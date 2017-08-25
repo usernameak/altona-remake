@@ -1,6 +1,0 @@
-sound.o: sound.cpp \
- /home/usernameak/fr_public/altona_wz4/altona/main/base/types.hpp \
- /home/usernameak/fr_public/altona_wz4/altona/main/../altona_config.hpp
-sound.cpp :
- /home/usernameak/fr_public/altona_wz4/altona/main/base/types.hpp :
- /home/usernameak/fr_public/altona_wz4/altona/main/../altona_config.hpp :

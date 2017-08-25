@@ -1,6 +1,0 @@
-animation.o: animation.cpp animation.hpp \
- /home/usernameak/fr_public/altona_wz4/altona/main/base/types.hpp \
- /home/usernameak/fr_public/altona_wz4/altona/main/../altona_config.hpp
-animation.cpp animation.hpp :
- /home/usernameak/fr_public/altona_wz4/altona/main/base/types.hpp :
- /home/usernameak/fr_public/altona_wz4/altona/main/../altona_config.hpp :
