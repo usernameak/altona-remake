@@ -3166,8 +3166,8 @@ typedef unsigned char stbi_uc;
 
 extern "C" 
 {
-  extern stbi_uc *stbi_load_from_memory(stbi_uc *buffer, int len, int *x, int *y, int *comp, int req_comp);
-  extern void     stbi_image_free      (stbi_uc *retval_from_stbi_load);
+  /*extern stbi_uc *stbi_load_from_memory(stbi_uc *buffer, int len, int *x, int *y, int *comp, int req_comp);
+  extern void     stbi_image_free      (stbi_uc *retval_from_stbi_load);*/
   void *sStbAlloc(int size)
   {
     return sAllocMem(size,16,sAMF_DEFAULT|sAMF_ALT);
@@ -3179,7 +3179,7 @@ extern "C"
   }
 }
 
-
+#include "util/stb_image.h"
 
 sBool sImage::LoadJPG(const sU8 *data,sInt size)
 {
