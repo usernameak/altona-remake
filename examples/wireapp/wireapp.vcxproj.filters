@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup>
+		<ClInclude Include="main.hpp" />
+		<ClInclude Include="doc.hpp" />
+		<ClInclude Include="gui.hpp" />
+	</ItemGroup>
+	<ItemGroup>
+		<ClCompile Include="main.cpp" />
+		<ClCompile Include="doc.cpp" />
+		<ClCompile Include="gui.cpp" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Include="wireapp.mp.txt" />
+		<None Include="wireapp.wire.txt" />
+	</ItemGroup>
+	<ItemGroup>
+	</ItemGroup>
+</Project>
