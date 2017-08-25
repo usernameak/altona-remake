@@ -1,0 +1,2 @@
+stb_image.o: stb_image.c
+stb_image.c :

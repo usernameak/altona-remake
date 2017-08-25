@@ -1,0 +1,12 @@
+windows_xlib.o: windows_xlib.cpp \
+ /home/usernameak/fr_public/altona_wz4/altona/main/base/types.hpp \
+ /home/usernameak/fr_public/altona_wz4/altona/main/../altona_config.hpp \
+ /home/usernameak/fr_public/altona_wz4/altona/main/base/system.hpp \
+ /home/usernameak/fr_public/altona_wz4/altona/main/base/windows.hpp \
+ /home/usernameak/fr_public/altona_wz4/altona/main/base/serialize.hpp
+windows_xlib.cpp :
+ /home/usernameak/fr_public/altona_wz4/altona/main/base/types.hpp :
+ /home/usernameak/fr_public/altona_wz4/altona/main/../altona_config.hpp :
+ /home/usernameak/fr_public/altona_wz4/altona/main/base/system.hpp :
+ /home/usernameak/fr_public/altona_wz4/altona/main/base/windows.hpp :
+ /home/usernameak/fr_public/altona_wz4/altona/main/base/serialize.hpp :

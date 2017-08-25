@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup>
+		<ClInclude Include="graphics.hpp" />
+		<ClInclude Include="graphics_dx9_private.hpp" />
+		<ClInclude Include="graphics_dx11_private.hpp" />
+		<ClInclude Include="graphics_ogles2_private.hpp" />
+		<ClInclude Include="math.hpp" />
+		<ClInclude Include="sound.hpp" />
+		<ClInclude Include="system.hpp" />
+		<ClInclude Include="input2.hpp" />
+		<ClInclude Include="devices.hpp" />
+		<ClInclude Include="types.hpp" />
+		<ClInclude Include="types2.hpp" />
+		<ClInclude Include="serialize.hpp" />
+		<ClInclude Include="windows.hpp" />
+		<ClInclude Include="gl.h">
+			<Filter>glsdk</Filter>
+		</ClInclude>
+		<ClInclude Include="glext.h">
+			<Filter>glsdk</Filter>
+		</ClInclude>
+		<ClInclude Include="wglext.h">
+			<Filter>glsdk</Filter>
+		</ClInclude>
+		<ClInclude Include="glprocs.h">
+			<Filter>glsdk</Filter>
+		</ClInclude>
+	</ItemGroup>
+	<ItemGroup>
+		<ClCompile Include="graphics.cpp" />
+		<ClCompile Include="graphics_dx9.cpp" />
+		<ClCompile Include="graphics_dx11.cpp" />
+		<ClCompile Include="graphics_ogl2.cpp" />
+		<ClCompile Include="graphics_blank.cpp" />
+		<ClCompile Include="graphics_ogles2.cpp" />
+		<ClCompile Include="math.cpp" />
+		<ClCompile Include="sound.cpp" />
+		<ClCompile Include="system.cpp" />
+		<ClCompile Include="system_win.cpp" />
+		<ClCompile Include="system_linux.cpp" />
+		<ClCompile Include="input2.cpp" />
+		<ClCompile Include="devices_win.cpp" />
+		<ClCompile Include="types.cpp" />
+		<ClCompile Include="types2.cpp" />
+		<ClCompile Include="serialize.cpp" />
+		<ClCompile Include="windows.cpp" />
+		<ClCompile Include="windows_xlib.cpp" />
+		<ClCompile Include="npplugin.cpp" />
+		<ClCompile Include="glprocs.c">
+			<Filter>glsdk</Filter>
+		</ClCompile>
+	</ItemGroup>
+	<ItemGroup>
+		<None Include="npplugin.def" />
+		<None Include="base.mp.txt" />
+	</ItemGroup>
+	<ItemGroup>
+		<Filter Include="glsdk">
+			<UniqueIdentifier>{eb537f6e-8376-2d7e-e813-59d7deeb0fc}</UniqueIdentifier>
+		</Filter>
+	</ItemGroup>
+</Project>

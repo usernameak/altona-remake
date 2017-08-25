@@ -1,0 +1,20 @@
+ipp.o: ipp.cpp \
+ /home/usernameak/fr_public/altona_wz4/altona/main/base/graphics.hpp \
+ /home/usernameak/fr_public/altona_wz4/altona/main/base/types.hpp \
+ /home/usernameak/fr_public/altona_wz4/altona/main/../altona_config.hpp \
+ /home/usernameak/fr_public/altona_wz4/altona/main/base/math.hpp \
+ /home/usernameak/fr_public/altona_wz4/altona/main/base/serialize.hpp \
+ /home/usernameak/fr_public/altona_wz4/altona/main/base/system.hpp \
+ /home/usernameak/fr_public/altona_wz4/altona/main/base/types2.hpp \
+ /home/usernameak/fr_public/altona_wz4/altona/main/util/shaders.hpp \
+ /home/usernameak/fr_public/altona_wz4/altona/main/util/ipp.hpp
+ipp.cpp :
+ /home/usernameak/fr_public/altona_wz4/altona/main/base/graphics.hpp :
+ /home/usernameak/fr_public/altona_wz4/altona/main/base/types.hpp :
+ /home/usernameak/fr_public/altona_wz4/altona/main/../altona_config.hpp :
+ /home/usernameak/fr_public/altona_wz4/altona/main/base/math.hpp :
+ /home/usernameak/fr_public/altona_wz4/altona/main/base/serialize.hpp :
+ /home/usernameak/fr_public/altona_wz4/altona/main/base/system.hpp :
+ /home/usernameak/fr_public/altona_wz4/altona/main/base/types2.hpp :
+ /home/usernameak/fr_public/altona_wz4/altona/main/util/shaders.hpp :
+ /home/usernameak/fr_public/altona_wz4/altona/main/util/ipp.hpp :

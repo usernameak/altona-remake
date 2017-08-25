@@ -1,0 +1,845 @@
+#
+# Automatic Generated Makefile for Linux
+#
+ifndef CONFIG
+CONFIG      = release_linux_blank_shell
+endif
+
+ifeq ($(CONFIG),release_linux_blank_shell)
+
+
+OBJS        = $(CONFIG)/camera.o $(CONFIG)/effect.o $(CONFIG)/image.o $(CONFIG)/musicplayer.o $(CONFIG)/painter.o $(CONFIG)/scanner.o $(CONFIG)/scanconfig.o $(CONFIG)/animation.o
+OBJS       += $(CONFIG)/shaders.o $(CONFIG)/movieplayer.o $(CONFIG)/perfmon.o $(CONFIG)/stb_image.o $(CONFIG)/taskscheduler.o $(CONFIG)/ipp.o $(CONFIG)/rasterizer.o
+CUSTOMDEPS  = shaders.hpp
+DEPS        = $(HOME)/fr_public/altona_wz4/altona/main/base/$(CONFIG)/libbase.a
+DEFINES     = -DsCONFIG_GUID={0x9575FAD3\,{0xF5A4\,0x4909\,0xB20E}\,{0x14\,0x5A\,0x50\,0x24\,0xC5\,0x78}} -DsCONFIG_SYSTEM_LINUX -DsCONFIG_RENDER_BLANK -DsCONFIG_OPTION_SHELL
+LIBS        = -lm -lrt -lpthread
+INCDIR      = -I$(HOME)/fr_public/altona_wz4/altona/main
+TARGET      = $(CONFIG)/libutil.a
+
+#
+# defines
+#
+
+ALTONAPATH = "$(HOME)/fr_public/altona_wz4/"
+INCDIR     += -I$(ALTONAPATH)/altona/main
+INCDIR     += -I./
+CFLAGS      = -Wall -Wno-unused-function $(INCDIR) $(DEFINES) -fno-common -fno-strict-aliasing -fshort-wchar -finput-charset=ISO8859-1
+CXXFLAGS    = -Wall -Wno-unused-function -Wno-invalid-offsetof $(INCDIR) $(DEFINES) -fno-exceptions -fno-common -fno-strict-aliasing -fno-rtti -fshort-wchar -finput-charset=ISO8859-1
+ASFLAGS     = -c -xassembler-with-cpp $(INCDIR) 
+NASMFLAGS   = -f elf $(INCDIR) $(DEFINES)
+LDFLAGS     = $(LIBDIR)
+DEPDIR      = $(CONFIG)/.deps
+DEPF        = $(DEPDIR)/$(*F)
+
+ifndef ASCC
+ASCC        = asc
+endif
+ifndef WZ4OPSC
+WZ4OPSC     = wz4ops
+endif
+
+.SUFFIXES:
+$(CONFIG)/%.o:%.s
+	@echo GCC $<
+	@mkdir -p $(DEPDIR)
+	@mkdir -p $(@D)
+	@gcc -MM $(INCDIR) $(DEFINES) -o $(DEPF).d $<; \
+	cp $(DEPF).d $(DEPF).P; \
+	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+	-e '/^$$/ d' -e 's/$$/ :/' < $(DEPF).d >> $(DEPF).P; \
+	rm -f $(DEPF).d
+	@gcc $(ASFLAGS) -o $@ $<
+
+$(CONFIG)/%.o:%.asm
+	@echo ASM $<
+	@mkdir -p $(DEPDIR)
+	@mkdir -p $(@D)
+	@nasm -M $(INCDIR) $(DEFINES) $< > $(DEPF).d; \
+	cp $(DEPF).d $(DEPF).P; \
+	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+	-e '/^$$/ d' -e 's/$$/ :/' < $(DEPF).d >> $(DEPF).P; \
+	rm -f $(DEPF).d
+	@nasm $(NASMFLAGS) -o $@ $<
+
+$(CONFIG)/%.o:%.c
+	@echo GCC $<
+	@mkdir -p $(DEPDIR)
+	@mkdir -p $(@D)
+	@gcc -MM $(INCDIR) $(DEFINES) -o $(DEPF).d $<; \
+	cp $(DEPF).d $(DEPF).P; \
+	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+	-e '/^$$/ d' -e 's/$$/ :/' < $(DEPF).d >> $(DEPF).P; \
+	rm -f $(DEPF).d
+	@gcc $(CFLAGS) -c $< -o $@
+
+$(CONFIG)/%.o:%.cpp
+	@echo G++ $<
+	@mkdir -p $(DEPDIR)
+	@mkdir -p $(@D)
+	@g++ -MM $(INCDIR) $(DEFINES) -o $(DEPF).d $<; \
+	cp $(DEPF).d $(DEPF).P; \
+	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+	-e '/^$$/ d' -e 's/$$/ :/' < $(DEPF).d >> $(DEPF).P; \
+	rm -f $(DEPF).d
+	@g++ $(CXXFLAGS) -c $< -o $@
+
+%.hpp %.cpp:%.asc
+	@echo ASC $<
+	@$(ASCC) $< -q
+
+%.hpp %.cpp:%.ops
+	@echo WZ4OPS $<
+	@$(WZ4OPSC) $< -q
+
+all: $(TARGET)
+
+-include $(OBJS:$(CONFIG)/%.o=$(DEPDIR)/%.P)
+CFLAGS     += -O2 -funroll-loops
+CXXFLAGS   += -O2 -funroll-loops
+
+#
+# the main target
+#
+
+$(TARGET): $(OBJS)
+	@echo "AR  $(TARGET)"
+	@rm -f $@
+	@ar rcs $@ $(OBJS)
+
+#
+# custom build step dependencies
+#
+
+$(OBJS): | $(CUSTOMDEPS) 
+
+#
+# other targets
+#
+
+clean:
+	@echo --- clean $(TARGET)
+	@-rm -rf $(CONFIG)/
+
+else
+ifeq ($(CONFIG),debugfast_linux_blank_shell)
+
+
+OBJS        = $(CONFIG)/camera.o $(CONFIG)/effect.o $(CONFIG)/image.o $(CONFIG)/musicplayer.o $(CONFIG)/painter.o $(CONFIG)/scanner.o $(CONFIG)/scanconfig.o $(CONFIG)/animation.o
+OBJS       += $(CONFIG)/shaders.o $(CONFIG)/movieplayer.o $(CONFIG)/perfmon.o $(CONFIG)/stb_image.o $(CONFIG)/taskscheduler.o $(CONFIG)/ipp.o $(CONFIG)/rasterizer.o
+CUSTOMDEPS  = shaders.hpp
+DEPS        = $(HOME)/fr_public/altona_wz4/altona/main/base/$(CONFIG)/libbase.a
+DEFINES     = -DsCONFIG_GUID={0x9575FAD3\,{0xF5A4\,0x4909\,0xB20E}\,{0x14\,0x5A\,0x50\,0x24\,0xC5\,0x78}} -DsCONFIG_SYSTEM_LINUX -DsCONFIG_RENDER_BLANK -DsCONFIG_OPTION_SHELL
+LIBS        = -lm -lrt -lpthread
+INCDIR      = -I$(HOME)/fr_public/altona_wz4/altona/main
+TARGET      = $(CONFIG)/libutil.a
+
+#
+# defines
+#
+
+ALTONAPATH = "$(HOME)/fr_public/altona_wz4/"
+INCDIR     += -I$(ALTONAPATH)/altona/main
+INCDIR     += -I./
+CFLAGS      = -Wall -Wno-unused-function $(INCDIR) $(DEFINES) -fno-common -fno-strict-aliasing -fshort-wchar -finput-charset=ISO8859-1
+CXXFLAGS    = -Wall -Wno-unused-function -Wno-invalid-offsetof $(INCDIR) $(DEFINES) -fno-exceptions -fno-common -fno-strict-aliasing -fno-rtti -fshort-wchar -finput-charset=ISO8859-1
+ASFLAGS     = -c -xassembler-with-cpp $(INCDIR) 
+NASMFLAGS   = -f elf $(INCDIR) $(DEFINES)
+LDFLAGS     = $(LIBDIR)
+DEPDIR      = $(CONFIG)/.deps
+DEPF        = $(DEPDIR)/$(*F)
+
+ifndef ASCC
+ASCC        = asc
+endif
+ifndef WZ4OPSC
+WZ4OPSC     = wz4ops
+endif
+
+.SUFFIXES:
+$(CONFIG)/%.o:%.s
+	@echo GCC $<
+	@mkdir -p $(DEPDIR)
+	@mkdir -p $(@D)
+	@gcc -MM $(INCDIR) $(DEFINES) -o $(DEPF).d $<; \
+	cp $(DEPF).d $(DEPF).P; \
+	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+	-e '/^$$/ d' -e 's/$$/ :/' < $(DEPF).d >> $(DEPF).P; \
+	rm -f $(DEPF).d
+	@gcc $(ASFLAGS) -o $@ $<
+
+$(CONFIG)/%.o:%.asm
+	@echo ASM $<
+	@mkdir -p $(DEPDIR)
+	@mkdir -p $(@D)
+	@nasm -M $(INCDIR) $(DEFINES) $< > $(DEPF).d; \
+	cp $(DEPF).d $(DEPF).P; \
+	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+	-e '/^$$/ d' -e 's/$$/ :/' < $(DEPF).d >> $(DEPF).P; \
+	rm -f $(DEPF).d
+	@nasm $(NASMFLAGS) -o $@ $<
+
+$(CONFIG)/%.o:%.c
+	@echo GCC $<
+	@mkdir -p $(DEPDIR)
+	@mkdir -p $(@D)
+	@gcc -MM $(INCDIR) $(DEFINES) -o $(DEPF).d $<; \
+	cp $(DEPF).d $(DEPF).P; \
+	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+	-e '/^$$/ d' -e 's/$$/ :/' < $(DEPF).d >> $(DEPF).P; \
+	rm -f $(DEPF).d
+	@gcc $(CFLAGS) -c $< -o $@
+
+$(CONFIG)/%.o:%.cpp
+	@echo G++ $<
+	@mkdir -p $(DEPDIR)
+	@mkdir -p $(@D)
+	@g++ -MM $(INCDIR) $(DEFINES) -o $(DEPF).d $<; \
+	cp $(DEPF).d $(DEPF).P; \
+	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+	-e '/^$$/ d' -e 's/$$/ :/' < $(DEPF).d >> $(DEPF).P; \
+	rm -f $(DEPF).d
+	@g++ $(CXXFLAGS) -c $< -o $@
+
+%.hpp %.cpp:%.asc
+	@echo ASC $<
+	@$(ASCC) $< -q
+
+%.hpp %.cpp:%.ops
+	@echo WZ4OPS $<
+	@$(WZ4OPSC) $< -q
+
+all: $(TARGET)
+
+-include $(OBJS:$(CONFIG)/%.o=$(DEPDIR)/%.P)
+CFLAGS     += -g -O
+CXXFLAGS   += -g -O
+LDFLAGS    += -g
+
+#
+# the main target
+#
+
+$(TARGET): $(OBJS)
+	@echo "AR  $(TARGET)"
+	@rm -f $@
+	@ar rcs $@ $(OBJS)
+
+#
+# custom build step dependencies
+#
+
+$(OBJS): | $(CUSTOMDEPS) 
+
+#
+# other targets
+#
+
+clean:
+	@echo --- clean $(TARGET)
+	@-rm -rf $(CONFIG)/
+
+else
+ifeq ($(CONFIG),debug_linux_blank_shell)
+
+
+OBJS        = $(CONFIG)/camera.o $(CONFIG)/effect.o $(CONFIG)/image.o $(CONFIG)/musicplayer.o $(CONFIG)/painter.o $(CONFIG)/scanner.o $(CONFIG)/scanconfig.o $(CONFIG)/animation.o
+OBJS       += $(CONFIG)/shaders.o $(CONFIG)/movieplayer.o $(CONFIG)/perfmon.o $(CONFIG)/stb_image.o $(CONFIG)/taskscheduler.o $(CONFIG)/ipp.o $(CONFIG)/rasterizer.o
+CUSTOMDEPS  = shaders.hpp
+DEPS        = $(HOME)/fr_public/altona_wz4/altona/main/base/$(CONFIG)/libbase.a
+DEFINES     = -DsCONFIG_GUID={0x9575FAD3\,{0xF5A4\,0x4909\,0xB20E}\,{0x14\,0x5A\,0x50\,0x24\,0xC5\,0x78}} -DsCONFIG_SYSTEM_LINUX -DsCONFIG_RENDER_BLANK -DsCONFIG_OPTION_SHELL
+LIBS        = -lm -lrt -lpthread
+INCDIR      = -I$(HOME)/fr_public/altona_wz4/altona/main
+TARGET      = $(CONFIG)/libutil.a
+
+#
+# defines
+#
+
+ALTONAPATH = "$(HOME)/fr_public/altona_wz4/"
+INCDIR     += -I$(ALTONAPATH)/altona/main
+INCDIR     += -I./
+CFLAGS      = -Wall -Wno-unused-function $(INCDIR) $(DEFINES) -fno-common -fno-strict-aliasing -fshort-wchar -finput-charset=ISO8859-1
+CXXFLAGS    = -Wall -Wno-unused-function -Wno-invalid-offsetof $(INCDIR) $(DEFINES) -fno-exceptions -fno-common -fno-strict-aliasing -fno-rtti -fshort-wchar -finput-charset=ISO8859-1
+ASFLAGS     = -c -xassembler-with-cpp $(INCDIR) 
+NASMFLAGS   = -f elf $(INCDIR) $(DEFINES)
+LDFLAGS     = $(LIBDIR)
+DEPDIR      = $(CONFIG)/.deps
+DEPF        = $(DEPDIR)/$(*F)
+
+ifndef ASCC
+ASCC        = asc
+endif
+ifndef WZ4OPSC
+WZ4OPSC     = wz4ops
+endif
+
+.SUFFIXES:
+$(CONFIG)/%.o:%.s
+	@echo GCC $<
+	@mkdir -p $(DEPDIR)
+	@mkdir -p $(@D)
+	@gcc -MM $(INCDIR) $(DEFINES) -o $(DEPF).d $<; \
+	cp $(DEPF).d $(DEPF).P; \
+	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+	-e '/^$$/ d' -e 's/$$/ :/' < $(DEPF).d >> $(DEPF).P; \
+	rm -f $(DEPF).d
+	@gcc $(ASFLAGS) -o $@ $<
+
+$(CONFIG)/%.o:%.asm
+	@echo ASM $<
+	@mkdir -p $(DEPDIR)
+	@mkdir -p $(@D)
+	@nasm -M $(INCDIR) $(DEFINES) $< > $(DEPF).d; \
+	cp $(DEPF).d $(DEPF).P; \
+	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+	-e '/^$$/ d' -e 's/$$/ :/' < $(DEPF).d >> $(DEPF).P; \
+	rm -f $(DEPF).d
+	@nasm $(NASMFLAGS) -o $@ $<
+
+$(CONFIG)/%.o:%.c
+	@echo GCC $<
+	@mkdir -p $(DEPDIR)
+	@mkdir -p $(@D)
+	@gcc -MM $(INCDIR) $(DEFINES) -o $(DEPF).d $<; \
+	cp $(DEPF).d $(DEPF).P; \
+	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+	-e '/^$$/ d' -e 's/$$/ :/' < $(DEPF).d >> $(DEPF).P; \
+	rm -f $(DEPF).d
+	@gcc $(CFLAGS) -c $< -o $@
+
+$(CONFIG)/%.o:%.cpp
+	@echo G++ $<
+	@mkdir -p $(DEPDIR)
+	@mkdir -p $(@D)
+	@g++ -MM $(INCDIR) $(DEFINES) -o $(DEPF).d $<; \
+	cp $(DEPF).d $(DEPF).P; \
+	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+	-e '/^$$/ d' -e 's/$$/ :/' < $(DEPF).d >> $(DEPF).P; \
+	rm -f $(DEPF).d
+	@g++ $(CXXFLAGS) -c $< -o $@
+
+%.hpp %.cpp:%.asc
+	@echo ASC $<
+	@$(ASCC) $< -q
+
+%.hpp %.cpp:%.ops
+	@echo WZ4OPS $<
+	@$(WZ4OPSC) $< -q
+
+all: $(TARGET)
+
+-include $(OBJS:$(CONFIG)/%.o=$(DEPDIR)/%.P)
+CFLAGS     += -g
+CXXFLAGS   += -g
+
+#
+# the main target
+#
+
+$(TARGET): $(OBJS)
+	@echo "AR  $(TARGET)"
+	@rm -f $@
+	@ar rcs $@ $(OBJS)
+
+#
+# custom build step dependencies
+#
+
+$(OBJS): | $(CUSTOMDEPS) 
+
+#
+# other targets
+#
+
+clean:
+	@echo --- clean $(TARGET)
+	@-rm -rf $(CONFIG)/
+
+else
+ifeq ($(CONFIG),release_linux_blank)
+
+
+OBJS        = $(CONFIG)/camera.o $(CONFIG)/effect.o $(CONFIG)/image.o $(CONFIG)/musicplayer.o $(CONFIG)/painter.o $(CONFIG)/scanner.o $(CONFIG)/scanconfig.o $(CONFIG)/animation.o
+OBJS       += $(CONFIG)/shaders.o $(CONFIG)/movieplayer.o $(CONFIG)/perfmon.o $(CONFIG)/stb_image.o $(CONFIG)/taskscheduler.o $(CONFIG)/ipp.o $(CONFIG)/rasterizer.o
+CUSTOMDEPS  = shaders.hpp
+DEPS        = $(HOME)/fr_public/altona_wz4/altona/main/base/$(CONFIG)/libbase.a
+DEFINES     = -DsCONFIG_GUID={0x9575FAD3\,{0xF5A4\,0x4909\,0xB20E}\,{0x14\,0x5A\,0x50\,0x24\,0xC5\,0x78}} -DsCONFIG_SYSTEM_LINUX -DsCONFIG_RENDER_BLANK -DsCONFIG_GUI_X11 -DsCONFIG_GUI_X11 `freetype-config --cflags`
+LIBS        = -lm -lrt -lpthread -lX11 -lXft
+INCDIR      = -I$(HOME)/fr_public/altona_wz4/altona/main
+TARGET      = $(CONFIG)/libutil.a
+
+#
+# defines
+#
+
+ALTONAPATH = "$(HOME)/fr_public/altona_wz4/"
+INCDIR     += -I$(ALTONAPATH)/altona/main
+INCDIR     += -I./
+CFLAGS      = -Wall -Wno-unused-function $(INCDIR) $(DEFINES) -fno-common -fno-strict-aliasing -fshort-wchar -finput-charset=ISO8859-1
+CXXFLAGS    = -Wall -Wno-unused-function -Wno-invalid-offsetof $(INCDIR) $(DEFINES) -fno-exceptions -fno-common -fno-strict-aliasing -fno-rtti -fshort-wchar -finput-charset=ISO8859-1
+ASFLAGS     = -c -xassembler-with-cpp $(INCDIR) 
+NASMFLAGS   = -f elf $(INCDIR) $(DEFINES)
+LDFLAGS     = $(LIBDIR)
+DEPDIR      = $(CONFIG)/.deps
+DEPF        = $(DEPDIR)/$(*F)
+
+ifndef ASCC
+ASCC        = asc
+endif
+ifndef WZ4OPSC
+WZ4OPSC     = wz4ops
+endif
+
+.SUFFIXES:
+$(CONFIG)/%.o:%.s
+	@echo GCC $<
+	@mkdir -p $(DEPDIR)
+	@mkdir -p $(@D)
+	@gcc -MM $(INCDIR) $(DEFINES) -o $(DEPF).d $<; \
+	cp $(DEPF).d $(DEPF).P; \
+	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+	-e '/^$$/ d' -e 's/$$/ :/' < $(DEPF).d >> $(DEPF).P; \
+	rm -f $(DEPF).d
+	@gcc $(ASFLAGS) -o $@ $<
+
+$(CONFIG)/%.o:%.asm
+	@echo ASM $<
+	@mkdir -p $(DEPDIR)
+	@mkdir -p $(@D)
+	@nasm -M $(INCDIR) $(DEFINES) $< > $(DEPF).d; \
+	cp $(DEPF).d $(DEPF).P; \
+	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+	-e '/^$$/ d' -e 's/$$/ :/' < $(DEPF).d >> $(DEPF).P; \
+	rm -f $(DEPF).d
+	@nasm $(NASMFLAGS) -o $@ $<
+
+$(CONFIG)/%.o:%.c
+	@echo GCC $<
+	@mkdir -p $(DEPDIR)
+	@mkdir -p $(@D)
+	@gcc -MM $(INCDIR) $(DEFINES) -o $(DEPF).d $<; \
+	cp $(DEPF).d $(DEPF).P; \
+	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+	-e '/^$$/ d' -e 's/$$/ :/' < $(DEPF).d >> $(DEPF).P; \
+	rm -f $(DEPF).d
+	@gcc $(CFLAGS) -c $< -o $@
+
+$(CONFIG)/%.o:%.cpp
+	@echo G++ $<
+	@mkdir -p $(DEPDIR)
+	@mkdir -p $(@D)
+	@g++ -MM $(INCDIR) $(DEFINES) -o $(DEPF).d $<; \
+	cp $(DEPF).d $(DEPF).P; \
+	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+	-e '/^$$/ d' -e 's/$$/ :/' < $(DEPF).d >> $(DEPF).P; \
+	rm -f $(DEPF).d
+	@g++ $(CXXFLAGS) -c $< -o $@
+
+%.hpp %.cpp:%.asc
+	@echo ASC $<
+	@$(ASCC) $< -q
+
+%.hpp %.cpp:%.ops
+	@echo WZ4OPS $<
+	@$(WZ4OPSC) $< -q
+
+all: $(TARGET)
+
+-include $(OBJS:$(CONFIG)/%.o=$(DEPDIR)/%.P)
+CFLAGS     += -O2 -funroll-loops
+CXXFLAGS   += -O2 -funroll-loops
+CFLAGS     += `freetype-config --cflags`
+CXXFLAGS   += `freetype-config --cflags`
+
+#
+# the main target
+#
+
+$(TARGET): $(OBJS)
+	@echo "AR  $(TARGET)"
+	@rm -f $@
+	@ar rcs $@ $(OBJS)
+
+#
+# custom build step dependencies
+#
+
+$(OBJS): | $(CUSTOMDEPS) 
+
+#
+# other targets
+#
+
+clean:
+	@echo --- clean $(TARGET)
+	@-rm -rf $(CONFIG)/
+
+else
+ifeq ($(CONFIG),debugfast_linux_blank)
+
+
+OBJS        = $(CONFIG)/camera.o $(CONFIG)/effect.o $(CONFIG)/image.o $(CONFIG)/musicplayer.o $(CONFIG)/painter.o $(CONFIG)/scanner.o $(CONFIG)/scanconfig.o $(CONFIG)/animation.o
+OBJS       += $(CONFIG)/shaders.o $(CONFIG)/movieplayer.o $(CONFIG)/perfmon.o $(CONFIG)/stb_image.o $(CONFIG)/taskscheduler.o $(CONFIG)/ipp.o $(CONFIG)/rasterizer.o
+CUSTOMDEPS  = shaders.hpp
+DEPS        = $(HOME)/fr_public/altona_wz4/altona/main/base/$(CONFIG)/libbase.a
+DEFINES     = -DsCONFIG_GUID={0x9575FAD3\,{0xF5A4\,0x4909\,0xB20E}\,{0x14\,0x5A\,0x50\,0x24\,0xC5\,0x78}} -DsCONFIG_SYSTEM_LINUX -DsCONFIG_RENDER_BLANK -DsCONFIG_GUI_X11 -DsCONFIG_GUI_X11 `freetype-config --cflags`
+LIBS        = -lm -lrt -lpthread -lX11 -lXft
+INCDIR      = -I$(HOME)/fr_public/altona_wz4/altona/main
+TARGET      = $(CONFIG)/libutil.a
+
+#
+# defines
+#
+
+ALTONAPATH = "$(HOME)/fr_public/altona_wz4/"
+INCDIR     += -I$(ALTONAPATH)/altona/main
+INCDIR     += -I./
+CFLAGS      = -Wall -Wno-unused-function $(INCDIR) $(DEFINES) -fno-common -fno-strict-aliasing -fshort-wchar -finput-charset=ISO8859-1
+CXXFLAGS    = -Wall -Wno-unused-function -Wno-invalid-offsetof $(INCDIR) $(DEFINES) -fno-exceptions -fno-common -fno-strict-aliasing -fno-rtti -fshort-wchar -finput-charset=ISO8859-1
+ASFLAGS     = -c -xassembler-with-cpp $(INCDIR) 
+NASMFLAGS   = -f elf $(INCDIR) $(DEFINES)
+LDFLAGS     = $(LIBDIR)
+DEPDIR      = $(CONFIG)/.deps
+DEPF        = $(DEPDIR)/$(*F)
+
+ifndef ASCC
+ASCC        = asc
+endif
+ifndef WZ4OPSC
+WZ4OPSC     = wz4ops
+endif
+
+.SUFFIXES:
+$(CONFIG)/%.o:%.s
+	@echo GCC $<
+	@mkdir -p $(DEPDIR)
+	@mkdir -p $(@D)
+	@gcc -MM $(INCDIR) $(DEFINES) -o $(DEPF).d $<; \
+	cp $(DEPF).d $(DEPF).P; \
+	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+	-e '/^$$/ d' -e 's/$$/ :/' < $(DEPF).d >> $(DEPF).P; \
+	rm -f $(DEPF).d
+	@gcc $(ASFLAGS) -o $@ $<
+
+$(CONFIG)/%.o:%.asm
+	@echo ASM $<
+	@mkdir -p $(DEPDIR)
+	@mkdir -p $(@D)
+	@nasm -M $(INCDIR) $(DEFINES) $< > $(DEPF).d; \
+	cp $(DEPF).d $(DEPF).P; \
+	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+	-e '/^$$/ d' -e 's/$$/ :/' < $(DEPF).d >> $(DEPF).P; \
+	rm -f $(DEPF).d
+	@nasm $(NASMFLAGS) -o $@ $<
+
+$(CONFIG)/%.o:%.c
+	@echo GCC $<
+	@mkdir -p $(DEPDIR)
+	@mkdir -p $(@D)
+	@gcc -MM $(INCDIR) $(DEFINES) -o $(DEPF).d $<; \
+	cp $(DEPF).d $(DEPF).P; \
+	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+	-e '/^$$/ d' -e 's/$$/ :/' < $(DEPF).d >> $(DEPF).P; \
+	rm -f $(DEPF).d
+	@gcc $(CFLAGS) -c $< -o $@
+
+$(CONFIG)/%.o:%.cpp
+	@echo G++ $<
+	@mkdir -p $(DEPDIR)
+	@mkdir -p $(@D)
+	@g++ -MM $(INCDIR) $(DEFINES) -o $(DEPF).d $<; \
+	cp $(DEPF).d $(DEPF).P; \
+	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+	-e '/^$$/ d' -e 's/$$/ :/' < $(DEPF).d >> $(DEPF).P; \
+	rm -f $(DEPF).d
+	@g++ $(CXXFLAGS) -c $< -o $@
+
+%.hpp %.cpp:%.asc
+	@echo ASC $<
+	@$(ASCC) $< -q
+
+%.hpp %.cpp:%.ops
+	@echo WZ4OPS $<
+	@$(WZ4OPSC) $< -q
+
+all: $(TARGET)
+
+-include $(OBJS:$(CONFIG)/%.o=$(DEPDIR)/%.P)
+CFLAGS     += -g -O
+CXXFLAGS   += -g -O
+LDFLAGS    += -g
+CFLAGS     += `freetype-config --cflags`
+CXXFLAGS   += `freetype-config --cflags`
+
+#
+# the main target
+#
+
+$(TARGET): $(OBJS)
+	@echo "AR  $(TARGET)"
+	@rm -f $@
+	@ar rcs $@ $(OBJS)
+
+#
+# custom build step dependencies
+#
+
+$(OBJS): | $(CUSTOMDEPS) 
+
+#
+# other targets
+#
+
+clean:
+	@echo --- clean $(TARGET)
+	@-rm -rf $(CONFIG)/
+
+else
+ifeq ($(CONFIG),debug_linux_blank)
+
+
+OBJS        = $(CONFIG)/camera.o $(CONFIG)/effect.o $(CONFIG)/image.o $(CONFIG)/musicplayer.o $(CONFIG)/painter.o $(CONFIG)/scanner.o $(CONFIG)/scanconfig.o $(CONFIG)/animation.o
+OBJS       += $(CONFIG)/shaders.o $(CONFIG)/movieplayer.o $(CONFIG)/perfmon.o $(CONFIG)/stb_image.o $(CONFIG)/taskscheduler.o $(CONFIG)/ipp.o $(CONFIG)/rasterizer.o
+CUSTOMDEPS  = shaders.hpp
+DEPS        = $(HOME)/fr_public/altona_wz4/altona/main/base/$(CONFIG)/libbase.a
+DEFINES     = -DsCONFIG_GUID={0x9575FAD3\,{0xF5A4\,0x4909\,0xB20E}\,{0x14\,0x5A\,0x50\,0x24\,0xC5\,0x78}} -DsCONFIG_SYSTEM_LINUX -DsCONFIG_RENDER_BLANK -DsCONFIG_GUI_X11 -DsCONFIG_GUI_X11 `freetype-config --cflags`
+LIBS        = -lm -lrt -lpthread -lX11 -lXft
+INCDIR      = -I$(HOME)/fr_public/altona_wz4/altona/main
+TARGET      = $(CONFIG)/libutil.a
+
+#
+# defines
+#
+
+ALTONAPATH = "$(HOME)/fr_public/altona_wz4/"
+INCDIR     += -I$(ALTONAPATH)/altona/main
+INCDIR     += -I./
+CFLAGS      = -Wall -Wno-unused-function $(INCDIR) $(DEFINES) -fno-common -fno-strict-aliasing -fshort-wchar -finput-charset=ISO8859-1
+CXXFLAGS    = -Wall -Wno-unused-function -Wno-invalid-offsetof $(INCDIR) $(DEFINES) -fno-exceptions -fno-common -fno-strict-aliasing -fno-rtti -fshort-wchar -finput-charset=ISO8859-1
+ASFLAGS     = -c -xassembler-with-cpp $(INCDIR) 
+NASMFLAGS   = -f elf $(INCDIR) $(DEFINES)
+LDFLAGS     = $(LIBDIR)
+DEPDIR      = $(CONFIG)/.deps
+DEPF        = $(DEPDIR)/$(*F)
+
+ifndef ASCC
+ASCC        = asc
+endif
+ifndef WZ4OPSC
+WZ4OPSC     = wz4ops
+endif
+
+.SUFFIXES:
+$(CONFIG)/%.o:%.s
+	@echo GCC $<
+	@mkdir -p $(DEPDIR)
+	@mkdir -p $(@D)
+	@gcc -MM $(INCDIR) $(DEFINES) -o $(DEPF).d $<; \
+	cp $(DEPF).d $(DEPF).P; \
+	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+	-e '/^$$/ d' -e 's/$$/ :/' < $(DEPF).d >> $(DEPF).P; \
+	rm -f $(DEPF).d
+	@gcc $(ASFLAGS) -o $@ $<
+
+$(CONFIG)/%.o:%.asm
+	@echo ASM $<
+	@mkdir -p $(DEPDIR)
+	@mkdir -p $(@D)
+	@nasm -M $(INCDIR) $(DEFINES) $< > $(DEPF).d; \
+	cp $(DEPF).d $(DEPF).P; \
+	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+	-e '/^$$/ d' -e 's/$$/ :/' < $(DEPF).d >> $(DEPF).P; \
+	rm -f $(DEPF).d
+	@nasm $(NASMFLAGS) -o $@ $<
+
+$(CONFIG)/%.o:%.c
+	@echo GCC $<
+	@mkdir -p $(DEPDIR)
+	@mkdir -p $(@D)
+	@gcc -MM $(INCDIR) $(DEFINES) -o $(DEPF).d $<; \
+	cp $(DEPF).d $(DEPF).P; \
+	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+	-e '/^$$/ d' -e 's/$$/ :/' < $(DEPF).d >> $(DEPF).P; \
+	rm -f $(DEPF).d
+	@gcc $(CFLAGS) -c $< -o $@
+
+$(CONFIG)/%.o:%.cpp
+	@echo G++ $<
+	@mkdir -p $(DEPDIR)
+	@mkdir -p $(@D)
+	@g++ -MM $(INCDIR) $(DEFINES) -o $(DEPF).d $<; \
+	cp $(DEPF).d $(DEPF).P; \
+	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+	-e '/^$$/ d' -e 's/$$/ :/' < $(DEPF).d >> $(DEPF).P; \
+	rm -f $(DEPF).d
+	@g++ $(CXXFLAGS) -c $< -o $@
+
+%.hpp %.cpp:%.asc
+	@echo ASC $<
+	@$(ASCC) $< -q
+
+%.hpp %.cpp:%.ops
+	@echo WZ4OPS $<
+	@$(WZ4OPSC) $< -q
+
+all: $(TARGET)
+
+-include $(OBJS:$(CONFIG)/%.o=$(DEPDIR)/%.P)
+CFLAGS     += -g
+CXXFLAGS   += -g
+CFLAGS     += `freetype-config --cflags`
+CXXFLAGS   += `freetype-config --cflags`
+
+#
+# the main target
+#
+
+$(TARGET): $(OBJS)
+	@echo "AR  $(TARGET)"
+	@rm -f $@
+	@ar rcs $@ $(OBJS)
+
+#
+# custom build step dependencies
+#
+
+$(OBJS): | $(CUSTOMDEPS) 
+
+#
+# other targets
+#
+
+clean:
+	@echo --- clean $(TARGET)
+	@-rm -rf $(CONFIG)/
+
+else
+ifeq ($(CONFIG),profile_linux_blank)
+
+
+OBJS        = $(CONFIG)/camera.o $(CONFIG)/effect.o $(CONFIG)/image.o $(CONFIG)/musicplayer.o $(CONFIG)/painter.o $(CONFIG)/scanner.o $(CONFIG)/scanconfig.o $(CONFIG)/animation.o
+OBJS       += $(CONFIG)/shaders.o $(CONFIG)/movieplayer.o $(CONFIG)/perfmon.o $(CONFIG)/stb_image.o $(CONFIG)/taskscheduler.o $(CONFIG)/ipp.o $(CONFIG)/rasterizer.o
+CUSTOMDEPS  = shaders.hpp
+DEPS        = $(HOME)/fr_public/altona_wz4/altona/main/base/$(CONFIG)/libbase.a
+DEFINES     = -DsCONFIG_GUID={0x9575FAD3\,{0xF5A4\,0x4909\,0xB20E}\,{0x14\,0x5A\,0x50\,0x24\,0xC5\,0x78}} -DsCONFIG_SYSTEM_LINUX -DsCONFIG_RENDER_BLANK -DsCONFIG_GUI_X11 -DsCONFIG_GUI_X11 `freetype-config --cflags`
+LIBS        = -lm -lrt -lpthread -lX11 -lXft
+INCDIR      = -I$(HOME)/fr_public/altona_wz4/altona/main
+TARGET      = $(CONFIG)/libutil.a
+
+#
+# defines
+#
+
+ALTONAPATH = "$(HOME)/fr_public/altona_wz4/"
+INCDIR     += -I$(ALTONAPATH)/altona/main
+INCDIR     += -I./
+CFLAGS      = -Wall -Wno-unused-function $(INCDIR) $(DEFINES) -fno-common -fno-strict-aliasing -fshort-wchar -finput-charset=ISO8859-1
+CXXFLAGS    = -Wall -Wno-unused-function -Wno-invalid-offsetof $(INCDIR) $(DEFINES) -fno-exceptions -fno-common -fno-strict-aliasing -fno-rtti -fshort-wchar -finput-charset=ISO8859-1
+ASFLAGS     = -c -xassembler-with-cpp $(INCDIR) 
+NASMFLAGS   = -f elf $(INCDIR) $(DEFINES)
+LDFLAGS     = $(LIBDIR)
+DEPDIR      = $(CONFIG)/.deps
+DEPF        = $(DEPDIR)/$(*F)
+
+ifndef ASCC
+ASCC        = asc
+endif
+ifndef WZ4OPSC
+WZ4OPSC     = wz4ops
+endif
+
+.SUFFIXES:
+$(CONFIG)/%.o:%.s
+	@echo GCC $<
+	@mkdir -p $(DEPDIR)
+	@mkdir -p $(@D)
+	@gcc -MM $(INCDIR) $(DEFINES) -o $(DEPF).d $<; \
+	cp $(DEPF).d $(DEPF).P; \
+	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+	-e '/^$$/ d' -e 's/$$/ :/' < $(DEPF).d >> $(DEPF).P; \
+	rm -f $(DEPF).d
+	@gcc $(ASFLAGS) -o $@ $<
+
+$(CONFIG)/%.o:%.asm
+	@echo ASM $<
+	@mkdir -p $(DEPDIR)
+	@mkdir -p $(@D)
+	@nasm -M $(INCDIR) $(DEFINES) $< > $(DEPF).d; \
+	cp $(DEPF).d $(DEPF).P; \
+	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+	-e '/^$$/ d' -e 's/$$/ :/' < $(DEPF).d >> $(DEPF).P; \
+	rm -f $(DEPF).d
+	@nasm $(NASMFLAGS) -o $@ $<
+
+$(CONFIG)/%.o:%.c
+	@echo GCC $<
+	@mkdir -p $(DEPDIR)
+	@mkdir -p $(@D)
+	@gcc -MM $(INCDIR) $(DEFINES) -o $(DEPF).d $<; \
+	cp $(DEPF).d $(DEPF).P; \
+	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+	-e '/^$$/ d' -e 's/$$/ :/' < $(DEPF).d >> $(DEPF).P; \
+	rm -f $(DEPF).d
+	@gcc $(CFLAGS) -c $< -o $@
+
+$(CONFIG)/%.o:%.cpp
+	@echo G++ $<
+	@mkdir -p $(DEPDIR)
+	@mkdir -p $(@D)
+	@g++ -MM $(INCDIR) $(DEFINES) -o $(DEPF).d $<; \
+	cp $(DEPF).d $(DEPF).P; \
+	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+	-e '/^$$/ d' -e 's/$$/ :/' < $(DEPF).d >> $(DEPF).P; \
+	rm -f $(DEPF).d
+	@g++ $(CXXFLAGS) -c $< -o $@
+
+%.hpp %.cpp:%.asc
+	@echo ASC $<
+	@$(ASCC) $< -q
+
+%.hpp %.cpp:%.ops
+	@echo WZ4OPS $<
+	@$(WZ4OPSC) $< -q
+
+all: $(TARGET)
+
+-include $(OBJS:$(CONFIG)/%.o=$(DEPDIR)/%.P)
+CFLAGS     += -O2 -funroll-loops -g
+CXXFLAGS   += -O2 -funroll-loops -g
+LDFLAGS    += -g
+CFLAGS     += `freetype-config --cflags`
+CXXFLAGS   += `freetype-config --cflags`
+
+#
+# the main target
+#
+
+$(TARGET): $(OBJS)
+	@echo "AR  $(TARGET)"
+	@rm -f $@
+	@ar rcs $@ $(OBJS)
+
+#
+# custom build step dependencies
+#
+
+$(OBJS): | $(CUSTOMDEPS) 
+
+#
+# other targets
+#
+
+clean:
+	@echo --- clean $(TARGET)
+	@-rm -rf $(CONFIG)/
+
+else
+$(error CONFIG set to an invalid value)
+endif
+endif
+endif
+endif
+endif
+endif
+endif

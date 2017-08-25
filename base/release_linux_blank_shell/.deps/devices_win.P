@@ -1,0 +1,6 @@
+devices_win.o: devices_win.cpp \
+ /home/usernameak/fr_public/altona_wz4/altona/main/base/types.hpp \
+ /home/usernameak/fr_public/altona_wz4/altona/main/../altona_config.hpp
+devices_win.cpp :
+ /home/usernameak/fr_public/altona_wz4/altona/main/base/types.hpp :
+ /home/usernameak/fr_public/altona_wz4/altona/main/../altona_config.hpp :
