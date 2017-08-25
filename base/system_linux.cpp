@@ -93,13 +93,15 @@ static sInt ErrorCode = 0;
 
 void sLinuxFromWide(char *dest,const sChar *src,int size)
 {
-  sInt len = sGetStringLen(src);
+  /*sInt len = sGetStringLen(src);
   sU32 *convBuffer = sALLOCSTACK(sU32,len+1);
   for(sInt i=0;i<=len;i++) // fake-wchar16-to-wchar32 (argh!)
     convBuffer[i] = src[i];
   
   wcstombs(dest,(wchar_t *)convBuffer,size);
-  dest[size-1] = 0;
+  dest[size-1] = 0;*/
+  wcstombs(dest, (wchar_t *)src, size);
+  dest[size - 1] = 0;
 }
 
 template<class T> static inline void sLinuxFromWide(T &dest,const sChar *str)
@@ -463,20 +465,55 @@ sInt sGetRandomSeed()
 
 sBool sExecuteShell(const sChar *cmdline)
 {
-  sPrintF(L"sExecuteShell(\"%s\")\n",cmdline);
-  return sFALSE;
+  size_t size = sGetStringLen(cmdline) * 6 + 1;
+  char *s = new char[size];
+  wcstombs(s, cmdline, size);
+  int result = system(s);
+  delete s;
+  return result < 0;
 }
 
 sBool sExecuteShellDetached(const sChar *cmdline)
 {
-  sPrintF(L"sExecuteShellDetached(\"%s\")\n",cmdline);
-  return sFALSE;
+  size_t size = sGetStringLen(cmdline) * 6 + 1;
+  char *s = new char[size];
+  wcstombs(s, cmdline, size);
+  switch (fork())
+  {
+  case -1:
+    return sFALSE;
+    break;
+  case 0:
+    daemon(1, 0);
+    execlp("sh", "-c", s);
+    exit(0);
+    break;
+  default:
+    delete s;
+    return sTRUE;
+  }
 }
 
+// copy-pasted from stackoverflow with love
 sBool sExecuteShell(const sChar *cmdline,sTextBuffer *tb)
 {
-  sPrintF(L"sExecuteShell(\"%s\",tb)\n",cmdline);
-  return sFALSE;
+  size_t size = sGetStringLen(cmdline) * 6 + 1;
+  char *s = new char[size];
+  wcstombs(s, cmdline, size);
+
+  FILE *output = popen(s, "r");
+  if(output == NULL) return sFALSE;
+  delete s;
+  char buf[256];
+  sChar buf2[256/sizeof(sChar)*6];
+  int count;
+  while (count = (fgets(buf, sizeof(buf), output) != 0)) {
+    int len = mblen(buf, count);
+    mbstowcs(buf2, buf, len);
+    tb->Print(buf2);
+  }
+  pclose(output);
+  return sTRUE;
 }
 
 sBool sExecuteOpen(const sChar *file)
