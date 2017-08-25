@@ -473,11 +473,7 @@ sBool sExecuteShell(const sChar *cmdline)
   return result < 0;
 }
 
-sBool sExecuteShellDetached(const sChar *cmdline)
-{
-  size_t size = sGetStringLen(cmdline) * 6 + 1;
-  char *s = new char[size];
-  wcstombs(s, cmdline, size);
+sBool sExecuteShellDetachedLinuxImpl(const char *progname, const char *const *cmdline) {
   switch (fork())
   {
   case -1:
@@ -485,13 +481,24 @@ sBool sExecuteShellDetached(const sChar *cmdline)
     break;
   case 0:
     daemon(1, 0);
-    execlp("sh", "-c", s);
+    execvp(progname, (char *const *) cmdline);
     exit(0);
     break;
   default:
-    delete s;
     return sTRUE;
   }
+}
+
+sBool sExecuteShellDetached(const sChar *cmdline)
+{
+  size_t size = sGetStringLen(cmdline) * 6 + 1;
+  char *s = new char[size];
+  wcstombs(s, cmdline, size);
+  const char *const *list = new const char*[2] {"-c", s};
+  sBool result = sExecuteShellDetachedLinuxImpl("sh", list);
+  delete s;
+  delete list;
+  return result;
 }
 
 // copy-pasted from stackoverflow with love
@@ -518,8 +525,18 @@ sBool sExecuteShell(const sChar *cmdline,sTextBuffer *tb)
 
 sBool sExecuteOpen(const sChar *file)
 {
-  sPrintF(L"Implement sExecuteOpen!\n");
-  return sFALSE;
+  size_t size = sGetStringLen(file) * 6 + 1;
+  char *s = new char[size];
+  wcstombs(s, file, size);
+
+  const char *const *list = new const char*[1] {s};
+
+  sBool result = sExecuteShellDetachedLinuxImpl("xdg-open", list);
+
+  delete s;
+  delete list;
+
+  return result;
 }
 
 /****************************************************************************/
