@@ -26,4 +26,9 @@ add_definitions(-DsSTF_NVIDIA=sSTF_GLSL)
 add_subdirectory(base)
 add_subdirectory(util)
 add_subdirectory(gui)
-add_subdirectory(window_example)
+
+option(BUILD_EXAMPLES "build examples" OFF)
+
+if(BUILD_EXAMPLES)
+    add_subdirectory(examples)
+endif(BUILD_EXAMPLES)
