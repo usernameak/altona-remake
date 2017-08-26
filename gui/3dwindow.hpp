@@ -7,7 +7,7 @@
 #pragma once
 #include "gui/gui.hpp"
 #include "base/graphics.hpp"
-#include "util/shaders.hpp"
+#include "shaders.hpp"
 
 /****************************************************************************/
 

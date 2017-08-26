@@ -8,7 +8,7 @@
 #include "base/types.hpp"
 #include "util/taskscheduler.hpp"
 #include "base/graphics.hpp"
-#include "util/shaders.hpp"
+#include "shaders.hpp"
 
 static sU32 StatSpin;
 static sU32 StatLock;

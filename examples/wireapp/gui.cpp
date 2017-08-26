@@ -17,7 +17,7 @@
 #include "gui.hpp"
 #include "doc.hpp"
 #include "gui/gui.hpp"
-#include "util/shaders.hpp"
+#include "shaders.hpp"
 
 MainWindow *App;
 

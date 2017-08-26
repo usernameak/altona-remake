@@ -19,6 +19,7 @@ else(IS_BE)
 endif(IS_BE)
 
 include_directories(${CMAKE_SOURCE_DIR})
+include_directories(${CMAKE_BINARY_DIR}/util) # it has to be in util, but no
 
 add_definitions(-DsCONFIG_RENDER_OGL2)
 add_definitions(-DsSTF_NVIDIA=sSTF_GLSL)

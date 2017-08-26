@@ -10,7 +10,7 @@
 
 #include "base/graphics.hpp"
 #include "base/system.hpp"
-#include "util/shaders.hpp"
+#include "shaders.hpp"
 #include "util/ipp.hpp"
 
 extern sInt sExitFlag;

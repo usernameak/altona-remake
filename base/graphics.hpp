@@ -73,6 +73,8 @@ enum
   #include "graphics_dx11_private.hpp"
 #elif sRENDERER==sRENDER_DX9
   #include "graphics_dx9_private.hpp"
+#elif sRENDERER == sRENDER_OGL2
+  #include "graphics_ogl2_private.hpp"
 #elif sRENDERER==sRENDER_OGLES2
   #include "graphics_ogles2_private.hpp"
 #else                                 // dummies for platforms that use the old way

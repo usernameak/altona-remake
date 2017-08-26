@@ -11,7 +11,7 @@
 
 #include "base/system.hpp"
 #include "base/graphics.hpp"
-#include "util/shaders.hpp"
+#include "shaders.hpp"
 #include "util/painter.hpp"
 
 /****************************************************************************/

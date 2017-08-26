@@ -932,7 +932,7 @@ sGeometry::~sGeometry()
   ExitPrivate();
 }
 
-#if sRENDERER!=sRENDER_DX11 && sRENDERER!=sRENDER_OGLES2 
+#if sRENDERER != sRENDER_DX11 && sRENDERER != sRENDER_OGLES2 && sRENDERER != sRENDER_OGL2
 
 void sGeometry::Clear()
 {
@@ -976,7 +976,7 @@ void sGeometry::Serialize(sReader &s)
 }
 
 /****************************************************************************/
-
+/*
 #if sRENDERER==sRENDER_OGL2 || sRENDERER==sRENDER_BLANK
 
 void sGeometry::Init(sInt flags,sVertexFormatHandle *form)
@@ -1054,7 +1054,7 @@ void sGeometry::BeginLoad(sInt vc,sInt ic,sInt flags,sVertexFormatHandle *vf,voi
     IndexPart.Clear();
 }
 #endif //  renderer
-
+*/
 /****************************************************************************/
 
 // now this is cheesy...
@@ -1483,9 +1483,9 @@ sTextureBase::sTextureBase()
 
   FrameRT = 0xffff;
   SceneRT = 0xffff;
-#if sRENDERER==sRENDER_OGL2
+/*#if sRENDERER==sRENDER_OGL2
   GLName = 0;
-#endif
+#endif**/
 
   NameId = 0;
    
@@ -1514,11 +1514,11 @@ void sTextureBase::ExitPrivate() {}
 sTexture2D::sTexture2D()
 {
   Flags = sTEX_2D;
-#if sRENDERER==sRENDER_OGL2
+/*#if sRENDERER==sRENDER_OGL2
   GLName = 0;
   GLFBName = 0;
   LoadMipmap = 0;
-#endif
+#endif*/
 }
 
 sTexture2D::sTexture2D(sInt xs,sInt ys,sU32 flags,sInt mipmaps)
@@ -1889,7 +1889,7 @@ void sTextureProxy::Connect(sTextureBase *tex)
   }
 }
 
-#if sRENDERER!=sRENDER_DX9 && sRENDERER!=sRENDER_DX11 && sRENDERER!=sRENDER_OGLES2 && sRENDERER!=sRENDER_BLANK
+#if sRENDERER != sRENDER_DX9 && sRENDERER != sRENDER_DX11 && sRENDERER != sRENDER_OGLES2 && sRENDERER != sRENDER_OGL2 && sRENDERER != sRENDER_BLANK
 
 void sTextureProxy::Connect2()
 {
@@ -2237,7 +2237,7 @@ void sMaterial::DiscardVariants()
   StateVariants = 0;
 }
 
-#if sRENDERER!=sRENDER_OGL2
+/*#if sRENDERER!=sRENDER_OGL2
 void sMaterial::AllocStates(const sU32 *data,sInt count,sInt var)
 {
   sVERIFY(var<StateVariants);
@@ -2260,7 +2260,7 @@ void sMaterial::SetVariant(sInt var)
   sVERIFY(data>=buffer && data<=buffer+sCOUNTOF(buffer));
   AllocStates(buffer,(data-buffer)/2,var);
 }
-#endif
+#endif*/
 
 void sMaterial::SetVariantRS(sInt var, const sMaterialRS &rs)
 {
@@ -2962,7 +2962,7 @@ void sSetFrameRateMode(sFrameRateMode mode)
 
 #if !sFAKECBUFFER
 
-#if sRENDERER!=sRENDER_DX11 && sRENDERER != sRENDER_OGLES2
+#if sRENDERER != sRENDER_DX11 && sRENDERER != sRENDER_OGLES2 && sRENDERER != sRENDER_OGL2
 
 void sClearCurrentCBuffers()
 {
@@ -3028,7 +3028,7 @@ void sSetCBuffers(sCBufferBase **cbuffers,sInt cbcount)
 
 // has own implementation...
 
-#elif sRENDERER == sRENDER_OGLES2
+#elif sRENDERER == sRENDER_OGLES2 || sRENDERER == sRENDER_OGL2
 
 // has own implementation...
 
@@ -3089,7 +3089,7 @@ void sSetCBuffers(sCBufferBase **cbuffers,sInt cbcount)
 #endif
 #endif
 
-#if sRENDERER!=sRENDER_DX11 && sRENDERER!=sRENDER_OGLES2
+#if sRENDERER != sRENDER_DX11 && sRENDERER != sRENDER_OGLES2 && sRENDERER != sRENDER_OGL2
 
 void sCBufferBase::Modify()
 {
@@ -3120,8 +3120,7 @@ void sCBufferBase::SetCfg(sInt slot, sInt start, sInt count, sU64 mask)
 
 #endif // !sFAKECBUFFER
 
-
-#if sRENDERER!=sRENDER_DX11 && sRENDERER!=sRENDER_OGLES2
+#if sRENDERER != sRENDER_DX11 && sRENDERER != sRENDER_OGLES2 && sRENDERER != sRENDER_OGL2
 
 sCBufferBase *sGetCurrentCBuffer(sInt slot)
 { sVERIFY(slot<sCBUFFER_MAXSLOT*sCBUFFER_SHADERTYPES);
@@ -4151,7 +4150,7 @@ void sGrabScreen(class sTexture2D *tex, sGrabFilterFlags filter, const sRect *ds
 /***                                                                      ***/
 /****************************************************************************/
 
-#if RENDERTARGET_NEW_TO_OLD
+#if RENDERTARGET_NEW_TO_OLD && sRENDERER != sRENDER_OGL2 && sRENDERER != sRENDER_OGL2
 
 void sSetTarget(const sTargetPara &para)
 {

@@ -15,10 +15,10 @@ elseif(PROJECT_OS_LINUX)
         WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
     )
 endif(WIN32)
-#message(${CMAKE_CURRENT_BINARY_DIR})
 
-add_library(altona_util SHARED camera.cpp effect.cpp image.cpp musicplayer.cpp
+add_library(altona_util SHARED shaders.hpp camera.cpp effect.cpp image.cpp musicplayer.cpp
     painter.cpp scanner.cpp scanconfig.cpp shaders.cpp animation.cpp
     movieplayer.cpp perfmon.cpp taskscheduler.cpp ipp.cpp rasterizer.cpp stb_image.cpp
+    
     )
 target_link_libraries(altona_util altona_base)
