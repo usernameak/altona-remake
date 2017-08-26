@@ -1719,9 +1719,9 @@ static void sXMessageLoop()
         if(sSystemFlags & sISF_CONTINUOUS)
           sUpdateWindow();
       }
-      
-      while(XPending(dpy))
-      {
+
+      /*while(XPending(dpy)) // loop makes the process busy waiting, so it's commented out
+      {*/
         XNextEvent(dpy,&e);
         
         switch(e.type)
@@ -1821,8 +1821,9 @@ static void sXMessageLoop()
           
           XDestroyWindow(dpy,sXWnd);
           done = sTRUE;
+          
         }
-      }
+      //}
     }
     
     sDelete(sAppPtr);

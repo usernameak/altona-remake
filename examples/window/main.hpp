@@ -28,6 +28,8 @@ class MyParentWin : public sHSplitFrame
 public:
   MyParentWin();
   void MakeMenu();
+  void Exit();
+  void Restart();
 };
 
 

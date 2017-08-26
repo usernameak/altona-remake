@@ -93,14 +93,23 @@ MyParentWin::MyParentWin()
   AddBorder(tb);
 }
 
+void MyParentWin::Exit() {
+  sExit();
+}
+
+void MyParentWin::Restart()
+{
+  sRestart();
+}
+
 void MyParentWin::MakeMenu()
 {
   sMenuFrame *mf;
   mf = new sMenuFrame(this);
-  mf->AddItem(L"first",sMessage(),0);
-  mf->AddItem(L"second",sMessage(),0);
+  mf->AddItem(L"new",sMessage(),0);
+  mf->AddItem(L"restart",sMessage(this, &MyParentWin::Restart),0);
   mf->AddSpacer();
-  mf->AddItem(L"last",sMessage(),0);
+  mf->AddItem(L"quit",sMessage(this, &MyParentWin::Exit),0);
   sGui->AddPulldownWindow(mf);
 }
 
