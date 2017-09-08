@@ -18,6 +18,7 @@
 #include "doc.hpp"
 #include "gui/gui.hpp"
 #include "shaders.hpp"
+#include "GL/glew.h"
 
 MainWindow *App;
 
@@ -112,6 +113,7 @@ WinCube::WinCube()
   Mtrl = new sSimpleMaterial;
   Mtrl->Flags = sMTRL_LIGHTING | sMTRL_ZON;
   Mtrl->Prepare(sVertexFormatStandard);
+  CmdScreenshot();
 }
 
 WinCube::~WinCube()
@@ -123,8 +125,6 @@ WinCube::~WinCube()
 
 void WinCube::Paint(sViewport &view,const sTargetSpec &spec)
 {
-#if !sCONFIG_SYSTEM_LINUX
-
   sSetTarget(sTargetPara(sST_CLEARALL|sST_SCISSOR,0xff405060,spec));
 
   Env.AmbientColor  = 0xff404040;
@@ -170,7 +170,6 @@ void WinCube::Paint(sViewport &view,const sTargetSpec &spec)
   Painter->SetPrint(0,~0,1);
   Painter->PrintF(30,30,L"%5.2ffps %5.3fms",1000/avg,avg);
   Painter->End();
-#endif
 }
 
 /****************************************************************************/

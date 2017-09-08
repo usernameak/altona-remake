@@ -16,6 +16,8 @@
 #include "util/image.hpp"
 #include "util/rasterizer.hpp"
 
+sISGUI(sTRUE)
+
 /****************************************************************************/
 
 void MyWindow::OnPaint2D()

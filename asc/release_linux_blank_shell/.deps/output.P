@@ -1,0 +1,24 @@
+output.o: output.cpp main.hpp \
+ /home/usernameak/fr_public/altona_wz4/altona/main/base/types2.hpp \
+ /home/usernameak/fr_public/altona_wz4/altona/main/base/types.hpp \
+ /home/usernameak/fr_public/altona_wz4/altona/main/../altona_config.hpp \
+ /home/usernameak/fr_public/altona_wz4/altona/main/base/serialize.hpp \
+ /home/usernameak/fr_public/altona_wz4/altona/main/base/system.hpp \
+ /home/usernameak/fr_public/altona_wz4/altona/main/util/scanner.hpp \
+ /home/usernameak/fr_public/altona_wz4/altona/main/shadercomp/asc_doc.hpp \
+ /home/usernameak/fr_public/altona_wz4/altona/main/base/graphics.hpp \
+ /home/usernameak/fr_public/altona_wz4/altona/main/base/math.hpp \
+ /home/usernameak/fr_public/altona_wz4/altona/main/shadercomp/shaderdis.hpp \
+ /home/usernameak/fr_public/altona_wz4/altona/main/shadercomp/shadercomp.hpp
+output.cpp main.hpp :
+ /home/usernameak/fr_public/altona_wz4/altona/main/base/types2.hpp :
+ /home/usernameak/fr_public/altona_wz4/altona/main/base/types.hpp :
+ /home/usernameak/fr_public/altona_wz4/altona/main/../altona_config.hpp :
+ /home/usernameak/fr_public/altona_wz4/altona/main/base/serialize.hpp :
+ /home/usernameak/fr_public/altona_wz4/altona/main/base/system.hpp :
+ /home/usernameak/fr_public/altona_wz4/altona/main/util/scanner.hpp :
+ /home/usernameak/fr_public/altona_wz4/altona/main/shadercomp/asc_doc.hpp :
+ /home/usernameak/fr_public/altona_wz4/altona/main/base/graphics.hpp :
+ /home/usernameak/fr_public/altona_wz4/altona/main/base/math.hpp :
+ /home/usernameak/fr_public/altona_wz4/altona/main/shadercomp/shaderdis.hpp :
+ /home/usernameak/fr_public/altona_wz4/altona/main/shadercomp/shadercomp.hpp :

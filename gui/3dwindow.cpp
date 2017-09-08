@@ -337,7 +337,7 @@ void s3DWindow::CmdGearShift(sDInt n)
   GearShiftDisplay = sGetTime()+500;
 }
 
-#define SCREENSHOTDIR L"c:/nxn/temp/screenshots"
+#define SCREENSHOTDIR L"~/altona_screenshots"
 #define SCREENSHOTNAME L"tool_"
 
 void s3DWindow::OnPaint3D()

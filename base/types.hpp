@@ -608,7 +608,7 @@ void __debugbreak();
 #define sINTRO        0                     // code size optimisations 
 #define sRELEASE      (sCONFIG_BUILD_RELEASE||sCONFIG_BUILD_STRIPPED)      // ommit time consuming checks
 #define sSTRIPPED     sCONFIG_BUILD_STRIPPED // no cheats, no debugs.
-#define sCOMMANDLINE  sCONFIG_OPTION_SHELL  // commandline build - don't open window
+//#define sCOMMANDLINE  sCONFIG_OPTION_SHELL  // commandline build - don't open window
 
 /****************************************************************************/
 
@@ -1738,23 +1738,23 @@ inline void sCDECL operator delete[](void* p) { sFreeMem(p); }
 #endif // sCONFIG_DEBUGMEM
 #endif // !sCONFIG_OPTION_XSI
 
-inline void *operator new(sCONFIG_SIZET, void *ptr)throw() { return ptr; }
-inline void *operator new[](sCONFIG_SIZET, void *ptr)throw() { return ptr; }
+//inline void *operator new(sCONFIG_SIZET, void *ptr)throw() { return ptr; }
+//inline void *operator new[](sCONFIG_SIZET, void *ptr)throw() { return ptr; }
 
 #undef sNEW_ALLOCATOR
 
 #if sCONFIG_DEBUGMEM && !sCONFIG_OPTION_XSI
-#define sDEFINE_NEW new(__FILE__,__LINE__)
+//#define sDEFINE_NEW new(__FILE__,__LINE__) // хьюстон у нас проблемы
 #else
-#define sDEFINE_NEW new
+//#define sDEFINE_NEW new
 #endif
 
 #endif  // !IOS 
 
 #if sPLATFORM==sPLAT_IOS
-inline void *operator new(sCONFIG_SIZET, void *ptr)throw() { return ptr; }
-inline void *operator new[](sCONFIG_SIZET, void *ptr)throw() { return ptr; }
-#define sDEFINE_NEW new
+//inline void *operator new(sCONFIG_SIZET, void *ptr)throw() { return ptr; }
+//inline void *operator new[](sCONFIG_SIZET, void *ptr)throw() { return ptr; }
+//#define sDEFINE_NEW new
 #endif // IOS
 
 template<class T> 
@@ -1766,7 +1766,7 @@ T* sPlacementNew(void *ptr, ARG0 arg0, ARG1 arg1){ return new (ptr) T(arg0, arg1
 template<class T, typename ARG0, typename ARG1, typename ARG2> 
 T* sPlacementNew(void *ptr, ARG0 arg0, ARG1 arg1, ARG2 arg2){ return new (ptr) T(arg0, arg1, arg2); }
 
-#define new sDEFINE_NEW
+//#define new sDEFINE_NEW
 
 /****************************************************************************/
 /***                                                                      ***/
@@ -4135,6 +4135,8 @@ public:
   //! index the bits like an array. read only.
   sInt operator[](sInt i) const { return Get(i); }
 };
+
+#define sISGUI(val) void sCheckIsGUI() {if(val) sEnableGUI();}
 
 /****************************************************************************/
 /****************************************************************************/

@@ -459,6 +459,10 @@ sChar *sTextBuffer::Get()
   return Buffer;
 }
 
+sInt sTextBuffer::GetLength() {
+  return Used;
+}
+
 void sTextBuffer::Insert(sInt pos,sChar c)
 {
   sVERIFY(pos>=0 && pos<=Used);

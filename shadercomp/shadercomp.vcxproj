@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup Label="ProjectConfigurations">
+	</ItemGroup>
+
+	<PropertyGroup Label="Globals">
+		<ProjectGuid>{A36D3ED2-7C93-4EB8-98C3-77DBA9ADDAEB}</ProjectGuid>
+		<RootNamespace>shadercomp</RootNamespace>
+		<Keyword>Win32Proj</Keyword>
+		<AltonaRoot>~/fr_public/altona_wz4/</AltonaRoot>
+	</PropertyGroup>
+
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+
+
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+	<ImportGroup Label="ExtensionSettings">
+		<Import Project="$(AltonaRoot)\altona\doc\altona.props"/>
+		<Import Project="$(AltonaRoot)\altona\doc\yasm.props"/>
+	</ImportGroup>
+	<PropertyGroup Label="UserMacros" />
+
+
+	<ItemGroup>
+		<ClInclude Include="asc_doc.hpp" />
+		<ClInclude Include="shaderdis.hpp" />
+		<ClInclude Include="shadercomp.hpp" />
+	</ItemGroup>
+	<ItemGroup>
+		<ClCompile Include="compile_cg.cpp">
+		</ClCompile>
+		<ClCompile Include="asc_doc.cpp" />
+		<ClCompile Include="asc_parser.cpp" />
+		<ClCompile Include="asc_output.cpp" />
+		<ClCompile Include="shaderdis.cpp" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Include="shadercomp.mp.txt" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="~/fr_public/altona_wz4/altona/main/base/base.vcxproj">
+			<Project>{F13B45DE-3700-45FB-B651-E652B962BE4F}</Project>
+		</ProjectReference>
+	</ItemGroup>
+
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+	<ImportGroup Label="ExtensionTargets">
+		<Import Project="~/fr_public/altona_wz4/\altona\doc\altona.targets"/>
+		<Import Project="~/fr_public/altona_wz4/\altona\doc\yasm.targets"/>
+	</ImportGroup>
+</Project>

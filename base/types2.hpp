@@ -350,6 +350,8 @@ public:
   void Serialize(sWriter &stream);
   void Load(sChar *filename);
 
+  sInt GetLength();
+
   // buffer management
 
   void Clear();                   // clear buffer. don't deallocate

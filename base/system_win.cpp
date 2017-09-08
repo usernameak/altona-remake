@@ -2539,7 +2539,7 @@ void sInit(sInt flags,sInt xs,sInt ys)
         CW_USEDEFAULT,CW_USEDEFAULT,r2.right-r2.left,r2.bottom-r2.top,
         0,0,wc.hInstance,0);
     
-      if(sCOMMANDLINE==0)                   // don't show window for commandline tools
+      if(sGUIEnabled)                   // don't show window for commandline tools
         ShowWindow(sHWND,SW_SHOWDEFAULT);
     }
   }

@@ -36,6 +36,8 @@ void sRestart();
 sInt sGetSystemFlags();
 void sSetErrorCode(sInt i=1);           // set the commandline error code. 0=OK, 1=ERROR
 
+extern sBool sGUIEnabled;
+
 /****************************************************************************/
 
 enum sInitSystemFlags
@@ -115,6 +117,8 @@ sBool sExecuteShellDetached(const sChar *cmdline);
 sBool sExecuteShell(const sChar *cmdline,class sTextBuffer *tb);
 sBool sExecuteOpen(const sChar *file);
 sBool sGetEnvironmentVariable(const sStringDesc &dst,const sChar *var);
+
+void sEnableGUI();
 
 void sConsoleWindowClear();
 sInt sGetTime();
@@ -1003,6 +1007,25 @@ sVideoWriter *sCreateVideoWriter(const sChar *filename,const sChar *codec,sF32 f
 sBool sGetUserName(const sStringDesc &dest, sInt joypadId);
 
 /****************************************************************************/
+
+void sCheckIsGUI();
+
+void sLinuxFromWide(char *dest, const sChar *src, int size);
+char *sLinuxFromWide(const sChar *str);
+template <class T>
+static inline void sLinuxFromWide(T &dest, const sChar *str)
+{
+  sLinuxFromWide(dest, str, sizeof(dest));
+}
+
+void sLinuxToWide(sChar *dest, const char *src, int size);
+wchar_t *sLinuxToWide(const char *src, int size);
+
+    template <class T>
+    static inline void sLinuxToWide(T &dest, const char *src)
+{
+  sLinuxToWide(dest, src, sCOUNTOF(dest));
+}
 
 #endif   //ALTONA_BASE_SYSTEM
 

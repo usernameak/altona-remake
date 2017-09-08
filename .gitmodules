@@ -1,3 +1,0 @@
-[submodule "hlsl2glsl"]
-	path = hlsl2glsl
-	url = https://github.com/aras-p/hlsl2glslfork

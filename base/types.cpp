@@ -4773,7 +4773,8 @@ void sFreeMem(void *ptr)
     }
 
     if (!h) 
-      sFatal(L"pointer %08x seems not to belong to any sMemoryHandler",p);
+      //sFatal(L"pointer %08x seems not to belong to any sMemoryHandler",p);
+      sDPrintF(L"pointer %08x seems not to belong to any sMemoryHandler. not using custom memory allocator?", p); // very shitty workaround
 
 #if sCONFIG_DEBUGMEM
     if(sMemoryLeakCheck && !h->NoLeaks)
@@ -4816,7 +4817,8 @@ sPtr sMemSize(void *ptr)
         return r;
       }
     }
-    sFatal(L"pointer %08x seems not to belong to any sMemoryHandler",p);
+    //sFatal(L"pointer %08x seems not to belong to any sMemoryHandler",p);
+    sDPrintF(L"pointer %08x seems not to belong to any sMemoryHandler. not using custom memory allocator?", p); // very shitty workaround
   }
   return 0;
 }

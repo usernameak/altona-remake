@@ -752,9 +752,9 @@ private:
   sBool IsMemMarkSet;              // sSetMemMark() was called before allocating this
   sVertexFormatHandle *Next;
 
-#if sRENDERER==sRENDER_OGL2
-  OGLDecl *Decl;
-#endif
+//#if sRENDERER==sRENDER_OGL2
+//  OGLDecl *Decl;
+//#endif
   void Create();
   void Destroy();
 public:
@@ -762,15 +762,17 @@ public:
   sInt GetSize(sInt stream) const { return VertexSize[stream]; }    // size in bytes
   sInt GetCount() const { return Count; }    // element count
   sInt GetStreams() const { return Streams; }                       // highest used stream + 1. if streams 0 and 2 are used, this is 3
-  sBool Has(sInt flag) const { return (AvailMask & (1<<(flag & sVF_USEMASK)))!=0; } // check if the format has a specific attribute
+  sBool Has(sInt flag) const {
+    return (AvailMask & (1<<(flag & sVF_USEMASK)))!=0;
+  } // check if the format has a specific attribute
   sU32 GetAvailMask() const { return AvailMask; }                   // get all available attributes
   sInt GetOffset(sInt semantic_and_format);
   sInt GetDataType(sInt semantic)const;                             // slow: searches the description array
 
   const sU32 *GetDesc() const { return Data; }                      // if you want to know exactly...
-#if sRENDERER==sRENDER_OGL2
-  OGLDecl *GetDecl() { return Decl; }                               // this is only for internal use.
-#endif
+//#if sRENDERER==sRENDER_OGL2
+//  OGLDecl *GetDecl() { return Decl; }                               // this is only for internal use.
+//#endif
 };
 
 
@@ -1966,8 +1968,8 @@ public:
 
 
 protected:
-  sInt StateVariants;
-  sMaterialRS *VariantFlags;
+  //sInt StateVariants;
+  //sMaterialRS *VariantFlags;
 
   friend class sToolPlatform;
 
@@ -1990,11 +1992,11 @@ protected:
   void SetStates(sInt variant);
 #endif
 
-#if sRENDERER==sRENDER_OGL2
+/*#if sRENDERER==sRENDER_OGL2
   void SetStates(sInt variant=0);
-#endif
+//#endif*/
 
-#if sRENDERER==sRENDER_OGLES2
+#if sRENDERER == sRENDER_OGLES2 || sRENDERER == sRENDER_OGL2
   void SetStates(sInt variant=0);
   sInt StateVariants;
   sMaterialRS *VariantFlags;

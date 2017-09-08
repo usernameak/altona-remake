@@ -13,6 +13,7 @@
 
 sInt sSystemFlags = 0;
 sInt sExitFlag = 0;
+sBool sGUIEnabled = false;
 
 sApp *sAppPtr = 0;
 sHooks *sFrameHook = 0;
@@ -74,6 +75,63 @@ void sApp::OnInit()
 }
 
 /****************************************************************************/
+
+/****************************************************************************/
+/***                                                                      ***/
+/***   Unicode helper functions                                           ***/
+/***                                                                      ***/
+/****************************************************************************/
+
+void sLinuxFromWide(char *dest, const sChar *src, int size)
+{
+  sInt len = sGetStringLen(src);
+  sU32 *convBuffer = sALLOCSTACK(sU32,len+1);
+  for(sInt i=0;i<=len;i++) // fake-wchar16-to-wchar32 (argh!)
+    convBuffer[i] = src[i];
+  
+  wcstombs(dest,(wchar_t *)convBuffer,size);
+  dest[size-1] = 0;
+  /*wcstombs(dest, (wchar_t *)src, size);
+  dest[size - 1] = 0;*/
+}
+
+// Careful with this, result is overwritten on next call, sDPrintF etc!!!
+char *sLinuxFromWide(const sChar *str)
+{
+  sThreadContext *ctx = sGetThreadContext();
+  char *buffer = (char *)&ctx->PrintBuffer[0];
+  sLinuxFromWide(buffer, str, sizeof(ctx->PrintBuffer));
+
+  return buffer;
+}
+
+void sLinuxToWide(sChar *dest, const char *src, int size)
+{
+  sU32 *convBuffer = sALLOCSTACK(sU32, size);
+  size_t nconv = mbstowcs((wchar_t *)convBuffer, src, size);
+  if (nconv == (size_t)-1)
+    nconv = 0;
+
+  for (size_t i = 0; i != nconv; i++) // fake-wchar32-to-wchar16
+    dest[i] = convBuffer[i];
+  dest[sMin<sInt>(nconv, size - 1)] = 0;
+}
+
+wchar_t *sLinuxToWide(const char *src, int size)
+{
+  wchar_t *convBuffer = new wchar_t[size+1];
+  convBuffer[size - 1] = 0;
+  size_t nconv = mbstowcs((wchar_t *)convBuffer, src, size);
+  if (nconv == (size_t)-1)
+    nconv = 0;
+
+  for (size_t i = 0; i != nconv; i++) // fake-wchar32-to-wchar16
+    ((sChar*)convBuffer)[i] = convBuffer[i];
+  ((sChar*)convBuffer)[sMin<sInt>(nconv, size - 1)] = 0;
+  return convBuffer;
+}
+
+/******************************************************************************/
 
 void sVerifyFalse(const sChar *file,sInt line)
 {
@@ -1686,3 +1744,7 @@ sVideoWriter::~sVideoWriter()
 }
 
 /****************************************************************************/
+
+void sEnableGUI() {
+  sGUIEnabled = true;
+}

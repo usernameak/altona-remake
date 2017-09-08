@@ -22,6 +22,7 @@
 
 void sInitGui(sGuiApp *newGuiApp)
 {
+  if(!sGUIEnabled) sFatal(L"Application is not GUI application");
   if (!newGuiApp)
     newGuiApp = new sGuiApp(); // the assignemnt isn't really neccessary
                                // because the contructor calls sSetApp(this)

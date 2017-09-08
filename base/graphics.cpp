@@ -4150,7 +4150,7 @@ void sGrabScreen(class sTexture2D *tex, sGrabFilterFlags filter, const sRect *ds
 /***                                                                      ***/
 /****************************************************************************/
 
-#if RENDERTARGET_NEW_TO_OLD && sRENDERER != sRENDER_OGL2 && sRENDERER != sRENDER_OGL2
+#if RENDERTARGET_NEW_TO_OLD && sRENDERER != sRENDER_OGL2 && sRENDERER != sRENDER_OGLES2
 
 void sSetTarget(const sTargetPara &para)
 {

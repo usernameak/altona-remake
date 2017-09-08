@@ -2539,124 +2539,85 @@ void sGeometryPrivate::EndLoadPrv(Buffer *b,sInt count,sInt bindflag)
 
 // helper
 
-void sGeometry::BeginLoad(sVertexFormatHandle *vf,sInt flags,sGeometryDuration duration,sInt vc,sInt ic,void **vp,void **ip)
+void sGeometry::Init(sInt flags, sVertexFormatHandle *form)
 {
-  Init(flags,vf);
-  BeginLoadIB(ic,duration,ip);
-  BeginLoadVB(vc,duration,vp);
-}
+  sVERIFY(!(flags & sGF_CPU_MEM));
+  Flags = flags;
+  Format = form;
 
-void sGeometry::EndLoad(sInt vc,sInt ic)
-{
-  EndLoadVB(vc);
-  EndLoadIB(ic);
-}
-
-// vertex stream merging
-
-
-void sGeometry::Merge(sGeometry *geo0,sGeometry *geo1)
-{
-  sVERIFY(geo1!=this);
-  if(geo0 != this)
+  switch (Flags & sGF_INDEXMASK)
   {
-    for(sInt i=0;i<sVF_STREAMMAX;i++)
-      VB[i].CloneFrom(&geo0->VB[i]);
-    IB.CloneFrom(&geo0->IB);
-  }
-
-  if(geo1)
-  {
-    for(sInt i=0;i<sVF_STREAMMAX;i++)
-      if(!geo1->VB[i].IsEmpty())
-        VB[i].CloneFrom(&geo1->VB[i]);
-    if(!geo1->IB.IsEmpty())
-      IB.CloneFrom(&geo1->IB);
+  case sGF_INDEX16:
+    IndexSize = 2;
+    break;
+  case sGF_INDEX32:
+    IndexSize = 4;
+    break;
+  default:
+    IndexSize = 0;
   }
 }
 
-void sGeometry::MergeVertexStream(sInt DestStream,sGeometry *src,sInt SrcStream)
+void sGeometry::BeginLoadIB(sInt ic, sGeometryDuration duration, void **ip)
 {
-  sVERIFY(src!=this);
-  VB[DestStream].CloneFrom(&src->VB[SrcStream]);
+  sVERIFY(IndexSize > 0)
+      IndexPart.Clear();
+#if sRENDERER == sRENDER_DX9 || sRENDERER == sRENDER_DX11
+  IndexPart.Init(ic, IndexSize, duration, (Flags & sGF_INDEX32) ? 2 : 1);
+#else
+  IndexPart.Init(ic, IndexSize, duration, 1);
+#endif
+  IndexPart.Lock(ip);
 }
 
-void sGeometryPrivate::Buffer::CloneFrom(sGeometryPrivate::Buffer *s)
-{ 
-  ElementCount=s->ElementCount; 
-  ElementSize=s->ElementSize;
-  DynMap = s->DynMap;
-  LoadBuffer = 0;
-  sDXRELEASE(DXBuffer);
-  DXBuffer = s->DXBuffer;
-  if(DXBuffer) DXBuffer->AddRef();
-}
-
-/****************************************************************************/
-/***                                                                      ***/
-/***   Dynamic Management                                                 ***/
-/***                                                                      ***/
-/****************************************************************************/
-
-void sGeometry::InitDyn(sInt ic,sInt vc0,sInt vc1,sInt vc2,sInt vc3)
+void sGeometry::EndLoadIB(sInt ic)
 {
-  sInt vc[4];
-  vc[0] = vc0;
-  vc[1] = vc1;
-  vc[2] = vc2;
-  vc[3] = vc3;
-  D3D11_BUFFER_DESC bd;
-  sClear(bd);
-
-  bd.Usage = D3D11_USAGE_DYNAMIC;
-  bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-  bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-
-  if(ic>0)
-  {
-    IB.ElementSize = IndexSize;
-    IB.ElementCount = ic;
-    bd.ByteWidth = ic*IndexSize;
-    DXErr(DXDev->CreateBuffer(&bd,0,&IB.DXBuffer));  
-  }
-
-  bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-  for(sInt i=0;i<4;i++)
-  {
-    if(vc[i]>0)
-    {
-      VB[i].ElementSize = Format->GetSize(i);
-      VB[i].ElementCount = vc[i];
-      bd.ByteWidth = vc[i]*Format->GetSize(i);
-      DXErr(DXDev->CreateBuffer(&bd,0,&VB[i].DXBuffer));      
-    }
-  }
+  IndexPart.Unlock(ic, IndexSize);
 }
 
-void *sGeometry::BeginDynVB(sBool discard,sInt stream)
+void sGeometry::BeginLoadVB(sInt vc, sGeometryDuration duration, void **vp, sInt stream)
 {
-  D3D11_MAPPED_SUBRESOURCE mr;
-  DXErr(GTC->DXCtx->Map(VB[stream].DXBuffer,0,discard ? D3D11_MAP_WRITE_DISCARD : D3D11_MAP_WRITE_NO_OVERWRITE,0,&mr));
-  return mr.pData;
+  VertexPart[stream].Clear();
+  VertexPart[stream].Init(vc, Format->GetSize(stream), duration, 0);
+  VertexPart[stream].Lock(vp);
 }
 
-void *sGeometry::BeginDynIB(sBool discard)
+void sGeometry::EndLoadVB(sInt vc, sInt stream)
 {
-  D3D11_MAPPED_SUBRESOURCE mr;
-  DXErr(GTC->DXCtx->Map(IB.DXBuffer,0,discard ? D3D11_MAP_WRITE_DISCARD : D3D11_MAP_WRITE_NO_OVERWRITE,0,&mr));
-  return mr.pData;
+  VertexPart[stream].Unlock(vc, Format->GetSize(stream));
 }
 
-void sGeometry::EndDynVB(sInt stream)
+void sGeometry::BeginLoad(sVertexFormatHandle *vf, sInt flags, sGeometryDuration duration, sInt vc, sInt ic, void **vp, void **ip)
 {
-  GTC->DXCtx->Unmap(VB[stream].DXBuffer,0);
+  Init(flags, vf);
+  BeginLoadVB(vc, duration, vp, 0);
+  if (ic)
+    BeginLoadIB(ic, duration, ip);
+  else
+    IndexPart.Clear();
 }
 
-void sGeometry::EndDynIB()
+void sGeometry::EndLoad(sInt vc, sInt ic)
 {
-  GTC->DXCtx->Unmap(IB.DXBuffer,0);
+  VertexPart[0].Unlock(vc, Format->GetSize(0));
+  if (IndexPart.Buffer)
+    IndexPart.Unlock(ic, IndexSize);
 }
 
+// obsolete
+
+void sGeometry::BeginLoad(sInt vc, sInt ic, sInt flags, sVertexFormatHandle *vf, void **vp, void **ip)
+{
+  if (!(flags & sGF_INDEX32))
+    flags |= sGF_INDEX16;
+
+  Init(flags & (sGF_PRIMMASK | sGF_INDEXMASK | sGF_INSTANCES), vf);
+  BeginLoadVB(vc, sGeometryDuration(flags & 3), vp, 0);
+  if (ic)
+    BeginLoadIB(ic, sGeometryDuration((flags >> 4) & 3), ip);
+  else
+    IndexPart.Clear();
+}
 
 /****************************************************************************/
 /***                                                                      ***/

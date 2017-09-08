@@ -538,29 +538,29 @@ void sProgressDialog::Render()
 void sProgressDialog::Open(const sChar *title,const sChar *text)
 {
   sVERIFY(Instance == 0);
-#if !sCOMMANDLINE
-  Instance = new sProgressDialog(title,text);
-#endif
+  if(sGUIEnabled){
+    Instance = new sProgressDialog(title,text);
+  }
 }
 
 sBool sProgressDialog::Close()
 {
-#if !sCOMMANDLINE
-  if(Instance != 0)
-  {
-    sGui->Update();
-    sBool ret = !Instance->CancelFlag;
+  if(sGUIEnabled) {
+    if(Instance != 0)
+    {
+      sGui->Update();
+      sBool ret = !Instance->CancelFlag;
 
-    delete Instance;
-    Instance = 0;
+      delete Instance;
+      Instance = 0;
 
-    return ret;
+      return ret;
+    }
+    else
+      return sTRUE; // no window => no cancel
+  } else {
+    return sTRUE;
   }
-  else
-    return sTRUE; // no window => no cancel
-#else
-  return sTRUE;
-#endif
 }
 
 void sProgressDialog::SetText(const sChar *message,sBool forceUpdate)

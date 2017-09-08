@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup Label="ProjectConfigurations">
+	</ItemGroup>
+
+	<PropertyGroup Label="Globals">
+		<ProjectGuid>{A143CFE3-894F-4C7C-9D72-DEB94AA70DDF}</ProjectGuid>
+		<RootNamespace>asc</RootNamespace>
+		<Keyword>Win32Proj</Keyword>
+		<AltonaRoot>~/fr_public/altona_wz4/</AltonaRoot>
+	</PropertyGroup>
+
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+
+
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+	<ImportGroup Label="ExtensionSettings">
+		<Import Project="$(AltonaRoot)\altona\doc\altona.props"/>
+		<Import Project="$(AltonaRoot)\altona\doc\yasm.props"/>
+	</ImportGroup>
+	<PropertyGroup Label="UserMacros" />
+
+
+	<ItemGroup>
+		<ClInclude Include="main.hpp" />
+		<ClInclude Include="test.hpp" />
+		<ClInclude Include="../../main/util/scanner.hpp" />
+	</ItemGroup>
+	<ItemGroup>
+		<ClCompile Include="main.cpp" />
+		<ClCompile Include="parse.cpp" />
+		<ClCompile Include="output.cpp" />
+		<ClCompile Include="new.cpp" />
+		<ClCompile Include="test.cpp">
+		</ClCompile>
+		<ClCompile Include="../../main/util/scanner.cpp" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Include="asc.mp.txt" />
+		<None Include="todo.txt" />
+		<None Include="test.txt" />
+		<None Include="longtest.txt" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="~/fr_public/altona_wz4/altona/main/base/base.vcxproj">
+			<Project>{F13B45DE-3700-45FB-B651-E652B962BE4F}</Project>
+		</ProjectReference>
+		<ProjectReference Include="~/fr_public/altona_wz4/altona/main/shadercomp/shadercomp.vcxproj">
+			<Project>{A36D3ED2-7C93-4EB8-98C3-77DBA9ADDAEB}</Project>
+		</ProjectReference>
+	</ItemGroup>
+
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+	<ImportGroup Label="ExtensionTargets">
+		<Import Project="~/fr_public/altona_wz4/\altona\doc\altona.targets"/>
+		<Import Project="~/fr_public/altona_wz4/\altona\doc\yasm.targets"/>
+	</ImportGroup>
+</Project>

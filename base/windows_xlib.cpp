@@ -9,8 +9,6 @@
 #include "base/system.hpp"
 #include "base/windows.hpp"
 
-#if !sCOMMANDLINE
-
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/cursorfont.h>
@@ -1200,8 +1198,5 @@ sInt sFont2D::Print(sInt flags,const sRect &r,const sChar *text,sInt len,sInt ma
 
   return result;
 }
-
-#endif // sCOMMANDLINE
-
 /****************************************************************************/
 

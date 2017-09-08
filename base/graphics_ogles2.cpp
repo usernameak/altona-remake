@@ -149,12 +149,12 @@ void InitGFX(sInt flags_,sInt xs_,sInt ys_)
 
   // set up framebuffer
 
-  glGenFramebuffers(1, &GLES_FrameBuffer);
+  /*glGenFramebuffers(1, &GLES_FrameBuffer);
   glGenRenderbuffers(1, &GLES_ColorBuffer);
   glBindFramebuffer(GL_FRAMEBUFFER,GLES_FrameBuffer);
   glBindRenderbuffer(GL_RENDERBUFFER,GLES_ColorBuffer);
   glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER,GLES_ColorBuffer);  
-  GLERR();
+  GLERR();*/
   
   // intialize quad index buffer
   
@@ -193,9 +193,9 @@ void ExitGFX()
   sExitGfxCommon();
 
   // Tear down GL
-  glDeleteFramebuffers(1,&GLES_FrameBuffer);
+  /*glDeleteFramebuffers(1,&GLES_FrameBuffer);
   glDeleteRenderbuffers(1,&GLES_DepthBuffer);
-  glDeleteRenderbuffers(1,&GLES_ColorBuffer);
+  glDeleteRenderbuffers(1,&GLES_ColorBuffer);*/
 }
 
 /****************************************************************************/
@@ -206,7 +206,7 @@ void ExitGFX()
 
 sBool sRender3DBegin()
 { 
-  glBindFramebuffer(GL_FRAMEBUFFER,GLES_FrameBuffer);
+  //glBindFramebuffer(GL_FRAMEBUFFER,GLES_FrameBuffer);
   glViewport(0, 0, GLES_ScreenX, GLES_ScreenY);
   GLERR();
   
@@ -217,7 +217,7 @@ sBool sRender3DBegin()
 void sRender3DEnd(sBool flip)
 {
   GLERR();
-  glBindRenderbuffer(GL_RENDERBUFFER,GLES_FrameBuffer);
+  //glBindRenderbuffer(GL_RENDERBUFFER,GLES_FrameBuffer);
   glFinish();
   GLERR();
 }

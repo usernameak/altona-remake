@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup>
+		<ClInclude Include="shaderdis.hpp" />
+		<ClInclude Include="shadercomp.hpp" />
+		<ClInclude Include="asc_doc.hpp">
+			<Filter>asc</Filter>
+		</ClInclude>
+	</ItemGroup>
+	<ItemGroup>
+		<ClCompile Include="shaderdis.cpp" />
+		<ClCompile Include="compile_cg.cpp">
+			<Filter>modules</Filter>
+		</ClCompile>
+		<ClCompile Include="asc_doc.cpp">
+			<Filter>asc</Filter>
+		</ClCompile>
+		<ClCompile Include="asc_parser.cpp">
+			<Filter>asc</Filter>
+		</ClCompile>
+		<ClCompile Include="asc_output.cpp">
+			<Filter>asc</Filter>
+		</ClCompile>
+	</ItemGroup>
+	<ItemGroup>
+		<None Include="shadercomp.mp.txt" />
+	</ItemGroup>
+	<ItemGroup>
+		<Filter Include="modules">
+			<UniqueIdentifier>{53c11958-b93e-6688-ceb1-1767bc8a1b82}</UniqueIdentifier>
+		</Filter>
+		<Filter Include="asc">
+			<UniqueIdentifier>{c57b1aca-b2dd-4a17-9b27-7df5e6f42d63}</UniqueIdentifier>
+		</Filter>
+	</ItemGroup>
+</Project>
