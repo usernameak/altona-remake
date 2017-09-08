@@ -276,13 +276,13 @@ void InitGFX(sInt flags_, sInt xs_, sInt ys_)
 
     // set up framebuffer
 
-    GLBackBuffer = new sTexture2D(xs_, ys_, sTEX_ARGB8888);
+    /*GLBackBuffer = new sTexture2D(xs_, ys_, sTEX_ARGB8888);
     glBindTexture(GL_TEXTURE_2D, GLBackBuffer->GLName);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, xs_, ys_, 0, GL_RGBA, GL_UNSIGNED_BYTE, sNULL);
     glBindTexture(GL_TEXTURE_2D, 0);
 
     glGenFramebuffers(1, &GLES_FrameBuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, GLES_FrameBuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, GLES_FrameBuffer);*/
     /*
   glGenRenderbuffers(1, &GLES_ColorBuffer);
 
@@ -329,14 +329,15 @@ void ExitGFX()
     sExitGfxCommon();
 
     // Tear down GL
-    glDeleteFramebuffers(1, &GLES_FrameBuffer);
+    /*glDeleteFramebuffers(1, &GLES_FrameBuffer);
     glDeleteRenderbuffers(1, &GLES_DepthBuffer);
-    glDeleteRenderbuffers(1, &GLES_ColorBuffer);
+    glDeleteRenderbuffers(1, &GLES_ColorBuffer);*/
 }
 
 void ResizeGFX(sInt w, sInt h)
 {
-    if (GLES_ColorBuffer != 0)
+    glViewport(0, 0, w, h);
+    /*if (GLES_ColorBuffer != 0)
         glDeleteRenderbuffers(1, &GLES_ColorBuffer);
     glGenRenderbuffers(1, &GLES_ColorBuffer);
     glBindRenderbuffer(GL_RENDERBUFFER, GLES_ColorBuffer);
@@ -348,7 +349,7 @@ void ResizeGFX(sInt w, sInt h)
     glBindRenderbuffer(GL_RENDERBUFFER, GLES_DepthBuffer);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, w, h);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, GLES_DepthBuffer);
-    GLERR();
+    GLERR();*/
 }
 
 /****************************************************************************/
@@ -359,7 +360,8 @@ void ResizeGFX(sInt w, sInt h)
 
 sBool sRender3DBegin()
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, GLES_FrameBuffer);
+    XLockDisplay(sXDisplay());
+    /*glBindFramebuffer(GL_FRAMEBUFFER, GLES_FrameBuffer);*/
     glViewport(0, 0, OGLGfxWidth, OGLGfxHeight);
     GLERR();
 
@@ -368,9 +370,23 @@ sBool sRender3DBegin()
 
 void sRender3DEnd(sBool flip)
 {
+    XUnlockDisplay(sXDisplay());
     GLERR();
-    glBindFramebuffer(GL_FRAMEBUFFER, GLES_FrameBuffer);
-    glFinish();
+    /*glBindFramebuffer(GL_FRAMEBUFFER, GLES_FrameBuffer);
+    glEnable(GL_TEXTURE_2D);
+
+    glDisable(GL_TEXTURE_2D);
+    glFinish();*/
+    //sSleep(1000);
+    sPreFlipHook->Call();
+    #if sPLATFORM == sPLAT_WINDOWS
+    //  SwapBuffers(GLDC);
+    #elif sPLATFORM == sPLAT_LINUX
+        glXSwapBuffers(sXDisplay(), sXWnd);
+    #endif
+
+    sFlipMem();
+    sPostFlipHook->Call();
     GLERR();
 }
 
@@ -419,6 +435,10 @@ void sSetTarget(const sTargetPara &para)
     sGFXRendertargetY = para.Window.SizeY();
     sGFXRendertargetAspect = sF32(sGFXRendertargetX) / sGFXRendertargetY;
     sGFXViewRect.Init(0, 0, sGFXRendertargetX, sGFXRendertargetY);
+
+    glScissor(para.Window.x0, para.Window.y0, para.Window.SizeX(), para.Window.SizeY());
+    glEnable(GL_SCISSOR_TEST);
+    glViewport(para.Window.x0, para.Window.y0, para.Window.SizeX(), para.Window.SizeY());
 
     GLERR();
 }
