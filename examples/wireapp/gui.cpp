@@ -113,7 +113,7 @@ WinCube::WinCube()
   Mtrl = new sSimpleMaterial;
   Mtrl->Flags = sMTRL_LIGHTING | sMTRL_ZON;
   Mtrl->Prepare(sVertexFormatStandard);
-  CmdScreenshot();
+  //CmdScreenshot();
 }
 
 WinCube::~WinCube()

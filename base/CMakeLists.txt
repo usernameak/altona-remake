@@ -12,5 +12,5 @@ elseif(UNIX)
 endif(WIN32)
 
 add_library(altona_base SHARED graphics.cpp math.cpp sound_common.cpp sound_pulseaudio.cpp system.cpp
-    input2.cpp types.cpp types2.cpp devices_win.cpp serialize.cpp windows.cpp graphics_ogl2.cpp glprocs.c ${PLATDEP_FILES_BASE})
+    input2.cpp types.cpp types2.cpp devices_win.cpp serialize.cpp windows.cpp graphics_ogl2_old.cpp glprocs.c ${PLATDEP_FILES_BASE})
 target_link_libraries(altona_base GL GLEW pthread ${X11_LIBRARIES} ${X11_Xrender_LIB} ${X11_Xft_LIB})

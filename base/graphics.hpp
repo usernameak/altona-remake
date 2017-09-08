@@ -73,8 +73,8 @@ enum
   #include "graphics_dx11_private.hpp"
 #elif sRENDERER==sRENDER_DX9
   #include "graphics_dx9_private.hpp"
-#elif sRENDERER == sRENDER_OGL2
-  #include "graphics_ogl2_private.hpp"
+//#elif sRENDERER == sRENDER_OGL2
+//  #include "graphics_ogl2_private.hpp"
 #elif sRENDERER==sRENDER_OGLES2
   #include "graphics_ogles2_private.hpp"
 #else                                 // dummies for platforms that use the old way
@@ -752,9 +752,9 @@ private:
   sBool IsMemMarkSet;              // sSetMemMark() was called before allocating this
   sVertexFormatHandle *Next;
 
-//#if sRENDERER==sRENDER_OGL2
-//  OGLDecl *Decl;
-//#endif
+#if sRENDERER==sRENDER_OGL2
+  OGLDecl *Decl;
+#endif
   void Create();
   void Destroy();
 public:
@@ -770,9 +770,9 @@ public:
   sInt GetDataType(sInt semantic)const;                             // slow: searches the description array
 
   const sU32 *GetDesc() const { return Data; }                      // if you want to know exactly...
-//#if sRENDERER==sRENDER_OGL2
-//  OGLDecl *GetDecl() { return Decl; }                               // this is only for internal use.
-//#endif
+#if sRENDERER==sRENDER_OGL2
+  OGLDecl *GetDecl() { return Decl; }                               // this is only for internal use.
+#endif
 };
 
 
@@ -1994,7 +1994,7 @@ protected:
 
 /*#if sRENDERER==sRENDER_OGL2
   void SetStates(sInt variant=0);
-//#endif*/
+#endif*/
 
 #if sRENDERER == sRENDER_OGLES2 || sRENDERER == sRENDER_OGL2
   void SetStates(sInt variant=0);

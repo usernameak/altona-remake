@@ -322,6 +322,11 @@ void sGeoBufferPart::Unlock(sInt count,sInt size)
 
 /****************************************************************************/
 
+void sGeometry::Draw()
+{
+  sGeometry::Draw(0, 0, 0, 0);
+}
+
 void sGeometry::Draw(sDrawRange *ir,sInt irc,sInt instancecount, sVertexOffset *off/*=0*/)
 {
   // set vertexformat
@@ -1401,6 +1406,10 @@ void sGeometry::BeginGrid(void **data,sInt xs,sInt ys)
 void sGeometry::EndGrid()
 {
   sFatal(L"EndGrid not implemented!");
+}
+
+void sEnableGraphicsStats(sBool enable)
+{
 }
 
 #endif // sRENDERER == sRENDER_OGL2

@@ -40,7 +40,7 @@
 
 #define sCONFIG_SDK_DX9 0   // Microsoft DX9 sdk installed (required for input, sound, graphics)
 #define sCONFIG_SDK_DX11 0  // Microsoft DX11 sdk installed
-#define sCONFIG_SDK_CG 0    // NVidia CG SDK (required for ASC)
+#define sCONFIG_SDK_CG 1    // NVidia CG SDK (required for ASC)
 #define sCONFIG_SDK_XSI 0   // Softimage XSI SDK
 #define sCONFIG_SDK_GECKO 0 // Mozilla Gecko (XULRunner) SDK
 

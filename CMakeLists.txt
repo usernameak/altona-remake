@@ -10,6 +10,8 @@ elseif(UNIX)
     include_directories(/usr/include/freetype2)
 endif(WIN32)
 
+#add_definitions(-DsCONFIG_SDK_CG)
+
 include(TestBigEndian)
 test_big_endian(IS_BE)
 if(IS_BE)

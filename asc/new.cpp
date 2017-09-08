@@ -131,7 +131,7 @@ sBool Compiler::Process(NewCode *code,NewShader *ns,sTextBuffer *errors)
   //}
   /*if(!Level11 && !PcOnly)
   {*/
-  if (!ns->AscSource.IsEmpty())
+  /*if (!ns->AscSource.IsEmpty())
   {
     ASC->Output(ns->ShaderType | sSTF_HLSL23, sRENDER_DX9);
     const sChar *profile = ns->Profile;
@@ -145,7 +145,7 @@ sBool Compiler::Process(NewCode *code,NewShader *ns,sTextBuffer *errors)
       sFatal(L"GLSL: shader type is neither ps nor vs");
     }
       /*ok &= sShaderCompileDX(ns->HlslSource.Get(), profile, L"main", code->DX11Code, code->DX11Size, ns->CompileFlags, errors);*/
-    ShHandle compiler = Hlsl2Glsl_ConstructCompiler(lang);
+    /*ShHandle compiler = Hlsl2Glsl_ConstructCompiler(lang);
 
     //printf("%s", sLinuxFromWide(ASC->Out.Get()));
     if(!Hlsl2Glsl_Parse(compiler, sLinuxFromWide(ASC->Out.Get()), ETargetGLSL_120, NULL, ETranslateOpNone)) {
@@ -170,21 +170,21 @@ sBool Compiler::Process(NewCode *code,NewShader *ns,sTextBuffer *errors)
     code->GLSLSize = sGetStringLen(ns->GlslSource) + 1;
     code->GLSLCode = new sU8[code->GLSLSize];
     sCopyString((sChar8 *)code->GLSLCode, ns->GlslSource, code->GLSLSize);
-  }
-  /*if(!ns->GlslSource.IsEmpty())
+  }*/
+  if(!ns->GlslSource.IsEmpty())
     {
       code->GLSLSize = sGetStringLen(ns->GlslSource)+1;
       code->GLSLCode = new sU8[code->GLSLSize];
       sCopyString((sChar8 *)code->GLSLCode,ns->GlslSource,code->GLSLSize);
     }
-    /*else if(ok && sCONFIG_SDK_CG && (sPLATFORM != sPLAT_WINDOWS || sGetShellSwitch(L"-gen_cg")))
+    else if(ok && sCONFIG_SDK_CG && (sPLATFORM != sPLAT_WINDOWS || sGetShellSwitch(L"-gen_cg")))
     {
 #if sCONFIG_SDK_CG
       ASC->Output(ns->ShaderType | sSTF_CG,sRENDER_OGL2);
-      const sChar *prof = ((ns->ShaderType & sSTF_KIND)==sSTF_PIXEL) ? L"fp40" : L"vp40";
+      const sChar *prof = ((ns->ShaderType & sSTF_KIND)==sSTF_PIXEL) ? L"arbfp1" : L"arbvp1";
       ok &= sShaderCompileCG(ASC->Out.Get(),prof,L"main",code->GLSLCode,code->GLSLSize,ns->CompileFlags,errors);
-#endif*/
-  //}
+#endif
+  }
   //}
 
   // done
