@@ -14,6 +14,7 @@
 #include <X11/cursorfont.h>
 #include <X11/extensions/Xrender.h>
 #include <X11/Xft/Xft.h>
+#include <X11/Xatom.h>
 #include <string.h>
 
 extern Colormap sXColMap;
@@ -245,32 +246,67 @@ void sSetWindowMode(sInt mode)
 
 void sSetWindowSize(sInt xs,sInt ys)
 {
-  sLogF(L"xlib",L"sSetWindowSize\n");
+  XWindowChanges changes;
+  changes.width = xs;
+  changes.height = ys;
+  XConfigureWindow(sXDisplay(), sXWnd, CWWidth | CWHeight, &changes);
 }
 
 void sSetWindowPos(sInt x,sInt y)
 {
-  sLogF(L"xlib",L"sSetWindowPos\n");
+  XWindowChanges changes;
+  changes.x = x;
+  changes.y = y;
+  XConfigureWindow(sXDisplay(), sXWnd, CWX | CWY, &changes);
 }
 
 void sGetWindowPos(sInt &x,sInt &y)
 {
-  sLogF(L"xlib",L"sGetWindowPos\n");
-  x = 0;
-  y = 0;
+  XWindowAttributes xwa;
+  XGetWindowAttributes(sXDisplay(), sXWnd, &xwa);
+  x = xwa.x;
+  y = xwa.y;
 }
 
 void sGetWindowSize(sInt &sx,sInt &sy)
 {
-  sLogF(L"xlib",L"sGetWindowSize\n");
-  sx = 0;
-  sy = 0;
+  XWindowAttributes xwa;
+  XGetWindowAttributes(sXDisplay(), sXWnd, &xwa);
+  sx = xwa.width;
+  sy = xwa.height;
 }
 
 sInt sGetWindowMode()
 {
-  sLogF(L"xlib",L"sGetWindowMode\n");
-  return sWM_NORMAL;
+  //XWMHints hints = XGetWMHints(sXDisplay, sXWnd);
+  sWindowModeCodes mode = sWM_NORMAL;
+  sInt maxmode = 0;
+  Atom *data, type;
+  sInt  format;
+  long unsigned int size, ba;
+  XGetWindowProperty(sXDisplay(), sXWnd, XInternAtom(sXDisplay(), "_NET_WM_STATE", sFALSE)
+    , 0, sMAX_U64, sFALSE, XA_ATOM, &type, &format, &size, &ba, (unsigned char **) &data);
+  
+  if (type != None)
+  {
+    Atom hidden_atom = XInternAtom(sXDisplay(), "_NET_WM_STATE_HIDDEN", sFALSE);
+    Atom vmaximized_atom = XInternAtom(sXDisplay(), "_NET_WM_STATE_MAXIMIZED_VERT", sFALSE);
+    Atom hmaximized_atom = XInternAtom(sXDisplay(), "_NET_WM_STATE_MAXIMIZED_HORZ", sFALSE);
+    for (sInt i = 0; i < size; i++) {
+      if(data[i] == hidden_atom) {
+        mode = sWM_MINIMIZED;
+      } else if(data[i] == vmaximized_atom) {
+        maxmode |= 1;
+      } else if (data[i] == hmaximized_atom) {
+        maxmode |= 2;
+      }
+    }
+  }
+  if(maxmode == 3 && mode != sWM_MINIMIZED) {
+    mode = sWM_MAXIMIZED;
+  }
+  XFree(data);
+  return mode;
 }
 
 sBool sHasWindowFocus()

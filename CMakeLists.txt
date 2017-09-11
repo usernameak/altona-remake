@@ -24,14 +24,14 @@ include_directories(${CMAKE_SOURCE_DIR})
 include_directories(${CMAKE_BINARY_DIR}/util) # it has to be in util, but no
 
 add_definitions(-DsCONFIG_RENDER_OGL2)
-add_definitions(-DsSTF_NVIDIA=sSTF_GLSL)
+#add_definitions(-DsSTF_NVIDIA=sSTF_GLSL)
 
 #include(${CMAKE_ROOT}/Modules/ExternalProject.cmake)
 
 add_subdirectory(base)
 #ExternalProject_Add(hlsl2glsl GIT_REPOSITORY https://github.com/aras-p/hlsl2glslfork INSTALL_COMMAND "")
-add_subdirectory(hlsl2glsl)
-include_directories(${CMAKE_SOURCE_DIR}/hlsl2glsl/include)
+#add_subdirectory(hlsl2glsl)
+#include_directories(${CMAKE_SOURCE_DIR}/hlsl2glsl/include)
 add_subdirectory(util)
 add_subdirectory(gui)
 add_subdirectory(shadercomp)

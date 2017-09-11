@@ -428,7 +428,7 @@ void Compiler::OutputHPP()
         HPP.PrintF(L"#line %d \"%p\"\n",ext->ParaLine,ext->File);
         HPP.PrintF(L"  %s %s(%s);\n",ext->Result,ext->Name,ext->Para);
       }
-      HPP.PrintF(L"#line %d \"%p.hpp\"\n",sCountChar(HPP.Get(),'\n')+2,Filename);
+      HPP.PrintF(L"#line %d \"%phpp\"\n",sCountChar(HPP.Get(),'\n')+2,Filename);
       HPP.Print(L"};\n");
       HPP.Print(L"\n");
     }
@@ -477,7 +477,7 @@ void Compiler::OutputHPP()
     if(!nm->Header.IsEmpty())
     {
       PrintCode(HPP,nm->Header);
-      HPP.PrintF(L"#line %d \"%p.cpp\"\n",sCountChar(HPP.Get(),'\n')+2,Filename);
+      HPP.PrintF(L"#line %d \"%pcpp\"\n",sCountChar(HPP.Get(),'\n')+2,Filename);
     }
     HPP.PrintF(L"};\n");
   }
@@ -592,7 +592,7 @@ void Compiler::OutputCPP()
   CPP.Print(L"/***                                                                      ***/\n");
   CPP.Print(L"/****************************************************************************/\n");
   CPP.Print(L"\n");
-  CPP.PrintF(L"#include \"%p.hpp\"\n",Filename);
+  CPP.PrintF(L"#include \"%phpp\"\n",Filename);
 
   CPP.Print(L"\n");
   CPP.Print(L"/****************************************************************************/\n");
@@ -611,7 +611,7 @@ void Compiler::OutputCPP()
         CPP.PrintF(L"#line %d \"%p\"\n",ext->BodyLine,ext->File);
         CPP.PrintF(L"{%s}\n",ext->Body);
       }
-      CPP.PrintF(L"#line %d \"%p.cpp\"\n",sCountChar(CPP.Get(),'\n')+2,Filename);
+      CPP.PrintF(L"#line %d \"%pcpp\"\n",sCountChar(CPP.Get(),'\n')+2,Filename);
     }
   }
 
@@ -648,14 +648,14 @@ void Compiler::OutputCPP()
       CPP.PrintF(L"%s::%s()\n",nm->Name,nm->Name);
       CPP.Print(L"{\n");
       PrintCode(CPP,nm->New);
-      CPP.PrintF(L"#line %d \"%p.cpp\"\n",sCountChar(CPP.Get(),'\n')+2,Filename);
+      CPP.PrintF(L"#line %d \"%pcpp\"\n",sCountChar(CPP.Get(),'\n')+2,Filename);
       CPP.Print(L"}\n");
     }
 
     if(!nm->Code.IsEmpty())
     {
       PrintCode(CPP,nm->Code);
-      CPP.PrintF(L"#line %d \"%p.cpp\"\n",sCountChar(CPP.Get(),'\n')+2,Filename);
+      CPP.PrintF(L"#line %d \"%pcpp\"\n",sCountChar(CPP.Get(),'\n')+2,Filename);
     }
 
     CPP.PrintF(L"void %s::SelectShaders(sVertexFormatHandle *format)\n",nm->Name);
@@ -663,7 +663,7 @@ void Compiler::OutputCPP()
     if(!nm->Prepare.IsEmpty())
     {
       PrintCode(CPP,nm->Prepare);
-      CPP.PrintF(L"#line %d \"%p.cpp\"\n",sCountChar(CPP.Get(),'\n')+2,Filename);
+      CPP.PrintF(L"#line %d \"%pcpp\"\n",sCountChar(CPP.Get(),'\n')+2,Filename);
     }
     else
     {

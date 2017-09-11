@@ -9,8 +9,6 @@
 
 #include "main.hpp"
 
-#include "hlsl2glsl.h"
-
 #include "shadercomp/shadercomp.hpp"
 
 #include <string.h>

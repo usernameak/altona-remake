@@ -7,14 +7,14 @@ if(WIN32)
         OUTPUT shaders.cpp shaders.hpp
         COMMAND ${CMAKE_BINARY_DIR}/asc/asc.exe ${CMAKE_CURRENT_SOURCE_DIR}/shaders.asc --gen_cg
         WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-        DEPENDS asc
+        DEPENDS asc shaders.asc
     )
 elseif(PROJECT_OS_LINUX)
     add_custom_command(
         OUTPUT shaders.cpp shaders.hpp
         COMMAND ${CMAKE_BINARY_DIR}/asc/asc ${CMAKE_CURRENT_SOURCE_DIR}/shaders.asc -o ${CMAKE_CURRENT_BINARY_DIR}/shaders --gen_cg 
         WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-        DEPENDS asc
+        DEPENDS asc shaders.asc
     )
 endif(WIN32)
 

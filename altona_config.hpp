@@ -44,14 +44,4 @@
 #define sCONFIG_SDK_XSI 0   // Softimage XSI SDK
 #define sCONFIG_SDK_GECKO 0 // Mozilla Gecko (XULRunner) SDK
 
-// makeproject: what project files should be created?
-// scanned at program start, no need to recompile
-// sCONFIG_MP_VS_???: all platforms will be integrated into one project file
-// sCONFIG_MP_MAKE_???: choose only ---ONE--- platform to be put into the "Makefile"
-
-#define sCONFIG_MP_VS_WIN32 0   // create VS project files for win32
-#define sCONFIG_MP_VS_WIN64 0   // create VS project files for win64
-#define sCONFIG_MP_MAKE_MINGW 0 // create makefiles for win32 mingw
-#define sCONFIG_MP_MAKE_LINUX 1 // create makefiles for linux
-
 /****************************************************************************/

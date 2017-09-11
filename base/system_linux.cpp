@@ -81,8 +81,6 @@ void ResizeGFX(sInt x, sInt y);
 
 static sInt ErrorCode = 0;
 
-
-
 // Includes home directory matching
 static void FromWideFileName(char *dest, const sChar *src, int size)
 {
@@ -134,8 +132,6 @@ static char *FromWideFileName(const sChar *str)
 
   return buffer;
 }
-
-
 
 static sBool NormalizePathR(const sStringDesc &desc, sInt &inPos, sInt outPos, sInt count)
 {
@@ -1387,7 +1383,8 @@ sADDSUBSYSTEM(Input, 0x30, sInitInput, sExitInput);
 
 Display *sXDisplay()
 {
-  if(sGUIEnabled) {
+  if (sGUIEnabled)
+  {
     Display **dpy = sGetTls<Display *>(sXDisplayTls);
     if (!dpy) // main thread
       dpy = &sXMainDisplay;
@@ -1475,7 +1472,8 @@ sInt sMakeUnshiftedKey(sInt ascii)
 
 void sInit(sInt flags, sInt xs, sInt ys)
 {
-  if(sGUIEnabled){
+  if (sGUIEnabled)
+  {
     const sChar *caption = sGetWindowName();
 
     // X11 initialization
@@ -1489,7 +1487,8 @@ void sInit(sInt flags, sInt xs, sInt ys)
     sXScreen = DefaultScreen(dpy);
     int depth = DefaultDepth(dpy, sXScreen);
 
-    if (flags & sISF_3D) {
+    if (flags & sISF_3D)
+    {
       //sPrintF(L"preinitgfx");
       PreInitGFX(flags, xs, ys);
     }
@@ -1542,11 +1541,13 @@ void sInit(sInt flags, sInt xs, sInt ys)
     XMapWindow(dpy, sXWnd);
 
     sSystemFlags = flags;
-    if (flags & sISF_3D) {
+    if (flags & sISF_3D)
+    {
       //
 
       InitGFX(flags, xs, ys);
-    } else
+    }
+    else
       ResizeGFX(xs, ys);
 
     XSynchronize(dpy, False);
@@ -1736,6 +1737,8 @@ static void sXMessageLoop()
             sGetApp()->OnPrepareFrame();
         }
 
+        //sGetApp()->OnPrepareFrame();
+
         if ((sSystemFlags & sISF_2D) && !sExitFlag)
         {
           Window root;
@@ -1747,6 +1750,7 @@ static void sXMessageLoop()
           client.Init(0, 0, width, height);
           sXGetUpdateBoundingRect(update);
           sXClipPushUpdate();
+
           if (sAppPtr)
             sAppPtr->OnPaint2D(client, update);
           sClipPop();
@@ -1759,127 +1763,128 @@ static void sXMessageLoop()
           Render3D();
         }
 
-        if (sSystemFlags & sISF_CONTINUOUS)
+        if (sSystemFlags & sISF_3D || sSystemFlags & sISF_CONTINUOUS)
           sUpdateWindow();
       }
 
-      /*while(XPending(dpy)) // loop makes the process busy waiting, so it's commented out
-      {*/
-      XNextEvent(dpy, &e);
-
-      switch (e.type)
+      while (XPending(dpy) || !(sSystemFlags & sISF_3D))
       {
-      case DestroyNotify:
-        sDelete(sAppPtr);
-        done = sTRUE;
-        break;
+        XNextEvent(dpy, &e);
 
-      case Expose:
-      {
-        sRect r;
-        r.Init(e.xexpose.x, e.xexpose.y, e.xexpose.x + e.xexpose.width, e.xexpose.y + e.xexpose.height);
-        sUpdateWindow(r);
-      }
-      break;
-
-      case MotionNotify:
-        sendMouseMove(e.xmotion.x, e.xmotion.y);
-        break;
-
-      case ButtonPress:
-      case ButtonRelease:
-      {
-        sInt b = e.xbutton.button;
-        sU32 orm = (e.type == ButtonRelease) ? 0 : ~0u;
-
-        sendMouseMove(e.xbutton.x, e.xbutton.y);
-        if (b < sCOUNTOF(buttonMask))
+        switch (e.type)
         {
-          sU32 mask = buttonMask[b];
-          Mouse[0].Buttons = (Mouse[0].Buttons & ~mask) | (mask & orm);
-          sInput2SendEvent(sInput2Event(buttonKey[b] | (sKEYQ_BREAK & ~orm)));
-        }
-      }
-      break;
+        case DestroyNotify:
+          sDelete(sAppPtr);
+          done = sTRUE;
+          break;
 
-      case KeyPress:
-      case KeyRelease:
-      {
-        static XComposeStatus compose[2];
-        sInt isRelease = (e.type == KeyRelease);
-        sU32 orm = isRelease ? 0 : ~0u;
-        char str[8];
-        sChar wch[8];
-        KeySym sym;
-
-        e.xkey.state &= ~ControlMask; // we handle this ourselves
-
-        int nch = XLookupString(&e.xkey, str, sizeof(str), &sym, &compose[isRelease]);
-        str[nch] = 0; // todo: latin1 to utf
-        sLinuxToWide(wch, str);
-
-        switch (sym)
+        case Expose:
         {
-        case XK_Shift_L:
-          sKeyQual = (sKeyQual & ~sKEYQ_SHIFTL) | (sKEYQ_SHIFTL & orm);
-          break;
-        case XK_Shift_R:
-          sKeyQual = (sKeyQual & ~sKEYQ_SHIFTR) | (sKEYQ_SHIFTR & orm);
-          break;
-        case XK_Control_L:
-          sKeyQual = (sKeyQual & ~sKEYQ_CTRLL) | (sKEYQ_CTRLL & orm);
-          break;
-        case XK_Control_R:
-          sKeyQual = (sKeyQual & ~sKEYQ_CTRLR) | (sKEYQ_CTRLR & orm);
-          break;
-        case XK_Alt_L:
-          sKeyQual = (sKeyQual & ~sKEYQ_ALT) | (sKEYQ_ALT & orm);
-          break;
-        case XK_Alt_R:
-          sKeyQual = (sKeyQual & ~sKEYQ_ALTGR) | (sKEYQ_ALTGR & orm);
-          break;
-        case XK_Delete:
-          wch[0] = 0;
-          break; // don't generate printable char for delete
+          sRect r;
+          r.Init(e.xexpose.x, e.xexpose.y, e.xexpose.x + e.xexpose.width, e.xexpose.y + e.xexpose.height);
+          sUpdateWindow(r);
         }
-
-        if (nch == 1 && wch[0] == 13) // CR to LF
-          wch[0] = sKEY_ENTER;
-
-        for (sInt i = 0; i < wch[i]; i++)
-          sInput2SendEvent(sInput2Event(wch[i] | (sKEYQ_BREAK & ~orm)));
-
-        if (!wch[0]) // nonprintable
-        {
-          sInt k = sXLookupKeySym(sym);
-          if (k)
-            sInput2SendEvent(sInput2Event(k | (sKEYQ_BREAK & ~orm)));
-        }
-      }
-      break;
-
-      case ClientMessage:
-        if (e.xclient.format == 32)
-          sAppPtr->OnEvent(e.xclient.data.l[0]);
         break;
 
-      default:
+        case MotionNotify:
+          sendMouseMove(e.xmotion.x, e.xmotion.y);
+          break;
+
+        case ButtonPress:
+        case ButtonRelease:
+        {
+          sInt b = e.xbutton.button;
+          sU32 orm = (e.type == ButtonRelease) ? 0 : ~0u;
+
+          sendMouseMove(e.xbutton.x, e.xbutton.y);
+          if (b < sCOUNTOF(buttonMask))
+          {
+            sU32 mask = buttonMask[b];
+            Mouse[0].Buttons = (Mouse[0].Buttons & ~mask) | (mask & orm);
+            sInput2SendEvent(sInput2Event(buttonKey[b] | (sKEYQ_BREAK & ~orm)));
+          }
+        }
         break;
+
+        case KeyPress:
+        case KeyRelease:
+        {
+          static XComposeStatus compose[2];
+          sInt isRelease = (e.type == KeyRelease);
+          sU32 orm = isRelease ? 0 : ~0u;
+          char str[8];
+          sChar wch[8];
+          KeySym sym;
+
+          e.xkey.state &= ~ControlMask; // we handle this ourselves
+
+          int nch = XLookupString(&e.xkey, str, sizeof(str), &sym, &compose[isRelease]);
+          str[nch] = 0; // todo: latin1 to utf
+          sLinuxToWide(wch, str);
+
+          switch (sym)
+          {
+          case XK_Shift_L:
+            sKeyQual = (sKeyQual & ~sKEYQ_SHIFTL) | (sKEYQ_SHIFTL & orm);
+            break;
+          case XK_Shift_R:
+            sKeyQual = (sKeyQual & ~sKEYQ_SHIFTR) | (sKEYQ_SHIFTR & orm);
+            break;
+          case XK_Control_L:
+            sKeyQual = (sKeyQual & ~sKEYQ_CTRLL) | (sKEYQ_CTRLL & orm);
+            break;
+          case XK_Control_R:
+            sKeyQual = (sKeyQual & ~sKEYQ_CTRLR) | (sKEYQ_CTRLR & orm);
+            break;
+          case XK_Alt_L:
+            sKeyQual = (sKeyQual & ~sKEYQ_ALT) | (sKEYQ_ALT & orm);
+            break;
+          case XK_Alt_R:
+            sKeyQual = (sKeyQual & ~sKEYQ_ALTGR) | (sKEYQ_ALTGR & orm);
+            break;
+          case XK_Delete:
+            wch[0] = 0;
+            break; // don't generate printable char for delete
+          }
+
+          if (nch == 1 && wch[0] == 13) // CR to LF
+            wch[0] = sKEY_ENTER;
+
+          for (sInt i = 0; i < wch[i]; i++)
+            sInput2SendEvent(sInput2Event(wch[i] | (sKEYQ_BREAK & ~orm)));
+
+          if (!wch[0]) // nonprintable
+          {
+            sInt k = sXLookupKeySym(sym);
+            if (k)
+              sInput2SendEvent(sInput2Event(k | (sKEYQ_BREAK & ~orm)));
+          }
+        }
+        break;
+
+        case ClientMessage:
+          if (e.xclient.format == 32)
+            sAppPtr->OnEvent(e.xclient.data.l[0]);
+          break;
+
+        default:
+          break;
+        }
+
+        if (sExitFlag)
+        {
+          sAppPtr->OnEvent(sAE_EXIT);
+          sCollect();
+          sCollector(sTRUE);
+
+          if (sSystemFlags & sISF_3D)
+            ExitGFX();
+
+          XDestroyWindow(dpy, sXWnd);
+          done = sTRUE;
+        }
+        if(!(sSystemFlags & sISF_3D)) {break;} // this workaround sucks
       }
-
-      if (sExitFlag)
-      {
-        sAppPtr->OnEvent(sAE_EXIT);
-        sCollect();
-        sCollector(sTRUE);
-
-        if (sSystemFlags & sISF_3D)
-          ExitGFX();
-
-        XDestroyWindow(dpy, sXWnd);
-        done = sTRUE;
-      }
-      //}
     }
 
     sDelete(sAppPtr);

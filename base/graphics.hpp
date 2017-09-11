@@ -949,6 +949,7 @@ enum sShaderTypeFlag
   sSTF_HLSL23   = 0x0100,           // hlsl shader model 2 and 3
   sSTF_GLSL     = 0x0200,           // vertex_shader / fragment_shader
   sSTF_CG       = 0x0900,
+  sSTF_NVIDIA   = sSTF_CG,
   sSTF_HLSL45   = 0x0a00,           // hlsl shader model 4 and 5
   
   // kind

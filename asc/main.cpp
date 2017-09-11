@@ -8,8 +8,6 @@
 #include "shadercomp/shadercomp.hpp"
 #include "base/system.hpp"
 
-#include "hlsl2glsl.h"
-
 sISGUI(sFALSE)
 
 /****************************************************************************/
@@ -23,18 +21,18 @@ void Compiler::Run(const sChar *fn)
   ASC = 0;
   Level11 = 0;
 
-  if(!Hlsl2Glsl_Initialize()) {
-    sFatal(L"Cannot initialize hlsl2glsl library");
-  }
-
   sString<sMAXPATH> buffer;
   //  sExtractPath(fn,Path,CurScanFile);
 
   buffer=fn;
   *sFindFileExtension(buffer)=0;
   
-  Filename = sGetShellString(L"o", NULL, buffer);
-  
+  Filename = sGetShellString(L"o", NULL, L"");
+  if(Filename == L"") {
+    Filename = buffer;
+  } else {
+    Filename.Add(Filename, L".");
+  }
 
   Scan.Init();
   Scan.AddToken(L"{",'{');
@@ -79,7 +77,7 @@ void Compiler::Run(const sChar *fn)
   if(Scan.Errors==0)
   {
     buffer = Filename;
-    buffer.Add(L".cpp");
+    buffer.Add(L"cpp");
     sPrintF(L"%q", buffer);
     if(!sSaveTextAnsi(buffer,CPP.Get()))
     {
@@ -88,7 +86,7 @@ void Compiler::Run(const sChar *fn)
     }
 
     buffer = Filename;
-    buffer.Add(L".hpp");
+    buffer.Add(L"hpp");
     if(!sSaveTextAnsi(buffer,HPP.Get()))
     {
       sPrintF(L"failed writing %q\n",buffer);
@@ -100,9 +98,7 @@ void Compiler::Run(const sChar *fn)
     sSetErrorCode();
   }
 
-  Hlsl2Glsl_Shutdown();
-
-      sDeleteAll(NewShaders);
+  sDeleteAll(NewShaders);
   sDeleteAll(NewMtrls);
   sDeleteAll(ComputeShaders);
 
