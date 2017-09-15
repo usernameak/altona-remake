@@ -117,10 +117,10 @@ static void FromWideFileName(char *dest, const sChar *src, int size)
   }
 }
 
-template <class T>
-static inline void FromWideFileName(T &dest, const sChar *str)
+template <class T, size_t N>
+static inline void FromWideFileName(T (&dest)[N], const sChar *str)
 {
-  FromWideFileName(dest, str, sizeof(dest));
+  FromWideFileName(dest, str, N);
 }
 
 // Careful with this, result is overwritten on next call, sDPrintF etc!!!
@@ -1767,7 +1767,7 @@ static void sXMessageLoop()
           sUpdateWindow();
       }
 
-      while (XPending(dpy) || !(sSystemFlags & sISF_3D))
+      while (!(sSystemFlags & sISF_3D) || XPending(dpy))
       {
         XNextEvent(dpy, &e);
 

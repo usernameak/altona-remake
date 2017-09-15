@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup Label="ProjectConfigurations">
+	</ItemGroup>
+
+	<PropertyGroup Label="Globals">
+		<ProjectGuid>{E1344963-E400-453B-8031-E6DE0DEECF07}</ProjectGuid>
+		<RootNamespace>recttoy</RootNamespace>
+		<Keyword>Win32Proj</Keyword>
+		<AltonaRoot>~/fr_public/altona_wz4/</AltonaRoot>
+	</PropertyGroup>
+
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+
+
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+	<ImportGroup Label="ExtensionSettings">
+		<Import Project="$(AltonaRoot)\altona\doc\altona.props"/>
+		<Import Project="$(AltonaRoot)\altona\doc\yasm.props"/>
+	</ImportGroup>
+	<PropertyGroup Label="UserMacros" />
+
+
+	<ItemGroup>
+		<ClInclude Include="main.hpp" />
+	</ItemGroup>
+	<ItemGroup>
+		<ClCompile Include="main.cpp" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Include="recttoy.mp.txt" />
+		<None Include="recttoy.wire.txt" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="~/fr_public/altona_wz4/altona/main/base/base.vcxproj">
+			<Project>{F13B45DE-3700-45FB-B651-E652B962BE4F}</Project>
+		</ProjectReference>
+		<ProjectReference Include="~/fr_public/altona_wz4/altona/main/util/util.vcxproj">
+			<Project>{9575FAD3-F5A4-4909-B20E-145A5024C578}</Project>
+		</ProjectReference>
+		<ProjectReference Include="~/fr_public/altona_wz4/altona/main/gui/gui.vcxproj">
+			<Project>{32F4A637-1097-40B1-8D78-C4D8917E64B7}</Project>
+		</ProjectReference>
+	</ItemGroup>
+
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+	<ImportGroup Label="ExtensionTargets">
+		<Import Project="~/fr_public/altona_wz4/\altona\doc\altona.targets"/>
+		<Import Project="~/fr_public/altona_wz4/\altona\doc\yasm.targets"/>
+	</ImportGroup>
+</Project>

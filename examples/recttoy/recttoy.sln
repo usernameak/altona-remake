@@ -1,0 +1,31 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual C++ Express 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "recttoy", "~\fr_public\altona_wz4\altona\examples\_gui\recttoy\recttoy.vcxproj", "{E1344963-E400-453B-8031-E6DE0DEECF07}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F13B45DE-3700-45FB-B651-E652B962BE4F} = {F13B45DE-3700-45FB-B651-E652B962BE4F}
+		{9575FAD3-F5A4-4909-B20E-145A5024C578} = {9575FAD3-F5A4-4909-B20E-145A5024C578}
+		{32F4A637-1097-40B1-8D78-C4D8917E64B7} = {32F4A637-1097-40B1-8D78-C4D8917E64B7}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "base", "~\fr_public\altona_wz4\altona\main\base\base.vcxproj", "{F13B45DE-3700-45FB-B651-E652B962BE4F}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "util", "~\fr_public\altona_wz4\altona\main\util\util.vcxproj", "{9575FAD3-F5A4-4909-B20E-145A5024C578}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F13B45DE-3700-45FB-B651-E652B962BE4F} = {F13B45DE-3700-45FB-B651-E652B962BE4F}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gui", "~\fr_public\altona_wz4\altona\main\gui\gui.vcxproj", "{32F4A637-1097-40B1-8D78-C4D8917E64B7}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F13B45DE-3700-45FB-B651-E652B962BE4F} = {F13B45DE-3700-45FB-B651-E652B962BE4F}
+		{9575FAD3-F5A4-4909-B20E-145A5024C578} = {9575FAD3-F5A4-4909-B20E-145A5024C578}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
