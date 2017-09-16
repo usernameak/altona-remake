@@ -614,16 +614,16 @@ void sLineList2D(sInt *list,sInt count,sInt colid)
 static void sPicturePixmapFromRawData(Picture &pic,Pixmap &pixmap,const sU32 *data,sInt w,sInt h,sInt stride)
 {
   XRenderPictureAttributes attr;
-  XGCValues vals;
 
   attr.repeat = RepeatPad;
   
   // create a pixmap and corresponding picture
   pixmap = XCreatePixmap(sXDisplay(),sXWnd,w,h,32);
   pic = XRenderCreatePicture(sXDisplay(),pixmap,XFmtARGB,CPRepeat,&attr);
-  GC gc = XCreateGC(sXDisplay(),pixmap,0,&vals);
+  if (data)
+  {
+    GC gc = XCreateGC(sXDisplay(), pixmap, 0, 0);
   
-  if(data) {
     // upload data
     XImage *image = XCreateImage(sXDisplay(),sXVisual,32,ZPixmap,0,(char*)data,w,h,32,stride);
     XPutImage(sXDisplay(),pixmap,gc,image,0,0,0,0,w,h);
@@ -631,8 +631,9 @@ static void sPicturePixmapFromRawData(Picture &pic,Pixmap &pixmap,const sU32 *da
     // cleanup
     image->data = 0;
     XDestroyImage(image);
+  
+    XFreeGC(sXDisplay(),gc);
   }
-  XFreeGC(sXDisplay(),gc);
 }
 
 void sBlit2D(const sU32 *data,sInt width,const sRect &dest)
