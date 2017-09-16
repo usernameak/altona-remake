@@ -947,8 +947,13 @@ sFont2D::sLetterDimensions sFont2D::sGetLetterDimensions(const sChar letter)
 
 sBool sFont2D::LetterExists(sChar letter)
 {
-  sLogF(L"xlib",L"sFont2D::LetterExists\n");
-  return sFALSE;
+  sBool ret = sTRUE;
+  FT_Face face = XftLockFace(prv->Font);
+  if (FT_Get_Char_Index(face, letter) == 0) {
+    ret = sFALSE;
+  }
+  XftUnlockFace(prv->Font);
+  return ret;
 }
 
 void sFont2D::SetColor(sInt text,sInt back)
