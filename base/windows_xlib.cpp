@@ -18,9 +18,11 @@
 #include <string.h>
 
 extern Colormap sXColMap;
-extern Window sXWnd;
+extern Drawable sXWnd;
+extern Window sXWndFrontBuffer;
 extern Visual *sXVisual;
 extern GC sXGC;
+extern GC sXFrontGC;
 extern sInt sXScreen;
 
 /****************************************************************************/
@@ -236,7 +238,8 @@ const sChar *sGetWindowName()
 void sSetWindowName(const sChar *name)
 {
   WindowName = name;
-  if(sXWnd) XStoreName(sXDisplay(),sXWnd,sLinuxFromWide(name));
+  if(sXWnd)
+    XStoreName(sXDisplay(), sXWndFrontBuffer, sLinuxFromWide(name));
 }
 
 void sSetWindowMode(sInt mode)
@@ -249,7 +252,7 @@ void sSetWindowSize(sInt xs,sInt ys)
   XWindowChanges changes;
   changes.width = xs;
   changes.height = ys;
-  XConfigureWindow(sXDisplay(), sXWnd, CWWidth | CWHeight, &changes);
+  XConfigureWindow(sXDisplay(), sXWndFrontBuffer, CWWidth | CWHeight, &changes);
 }
 
 void sSetWindowPos(sInt x,sInt y)
@@ -257,13 +260,13 @@ void sSetWindowPos(sInt x,sInt y)
   XWindowChanges changes;
   changes.x = x;
   changes.y = y;
-  XConfigureWindow(sXDisplay(), sXWnd, CWX | CWY, &changes);
+  XConfigureWindow(sXDisplay(), sXWndFrontBuffer, CWX | CWY, &changes);
 }
 
 void sGetWindowPos(sInt &x,sInt &y)
 {
   XWindowAttributes xwa;
-  XGetWindowAttributes(sXDisplay(), sXWnd, &xwa);
+  XGetWindowAttributes(sXDisplay(), sXWndFrontBuffer, &xwa);
   x = xwa.x;
   y = xwa.y;
 }
@@ -271,7 +274,7 @@ void sGetWindowPos(sInt &x,sInt &y)
 void sGetWindowSize(sInt &sx,sInt &sy)
 {
   XWindowAttributes xwa;
-  XGetWindowAttributes(sXDisplay(), sXWnd, &xwa);
+  XGetWindowAttributes(sXDisplay(), sXWndFrontBuffer, &xwa);
   sx = xwa.width;
   sy = xwa.height;
 }
@@ -284,7 +287,7 @@ sInt sGetWindowMode()
   Atom *data, type;
   sInt  format;
   long unsigned int size, ba;
-  XGetWindowProperty(sXDisplay(), sXWnd, XInternAtom(sXDisplay(), "_NET_WM_STATE", sFALSE)
+  XGetWindowProperty(sXDisplay(), sXWndFrontBuffer, XInternAtom(sXDisplay(), "_NET_WM_STATE", sFALSE)
     , 0, sMAX_U64, sFALSE, XA_ATOM, &type, &format, &size, &ba, (unsigned char **) &data);
   
   if (type != None)
@@ -315,7 +318,7 @@ sBool sHasWindowFocus()
   int focusState;
   XGetInputFocus(sXDisplay(),&focusWin,&focusState);
 
-  return focusWin == sXWnd;
+  return focusWin == sXWndFrontBuffer;
 }
 
 void sSetClipboard(const sChar *text,sInt len)
@@ -620,13 +623,15 @@ static void sPicturePixmapFromRawData(Picture &pic,Pixmap &pixmap,const sU32 *da
   pic = XRenderCreatePicture(sXDisplay(),pixmap,XFmtARGB,CPRepeat,&attr);
   GC gc = XCreateGC(sXDisplay(),pixmap,0,&vals);
   
-  // upload data
-  XImage *image = XCreateImage(sXDisplay(),sXVisual,32,ZPixmap,0,(char*)data,w,h,32,stride);
-  XPutImage(sXDisplay(),pixmap,gc,image,0,0,0,0,w,h);
-  
-  // cleanup
-  image->data = 0;
-  XDestroyImage(image);
+  if(data) {
+    // upload data
+    XImage *image = XCreateImage(sXDisplay(),sXVisual,32,ZPixmap,0,(char*)data,w,h,32,stride);
+    XPutImage(sXDisplay(),pixmap,gc,image,0,0,0,0,w,h);
+    
+    // cleanup
+    image->data = 0;
+    XDestroyImage(image);
+  }
   XFreeGC(sXDisplay(),gc);
 }
 
@@ -679,24 +684,52 @@ void sStretch2D(const sU32 *data,sInt width,const sRect &source,const sRect &des
 /***                                                                      ***/
 /****************************************************************************/
 
+struct sImage2DPrivate
+{
+  sInt xs, ys;
+  Pixmap pixmap;
+  Picture pict;
+};
+
+static sInt Render2DMode = 0;
+static sImage2D *Render2DBuffer = 0;
+
 void sRender2DBegin(sInt xs,sInt ys)
 {
-  sLogF(L"xlib",L"sRender2DBegin\n");
+  sVERIFY(Render2DMode == 0);
+  sVERIFY(Render2DBuffer == 0);
+  Render2DBuffer = new sImage2D(xs, ys, 0);
+  sRender2DBegin(Render2DBuffer);
+  Render2DMode = 1;
 }
 
 void sRender2DBegin()
 {
-  sLogF(L"xlib",L"sRender2DBegin\n");
+  sVERIFY(Render2DMode == 0);
+  Render2DMode = 2;
 }
 
-void sRender2DBegin(sImage2D *)
+void sRender2DBegin(sImage2D *image)
 {
-	sLogF(L"xlib",L"sRender2DBegin\n");
+  sVERIFY(Render2DMode == 0);
+  Render2DMode = 3;
+  sXWnd = image->prv->pixmap;
+  sXGC = XCreateGC(sXDisplay(), sXWnd, 0, 0);
 }
 
 void sRender2DEnd()
 {
-  sLogF(L"xlib",L"sRender2DEnd\n");
+  sVERIFY(Render2DMode != 0);
+  if (Render2DMode == 1) {
+    delete Render2DBuffer;
+  }
+  if (Render2DMode == 3 || Render2DMode == 1)
+  {
+    sXWnd = sXWndFrontBuffer;
+    XFreeGC(sXDisplay(), sXGC);
+    sXGC = sXFrontGC;
+  }
+  Render2DMode = 0;
 }
 
 void sRender2DSet(sU32 *data)
@@ -714,13 +747,6 @@ void sRender2DGet(sU32 *data)
 /***   2D Blitting                                                        ***/
 /***                                                                      ***/
 /****************************************************************************/
-
-struct sImage2DPrivate
-{
-  sInt xs,ys;
-  Pixmap pixmap;
-  Picture pict;
-};
 
 sImage2D::sImage2D(sInt xs,sInt ys,sU32 *data)
 {

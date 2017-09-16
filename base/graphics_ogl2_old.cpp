@@ -49,7 +49,7 @@ sInt sEngineHacks;
 extern Display *sXDisplay();
 extern XVisualInfo *sXVisualInfo;
 extern Visual *sXVisual;
-extern Window sXWnd;
+extern Drawable sXWnd;
 extern sInt sXScreen;
 static GLXContext GLXC;
 

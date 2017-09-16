@@ -146,6 +146,7 @@ template <class Type> sBool sSetClipboardArray(sStaticArray<Type *>&arr,sU32 ser
 #endif
 }
 
+
 template <class Type> sBool sGetClipboardArray(sStaticArray<Type *>&arr,sU32 serid)
 {
 #if sPLATFORM==sPLAT_WINDOWS || sPLATFORM==sPLAT_LINUX
@@ -337,7 +338,7 @@ enum sFont2DPrintFlags
 class sImage2D
 {
   friend void sRender2DBegin(sImage2D *img);
-  struct sImage2DPrivate *prv;
+  public: struct sImage2DPrivate *prv; // TODO: make non-public
 public:
   sImage2D(sInt xs,sInt ys,sU32 *data);
   ~sImage2D();

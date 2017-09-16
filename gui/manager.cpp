@@ -1166,27 +1166,31 @@ void sGui_::PaintButton(const sRect &rect,const sChar *text,sInt flags,sInt len,
 
 void sGui_::BeginBackBuffer(const sRect &rect)
 {
-  sVERIFY(BackBufferUsed==0);
-  BackBufferUsed = 1;
-  BackBufferRect = rect;
+//  #if sPLATFORM != sPLAT_LINUX
+    sVERIFY(BackBufferUsed==0);
+    BackBufferUsed = 1;
+    BackBufferRect = rect;
 
-  sVERIFY(Client.x0 == 0);
-  sVERIFY(Client.y0 == 0);
-  if(BackBuffer==0 || BackBuffer->GetSizeX()!=Client.x1 || BackBuffer->GetSizeY()!=Client.y1)
-  {
-    delete BackBuffer;
-    BackBuffer = new sImage2D(Client.x1,Client.y1,0);
-  }
+    sVERIFY(Client.x0 == 0);
+    sVERIFY(Client.y0 == 0);
+    if(BackBuffer==0 || BackBuffer->GetSizeX()!=Client.x1 || BackBuffer->GetSizeY()!=Client.y1)
+    {
+      delete BackBuffer;
+      BackBuffer = new sImage2D(Client.x1,Client.y1,0);
+    }
 
-  sRender2DBegin(BackBuffer);
+    sRender2DBegin(BackBuffer);
+//  #endif
 }
 
 void sGui_::EndBackBuffer()
 {
-  sVERIFY(BackBufferUsed==1);
-  BackBufferUsed = 0;
-  sRender2DEnd();
-  BackBuffer->Paint(BackBufferRect,BackBufferRect.x0,BackBufferRect.y0);
+//  #if sPLATFORM != sPLAT_LINUX
+    sVERIFY(BackBufferUsed==1);
+    BackBufferUsed = 0;
+    sRender2DEnd();
+    BackBuffer->Paint(BackBufferRect,BackBufferRect.x0,BackBufferRect.y0);
+//  #endif
 }
 
 

@@ -52,8 +52,10 @@ XVisualInfo *sXVisualInfo;
 Visual *sXVisual;
 sInt sXScreen;
 Colormap sXColMap;
-Window sXWnd;
+Drawable sXWnd;
+Window sXWndFrontBuffer;
 GC sXGC;
+GC sXFrontGC;
 
 static Display *sXMainDisplay;
 static sPtr sXDisplayTls;
@@ -1411,7 +1413,7 @@ void sTriggerEvent(sInt event)
   ev.format = 32;
   ev.data.l[0] = event;
 
-  XSendEvent(sXDisplay(), sXWnd, False, NoEventMask, (XEvent *)&ev);
+  XSendEvent(sXDisplay(), sXWndFrontBuffer, False, NoEventMask, (XEvent *)&ev);
   XFlush(sXDisplay());
 #endif
 }
@@ -1419,7 +1421,7 @@ void sTriggerEvent(sInt event)
 void sSetMouse(sInt x, sInt y)
 {
 #if !sCOMMANDLINE
-  XWarpPointer(sXDisplay(), None, sXWnd, 0, 0, 0, 0, x, y);
+  XWarpPointer(sXDisplay(), None, sXWndFrontBuffer, 0, 0, 0, 0, x, y);
 #endif
 }
 
@@ -1430,7 +1432,7 @@ void sSetMouseCenter()
   int xp, yp;
   unsigned int width, height, border, depth;
 
-  XGetGeometry(sXDisplay(), sXWnd, &root, &xp, &yp, &width, &height, &border, &depth);
+  XGetGeometry(sXDisplay(), sXWndFrontBuffer, &root, &xp, &yp, &width, &height, &border, &depth);
   sSetMouse(width / 2, height / 2);
 #endif
 }
@@ -1527,18 +1529,18 @@ void sInit(sInt flags, sInt xs, sInt ys)
     attr.background_pixel = black;
     attr.border_pixel = black;
     attr.colormap = sXColMap;
-    sXWnd = XCreateWindow(dpy, root, 10, 10, xs, ys, 1, depth, InputOutput,
+    sXWnd = sXWndFrontBuffer = XCreateWindow(dpy, root, 10, 10, xs, ys, 1, depth, InputOutput,
                           sXVisual, CWBackPixel | CWBorderPixel | CWColormap, &attr);
-    if (!sXWnd)
+    if (!sXWndFrontBuffer)
       sFatal(L"XCreateWindow failed\n");
 
     XSync(dpy, False); // ...so we get errors now
 
-    sXGC = XCreateGC(dpy, sXWnd, 0, 0);
+    sXGC = sXFrontGC = XCreateGC(dpy, sXWnd, 0, 0);
 
-    XSelectInput(dpy, sXWnd, ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | StructureNotifyMask | PointerMotionMask);
-    XStoreName(dpy, sXWnd, sLinuxFromWide(caption));
-    XMapWindow(dpy, sXWnd);
+    XSelectInput(dpy, sXWndFrontBuffer, ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | StructureNotifyMask | PointerMotionMask);
+    XStoreName(dpy, sXWndFrontBuffer, sLinuxFromWide(caption));
+    XMapWindow(dpy, sXWndFrontBuffer);
 
     sSystemFlags = flags;
     if (flags & sISF_3D)
@@ -1714,7 +1716,7 @@ static void sXMessageLoop()
   //if(sGUIEnabled){
   Display *dpy = sXDisplay();
 
-  if (sAppPtr && sXWnd)
+  if (sAppPtr && sXWndFrontBuffer)
   {
     sBool done = sFALSE;
     static const sInt buttonKey[10] = {0, sKEY_LMB, sKEY_MMB, sKEY_RMB, sKEY_WHEELUP, sKEY_WHEELDOWN, 0, 0, sKEY_X1MB, sKEY_X2MB};
@@ -1745,7 +1747,7 @@ static void sXMessageLoop()
           int xp, yp;
           unsigned int width, height, border, depth;
 
-          XGetGeometry(dpy, sXWnd, &root, &xp, &yp, &width, &height, &border, &depth);
+          XGetGeometry(dpy, sXWndFrontBuffer, &root, &xp, &yp, &width, &height, &border, &depth);
           sRect client, update;
           client.Init(0, 0, width, height);
           sXGetUpdateBoundingRect(update);
@@ -1880,7 +1882,7 @@ static void sXMessageLoop()
           if (sSystemFlags & sISF_3D)
             ExitGFX();
 
-          XDestroyWindow(dpy, sXWnd);
+          XDestroyWindow(dpy, sXWndFrontBuffer);
           done = sTRUE;
         }
         if(!(sSystemFlags & sISF_3D)) {break;} // this workaround sucks
