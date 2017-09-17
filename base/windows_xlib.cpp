@@ -699,6 +699,7 @@ void sRender2DBegin(sInt xs,sInt ys)
 {
   sVERIFY(Render2DMode == 0);
   sVERIFY(Render2DBuffer == 0);
+  if(Render2DBuffer) delete Render2DBuffer;
   Render2DBuffer = new sImage2D(xs, ys, 0);
   sRender2DBegin(Render2DBuffer);
   Render2DMode = 1;
@@ -721,9 +722,6 @@ void sRender2DBegin(sImage2D *image)
 void sRender2DEnd()
 {
   sVERIFY(Render2DMode != 0);
-  if (Render2DMode == 1) {
-    delete Render2DBuffer;
-  }
   if (Render2DMode == 3 || Render2DMode == 1)
   {
     sXWnd = sXWndFrontBuffer;

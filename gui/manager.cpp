@@ -1202,7 +1202,7 @@ void sGui_::EndBackBuffer()
 /****************************************************************************/
 /****************************************************************************/
 
-const sGuiTheme sGuiThemeDefault =
+/*const sGuiTheme sGuiThemeDefault =
 {
   0xe4e4e4, // back
   0xffffff, // doc
@@ -1216,6 +1216,22 @@ const sGuiTheme sGuiThemeDefault =
   0x808080, // low2
   L"Arial", // prop
   L"Courier New", // fixed
+};*/
+
+const sGuiTheme sGuiThemeDefault =
+{
+  0x424242, // back
+  0x262626, // doc
+  0x595959, // button
+  0xc9c9c9, // text
+  0x707070, // draw
+  0x2558bb, // select
+  0x505050, // high
+  0x626262, // low
+  0x989898, // high2
+  0x262626, // low2
+  L"Arial",       // prop
+  L"Courier New" // fixed
 };
 
 const sGuiTheme sGuiThemeDarker = 
