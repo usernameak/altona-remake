@@ -521,18 +521,87 @@ void sTexture2D::EndLoadPalette()
 
 void sTextureCube::Create2(sInt flags)
 {
+  GLuint name;
+  glGenTextures(1, &name);
+  GLName = name;
 }
 
 void sTextureCube::Destroy2()
 {
+  GLuint name = GLName;
+  glDeleteTextures(1, &name);
+  GLName = 0;
 }
 
 void sTextureCube::BeginLoad(sTexCubeFace cf, sU8*& data, sInt& pitch, sInt mipmap)
 {
+  sVERIFY(LoadBuffer == 0);
+  sVERIFY(mipmap >= 0 && mipmap < Mipmaps);
+  sInt xs = SizeX >> mipmap;
+  sInt ys = SizeY >> mipmap;
+
+  LoadFace = cf;
+  LoadMipmap = mipmap;
+  LoadBuffer = new sU8[BitsPerPixel * xs * ys / 8];
+  data = LoadBuffer;
+  pitch = BitsPerPixel * xs / 8;
 }
 
 void sTextureCube::EndLoad()
 {
+  sVERIFY(LoadBuffer != 0);
+  sInt format = 0, channels = 0, type = 0;
+
+  sInt xs = SizeX >> LoadMipmap;
+  sInt ys = SizeY >> LoadMipmap;
+
+  switch (Flags & sTEX_FORMAT)
+  {
+  case sTEX_ARGB8888:
+    format = GL_RGBA8;
+    channels = GL_BGRA;
+    type = GL_UNSIGNED_BYTE;
+    break;
+  case sTEX_8TOIA:
+    format = GL_INTENSITY8;
+    channels = GL_INTENSITY8;
+    type = GL_UNSIGNED_BYTE;
+    break;
+  case sTEX_I8:
+    format = GL_LUMINANCE8;
+    channels = GL_LUMINANCE8;
+    type = GL_UNSIGNED_BYTE;
+    break;
+  default:
+    sFatal(L"unsupported texture format %d\n", Flags);
+  }
+
+  glBindTexture(GL_TEXTURE_CUBE_MAP, GLName);
+  GLenum face;
+  switch(LoadFace) {
+    case sTCF_POSX: 
+      face = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
+      break;
+    case sTCF_NEGX:
+      face = GL_TEXTURE_CUBE_MAP_NEGATIVE_X;
+      break;
+    case sTCF_POSY:
+      face = GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
+      break;
+    case sTCF_NEGY:
+      face = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
+      break;
+    case sTCF_POSZ:
+      face = GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
+      break;
+    case sTCF_NEGZ:
+      face = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z;
+      break;
+  }
+  glTexImage2D(face, LoadMipmap, format, xs, ys, 0, channels, type, LoadBuffer);
+  glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+
+  sDeleteArray(LoadBuffer);
 }
 
 /****************************************************************************/
