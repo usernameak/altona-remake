@@ -939,9 +939,17 @@ sInt sFont2D::GetCharCountFromWidth(sInt width,const sChar *text,sInt len)
 sFont2D::sLetterDimensions sFont2D::sGetLetterDimensions(const sChar letter)
 {
   sLetterDimensions result;
-  sClear(result);
-  
-  sLogF(L"xlib",L"sFont2D::sGetLetterDimensions\n");
+  FT_Face face = XftLockFace(prv->Font);
+  FT_Load_Char(face, letter, 0);
+  FT_Glyph_Metrics_ metrics = face->glyph->metrics;
+
+  result.Pre = ((sInt)(metrics.horiBearingX) & -64) >> 6;
+  result.Cell = ((sInt)(metrics.width) & -64) >> 6; //abc.abcB;
+  result.Advance = GetAdvance(&letter, 1);//abc.abcC;
+  result.Post = result.Advance - result.Cell - result.Pre;
+  result.Height = GetCharHeight();
+  result.OriginY = GetBaseline();
+  XftUnlockFace(prv->Font);
   return result;
 }
 
