@@ -1341,67 +1341,65 @@ sInt sReadTextureSkipLevels(sInt skiplevels)
 
 sInt sGetBitsPerPixel(sInt format)
 {
-  sInt BitsPerPixel = 0;
 
   switch(format&sTEX_FORMAT)
   {
-    case sTEX_ARGB8888: BitsPerPixel = 32;  break;
-    case sTEX_QWVU8888: BitsPerPixel = 32;  break;
+    case sTEX_ARGB8888: return 32;
+    case sTEX_QWVU8888: return 32;
     
-    case sTEX_GR16:     BitsPerPixel = 32;  break;
-    case sTEX_ARGB16:   BitsPerPixel = 64;  break;
+    case sTEX_GR16:     return 32;
+    case sTEX_ARGB16:   return 64;
 
-    case sTEX_R32F:     BitsPerPixel = 32;  break;
-    case sTEX_GR32F:    BitsPerPixel = 64;  break;
-    case sTEX_ARGB32F:  BitsPerPixel = 128; break;
-    case sTEX_R16F:     BitsPerPixel = 16;  break;
-    case sTEX_GR16F:    BitsPerPixel = 32;  break;
-    case sTEX_ARGB16F:  BitsPerPixel = 64;  break;
+    case sTEX_R32F:     return 32;
+    case sTEX_GR32F:    return 64;
+    case sTEX_ARGB32F:  return 128;
+    case sTEX_R16F:     return 16;
+    case sTEX_GR16F:    return 32;
+    case sTEX_ARGB16F:  return 64;
 
-    case sTEX_A8:       BitsPerPixel =  8;  break;
-    case sTEX_I8:       BitsPerPixel =  8;  break;
-    case sTEX_DXT1:     BitsPerPixel =  4;  break;
-    case sTEX_DXT1A:    BitsPerPixel =  4;  break;
-    case sTEX_DXT3:     BitsPerPixel =  8;  break;
-    case sTEX_DXT5:     BitsPerPixel =  8;  break;
-    case sTEX_DXT5N:    BitsPerPixel =  8;  break;
+    case sTEX_A8:       return 8;
+    case sTEX_I8:       return 8;
+    case sTEX_DXT1:     return 4;
+    case sTEX_DXT1A:    return 4;
+    case sTEX_DXT3:     return 8;
+    case sTEX_DXT5:     return 8;
+    case sTEX_DXT5N:    return 8;
 
-    case sTEX_MRGB8:    BitsPerPixel = 32;  break;
-    case sTEX_MRGB16:   BitsPerPixel = 64;  break;
+    case sTEX_MRGB8:    return 32;
+    case sTEX_MRGB16:   return 64;
 
-    case sTEX_ARGB2101010: BitsPerPixel=32; break;
-    case sTEX_D24S8:    BitsPerPixel = 32;  break;
+    case sTEX_ARGB2101010: return 32;
+    case sTEX_D24S8:    return 32;
 
-//    case sTEX_A4:       BitsPerPixel =  4; break;
-    case sTEX_I4:       BitsPerPixel =  4; break;
-    case sTEX_IA4:      BitsPerPixel =  8; break;
-    case sTEX_IA8:      BitsPerPixel = 16; break;
-    case sTEX_RGB5A3:   BitsPerPixel = 16; break;
+//    case sTEX_A4:       return 4;
+    case sTEX_I4:       return 4;
+    case sTEX_IA4:      return 8;
+    case sTEX_IA8:      return 16;
+    case sTEX_RGB5A3:   return 16;
 
-    case sTEX_INDEX4:   BitsPerPixel =  4; break;
-    case sTEX_INDEX8:   BitsPerPixel =  8; break;
+    case sTEX_INDEX4:   return 4;
+    case sTEX_INDEX8:   return 8;
 
-    case sTEX_ARGB1555: BitsPerPixel = 16; break;
-    case sTEX_ARGB4444: BitsPerPixel = 16; break;
-    case sTEX_RGB565:   BitsPerPixel = 16; break;
-    case sTEX_GR8:      BitsPerPixel = 16; break;
+    case sTEX_ARGB1555: return 16;
+    case sTEX_ARGB4444: return 16;
+    case sTEX_RGB565:   return 16;
+    case sTEX_GR8:      return 16;
 
-    case sTEX_DEPTH16NOREAD:  BitsPerPixel = 16; break;
-    case sTEX_DEPTH24NOREAD:  BitsPerPixel = 32; break;
-    case sTEX_PCF16:    BitsPerPixel = 16; break;
-    case sTEX_PCF24:    BitsPerPixel = 32; break;
-    case sTEX_DEPTH16:  BitsPerPixel = 16; break;
-    case sTEX_DEPTH24:  BitsPerPixel = 32; break;
+    case sTEX_DEPTH16NOREAD:  return 16;
+    case sTEX_DEPTH24NOREAD:  return 32;
+    case sTEX_PCF16:    return 16;
+    case sTEX_PCF24:    return 32;
+    case sTEX_DEPTH16:  return 16;
+    case sTEX_DEPTH24:  return 32;
 
-    case sTEX_DXT5_AYCOCG: BitsPerPixel =  8;  break;
+    case sTEX_DXT5_AYCOCG: return 8;
 
-    case sTEX_8TOIA:       BitsPerPixel =  8;  break;
+    case sTEX_8TOIA:       return 8;
 
-    case sTEX_UINT32:   BitsPerPixel = 32;  break;
+    case sTEX_UINT32:   return 32;
 
     default: sVERIFYFALSE;
   }
-  return BitsPerPixel;
 }
 
 /****************************************************************************/
@@ -4161,11 +4159,11 @@ void sSetTarget(const sTargetPara &para)
   if(para.Flags & sST_CLEARDEPTH) oldflags |= sCLEAR_ZBUFFER;
   if(para.Flags & sST_NOMSAA    ) oldflags |= sRTF_NO_MULTISAMPLING;
   if(!(para.Flags & sST_SCISSOR)) oldflags |= sCLEAR_NOSCISSOR;
-  if(!para.Depth)
+  /*if(!para.Depth)
   {
     oldflags |= sRTZBUF_NONE;
     oldflags &= ~sCLEAR_ZBUFFER;
-  }
+  }*/
 
   if(para.Target[1]==0 && para.Target[2]==0 && para.Target[3]==0)
   {

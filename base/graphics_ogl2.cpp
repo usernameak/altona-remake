@@ -5,52 +5,90 @@
 /***                                                                      ***/
 /**************************************************************************+*/
 
-#include <GL/glew.h>
-//#include <GLEW/glext.h>
+/****************************************************************************/
+/***                                                                      ***/
+/***   (C) 2005 Dierk Ohlerich, all rights reserved                       ***/
+/***                                                                      ***/
+/****************************************************************************/
 
 #include "base/types.hpp"
-#include "graphics.hpp"
+#if sRENDERER == sRENDER_OGL2
+
+#if sCONFIG_SYSTEM_WINDOWS
+
+#undef new
+#include <windows.h>
+#define new sDEFINE_NEW
+
+extern HWND sHWND;
+static HDC GLDC;
+static HGLRC GLRC;
+
+#endif
+
+#include "gl.h"
+#include "glext.h"
+#include "glprocs.h"
+
+#include "base/system.hpp"
+#include "base/math.hpp"
+#include "base/graphics.hpp"
 #include "base/windows.hpp"
-#include <GL/glx.h>
+
+#include "base/serialize.hpp"
 
 void sInitGfxCommon();
 void sExitGfxCommon();
-void ResizeGFX(sInt x, sInt y);
-extern sInt sSystemFlags;
+
+sInt sEngineHacks;
+
+#if sCONFIG_SYSTEM_LINUX
+
+#include <GL/glx.h>
 
 extern Display *sXDisplay();
 extern XVisualInfo *sXVisualInfo;
 extern Visual *sXVisual;
 extern Drawable sXWnd;
 extern sInt sXScreen;
-
-static sScreenMode GLScreenMode;
-
 static GLXContext GLXC;
+
+#endif
+
+void GLError(sU32 err,const sChar *file,sInt line,const sChar *system)
+{
+  sString<256> buffer;
+
+  sSPrintF(buffer,L"%s(%d): %s %08x %d\n",file,line,system,err,err);
+  sDPrint(buffer);
+  sFatal(buffer);
+}
+#define GLErr(hr) { sBool err=!(hr); if(err) GLError(0,sTXT(__FILE__),__LINE__,L"opengl"); }
+#define GLERR() { sInt err=glGetError(); if(err) GLError(err,sTXT(__FILE__),__LINE__,L"opengl"); }
+
+/****************************************************************************/
+/***                                                                      ***/
+/***   Globals                                                            ***/
+/***                                                                      ***/
+/****************************************************************************/
+
+//static sCBufferBase *CurrentCBs[sCBUFFER_MAXSLOT*sCBUFFER_SHADERTYPES];
+static sScreenMode DXScreenMode;
 
 /****************************************************************************/
 
-static sGraphicsStats Stats;
-static sGraphicsStats BufferedStats;
-static sGraphicsStats DisabledStats;
-static sBool StatsEnable;
-static sGraphicsCaps GraphicsCapsMaster;
-static sTexture2D *GLBackBuffer;
-
-static sU16 QuadIndexBuffer[0x10000 * 6 / 4];
-
 struct sGeoBuffer
 {
-    GLuint GLName; // gl name
-    sInt GLType;   // GL_ARRAY_BUFFER or GL_ELEMENT_ARRAY_BUFFER
-    sInt GLUsage;  // GL_STATIC_DRAW, ...
+  GLuint GLName;                  // gl name
+  sInt GLType;                    // GL_ARRAY_BUFFER_ARB or GL_ELEMENT_ARRAY_BUFFER_ARB
+  sInt GLUsage;                   // GL_STATIC_DRAW, ...
 
-    sGeometryDuration Duration; // sGD_???
-    sInt Type;                  // 0 = VB, 1 = IB
+  sGeometryDuration Duration;     // sGD_???
+  sInt Type;                      // 0 = VB, 1 = IB
 
-    sInt Alloc; // total available bytes
-    sInt Used;  // alreaedy used bytes
-    sInt Freed; // bytes freed. when Freed == Used, then the buffer is empty and may be reset
+  sInt Alloc;                     // total available bytes
+  sInt Used;                      // alreaedy used bytes
+  sInt Freed;                     // bytes freed. when Freed == Used, then the buffer is empty and may be reset
 };
 
 #define sMAX_GEOBUFFER 256
@@ -58,553 +96,6 @@ struct sGeoBuffer
 sGeoBuffer sGeoBuffers[sMAX_GEOBUFFER];
 sInt sGeoBufferCount;
 
-static sInt OGLGfxWidth;
-static sInt OGLGfxHeight;
-
-/****************************************************************************/
-/***                                                                      ***/
-/***   Fake                                                               ***/
-/***                                                                      ***/
-/****************************************************************************/
-
-//#import <GLES/gl.h>
-//#import <GLES/glext.h>
-
-/*GLint GLES_ScreenX;
-GLint GLES_ScreenY;*/
-GLuint GLES_FrameBuffer;
-GLuint GLES_ColorBuffer = 0;
-GLuint GLES_DepthBuffer = 0;
-
-#ifdef __GLIBC__
-#include <execinfo.h>
-#endif
-
-void GLERR()
-{
-    sBool ok = 1;
-    GLenum err;
-    for (;;)
-    {
-        err = glGetError();
-        if (err == GL_NO_ERROR)
-            break;
-        ok = 0;
-        switch (err)
-        {
-        case GL_INVALID_ENUM:
-            sLog(L"gfx", L"ERROR invalid enum\n");
-            break;
-        case GL_INVALID_FRAMEBUFFER_OPERATION:
-            sLogF(L"gfx", L"ERROR invalid fb, code %d\n", glCheckFramebufferStatus(GL_FRAMEBUFFER));
-            break;
-        case GL_INVALID_VALUE:
-            sLog(L"gfx", L"ERROR invalid value\n");
-            break;
-        case GL_INVALID_OPERATION:
-            sLog(L"gfx", L"ERROR invalid op\n");
-            break;
-        case GL_OUT_OF_MEMORY:
-            sLog(L"gfx", L"ERROR out of mem\n");
-            break;
-        default:
-            sLog(L"gfx", L"ERROR unknown\n");
-            break;
-        }
-    }
-#ifdef __GLIBC__
-    void *array[10];
-    size_t size;
-
-    // get void*'s for all entries on the stack
-    size = backtrace(array, 10);
-
-    if(!ok) {
-        backtrace_symbols_fd(array, size, 2);
-        /*for (int i = 1; i < size; ++i)
-        {
-            //sPrintF(L"[bt] #%d %s\n", i, messages[i]);
-            sString<256> syscom;
-            syscom.PrintF(L"addr2line %p -e altona_wireapp_example", array[i]); //last parameter is the name of this app
-            sExecuteShell(syscom);
-        }*/
-    }
-    
-#endif
-    sVERIFY(ok);
-}
-
-void CompileShader(GLuint *shaderp, GLenum type, const sChar *src)
-{
-    GLint status;
-    GLuint shader = 0;
-
-    char buffer[4096];
-
-    sCopyString(buffer, src, 4096);
-
-    const GLchar *bufp = buffer;
-    shader = glCreateShader(type);
-    glShaderSource(shader, 1, &bufp, 0);
-    glCompileShader(shader);
-
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
-    if (status == 0)
-    {
-        char buf8[1024];
-        sChar buf[1024];
-        glGetShaderInfoLog(shader, 1024, 0, buf8);
-        glDeleteShader(shader);
-        sCopyString(buf, buf8, 1024);
-        sLog(L"gfx", L"shader compiler failed\n");
-        sLog(L"gfx", buf);
-        shader = 0;
-        sVERIFYFALSE;
-    }
-    *shaderp = shader;
-    GLERR();
-}
-
-/****************************************************************************/
-/***                                                                      ***/
-/***   Initialisation                                                     ***/
-/***                                                                      ***/
-/****************************************************************************/
-
-void PreInitGFX(sInt &flags, sInt &xs, sInt &ys)
-{
-//xs = 1024;
-//ys = 640;
-//flags = 0;
-#if sPLATFORM == sPLAT_WINDOWS
-
-    if (flags & sISF_FULLSCREEN)
-    {
-        DEVMODE dm;
-        sClear(dm);
-        dm.dmSize = sizeof(dm);
-        dm.dmPelsWidth = xs;
-        dm.dmPelsHeight = ys;
-        dm.dmBitsPerPel = 32;
-        dm.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
-
-        if (ChangeDisplaySettings(&dm, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL)
-        {
-            dm.dmPelsWidth = xs = 800;
-            dm.dmPelsHeight = ys = 600;
-            if (ChangeDisplaySettings(&dm, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL)
-            {
-                sFatal(L"could not set displaymode %dx%d", xs, ys);
-            }
-        }
-    }
-
-#elif sPLATFORM == sPLAT_LINUX
-
-    static int attribList[] =
-        {
-            GLX_RGBA, GLX_DOUBLEBUFFER,
-            GLX_RED_SIZE, 8,
-            GLX_GREEN_SIZE, 8,
-            GLX_BLUE_SIZE, 8,
-            GLX_DEPTH_SIZE, 24,
-            GLX_STENCIL_SIZE, 8,
-            None};
-
-    Display *dpy = sXDisplay();
-
-    sXVisualInfo = glXChooseVisual(dpy, sXScreen, attribList);
-    if (!sXVisualInfo)
-        sFatal(L"glXChooseVisual returned 0!\n");
-
-#endif
-}
-
-void InitGFX(sInt flags_, sInt xs_, sInt ys_)
-{
-    sLog(L"gfx", L"init\n");
-#if sPLATFORM == sPLAT_LINUX
-
-    Display *dpy = sXDisplay();
-    GLXC = glXCreateContext(dpy, sXVisualInfo, 0, True);
-    if (!GLXC)
-        sFatal(L"glXCreateContext failed!\n");
-
-    if (!glXMakeCurrent(dpy, sXWnd, GLXC))
-        sFatal(L"glXMakeCurrent failed!\n");
-
-#endif
-    // query
-
-    sChar buffer[2048];
-    const GLubyte *str;
-
-    str = glGetString(GL_VENDOR);
-    sCopyString(buffer, (const sChar8 *)str, 2048);
-    sLogF(L"gfx", L"GL Vendor: %q\n", buffer);
-
-    str = glGetString(GL_RENDERER);
-    sCopyString(buffer, (const sChar8 *)str, 2048);
-    sLogF(L"gfx", L"GL Renderer: %q\n", buffer);
-
-    str = glGetString(GL_VERSION);
-    sCopyString(buffer, (const sChar8 *)str, 2048);
-    sLogF(L"gfx", L"GL Version: %q\n", buffer);
-
-    str = glGetString(GL_SHADING_LANGUAGE_VERSION);
-    sCopyString(buffer, (const sChar8 *)str, 2048);
-    sLogF(L"gfx", L"GL Shader Model: %q\n", buffer);
-
-    str = glGetString(GL_EXTENSIONS);
-    while (*str)
-    {
-        sInt n = 0;
-        while (str[n] != ' ')
-            n++;
-        sCopyString(buffer, (const sChar8 *)str, n + 1);
-        str += n;
-        while (*str == ' ')
-            str++;
-        sLogF(L"gfx", L"GLES Extension: %q\n", buffer);
-    }
-
-    int err = glewInit();
-    if (err != GLEW_OK)
-    {
-        sFatal(L"GLEW error code %d", err);
-    }
-
-    // set up framebuffer
-
-    GLBackBuffer = new sTexture2D(xs_, ys_, sTEX_ARGB8888);
-    glBindTexture(GL_TEXTURE_2D, GLBackBuffer->GLName);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, xs_, ys_, 0, GL_RGBA, GL_UNSIGNED_BYTE, sNULL);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    glGenFramebuffers(1, &GLES_FrameBuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, GLES_FrameBuffer);
-    /*
-  glGenRenderbuffers(1, &GLES_ColorBuffer);
-
-  glBindRenderbuffer(GL_RENDERBUFFER, GLES_ColorBuffer);
-  glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA, xs_, ys_);
-  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, GLES_ColorBuffer);
-  GLERR();*/
-    ResizeGFX(xs_, ys_);
-
-    // intialize quad index buffer
-
-    sU16 *ip = QuadIndexBuffer;
-    for (sInt i = 0; i < 0x4000; i++)
-        sQuad(ip, i * 4, 0, 1, 2, 3);
-
-    // ..
-
-    sInitGfxCommon();
-}
-
-void IOSResize1()
-{
-    //glBindRenderbuffer(GL_RENDERBUFFER,GLES_ColorBuffer);
-    GLERR();
-}
-
-/*void IOSResize2()
-{
-  glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH , &GLES_ScreenX);
-  glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &GLES_ScreenY);
-  glDeleteRenderbuffers(1,&GLES_DepthBuffer);
-  glGenRenderbuffers(1,&GLES_DepthBuffer);
-  glBindRenderbuffer(GL_RENDERBUFFER,GLES_DepthBuffer);
-  glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH_COMPONENT24,GLES_ScreenX,GLES_ScreenY);
-  glFramebufferRenderbuffer(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_RENDERBUFFER,GLES_DepthBuffer);
-
-  GLenum err = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-  sVERIFY(err==GL_FRAMEBUFFER_COMPLETE);
-}*/
-
-void ExitGFX()
-{
-    sLog(L"gfx", L"exit\n");
-    sExitGfxCommon();
-
-    // Tear down GL
-    glDeleteFramebuffers(1, &GLES_FrameBuffer);
-    glDeleteRenderbuffers(1, &GLES_DepthBuffer);
-    glDeleteRenderbuffers(1, &GLES_ColorBuffer);
-}
-
-void ResizeGFX(sInt w, sInt h)
-{
-    if (GLES_ColorBuffer != 0)
-        glDeleteRenderbuffers(1, &GLES_ColorBuffer);
-    glGenRenderbuffers(1, &GLES_ColorBuffer);
-    glBindRenderbuffer(GL_RENDERBUFFER, GLES_ColorBuffer);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA, w, h);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, GLBackBuffer->GLName, 0);
-    if (GLES_DepthBuffer != 0)
-        glDeleteRenderbuffers(1, &GLES_DepthBuffer);
-    glGenRenderbuffers(1, &GLES_DepthBuffer);
-    glBindRenderbuffer(GL_RENDERBUFFER, GLES_DepthBuffer);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, w, h);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, GLES_DepthBuffer);
-    GLERR();
-}
-
-/****************************************************************************/
-/***                                                                      ***/
-/***   Draw Loop                                                          ***/
-/***                                                                      ***/
-/****************************************************************************/
-
-sBool sRender3DBegin()
-{
-    glBindFramebuffer(GL_FRAMEBUFFER, GLES_FrameBuffer);
-    glViewport(0, 0, OGLGfxWidth, OGLGfxHeight);
-    GLERR();
-
-    return 1;
-}
-
-void sRender3DEnd(sBool flip)
-{
-    GLERR();
-    glBindFramebuffer(GL_FRAMEBUFFER, GLES_FrameBuffer);
-    glFinish();
-    GLERR();
-}
-
-void sRender3DFlush()
-{
-    GLERR();
-    glFlush();
-    GLERR();
-}
-
-/****************************************************************************/
-/***                                                                      ***/
-/***   Display Info                                                       ***/
-/***                                                                      ***/
-/****************************************************************************/
-
-sInt sGetDisplayCount()
-{
-    return 0;
-}
-void sGetScreenInfo(sScreenInfo &si, sInt flags, sInt display)
-{
-}
-void sGetScreenMode(sScreenMode &sm)
-{
-}
-sBool sSetScreenMode(const sScreenMode &smorg)
-{
-    return 0;
-}
-
-/****************************************************************************/
-/***                                                                      ***/
-/***   General Engine Interface, new style                                ***/
-/***                                                                      ***/
-/****************************************************************************/
-
-void sSetTarget(const sTargetPara &para)
-{
-    //sPrint(L"settarget\n");
-    glClearColor(para.ClearColor[0].x, para.ClearColor[0].y, para.ClearColor[0].z, para.ClearColor[0].w);
-    glClearDepthf(1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    sGFXRendertargetX = para.Window.SizeX();
-    sGFXRendertargetY = para.Window.SizeY();
-    sGFXRendertargetAspect = sF32(sGFXRendertargetX) / sGFXRendertargetY;
-    sGFXViewRect.Init(0, 0, sGFXRendertargetX, sGFXRendertargetY);
-
-    GLERR();
-}
-
-void sResolveTarget()
-{
-}
-void sResolveTexture(sTextureBase *tex)
-{
-}
-void sSetScissor(const sRect &r)
-{
-}
-sInt sGetScreenCount()
-{
-    return 0;
-}
-sTexture2D *sGetScreenColorBuffer(sInt screen)
-{
-    return GLBackBuffer;
-}
-sTexture2D *sGetScreenDepthBuffer(sInt screen)
-{
-    return 0;
-}
-sTexture2D *sGetRTDepthBuffer()
-{
-    return 0;
-}
-void sEnlargeRTDepthBuffer(sInt x, sInt y)
-{
-}
-void sBeginReadTexture(const sU8 *&_data, sS32 &pitch, enum sTextureFlags &flags, sTexture2D *tex)
-{
-    glActiveTexture(GL_TEXTURE0);
-    GLERR();
-    glBindTexture(GL_TEXTURE_2D, tex->GLName);
-    GLERR();
-    sInt w;
-    sInt h;
-    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &w);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &h);
-    GLERR();
-    sU8 *data = new sU8[w * h * 4];
-    glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, data);
-    _data = data;
-    flags = sTEX_ARGB8888;
-    pitch = w * 4;
-    GLERR();
-}
-void sEndReadTexture()
-{
-    GLERR();
-}
-void sCopyTexture(const sCopyTexturePara &para)
-{
-}
-
-void sGetGraphicsStats(sGraphicsStats &stat)
-{
-    stat = BufferedStats;
-}
-
-void sEnableGraphicsStats(sBool enable)
-{
-    if (!enable && StatsEnable)
-    {
-        DisabledStats = Stats;
-        StatsEnable = 0;
-    }
-    if (enable && !StatsEnable)
-    {
-        Stats = DisabledStats;
-        StatsEnable = 1;
-    }
-}
-
-void sGetGraphicsCaps(sGraphicsCaps &caps)
-{
-    caps = GraphicsCapsMaster;
-}
-
-/****************************************************************************/
-/***                                                                      ***/
-/***   Obsolete Functions                                                 ***/
-/***                                                                      ***/
-/****************************************************************************/
-
-void sConvertsRGBTex(sBool e)
-{
-    sVERIFYFALSE;
-}
-
-sBool sConvertsRGBTex()
-{
-    sVERIFYFALSE;
-    return 0;
-}
-
-sTexture2D *sGetCurrentFrontBuffer()
-{
-    sVERIFYFALSE;
-    return 0;
-}
-
-void sSetScreen(class sTexture2D *tex, sGrabFilterFlags filter, const sRect *dst, const sRect *src)
-{
-    sVERIFYFALSE;
-}
-
-void sSetScreen(const sRect &rect, sU32 *data)
-{
-    sVERIFYFALSE;
-}
-
-void sBeginSaveRT(const sU8 *&data, sS32 &pitch, enum sTextureFlags &flags)
-{
-    sVERIFYFALSE;
-}
-
-void sEndSaveRT()
-{
-    sVERIFYFALSE;
-}
-
-void sSetVSParam(sInt o, sInt count, const sVector4 *vsf)
-{
-    sVERIFYFALSE;
-}
-
-void sSetPSParam(sInt o, sInt count, const sVector4 *psf)
-{
-    sVERIFYFALSE;
-}
-
-void sSetVSBool(sU32 bits, sU32 mask)
-{
-    sVERIFYFALSE;
-}
-
-void sSetPSBool(sU32 bits, sU32 mask)
-{
-    sVERIFYFALSE;
-}
-
-void sCopyCubeFace(sTexture2D *dest, sTextureCube *src, sTexCubeFace cf)
-{
-    sVERIFYFALSE;
-}
-
-sBool sReadTexture(sReader &s, sTextureBase *&tex)
-{
-    sVERIFYFALSE;
-    return 0;
-}
-
-void sPackDXT(sU8 *d, sU32 *bmp, sInt xs, sInt ys, sInt format, sBool dither)
-{
-    sVERIFYFALSE;
-}
-
-void sTexture2D::BeginLoadPartial(const sRect &rect, sU8 *&data, sInt &pitch, sInt mipmap)
-{
-    sVERIFYFALSE;
-}
-
-void *sTexture2D::BeginLoadPalette()
-{
-    sVERIFYFALSE;
-    return 0;
-}
-
-void sTexture2D::EndLoadPalette()
-{
-    sVERIFYFALSE;
-}
-
-void sTexture2D::CalcOneMiplevel(const sRect &rect)
-{
-    sVERIFYFALSE;
-}
-
-void sTexture3D::Load(sU8 *data)
-{
-    sVERIFYFALSE;
-}
 
 /****************************************************************************/
 /***                                                                      ***/
@@ -614,611 +105,517 @@ void sTexture3D::Load(sU8 *data)
 
 void sVertexFormatHandle::Create()
 {
-    //MorphTargetId = ~0;
-    sInt i, b[sVF_STREAMMAX];
-    sInt stream;
+  sVertexFormatHandle::OGLDecl decl[40];
+  sInt dindex = 0;
 
-    for (i = 0; i < sVF_STREAMMAX; i++)
-        b[i] = 0;
+  sClear(decl);
 
-    i = 0;
-    while (Data[i])
+  for(sInt i=0;i<sVF_STREAMMAX;i++)
+    VertexSize[i] = 0;
+
+  for(sInt stream=0;stream<sVF_STREAMMAX;stream++)
+  {
+    sInt firstvert = 1;
+    sInt i = 0;
+    while(Data[i])
     {
-        stream = (Data[i] & sVF_STREAMMASK) >> sVF_STREAMSHIFT;
-        //    sVERIFY(stream==0)
-        sVERIFY(i < 31);
-
-        Attr[i].Offset = b[stream];
-        switch (Data[i] & sVF_TYPEMASK)
+      if(((Data[i]&sVF_STREAMMASK)>>sVF_STREAMSHIFT)==(sU32)stream)
+      {
+        if(firstvert)
         {
-        case sVF_F2:
-            b[stream] += 2 * 4;
-            Attr[i].Size = 2;
-            Attr[i].Type = GL_FLOAT;
-            Attr[i].Normalized = 0;
-            break;
-        case sVF_F3:
-            b[stream] += 3 * 4;
-            Attr[i].Size = 3;
-            Attr[i].Type = GL_FLOAT;
-            Attr[i].Normalized = 0;
-            break;
-        case sVF_F4:
-            b[stream] += 4 * 4;
-            Attr[i].Size = 4;
-            Attr[i].Type = GL_FLOAT;
-            Attr[i].Normalized = 0;
-            break;
-        case sVF_I4:
-            b[stream] += 1 * 4;
-            Attr[i].Size = 4;
-            Attr[i].Type = GL_UNSIGNED_BYTE;
-            Attr[i].Normalized = 0;
-            break;
-        case sVF_C4:
-            b[stream] += 1 * 4;
-            Attr[i].Size = 4;
-            Attr[i].Type = GL_UNSIGNED_BYTE;
-            Attr[i].Normalized = 1;
-            break;
-        case sVF_S2:
-            b[stream] += 1 * 4;
-            Attr[i].Size = 2;
-            Attr[i].Type = GL_SHORT;
-            Attr[i].Normalized = 1;
-            break;
-        case sVF_S4:
-            b[stream] += 2 * 4;
-            Attr[i].Size = 4;
-            Attr[i].Type = GL_SHORT;
-            Attr[i].Normalized = 1;
-            break;
-        /*
-      case sVF_H2:  b[stream]+=1*4; Attr[i].Size=2; Attr[i].Type=GL_FLOAT; Attr[i].Normalized=0; break;
-      case sVF_H3:  b[stream]+=3*2; Attr[i].Size=3; Attr[i].Type=GL_FLOAT; Attr[i].Normalized=0; break;
-      case sVF_H4:  b[stream]+=2*4; Attr[i].Size=4; Attr[i].Type=GL_FLOAT; Attr[i].Normalized=0; break;
- */
-        case sVF_F1:
-            b[stream] += 1 * 4;
-            Attr[i].Size = 1;
-            Attr[i].Type = GL_FLOAT;
-            Attr[i].Normalized = 0;
-            break;
-        default:
-            sVERIFYFALSE;
-        }
-        switch (Data[i] & sVF_USEMASK)
-        {
-        case sVF_POSITION:
-            Attr[i].Name = "in_pos";
-            break;
-        case sVF_NORMAL:
-            Attr[i].Name = "in_norm";
-            break;
-        case sVF_TANGENT:
-            Attr[i].Name = "in_tang";
-            break;
-        case sVF_BONEINDEX:
-            Attr[i].Name = "in_boneindex";
-            break;
-        case sVF_BONEWEIGHT:
-            Attr[i].Name = "in_boneweight";
-            break;
-        case sVF_BINORMAL:
-            Attr[i].Name = "in_binorm";
-            break;
-        case sVF_COLOR0:
-            Attr[i].Name = "in_col0";
-            break;
-        case sVF_COLOR1:
-            Attr[i].Name = "in_col1";
-            break;
-        case sVF_COLOR2:
-            Attr[i].Name = "in_col2";
-            break;
-        case sVF_COLOR3:
-            Attr[i].Name = "in_col3";
-            break;
-        case sVF_UV0:
-            Attr[i].Name = "in_uv0";
-            break;
-        case sVF_UV1:
-            Attr[i].Name = "in_uv1";
-            break;
-        case sVF_UV2:
-            Attr[i].Name = "in_uv2";
-            break;
-        case sVF_UV3:
-            Attr[i].Name = "in_uv3";
-            break;
-        case sVF_UV4:
-            Attr[i].Name = "in_uv4";
-            break;
-        case sVF_UV5:
-            Attr[i].Name = "in_uv5";
-            break;
-        case sVF_UV6:
-            Attr[i].Name = "in_uv6";
-            break;
-        case sVF_UV7:
-            Attr[i].Name = "in_uv7";
-            break;
-        default:
-            sVERIFYFALSE;
+          sVERIFY(dindex<sCOUNTOF(decl));
+          firstvert = 0;
+          decl[dindex].Mode = 2;
+          decl[dindex].Index = stream;
+          dindex++;
+          Streams = stream+1;
         }
 
-        AvailMask |= 1 << (Data[i] & sVF_USEMASK);
-        Streams = sMax(Streams, stream + 1);
-        i++;
+        sVERIFY(dindex<sCOUNTOF(decl));
+        
+        switch(Data[i]&sVF_USEMASK)
+        {
+        case sVF_NOP:         decl[dindex].Index = -1;  break;
+        case sVF_POSITION:    decl[dindex].Index =  0;  break;
+        case sVF_NORMAL:      decl[dindex].Index =  2;  break;
+        case sVF_TANGENT:     decl[dindex].Index =  6;  break;
+        case sVF_BONEINDEX:   decl[dindex].Index =  7;  break;
+        case sVF_BONEWEIGHT:  decl[dindex].Index =  1;  break;
+        case sVF_COLOR0:      decl[dindex].Index =  3;  break;
+        case sVF_COLOR1:      decl[dindex].Index =  4;  break;
+        case sVF_UV0:         decl[dindex].Index =  8;  break;
+        case sVF_UV1:         decl[dindex].Index =  9;  break;
+        case sVF_UV2:         decl[dindex].Index = 10;  break;
+        case sVF_UV3:         decl[dindex].Index = 11;  break;
+        case sVF_UV4:         decl[dindex].Index = 12;  break;
+        case sVF_UV5:         decl[dindex].Index = 13;  break;
+        case sVF_UV6:         decl[dindex].Index = 14;  break;
+        case sVF_UV7:         decl[dindex].Index = 15;  break;
+        default: sVERIFYFALSE;
+        }
+
+        sInt bytes = 0;
+        switch(Data[i]&sVF_TYPEMASK)
+        {
+        case sVF_F2:  decl[dindex].Type=GL_FLOAT;            decl[dindex].Size=2;   decl[dindex].Normalized=0;   bytes=2*4;   break;
+        case sVF_F3:  decl[dindex].Type=GL_FLOAT;            decl[dindex].Size=3;   decl[dindex].Normalized=0;   bytes=3*4;   break;
+        case sVF_F4:  decl[dindex].Type=GL_FLOAT;            decl[dindex].Size=4;   decl[dindex].Normalized=0;   bytes=4*4;   break;
+        case sVF_I4:  decl[dindex].Type=GL_UNSIGNED_BYTE;    decl[dindex].Size=4;   decl[dindex].Normalized=0;   bytes=1*4;   break;
+        case sVF_C4:  decl[dindex].Type=GL_UNSIGNED_BYTE;    decl[dindex].Size=4;   decl[dindex].Normalized=1;   bytes=1*4;   break;
+        case sVF_S2:  decl[dindex].Type=GL_UNSIGNED_SHORT;   decl[dindex].Size=2;   decl[dindex].Normalized=1;   bytes=1*4;   break;
+        case sVF_S4:  decl[dindex].Type=GL_UNSIGNED_SHORT;   decl[dindex].Size=4;   decl[dindex].Normalized=1;   bytes=2*4;   break;
+        case sVF_H2:  decl[dindex].Type=GL_HALF_FLOAT_NV;    decl[dindex].Size=2;   decl[dindex].Normalized=0;   bytes=1*4;   break;
+        case sVF_H4:  decl[dindex].Type=GL_HALF_FLOAT_NV;    decl[dindex].Size=4;   decl[dindex].Normalized=0;   bytes=2*4;   break;
+        case sVF_F1:  decl[dindex].Type=GL_FLOAT;            decl[dindex].Size=1;   decl[dindex].Normalized=0;   bytes=1*4;   break;
+        default: sVERIFYFALSE;
+        }
+
+        decl[dindex].Mode = 1;
+        decl[dindex].Offset = VertexSize[stream];
+        VertexSize[stream] += bytes;
+        AvailMask |= 1 << (Data[i]&sVF_USEMASK);
+        if(decl[dindex].Index >= 0)
+          dindex++;
+      }
+      i++;
     }
-    AttrCount = i;
+  }
 
-    for (sInt i = 0; i < sVF_STREAMMAX; i++)
-        VertexSize[i] = b[i];
+  // write endmarker
+
+  sVERIFY(dindex<sCOUNTOF(decl));
+  dindex++;
+
+  // copy to handle
+
+  Decl = new sVertexFormatHandle::OGLDecl[dindex];
+  sCopyMem(Decl,decl,dindex*sizeof(sVertexFormatHandle::OGLDecl));
 }
 
 void sVertexFormatHandle::Destroy()
 {
+  delete[] Decl;
 }
 
 /****************************************************************************/
 /***                                                                      ***/
-/***   Shader Interface                                                   ***/
+/***   sGeometry                                                          ***/
 /***                                                                      ***/
 /****************************************************************************/
 
-void sCreateShader2(sShader *shader, sShaderBlob *blob)
+static sGeoBuffer *sFindGeoBuffer(sInt bytes,sInt type,sGeometryDuration duration)
 {
-}
-void sDeleteShader2(sShader *shader)
-{
-}
+  // find available buffer (don't allocate, just find!)
 
-sShaderTypeFlag sGetShaderPlatform()
-{
-    return sSTF_GLSL;
-}
-
-sInt sGetShaderProfile()
-{
-    return 0;
-}
-
-/****************************************************************************/
-/****************************************************************************/
-
-sCBufferBase::sCBufferBase()
-{
-    DataPtr = 0;
-    DataPersist = 0;
-}
-
-sCBufferBase::~sCBufferBase()
-{
-}
-
-void sCBufferBase::OverridePtr(void *ptr)
-{
-    DataPtr = 0;
-    DataPersist = ptr;
-    Modify();
-}
-
-void sCBufferBase::SetPtr(void **dataptr, void *data)
-{
-    DataPtr = dataptr;
-    DataPersist = data;
-    *DataPtr = DataPersist;
-}
-
-void sCBufferBase::Modify()
-{
-    if (DataPtr)
-        *DataPtr = DataPersist;
-
-    // always set all buffers. because of program binding!
-}
-
-void sCBufferBase::SetCfg(sInt slot, sInt start, sInt count)
-{
-    Slot = slot;
-    RegStart = start;
-    RegCount = count;
-}
-/*
-void sCBufferBase::SetRegs()
-{
-  if(RegStart==0 && RegCount>=4 && (Slot&sCBUFFER_SHADERMASK)==sCBUFFER_VS)
+  bytes = sAlign(bytes,128);
+  for(sInt i=0;i<sGeoBufferCount;i++)
   {
-    void *m = *DataPtr;
-    glUniform4fv(uniforms[UNIFORM_MVP],4,(GLfloat *)m);
+    sGeoBuffer *gb = &sGeoBuffers[i];
+    if(gb->Duration==duration && gb->Type==type && gb->Used+bytes<=gb->Alloc)
+      return gb;
   }
+
+  // allocate new buffer
+
+  sVERIFY(sGeoBufferCount<sMAX_GEOBUFFER);
+  sGeoBuffer *gb = &sGeoBuffers[sGeoBufferCount++];
+  switch(type)
+  {
+  case 0:
+    gb->Alloc = sMax(bytes,1024*1024);
+    gb->GLType = GL_ARRAY_BUFFER_ARB;
+    break;
+  case 1:
+    gb->Alloc = sMax(bytes,128*1024);
+    gb->GLType = GL_ELEMENT_ARRAY_BUFFER_ARB;
+    break;
+  default:
+    sVERIFYFALSE;
+  }
+  gb->Used = 0;
+  gb->Freed = 0;
+  gb->Duration = duration;
+  gb->Type = type;
+  gb->GLName = 0;
+  sVERIFY(bytes<=gb->Alloc);
+
+  // create GL object for buffer
+
+  switch(gb->Duration)
+  {
+  case sGD_STREAM:
+    gb->GLUsage = GL_STREAM_DRAW; 
+    break;
+  case sGD_FRAME:
+    gb->GLUsage = GL_DYNAMIC_DRAW;
+    break;
+  case sGD_STATIC:
+    gb->GLUsage = GL_STATIC_DRAW;
+    break;
+  default:
+    sVERIFYFALSE;
+  }
+  glGenBuffersARB(1,&gb->GLName);
+  GLERR();
+  glBindBufferARB(gb->GLType,gb->GLName);
+  glBufferDataARB(gb->GLType,gb->Alloc,0,gb->GLUsage);
+  GLERR();
+
+  // done
+
+  return gb;
 }
 
-void sSetCBuffers(sCBufferBase **cbuffers,sInt cbcount)
+sGeoBufferPart::sGeoBufferPart()
 {
-  for(sInt i=0;i<cbcount;i++)
-    cbuffers[i]->SetRegs();
-}
-*/
-/*
-void sClearCurrentCBuffers()
-{
+  Buffer = 0;
+  Start = 0;
+  Count = 0;
 }
 
-sCBufferBase *sGetCurrentCBuffer(sInt slot)
+sGeoBufferPart::~sGeoBufferPart()
 {
-  return 0;
+  Clear();
 }
-*/
+
+void sGeoBufferPart::Clear()
+{
+  if(Buffer)
+  {
+    Buffer->Freed += Count;
+    if(Buffer->Freed == Buffer->Used && Buffer->Duration==sGD_STATIC)
+      Buffer->Used = Buffer->Freed = 0;
+    Buffer = 0;
+  }
+  Start = 0;
+  Count = 0;
+}
+
+void sGeoBufferPart::Init(sInt count,sInt size,sGeometryDuration duration,sInt buffertype)
+{
+  Buffer = sFindGeoBuffer(size*count,buffertype,duration);
+  Start = Buffer->Used;
+  Count = count;
+}
+
+void sGeoBufferPart::Lock(void **ptr)
+{
+  glBindBufferARB(Buffer->GLType,Buffer->GLName);
+  sU8 *data = (sU8 *)glMapBufferARB(Buffer->GLType,GL_WRITE_ONLY);
+  GLERR();
+  glBindBufferARB(Buffer->GLType,0);
+  data+=Start;
+  *ptr = data;
+}
+
+void sGeoBufferPart::Unlock(sInt count,sInt size)
+{
+  if(count!=-1)
+    Count = count;
+  Buffer->Used += sAlign(Count*size,128);
+  sVERIFY(Buffer->Used<=Buffer->Alloc);
+  glBindBufferARB(Buffer->GLType,Buffer->GLName);
+  glUnmapBufferARB(Buffer->GLType);
+  GLERR();
+  glBindBufferARB(Buffer->GLType,0);
+}
 
 /****************************************************************************/
-/***                                                                      ***/
-/***   Geometry                                                           ***/
-/***                                                                      ***/
-/****************************************************************************/
-
-sGeometryPrivate::sGeometryPrivate()
-{
-    VPtr = 0;
-    VAlloc = 0;
-    VUsed = 0;
-    VUsedElements = 0;
-
-    IPtr = 0;
-    IAlloc = 0;
-    IUsed = 0;
-    VUsed = 0;
-    VUsedElements = 0;
-
-    IPtr = 0;
-    IAlloc = 0;
-    IUsed = 0;
-    IUsedElements = 0;
-}
-
-sGeometryPrivate::~sGeometryPrivate()
-{
-    delete[] VPtr;
-    delete[] IPtr;
-}
-
-void sGeometry::Init(sInt flags, sVertexFormatHandle *vf)
-{
-    Flags = flags;
-    Format = vf;
-    switch (flags & sGF_INDEXMASK)
-    {
-    case sGF_INDEX16:
-        IndexSize = 2;
-        break;
-    case sGF_INDEX32:
-        IndexSize = 4;
-        break;
-    default:
-        IndexSize = 0;
-        break;
-    }
-}
-
-void sGeometry::InitPrivate()
-{
-}
-
-void sGeometry::ExitPrivate()
-{
-}
-
-void sGeometry::Clear()
-{
-    VUsed = 0;
-    IUsed = 0;
-}
 
 void sGeometry::Draw()
 {
-    sGeometry::Draw(0, 0, 0, 0);
+  sGeometry::Draw(0, 0, 0, 0);
 }
 
-void sGeometry::Draw(sDrawRange *ir, sInt irc, sInt instancecount, sVertexOffset *off)
+void sGeometry::Draw(sDrawRange *ir,sInt irc,sInt instancecount, sVertexOffset *off/*=0*/)
 {
-    GLERR();
+  // set vertexformat
+  sVERIFY(!off);      // vertex stream offset currently unsupported
 
-    sInt n = 0;
-    sInt stride = Format->GetSize(0);
-    for (; n < Format->AttrCount; n++)
-    {
-        sVertexFormatHandlePrivate::AttrData *a = &Format->Attr[n];
-        glEnableVertexAttribArray(n);
-        glVertexAttribPointer(n, a->Size, a->Type, a->Normalized, stride, VPtr + a->Offset);
-        GLERR();
-    }
-    for (; n < sVF_MAXATTRIB; n++)
-    {
-        glDisableVertexAttribArray(n);
-    }
+  sVertexFormatHandle::OGLDecl *decl = Format->GetDecl();
+  sInt stride = 0;
+  sInt start = 0;
+  sInt disablemask = 0;
 
-    if ((Flags & sGF_PRIMMASK) == sGF_QUADLIST)
+  if(DebugBreak) sDEBUGBREAK;
+  
+  glEnableClientState(GL_VERTEX_ARRAY);
+
+  while(decl->Mode!=0)
+  {
+    if(decl->Mode==2)
     {
-        glDrawElements(GL_TRIANGLES, VUsedElements * 6 / 4, GL_UNSIGNED_SHORT, QuadIndexBuffer);
+      stride = Format->GetSize(decl->Index);
+      start = VertexPart[decl->Index].Start;
+      glBindBufferARB(GL_ARRAY_BUFFER_ARB,VertexPart[decl->Index].Buffer->GLName);
     }
     else
     {
-        if (IUsedElements > 0)
-        {
-            sVERIFY(IndexSize == 2);
-            glDrawElements(GL_TRIANGLES, IUsedElements, GL_UNSIGNED_SHORT, IPtr);
-        }
-        else
-        {
-            glDrawArrays(GL_TRIANGLES, 0, VUsedElements);
-        }
+      glVertexAttribPointerARB(
+        decl->Index,decl->Size,decl->Type,decl->Normalized,
+        stride,(const void *)(sDInt)(decl->Offset+start));
+      glEnableVertexAttribArrayARB(decl->Index);
+      disablemask |= (1<<decl->Index);
     }
-    GLERR();
-}
+    decl++;
+  }
 
-/****************************************************************************/
-/***                                                                      ***/
-/***   Geometry Begin/End interface                                       ***/
-/***                                                                      ***/
-/****************************************************************************/
+  // figure primitive type
 
-void sGeometry::BeginLoadIB(sInt ic, sGeometryDuration duration, void **ip)
-{
-    sInt size = IndexSize * ic;
-    if (size > IAlloc)
-    {
-        IAlloc = size;
-        IPtr = new sU8[size];
-    }
-    IUsed = size;
-    IUsedElements = ic;
-    *ip = IPtr;
-}
-
-void sGeometry::BeginLoadVB(sInt vc, sGeometryDuration duration, void **vp, sInt stream)
-{
-    sVERIFY(stream == 0);
-
-    sInt size = Format->GetSize(stream) * vc;
-    if (size > VAlloc)
-    {
-        VAlloc = size;
-        VPtr = new sU8[size];
-    }
-    VUsed = size;
-    VUsedElements = vc;
-    *vp = VPtr;
-}
-
-void sGeometry::EndLoadIB(sInt ic)
-{
-    sVERIFY(ic == -1);
-}
-
-void sGeometry::EndLoadVB(sInt vc, sInt stream)
-{
-    sVERIFY(vc == -1);
-    sVERIFY(stream == 0);
-}
-
-void sGeometry::BeginLoad(sVertexFormatHandle *vf, sInt flags, sGeometryDuration duration, sInt vc, sInt ic, void **vp, void **ip)
-{
-    Init(flags, vf);
-    BeginLoadVB(vc, duration, vp, 0);
-    BeginLoadIB(ic, duration, ip);
-    //IndexPart.Clear();
-}
-
-void sGeometry::EndLoad(sInt vc, sInt ic)
-{
-    EndLoadVB(vc, 0);
-    EndLoadIB(ic);
-    //VertexPart[0].Unlock(vc, Format->GetSize(0));
-    ///if (IndexPart.Buffer)
-    //  IndexPart.Unlock(ic, IndexSize);
-}
-void sGeometry::Merge(sGeometry *geo0, sGeometry *geo1)
-{
+  sInt primtype = 0;
+  switch(Flags & sGF_PRIMMASK)
+  {
+  case sGF_TRILIST:
+    primtype = GL_TRIANGLES;
+    break;
+  case sGF_TRISTRIP:
+    primtype = GL_TRIANGLE_STRIP;
+    break;
+  case sGF_LINELIST:
+    primtype = GL_LINES;
+    break;
+  case sGF_LINESTRIP:
+    primtype = GL_LINE_STRIP;
+    break;
+  case sGF_QUADLIST:
+    primtype = GL_QUADS;
+    break;
+  case sGF_SPRITELIST:
+    primtype = GL_POINT;
+    break;
+  default:
     sVERIFYFALSE;
-}
-void sGeometry::MergeVertexStream(sInt DestStream, sGeometry *src, sInt SrcStream)
-{
-    sVERIFYFALSE;
+  }
+
+  // fake color to white when unused
+
+  if(!(disablemask&(1<<3)))
+    glVertexAttrib4fARB(3,1,1,1,1);
+
+  // do drawing
+
+  sVERIFY(ir==0);
+  sVERIFY(irc==0);
+  sVERIFY(instancecount==0);
+
+  if(IndexPart.Buffer)
+  {
+    glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB,IndexPart.Buffer->GLName);
+    const sInt type = (Flags & sGF_INDEX32) ? GL_UNSIGNED_INT : GL_UNSIGNED_SHORT;
+    glDrawRangeElements(primtype,0,VertexPart[0].Count-1,IndexPart.Count, 
+      type, (void*) sDInt(IndexPart.Start));
+  }
+  else
+  {
+    glDrawArrays(primtype,0,VertexPart[0].Count);
+  }
+  GLERR();
+
+  // disable and unbind
+
+  for(sInt i=0;i<16;i++)
+    if(disablemask & (1<<i))
+      glDisableVertexAttribArrayARB(i);
+
+  glDisableClientState(GL_VERTEX_ARRAY);
+  glBindBufferARB(GL_ARRAY_BUFFER_ARB,0);
+  glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB,0);
 }
 
 /****************************************************************************/
 /***                                                                      ***/
-/***   Dynamic Management                                                 ***/
+/***   Viewport                                                           ***/
 /***                                                                      ***/
 /****************************************************************************/
 
-void sGeometry::InitDyn(sInt ic, sInt vc0, sInt vc1, sInt vc2, sInt vc3)
-{
-}
-void *sGeometry::BeginDynVB(sBool discard, sInt stream)
-{
-    return 0;
-}
-void *sGeometry::BeginDynIB(sBool discard)
-{
-    return 0;
-}
-void sGeometry::EndDynVB(sInt stream)
-{
-}
-void sGeometry::EndDynIB()
-{
-}
+/****************************************************************************/
+/***                                                                      ***/
+/***   Texture                                                            ***/
+/***                                                                      ***/
+/****************************************************************************/
 
-/****************************************************************************/
-/***                                                                      ***/
-/***   sTextureBase                                                       ***/
-/***                                                                      ***/
-/****************************************************************************/
+sBool sReadTexture(sReader &s, sTextureBase *&tex)
+{
+  return sFALSE;
+}
 
 sU64 sGetAvailTextureFormats()
 {
-    return (1ULL << sTEX_ARGB8888) |
-           0;
+  return (1ULL<<sTEX_ARGB8888);
 }
-
-sTextureBasePrivate::sTextureBasePrivate()
-{
-    LoadBuffer = 0;
-    LoadMipmap = -1;
-    GLName = 0;
-    GLIFormat = 0;
-    GLFormat = 0;
-    GLType = 0;
-}
-
-sTextureBasePrivate::~sTextureBasePrivate()
-{
-    sVERIFY(LoadBuffer == 0);
-}
-
-/****************************************************************************/
-/***                                                                      ***/
-/***   sTexture2D                                                         ***/
-/***                                                                      ***/
-/****************************************************************************/
 
 void sTexture2D::Create2(sInt flags)
 {
-    glGenTextures(1, (GLuint *)&GLName);
-
-    switch (flags & sTEX_FORMAT)
-    {
-    case sTEX_ARGB8888:
-        GLIFormat = GL_RGBA;
-        GLFormat = GL_BGRA;
-        GLType = GL_UNSIGNED_BYTE;
-        break;
-
-    case sTEX_A8:
-        GLIFormat = GL_ALPHA;
-        GLFormat = GL_ALPHA;
-        GLType = GL_UNSIGNED_BYTE;
-        break;
-
-    case sTEX_I8:
-        GLIFormat = GL_LUMINANCE;
-        GLFormat = GL_LUMINANCE;
-        GLType = GL_UNSIGNED_BYTE;
-        break;
-
-    default:
-        sVERIFYFALSE;
-        break;
-    }
+  GLuint name;
+  glGenTextures(1,&name);
+  GLName = name;
 }
 
 void sTexture2D::Destroy2()
 {
-    glDeleteTextures(1, (GLuint *)&GLName);
+  GLuint name = GLName;
+  glDeleteTextures(1,&name);
+  GLName = 0;
 }
 
-void sTexture2D::BeginLoad(sU8 *&data, sInt &pitch, sInt mipmap)
+void sTexture2D::BeginLoad(sU8 *&data,sInt &pitch,sInt mipmap)
 {
-    sVERIFY(LoadBuffer == 0);
-    pitch = (SizeX >> mipmap) * BitsPerPixel / 8;
-    LoadMipmap = mipmap;
-    LoadBuffer = new sU8[pitch * (SizeY >> mipmap)];
-    data = LoadBuffer;
+  sVERIFY(LoadBuffer==0);
+  sVERIFY(mipmap>=0 && mipmap<Mipmaps);
+  sInt xs = SizeX>>mipmap;
+  sInt ys = SizeY>>mipmap;
+
+  LoadMipmap = mipmap;
+  LoadBuffer = new sU8[BitsPerPixel*xs*ys/8];
+  data = LoadBuffer;
+  pitch = BitsPerPixel*xs/8;
 }
 
 void sTexture2D::EndLoad()
 {
-    GLERR();
-    glActiveTexture(GL_TEXTURE0);
-    GLERR();
-    glBindTexture(GL_TEXTURE_2D, GLName);
-    GLERR();
-    glTexImage2D(GL_TEXTURE_2D, LoadMipmap, GLIFormat, SizeX >> LoadMipmap, SizeY >> LoadMipmap, 0, GLFormat, GLType, LoadBuffer);
-    GLERR();
-    sDelete(LoadBuffer);
+  sVERIFY(LoadBuffer!=0);
+  sInt format = 0, channels = 0, type = 0;
+
+  sInt xs = SizeX>>LoadMipmap;
+  sInt ys = SizeY>>LoadMipmap;
+
+  switch(Flags & sTEX_FORMAT)
+  {
+  case sTEX_ARGB8888:
+    format = GL_RGBA8;
+    channels = GL_BGRA;
+    type = GL_UNSIGNED_BYTE;
+    break;
+  case sTEX_8TOIA:
+    format = GL_INTENSITY8;
+    channels = GL_INTENSITY8;
+    type = GL_UNSIGNED_BYTE;
+    break;
+  case sTEX_I8:
+    format = GL_LUMINANCE8;
+    channels = GL_LUMINANCE8;
+    type = GL_UNSIGNED_BYTE;
+    break;
+  default:
+    sFatal(L"unsupported texture format %d\n",Flags);
+  }
+
+  glBindTexture(GL_TEXTURE_2D,GLName);
+  glTexImage2D(GL_TEXTURE_2D,LoadMipmap,format,xs,ys,0,channels,type,LoadBuffer);
+  glBindTexture(GL_TEXTURE_2D,0);
+
+  sDeleteArray(LoadBuffer);
 }
 
-/****************************************************************************/
-/***                                                                      ***/
-/***   sTextureCube                                                       ***/
-/***                                                                      ***/
+void *sTexture2D::BeginLoadPalette()
+{
+  sFatal(L"paletted textures not supported");
+  return 0;
+}
+
+void sTexture2D::EndLoadPalette()
+{
+}
+
 /****************************************************************************/
 
 void sTextureCube::Create2(sInt flags)
 {
+  GLuint name;
+  glGenTextures(1, &name);
+  GLName = name;
 }
+
 void sTextureCube::Destroy2()
 {
+  GLuint name = GLName;
+  glDeleteTextures(1, &name);
+  GLName = 0;
 }
-void sTextureCube::BeginLoad(sTexCubeFace cf, sU8 *&data, sInt &pitch, sInt mipmap /*=0*/)
+
+void sTextureCube::BeginLoad(sTexCubeFace cf, sU8*& data, sInt& pitch, sInt mipmap)
 {
+  sVERIFY(LoadBuffer == 0);
+  sVERIFY(mipmap >= 0 && mipmap < Mipmaps);
+  sInt xs = SizeX >> mipmap;
+  sInt ys = SizeY >> mipmap;
+
+  LoadFace = cf;
+  LoadMipmap = mipmap;
+  LoadBuffer = new sU8[BitsPerPixel * xs * ys / 8];
+  data = LoadBuffer;
+  pitch = BitsPerPixel * xs / 8;
 }
+
 void sTextureCube::EndLoad()
 {
+  sVERIFY(LoadBuffer != 0);
+  sInt format = 0, channels = 0, type = 0;
+
+  sInt xs = SizeX >> LoadMipmap;
+  sInt ys = SizeY >> LoadMipmap;
+
+  switch (Flags & sTEX_FORMAT)
+  {
+  case sTEX_ARGB8888:
+    format = GL_RGBA8;
+    channels = GL_BGRA;
+    type = GL_UNSIGNED_BYTE;
+    break;
+  case sTEX_8TOIA:
+    format = GL_INTENSITY8;
+    channels = GL_INTENSITY8;
+    type = GL_UNSIGNED_BYTE;
+    break;
+  case sTEX_I8:
+    format = GL_LUMINANCE8;
+    channels = GL_LUMINANCE8;
+    type = GL_UNSIGNED_BYTE;
+    break;
+  default:
+    sFatal(L"unsupported texture format %d\n", Flags);
+  }
+
+  glBindTexture(GL_TEXTURE_CUBE_MAP, GLName);
+  GLenum face;
+  switch(LoadFace) {
+    case sTCF_POSX: 
+      face = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
+      break;
+    case sTCF_NEGX:
+      face = GL_TEXTURE_CUBE_MAP_NEGATIVE_X;
+      break;
+    case sTCF_POSY:
+      face = GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
+      break;
+    case sTCF_NEGY:
+      face = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
+      break;
+    case sTCF_POSZ:
+      face = GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
+      break;
+    case sTCF_NEGZ:
+      face = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z;
+      break;
+  }
+  glTexImage2D(face, LoadMipmap, format, xs, ys, 0, channels, type, LoadBuffer);
+  glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+
+  sDeleteArray(LoadBuffer);
+}
+
+/****************************************************************************/
+
+void sPackDXT(sU8 *d,sU32 *bmp,sInt xs,sInt ys,sInt format,sBool dither)
+{
+  sVERIFY("sPackDXT not supported with opengl")
 }
 
 /****************************************************************************/
 /***                                                                      ***/
-/***   sTexture3D                                                         ***/
+/***   Material                                                           ***/
 /***                                                                      ***/
 /****************************************************************************/
-
-sTexture3D::sTexture3D(sInt xs, sInt ys, sInt zs, sU32 flags)
-{
-}
-sTexture3D::~sTexture3D()
-{
-}
-void sTexture3D::BeginLoad(sU8 *&data, sInt &rpitch, sInt &spitch, sInt mipmap /*=0*/)
-{
-}
-void sTexture3D::EndLoad()
-{
-}
-
-/****************************************************************************/
-/***                                                                      ***/
-/***   sTextureProxy                                                      ***/
-/***                                                                      ***/
-/****************************************************************************/
-
-void sTextureProxy::Connect2()
-{
-}
-void sTextureProxy::Disconnect2()
-{
-}
-
-/****************************************************************************/
-/***                                                                      ***/
-/***   sMaterial                                                          ***/
-/***                                                                      ***/
-/****************************************************************************/
-
-sMaterialPrivate::sMaterialPrivate()
-{
-    GLName = 0;
-    sClear(VSSlot);
-    sClear(GLTexMin);
-    sClear(GLTexMax);
-    sClear(GLTexS);
-    sClear(GLTexT);
-
-    GLBCFunc = GL_FUNC_ADD;
-    GLBCSrc = GL_ONE;
-    GLBCDst = GL_ZERO;
-    GLBAFunc = GL_FUNC_ADD;
-    GLBASrc = GL_ONE;
-    GLBADst = GL_ZERO;
-}
-
-sMaterialPrivate::~sMaterialPrivate()
-{
-    if (GLName)
-        glDeleteProgram(GLName);
-}
 
 void sMaterial::Create2()
 {
@@ -1230,454 +627,859 @@ void sMaterial::Destroy2()
 
 void sMaterial::Prepare(sVertexFormatHandle *format)
 {
-    GLuint vertShader, fragShader;
-    GLint status;
+  sShader *oldvs = VertexShader;   VertexShader = 0;
+  sShader *oldps = PixelShader;    PixelShader = 0;
 
-    sBool _n = format->Has(sVF_NORMAL);
-    sBool _u = format->Has(sVF_UV0);
-    sBool _c = format->Has(sVF_COLOR0);
+  SelectShaders(format);
 
-    sTextBuffer vs, ps;
-
-    vs.Print(L"attribute vec4 in_pos;\n");
-    if (_n)
-        vs.Print(L"attribute vec4 in_norm;\n");
-    if (_c)
-    {
-        vs.Print(L"attribute vec4 in_col0;\n");
-        vs.Print(L"varying vec4 out_col0;\n");
-        ps.Print(L"varying vec4 out_col0;\n");
-    }
-    if (_u)
-    {
-        vs.Print(L"attribute vec2 in_uv0;\n");
-        vs.Print(L"varying vec2 out_uv0;\n");
-        ps.Print(L"varying vec2 out_uv0;\n");
-        ps.Print(L"uniform sampler2D tex0;\n");
-    }
-    vs.Print(L"uniform vec4 mvp[4];\n");
-    vs.Print(L"void main()\n");
-    ps.Print(L"void main()\n");
-    vs.Print(L"{\n");
-    ps.Print(L"{\n");
-    vs.Print(L"  gl_Position = in_pos.x*mvp[0] + in_pos.y*mvp[1] + in_pos.z*mvp[2] + in_pos.w*mvp[3];\n");
-    ps.Print(L"  vec4 col = vec4(1,1,1,1);\n");
-    if (_u)
-    {
-        vs.Print(L"  out_uv0 = in_uv0;\n");
-        ps.Print(L"  col *= texture2D(tex0,out_uv0);\n");
-    }
-    if (_c)
-    {
-        vs.Print(L"  out_col0 = in_col0;\n");
-        ps.Print(L"  col *= out_col0;\n");
-    }
-    vs.Print(L"}\n");
-    ps.Print(L"  gl_FragColor = col;\n");
-    ps.Print(L"}\n");
-
-    GLERR();
-
-    if (0)
-    {
-        sDPrint(vs.Get());
-        sDPrint(ps.Get());
-    }
-
-    CompileShader(&vertShader, GL_VERTEX_SHADER, vs.Get());
-    CompileShader(&fragShader, GL_FRAGMENT_SHADER, ps.Get());
-
-    sVERIFY(vertShader && fragShader)
-        GLName = glCreateProgram();
-
-    GLERR();
-    for (sInt i = 0; i < format->AttrCount; i++)
-        glBindAttribLocation(GLName, i, format->Attr[i].Name);
-    GLERR();
-
-    glAttachShader(GLName, vertShader);
-    glAttachShader(GLName, fragShader);
-    GLERR();
-
-    glLinkProgram(GLName);
-    GLERR();
-    glGetProgramiv(GLName, GL_LINK_STATUS, &status);
-    sVERIFY(status != 0);
-
-    VSSlot[0] = glGetUniformLocation(GLName, "mvp");
-    GLERR();
-
-    if (vertShader)
-        glDeleteShader(vertShader);
-    if (fragShader)
-        glDeleteShader(fragShader);
-    GLERR();
-
-    // texture options
-
-    for (sInt i = 0; i < sMTRL_MAXTEX; i++)
-    {
-        if (Texture[i] || (TFlags[i] & sMTF_EXTERN))
-        {
-            if (Texture[i] && Texture[i]->Mipmaps == 1)
-            {
-                switch (TFlags[i] & sMTF_LEVELMASK)
-                {
-                case sMTF_LEVEL0:
-                    GLTexMin[i] = GL_NEAREST;
-                    GLTexMax[i] = GL_NEAREST;
-                    break;
-                case sMTF_LEVEL1:
-                case sMTF_LEVEL2:
-                case sMTF_LEVEL3:
-                    GLTexMin[i] = GL_LINEAR;
-                    GLTexMax[i] = GL_LINEAR;
-                    break;
-                }
-            }
-            else
-            {
-                switch (TFlags[i] & sMTF_LEVELMASK)
-                {
-                case sMTF_LEVEL0:
-                    GLTexMin[i] = GL_NEAREST_MIPMAP_NEAREST;
-                    GLTexMax[i] = GL_NEAREST;
-                    break;
-                case sMTF_LEVEL1:
-                    GLTexMin[i] = GL_LINEAR_MIPMAP_NEAREST;
-                    GLTexMax[i] = GL_LINEAR;
-                    break;
-                case sMTF_LEVEL2:
-                case sMTF_LEVEL3:
-                    GLTexMin[i] = GL_LINEAR_MIPMAP_LINEAR;
-                    GLTexMax[i] = GL_LINEAR;
-                    break;
-                }
-            }
-            switch (TFlags[i] & sMTF_ADDRMASK_U)
-            {
-            case sMTF_TILE_U:
-                GLTexS[i] = GL_REPEAT;
-                break;
-            case sMTF_CLAMP_U:
-                GLTexS[i] = GL_CLAMP_TO_EDGE;
-                break;
-            case sMTF_MIRROR_U:
-                GLTexS[i] = GL_MIRRORED_REPEAT;
-                break;
-            default:
-                sVERIFYFALSE;
-                break;
-            }
-            switch (TFlags[i] & sMTF_ADDRMASK_V)
-            {
-            case sMTF_TILE_V:
-                GLTexT[i] = GL_REPEAT;
-                break;
-            case sMTF_CLAMP_V:
-                GLTexT[i] = GL_CLAMP_TO_EDGE;
-                break;
-            case sMTF_MIRROR_V:
-                GLTexT[i] = GL_MIRRORED_REPEAT;
-                break;
-            default:
-                sVERIFYFALSE;
-                break;
-            }
-        }
-    }
-
-    // blend unit
-
-    if (BlendColor != sMB_OFF)
-    {
-        const static sInt func[16] =
-            {
-                0,
-                GL_FUNC_ADD,
-                GL_FUNC_SUBTRACT,
-                GL_FUNC_REVERSE_SUBTRACT,
-                GL_MIN_EXT,
-                GL_MAX_EXT,
-            };
-        const static sInt fact[16] =
-            {
-                0,
-                GL_ZERO,
-                GL_ONE,
-                GL_SRC_COLOR,
-
-                GL_ONE_MINUS_SRC_COLOR,
-                GL_SRC_ALPHA,
-                GL_ONE_MINUS_SRC_ALPHA,
-                GL_DST_COLOR,
-
-                GL_ONE_MINUS_DST_COLOR,
-                GL_DST_ALPHA,
-                GL_ONE_MINUS_DST_ALPHA,
-                GL_SRC_ALPHA_SATURATE,
-
-                0,
-                0,
-                GL_CONSTANT_COLOR,
-                GL_ONE_MINUS_CONSTANT_COLOR,
-            };
-        GLBlendFactor.InitColor(BlendFactor);
-        GLBCFunc = func[(BlendColor & sMBO_MASK) >> 8];
-        GLBCSrc = fact[(BlendColor & sMBS_MASK)];
-        GLBCDst = fact[(BlendColor & sMBD_MASK) >> 16];
-        if (BlendAlpha == sMB_SAMEASCOLOR)
-        {
-            GLBAFunc = GLBCFunc;
-            GLBASrc = GLBCSrc;
-            GLBADst = GLBCDst;
-        }
-        else
-        {
-            GLBAFunc = func[(BlendAlpha & sMBO_MASK) >> 8];
-            GLBASrc = fact[(BlendAlpha & sMBS_MASK)];
-            GLBADst = fact[(BlendAlpha & sMBD_MASK) >> 16];
-        }
-    }
+  oldvs->Release();
+  oldps->Release();
 }
 
-void sMaterial::Set(sCBufferBase **cbuffers, sInt cbcount, sInt variant)
-{
-    GLERR();
-
-    glUseProgram(GLName);
-    for (sInt i = 0; i < sMTRL_MAXTEX; i++)
-    {
-        if (Texture[i])
-        {
-            glActiveTexture(GL_TEXTURE0 + i);
-            glBindTexture(GL_TEXTURE_2D, Texture[i]->GLName);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GLTexMin[i]);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GLTexMax[i]);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GLTexS[i]);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GLTexT[i]);
-        }
-        else
-        {
-            glActiveTexture(GL_TEXTURE0 + i);
-            glBindTexture(GL_TEXTURE_2D, 0);
-        }
-    }
-    GLERR();
-
-    if (BlendColor != sMB_OFF)
-    {
-        glBlendEquationSeparate(GLBCFunc, GLBAFunc);
-        glBlendFuncSeparate(GLBCSrc, GLBCDst, GLBASrc, GLBADst);
-        glBlendColor(GLBlendFactor.x, GLBlendFactor.y, GLBlendFactor.z, GLBlendFactor.w);
-        glEnable(GL_BLEND);
-    }
-    else
-    {
-        glDisable(GL_BLEND);
-    }
-    GLERR();
-
-    switch (Flags & sMTRL_ZMASK)
-    {
-    case sMTRL_ZOFF:
-        glDisable(GL_DEPTH_TEST);
-        break;
-    case sMTRL_ZREAD:
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LESS);
-        glDepthMask(GL_FALSE);
-        break;
-    case sMTRL_ZWRITE:
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_ALWAYS);
-        glDepthMask(GL_TRUE);
-        break;
-    case sMTRL_ZON:
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LESS);
-        glDepthMask(GL_TRUE);
-        break;
-    }
-    switch (Flags & sMTRL_CULLMASK)
-    {
-    case sMTRL_CULLOFF:
-        glCullFace(GL_FRONT_AND_BACK);
-        glDisable(GL_CULL_FACE);
-        break;
-    case sMTRL_CULLON:
-        glCullFace(GL_FRONT);
-        glEnable(GL_CULL_FACE);
-        break;
-    case sMTRL_CULLINV:
-        glCullFace(GL_BACK);
-        glEnable(GL_CULL_FACE);
-        break;
-    default:
-        sVERIFYFALSE;
-    }
-
-    for (sInt i = 0; i < cbcount; i++)
-    {
-        sCBufferBase *cb = cbuffers[i];
-        if (cb->RegStart == 0 && cb->RegCount >= 4 && (cb->Slot & sCBUFFER_SHADERMASK) == sCBUFFER_VS)
-            glUniform4fv(VSSlot[0], 4, (GLfloat *)(*cb->DataPtr));
-    }
-    GLERR();
-}
-
-void sMaterial::SetStates(sInt var)
+void sMaterial::InitVariants(sInt variants)
 {
 }
-void sMaterial::InitVariants(sInt max)
-{
-}
+
 void sMaterial::DiscardVariants()
 {
 }
-void sMaterial::SetVariant(sInt var)
+
+void sMaterial::SetVariant(sInt variants)
 {
+}
+
+void sMaterial::Set(sCBufferBase **cbuffers,sInt cbcount,sBool additive)
+{
+  SetStates();
+
+  if(VertexShader)
+  {
+    glEnable(GL_VERTEX_PROGRAM_ARB);
+    glBindProgramARB(GL_VERTEX_PROGRAM_ARB,VertexShader->GLName);
+  }
+  else
+  {
+    glBindProgramARB(GL_VERTEX_PROGRAM_ARB,0);
+    glDisable(GL_VERTEX_PROGRAM_ARB);
+  }
+  if(PixelShader)
+  {
+    glEnable(GL_FRAGMENT_PROGRAM_ARB);
+    glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB,PixelShader->GLName);
+  }
+  else
+  {
+    glDisable(GL_FRAGMENT_PROGRAM_ARB);
+    glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB,0);
+  }
+
+  // set constant buffers
+
+  /*for(sInt i=0;i<cbcount;i++)
+  {
+    sCBufferBase *cb = cbuffers[i];
+    sVERIFY(cb->Slot<sCBUFFER_MAXSLOT*sCBUFFER_SHADERTYPES);
+    if(cb != CurrentCBs[cb->Slot])
+    {
+      cb->SetRegs();
+      CurrentCBs[cb->Slot] = cb;
+    }
+  }*/
+
+  sSetCBuffers(cbuffers,cbcount);
+}
+
+static void makeblend(sInt blend,sInt &s,sInt &d,sInt &f)
+{
+  static const sInt arg[16] = 
+  {
+    0,
+    GL_ZERO,
+    GL_ONE,
+    GL_SRC_COLOR,
+    GL_ONE_MINUS_SRC_COLOR,
+    GL_SRC_ALPHA,
+    GL_ONE_MINUS_SRC_ALPHA,
+    GL_DST_COLOR,
+    GL_ONE_MINUS_DST_COLOR,
+    GL_DST_ALPHA,
+    GL_ONE_MINUS_DST_ALPHA,
+    GL_SRC_ALPHA_SATURATE,
+    0,
+    0,
+    GL_CONSTANT_COLOR,
+    GL_ONE_MINUS_CONSTANT_COLOR,
+  };
+  static const sInt func[16] =
+  {
+    0,
+    GL_FUNC_ADD,
+    GL_FUNC_SUBTRACT,
+    GL_FUNC_REVERSE_SUBTRACT,
+    GL_MIN,
+    GL_MAX,
+  };
+
+  s = arg[blend&15];
+  f = func[(blend>>8)&15];
+  d = arg[(blend>>16)&15];
+}
+
+void sMaterial::SetStates(sInt variant_ignored)
+{
+  // basic flags
+	glDepthMask((Flags & sMTRL_ZWRITE) != 0);
+
+  if(Flags & sMTRL_ZREAD)
+  {
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+  }
+  else
+  {
+    glDisable(GL_DEPTH_TEST);
+  }
+
+  switch(Flags & sMTRL_CULLMASK)
+  {
+  case sMTRL_CULLOFF:
+    glDisable(GL_CULL_FACE);
+    glCullFace(GL_FRONT);
+    break;
+  case sMTRL_CULLON:
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_FRONT);
+    break;
+  case sMTRL_CULLINV:
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    break;
+  }
+
+  glColorMask(1,1,1,1);
+
+  // stencil (not yet implemented)
+
+  glStencilMask(1);
+
+  // alpha blending
+
+  if(BlendColor==sMB_OFF)
+  {
+    glDisable(GL_BLEND);
+  }
+  else
+  {
+    glEnable(GL_BLEND);
+    if(BlendAlpha==sMB_SAMEASCOLOR)
+    {
+      sInt s,d,f;
+      makeblend(BlendColor,s,d,f);
+      glBlendEquation(f);
+      glBlendFunc(s,d);
+    }
+    else
+    {
+      sInt sc,dc,fc;
+      sInt sa,da,fa;
+      makeblend(BlendColor,sc,dc,fc);
+      makeblend(BlendAlpha,sa,da,fa);
+      glBlendEquationSeparateEXT(fc,fa);
+      glBlendFuncSeparate(sc,dc,sa,da);
+    }
+  }
+
+  // alpha test
+  const sU8 alphaFunc = FuncFlags[sMFT_ALPHA];
+
+  if (sMFF_ALWAYS == alphaFunc)
+  {
+    glDisable(GL_ALPHA_TEST);
+  }
+  else
+  {
+    glEnable(GL_ALPHA_TEST);
+    const GLenum alphaFuncs[] = {GL_NEVER, GL_LESS, GL_EQUAL, GL_LEQUAL, GL_GREATER, GL_NOTEQUAL, GL_GEQUAL};
+    sVERIFY(0 <= alphaFunc);
+    sVERIFY(alphaFunc < sizeof(alphaFuncs));
+    glAlphaFunc(alphaFuncs[alphaFunc], AlphaRef / 255.0f);
+  }
+
+  // textures
+
+  for(sInt i=0;i<sMTRL_MAXTEX;i++)
+  {
+    sSetTexture(i,Texture[i]);
+
+    if(Texture[i])
+    {
+      sInt mipmaps = Texture[i]->Mipmaps>1;
+      switch(TFlags[i] & sMTF_LEVELMASK)
+      {
+      case sMTF_LEVEL0:
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,mipmaps?GL_NEAREST_MIPMAP_NEAREST:GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+        break;
+      case sMTF_LEVEL1:
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,mipmaps?GL_NEAREST_MIPMAP_LINEAR:GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+        break;
+      case sMTF_LEVEL2:
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,mipmaps?GL_LINEAR_MIPMAP_LINEAR:GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+        break;
+      case sMTF_LEVEL3:
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,mipmaps?GL_LINEAR_MIPMAP_LINEAR:GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+        break;
+      }
+      switch(TFlags[i] & sMTF_ADDRMASK)
+      {
+      case sMTF_TILE:
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
+        break;
+      case sMTF_CLAMP:
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
+        break;
+      case sMTF_MIRROR:
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_MIRRORED_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_MIRRORED_REPEAT);
+        break;
+      case sMTF_BORDER:
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_BORDER);
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_BORDER);
+        break;
+      case sMTF_TILEU_CLAMPV:
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
+        break;
+      }
+    }
+  }
+}
+
+/****************************************************************************/
+/***                                                                      ***/
+/***   Shaders                                                            ***/
+/***                                                                      ***/
+/****************************************************************************/
+
+sShaderTypeFlag sGetShaderPlatform()
+{
+  return sSTF_NVIDIA;
+}
+
+sInt sGetShaderProfile()
+{
+  return sSTF_NVIDIA;
+}
+
+void sSetVSParamImpl(sInt o, sInt count, const sVector4* vsf)
+{
+  while(count>0)
+  {
+    glProgramLocalParameter4fvARB(GL_VERTEX_PROGRAM_ARB,o,&vsf->x);
+    o++;
+    vsf++;
+    count--;
+  }
+}
+
+void sSetVSParam(sInt o, sInt count, const sVector4* vsf)
+{
+  sSetVSParamImpl(o, count, vsf);
+}
+
+void sSetPSParamImpl(sInt o, sInt count, const sVector4* psf)
+{
+  while(count>0)
+  {
+    glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB,o,&psf->x);
+    o++;
+    psf++;
+    count--;
+  }
+}
+
+void sSetPSParam(sInt o, sInt count, const sVector4* psf)
+{
+  sSetPSParamImpl(o,count,psf);
+}
+
+void sSetVSBool(sU32 bits,sU32 mask)
+{
+}
+
+void sSetPSBool(sU32 bits,sU32 mask)
+{
+}
+
+void sCreateShader2(sShader *shader, sShaderBlob *blob)
+{
+  sInt type;
+  GLuint name;
+
+  switch(shader->Type&sSTF_KIND)
+  {
+  case sSTF_VERTEX:
+    type = GL_VERTEX_PROGRAM_ARB;
+    break;
+  case sSTF_PIXEL:
+    type = GL_FRAGMENT_PROGRAM_ARB;
+    break;
+  default:
+    type = 0;
+    sVERIFYFALSE;
+  }
+  
+  glGenProgramsARB(1,&name);
+  glBindProgramARB(type,name);
+  sInt size = blob->Size;
+  if(size>0 && blob->Data[size-1]==0)     // there might be a trailing zero
+    size--;
+
+  glProgramStringARB(type,GL_PROGRAM_FORMAT_ASCII_ARB,size,blob->Data);  
+  if(glGetError()!=0)
+  {
+    const sChar8 *error = (const sChar8 *)glGetString(GL_PROGRAM_ERROR_STRING_ARB);
+    sString<256> buffer;
+    sCopyString(buffer,error,sCOUNTOF(buffer));
+    sFatal(L"shader compiler error %q\n",buffer);
+  }
+
+  shader->GLName = name;
+}
+
+void sDeleteShader2(sShader *shader)
+{
+  GLuint name = shader->GLName;
+  glDeleteProgramsARB(1,&name);
+  shader->GLName = 0;
+}
+
+/****************************************************************************/
+
+sCBufferBase::sCBufferBase()
+{
+  DataPtr = 0;
+  DataPersist = 0;
+  Slot = 0;
+  Flags = 0;
+}
+
+void sCBufferBase::SetPtr(void **dataptr,void *data)
+{
+  DataPtr = dataptr;
+  DataPersist = data;
+  if(DataPtr)
+    *DataPtr = DataPersist;
+}
+
+void sCBufferBase::SetRegs()
+{
+  switch(Slot & sCBUFFER_SHADERMASK)
+  {
+  case sCBUFFER_VS:
+    sSetVSParamImpl(RegStart,RegCount,(sVector4*)DataPersist);
+    break;
+  case sCBUFFER_PS:
+    sSetPSParamImpl(RegStart,RegCount,(sVector4*)DataPersist);
+    break;
+  }
+  *DataPtr = 0;
+}
+
+sCBufferBase::~sCBufferBase()
+{
+}
+
+/****************************************************************************/
+/***                                                                      ***/
+/***   Initialisation                                                     ***/
+/***                                                                      ***/
+/****************************************************************************/
+
+void PreInitGFX(sInt &flags,sInt &xs,sInt &ys)
+{
+#if sPLATFORM == sPLAT_WINDOWS
+  
+  if(flags & sISF_FULLSCREEN)
+  {
+	  DEVMODE dm;
+    sClear(dm);
+	  dm.dmSize=sizeof(dm);
+	  dm.dmPelsWidth	= xs;
+	  dm.dmPelsHeight	= ys;
+	  dm.dmBitsPerPel	= 32;
+	  dm.dmFields=DM_BITSPERPEL|DM_PELSWIDTH|DM_PELSHEIGHT;
+
+	  if(ChangeDisplaySettings(&dm,CDS_FULLSCREEN)!=DISP_CHANGE_SUCCESSFUL)
+    {
+	    dm.dmPelsWidth	= xs = 800;
+	    dm.dmPelsHeight	= ys = 600;
+	    if(ChangeDisplaySettings(&dm,CDS_FULLSCREEN)!=DISP_CHANGE_SUCCESSFUL)
+      {
+        sFatal(L"could not set displaymode %dx%d",xs,ys);
+      }
+    }
+  }
+
+#elif sPLATFORM == sPLAT_LINUX
+  
+  static int attribList[] =
+  {
+    GLX_RGBA, GLX_DOUBLEBUFFER,
+    GLX_RED_SIZE, 8,
+    GLX_GREEN_SIZE, 8,
+    GLX_BLUE_SIZE, 8,
+    GLX_DEPTH_SIZE, 24,
+    GLX_STENCIL_SIZE, 8,
+    None
+  };
+  
+  Display *dpy = sXDisplay();
+  
+  sXVisualInfo = glXChooseVisual(dpy,sXScreen,attribList);
+  if(!sXVisualInfo)
+    sFatal(L"glXChooseVisual returned 0!\n");
+  
+#endif
+}
+
+void InitGFX(sInt flags,sInt xs,sInt ys)
+{
+#if sPLATFORM == sPLAT_WINDOWS
+  PIXELFORMATDESCRIPTOR pfd;
+  int format;
+
+  // get the device context (DC). Note: we don't use the forbidden GetDC(0)!
+
+  GLDC = GetDC(sHWND);
+  GLErr(GLDC);
+  
+  // set the pixel format for the DC
+
+  sClear(pfd);
+  pfd.nSize = sizeof(pfd);
+  pfd.nVersion = 1;
+  if(flags & sISF_2D)
+    pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL;
+  else
+    pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+  pfd.iPixelType = PFD_TYPE_RGBA;
+  pfd.cColorBits = 24;
+  pfd.cDepthBits = 24;
+  pfd.iLayerType = PFD_MAIN_PLANE;
+
+  GLErr(format = ChoosePixelFormat(GLDC,&pfd));
+  GLErr(SetPixelFormat(GLDC,format,&pfd));
+  
+  // create and enable the render context (RC)
+
+  GLErr(GLRC = wglCreateContext(GLDC));
+  GLErr(wglMakeCurrent(GLDC,GLRC));
+
+#elif sPLATFORM == sPLAT_LINUX  
+  
+  Display *dpy = sXDisplay();
+  GLXC = glXCreateContext(dpy,sXVisualInfo,0,True);
+  if(!GLXC)
+    sFatal(L"glXCreateContext failed!\n");
+  
+  if(!glXMakeCurrent(dpy,sXWnd,GLXC))
+    sFatal(L"glXMakeCurrent failed!\n");
+  
+#endif
+  
+  // query extensions and other strings
+
+  sString<256> Vendor;
+  sString<256> Renderer;
+  sString<256> Version;
+  sString<256> Extension;
+  sCopyString(Vendor  ,(const sChar8 *)glGetString(GL_VENDOR)  ,sCOUNTOF(Vendor  ));
+  sCopyString(Renderer,(const sChar8 *)glGetString(GL_RENDERER),sCOUNTOF(Renderer));
+  sCopyString(Version ,(const sChar8 *)glGetString(GL_VERSION ),sCOUNTOF(Version ));
+  const GLubyte *ext = glGetString(GL_EXTENSIONS);
+
+  sLogF(L"gfx",L"GL Vendor  <%s>\n",Vendor);
+  sLogF(L"gfx",L"GL Renderer <%s>\n",Renderer);
+  sLogF(L"gfx",L"GL Version  <%s>\n",Version);
+  sLogF(L"gfx",L"GL Extensions:\n");
+  while(*ext!=0)
+  {
+    sInt i=0;
+    while(*ext==' ') ext++;
+    while(*ext!=' ' && *ext!=0)
+      Extension[i++] = *ext++;
+    while(*ext==' ') ext++;
+    Extension[i++] = 0;
+
+    sLogF(L"gfx",L"<%s>\n",Extension);
+  }
+  sLogF(L"gfx",L".. end of extension list\n");
+
+  // other initializaation
+
+  DXScreenMode.ScreenX = xs;
+  DXScreenMode.ScreenY = ys;
+  DXScreenMode.Aspect = sF32(xs)/ys;
+  sGFXViewRect.Init(0,0,xs,ys);
+
+  sInitGfxCommon();
+}
+
+void ExitGFX()
+{
+  sExitGfxCommon();
+
+#if sPLATFORM == sPLAT_WINDOWS
+  wglMakeCurrent(0,0);
+  wglDeleteContext(GLRC);
+  ReleaseDC(sHWND,GLDC);
+#elif sPLATFORM == sPLAT_LINUX
+  Display *dpy = sXDisplay();
+  
+  glXMakeCurrent(dpy,None,0);
+  glXDestroyContext(dpy,GLXC);
+#endif
+}
+
+void ResizeGFX(sInt x,sInt y)  // this is called when the windows size changes
+{
+  if(x && y && (x!=DXScreenMode.ScreenX || y!=DXScreenMode.ScreenY)) 
+  {
+    DXScreenMode.ScreenX = x;
+    DXScreenMode.ScreenY = y;
+  }
+}
+
+
+/****************************************************************************/
+/***                                                                      ***/
+/***   ScreenModes                                                        ***/
+/***                                                                      ***/
+/****************************************************************************/
+
+sInt sGetDisplayCount()
+{
+  return 1;
+}
+
+void sGetScreenInfo(sScreenInfo &si,sInt flags,sInt display)
+{
+  si.Clear();
+  si.Resolutions.HintSize(1);
+  si.RefreshRates.HintSize(1);
+  si.AspectRatios.HintSize(1);
+  si.Resolutions.AddMany(1);
+  si.RefreshRates.AddMany(1);
+  si.AspectRatios.AddMany(1);
+
+  si.Resolutions[0].x = 800;
+  si.Resolutions[0].y = 600;
+  si.RefreshRates[0] = 60;
+  si.AspectRatios[0].x = 4;
+  si.AspectRatios[0].y = 3;
+  si.CurrentAspect = sF32(DXScreenMode.ScreenX)/DXScreenMode.ScreenY;
+  si.CurrentXSize = DXScreenMode.ScreenX;
+  si.CurrentYSize = DXScreenMode.ScreenY;
+}
+
+void sGetScreenMode(sScreenMode &sm)
+{
+  sm = DXScreenMode;
+}
+
+sBool sSetScreenMode(const sScreenMode &sm)
+{
+  DXScreenMode = sm;
+  return 1;
 }
 
 void sGetScreenSafeArea(sF32 &xs, sF32 &ys)
 {
-    xs = ys = 1;
+#if sCONFIG_BUILD_DEBUG || sCONFIG_BUILD_DEBUGFAST
+  xs = 0.95f;
+  ys = 0.9f;
+#elif sCONFIG_OPTION_LOCAKIT
+  xs = 0.95f;
+  ys = 0.95f;
+#else
+  xs=ys=1;
+#endif
 }
 
-static sGeoBuffer *sFindGeoBuffer(sInt bytes, sInt type, sGeometryDuration duration)
-{
-    // find available buffer (don't allocate, just find!)
-
-    bytes = sAlign(bytes, 128);
-    for (sInt i = 0; i < sGeoBufferCount; i++)
-    {
-        sGeoBuffer *gb = &sGeoBuffers[i];
-        if (gb->Duration == duration && gb->Type == type && gb->Used + bytes <= gb->Alloc)
-            return gb;
-    }
-
-    // allocate new buffer
-
-    sVERIFY(sGeoBufferCount < sMAX_GEOBUFFER);
-    sGeoBuffer *gb = &sGeoBuffers[sGeoBufferCount++];
-    switch (type)
-    {
-    case 0:
-        gb->Alloc = sMax(bytes, 1024 * 1024);
-        gb->GLType = GL_ARRAY_BUFFER;
-        break;
-    case 1:
-        gb->Alloc = sMax(bytes, 128 * 1024);
-        gb->GLType = GL_ELEMENT_ARRAY_BUFFER;
-        break;
-    default:
-        sVERIFYFALSE;
-    }
-    gb->Used = 0;
-    gb->Freed = 0;
-    gb->Duration = duration;
-    gb->Type = type;
-    gb->GLName = 0;
-    sVERIFY(bytes <= gb->Alloc);
-
-    // create GL object for buffer
-
-    switch (gb->Duration)
-    {
-    case sGD_STREAM:
-        gb->GLUsage = GL_STREAM_DRAW;
-        break;
-    case sGD_FRAME:
-        gb->GLUsage = GL_DYNAMIC_DRAW;
-        break;
-    case sGD_STATIC:
-        gb->GLUsage = GL_STATIC_DRAW;
-        break;
-    default:
-        sVERIFYFALSE;
-    }
-    glGenBuffers(1, &gb->GLName);
-    GLERR();
-    glBindBuffer(gb->GLType, gb->GLName);
-    glBufferData(gb->GLType, gb->Alloc, 0, gb->GLUsage);
-    GLERR();
-
-    // done
-
-    return gb;
-}
-
-/*sGeoBufferPart::sGeoBufferPart()
-{
-
-  sFatal(L"sGeoBufferPart::sGeoBufferPart() is not implemented");
-  exit(1);
-}
-
-sGeoBufferPart::~sGeoBufferPart() {
-  sFatal(L"sGeoBufferPart::~sGeoBufferPart() is not implemented");
-  exit(1);
-}*/
-sGeoBufferPart::sGeoBufferPart()
-{
-    Buffer = 0;
-    Start = 0;
-    Count = 0;
-}
-
-sGeoBufferPart::~sGeoBufferPart()
-{
-    Clear();
-}
-
-void sGeoBufferPart::Clear()
-{
-    if (Buffer)
-    {
-        Buffer->Freed += Count;
-        if (Buffer->Freed == Buffer->Used && Buffer->Duration == sGD_STATIC)
-            Buffer->Used = Buffer->Freed = 0;
-        Buffer = 0;
-    }
-    Start = 0;
-    Count = 0;
-}
-
-void sGeoBufferPart::Init(sInt count, sInt size, sGeometryDuration duration, sInt buffertype)
-{
-    Buffer = sFindGeoBuffer(size * count, buffertype, duration);
-    Start = Buffer->Used;
-    Count = count;
-}
-
-void sGeoBufferPart::Lock(void **ptr)
-{
-    glBindBuffer(Buffer->GLType, Buffer->GLName);
-    sU8 *data = (sU8 *)glMapBuffer(Buffer->GLType, GL_WRITE_ONLY);
-    GLERR();
-    glBindBuffer(Buffer->GLType, 0);
-    data += Start;
-    *ptr = data;
-}
-
-void sGeoBufferPart::Unlock(sInt count, sInt size)
-{
-    if (count != -1)
-        Count = count;
-    Buffer->Used += sAlign(Count * size, 128);
-    sVERIFY(Buffer->Used <= Buffer->Alloc);
-    glBindBuffer(Buffer->GLType, Buffer->GLName);
-    glUnmapBuffer(Buffer->GLType);
-    GLERR();
-    glBindBuffer(Buffer->GLType, 0);
-}
-
-void sSetRenderClipping(sRect *r, sInt count)
+void sSetScreen(class sTexture2D *tex, sGrabFilterFlags filter, const sRect *dst, const sRect *src)
 {
 }
 
 /****************************************************************************/
 /***                                                                      ***/
-/***                                                                      ***/
+/***   Rendering                                                          ***/
 /***                                                                      ***/
 /****************************************************************************/
+
+sTexture2D *sGetCurrentBackBuffer(void)
+{
+  return 0;
+}
+
+sTexture2D *sGetCurrentBackZBuffer(void)
+{
+  return 0;
+}
+
+void sSetRendertarget(const sRect *vrp,sInt flags,sU32 clearcolor,sTexture2D **tex,sInt count)
+{
+  sVERIFY(0);
+}
+
+static void sSetRendertargetPrivate(const sRect *vrp,sInt flags,sU32 color)
+{
+}
+
+void sSetRendertarget(const sRect *vrp, sInt clearflags, sU32 clearcolor)
+{
+  sSetRendertarget(vrp,0,clearflags,clearcolor);
+}
+
+void sSetRendertarget(const sRect *vrp,sTexture2D *tex, sInt clearflags, sU32 clearcolor)
+{
+  sVERIFY(tex==0);
+
+
+  // find rect
+
+  sRect r;
+  if(vrp)
+    r = *vrp;
+  else
+    r.Init(0,0,DXScreenMode.ScreenX,DXScreenMode.ScreenY);
+
+  // set scissor
+
+  glScissor(r.x0,DXScreenMode.ScreenY-r.y1,r.SizeX(),r.SizeY());
+  glEnable(GL_SCISSOR_TEST);
+  glViewport(r.x0,DXScreenMode.ScreenY-r.y1,r.SizeX(),r.SizeY());
+
+  // clear
+
+  sVector4 col;
+  col.InitColor(clearcolor);
+  glDepthMask(1);
+  glColorMask(1,1,1,1);
+  glStencilMask(1);
+  glClearColor(col.x,col.y,col.z,col.w);
+  glClearDepth(1.0f);
+
+  sInt mode = 0;
+  if(clearflags & sCLEAR_COLOR) mode |= GL_COLOR_BUFFER_BIT;
+  if(clearflags & sCLEAR_ZBUFFER) mode |= GL_DEPTH_BUFFER_BIT;
+
+  glClear(mode);
+
+}
+
+void sSetRendertargetCube(sTextureCube*,sTexCubeFace,sInt cf, sU32 cc)
+{
+  sFatal(L"sSetRendertargetCube not implemented!");
+}
+
+void sGrabScreen(class sTexture2D *tex, sGrabFilterFlags filter, const sRect *dst, const sRect *src)
+{
+  sFatal(L"sGrabScreen not implemented!");
+}
+
+void sBeginSaveRT(const sU8 *&data, sS32 &pitch, enum sTextureFlags &flags)
+{
+}
+
+void sEndSaveRT()
+{
+}
+
+void sBeginReadTexture(const sU8*& data, sS32& pitch, enum sTextureFlags& flags,sTexture2D *tex)
+{
+  sVERIFYFALSE;
+}
+
+void sEndReadTexture()
+{
+}
+
+void sRender3DEnd(sBool flip)
+{
+  sPreFlipHook->Call();
+#if sPLATFORM == sPLAT_WINDOWS
+//  SwapBuffers(GLDC);
+#elif sPLATFORM == sPLAT_LINUX
+  glXSwapBuffers(sXDisplay(),sXWnd);
+#endif
+  
+  sFlipMem();
+  sPostFlipHook->Call();
+}
+
+void sRender3DFlush()
+{
+}
+
+sBool sRender3DBegin()
+{
+  // prepare rendering
+
+  sGFXRendertargetX = DXScreenMode.ScreenX;
+  sGFXRendertargetY = DXScreenMode.ScreenY;
+  sGFXRendertargetAspect = DXScreenMode.Aspect;
+  sGFXViewRect.Init(0,0,DXScreenMode.ScreenX,DXScreenMode.ScreenY);
+  // reset dynamic buffers
+
+  for(sInt i=0;i<sGeoBufferCount;i++)
+  {
+    sGeoBuffer *geo = &sGeoBuffers[i];
+    if(geo->Duration==sGD_STREAM || geo->Duration==sGD_FRAME)
+    {
+      sVERIFY(geo->Alloc);
+      geo->Used = 0;
+      geo->Freed = 0;
+    }
+  }
+
+  // set some common gl-states
+
+//	glEnable(GL_DEPTH_TEST);
+//	glDisable(GL_DEPTH_TEST);
+//	glDepthFunc(GL_LEQUAL);
+  glDisable(GL_CULL_FACE);
+  glCullFace(GL_FRONT);
+  
+  // clear caching
+
+  return 1;
+}
+
+void sSetRenderClipping(sRect *r,sInt count)
+{
+}
+
+
+void sGetGraphicsStats(sGraphicsStats &stat)
+{
+  sLogF(L"gfx",L"sGetGraphicsStats not implemented\n");
+}
+
+sInt sRenderStateTexture(sU32* data, sInt texstage, sU32 tflags)
+{
+  sLogF(L"gfx",L"sRenderStateTexture not implemented\n");
+  return 0;
+}
+
+void sSetRenderStates(const sU32* data, sInt count)
+{
+  sLogF(L"gfx",L"sSetRenderStates not implemented\n");
+}
+
+sInt sRenderStateTexture(sU32* data, sInt texstage, sU32 tflags,sF32 lodbias)
+{
+  sFatal(L"sRenderStateTexture not implemented!");
+  return 0;
+}
+
+void sSetTexture(sInt stage,class sTextureBase *tex)
+{
+  if(tex)
+  {
+    sVERIFY(tex->Mipmaps>0);
+    switch(tex->Flags&sTEX_TYPE_MASK)
+    {
+      case sTEX_2D:
+        glActiveTexture(GL_TEXTURE0+stage);
+        glBindTexture(GL_TEXTURE_2D,tex->GLName);
+        glEnable(GL_TEXTURE_2D);
+        glDisable(GL_TEXTURE_3D);
+        glDisable(GL_TEXTURE_CUBE_MAP);
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAX_LEVEL,tex->Mipmaps-1);
+        break;
+      case sTEX_3D:
+        sVERIFY(0);
+        break;
+      case sTEX_CUBE:
+        sVERIFY(0);
+        break;
+    }
+  }
+  else
+  {
+//    glActiveTexture(GL_TEXTURE0+stage);
+
+//    glDisable(GL_TEXTURE_2D);
+//    glDisable(GL_TEXTURE_CUBE_MAP);
+//    glDisable(GL_TEXTURE_3D);
+
+//    glActiveTexture(GL_TEXTURE0);
+  }
+}
+
+void sSetDesiredFrameRate(sF32 rate)
+{
+}
+
+void sSetScreenGamma(sF32 gamma)
+{
+}
+
+void sGetGraphicsCaps(sGraphicsCaps &caps)
+{
+  sClear(caps);
+  caps.ShaderProfile = sSTF_NVIDIA;
+  caps.UVOffset = 0.0f;
+  caps.XYOffset = 0.0f;
+}
+
+/****************************************************************************/
+
+/****************************************************************************/
+/***                                                                      ***/
+/***   Geometry Prim Interface                                            ***/
+/***                                                                      ***/
+/****************************************************************************/
+
+void sGeometry::BeginQuadrics()
+{
+  sFatal(L"BeginQuadrics not implemented!");
+}
+
+void sGeometry::EndQuadrics()
+{
+  sFatal(L"EndQuadrics not implemented!");
+}
+
+void sGeometry::BeginQuad(void **data,sInt count)
+{
+  sFatal(L"BeginQuad not implemented!");
+}
+
+void sGeometry::EndQuad()
+{
+  sFatal(L"EndQuad not implemented!");
+}
+
+void sGeometry::BeginGrid(void **data,sInt xs,sInt ys)
+{
+  sFatal(L"BeginGrid not implemented!");
+}
+
+void sGeometry::EndGrid()
+{
+  sFatal(L"EndGrid not implemented!");
+}
+
+void sEnableGraphicsStats(sBool enable)
+{
+}
+
+#endif // sRENDERER == sRENDER_OGL2
+

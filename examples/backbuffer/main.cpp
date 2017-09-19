@@ -57,7 +57,8 @@ void MyWindow::OnPaint2D()
 
   if(BackBuffer) sGui->EndBackBuffer();
 
-  sGui->PropFont->Print(0,Client.x0+4,Client.y0+4,BackBuffer ? L"BackBuffer" : L"No BackBuffer");
+  sGui->PropFont->SetColor(sGC_TEXT, sGC_BACK);
+  sGui->PropFont->Print(0, Client.x0 + 4, Client.y0 + 4, BackBuffer ? L"BackBuffer" : L"No BackBuffer");
 }
 
 /****************************************************************************/
