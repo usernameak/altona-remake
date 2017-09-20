@@ -26,9 +26,10 @@ static HGLRC GLRC;
 
 #endif
 
-#include "gl.h"
+/*#include "gl.h"
 #include "glext.h"
-#include "glprocs.h"
+#include "glprocs.h"*/
+#include "GL/glew.h"
 
 #include "base/system.hpp"
 #include "base/math.hpp"
@@ -1092,6 +1093,8 @@ void InitGFX(sInt flags,sInt xs,sInt ys)
     sFatal(L"glXMakeCurrent failed!\n");
   
 #endif
+
+  glewInit();
   
   // query extensions and other strings
 
@@ -1120,6 +1123,8 @@ void InitGFX(sInt flags,sInt xs,sInt ys)
     sLogF(L"gfx",L"<%s>\n",Extension);
   }
   sLogF(L"gfx",L".. end of extension list\n");
+
+
 
   // other initializaation
 
@@ -1235,6 +1240,7 @@ sTexture2D *sGetCurrentBackZBuffer(void)
 void sSetRendertarget(const sRect *vrp,sInt flags,sU32 clearcolor,sTexture2D **tex,sInt count)
 {
   sVERIFY(0);
+  
 }
 
 static void sSetRendertargetPrivate(const sRect *vrp,sInt flags,sU32 color)
@@ -1283,7 +1289,7 @@ void sSetRendertarget(const sRect *vrp,sTexture2D *tex, sInt clearflags, sU32 cl
 
 }
 
-void sSetRendertargetCube(sTextureCube*,sTexCubeFace,sInt cf, sU32 cc)
+void sSetRendertargetCube(sTextureCube* tex,sTexCubeFace face,sInt cf, sU32 cc)
 {
   sFatal(L"sSetRendertargetCube not implemented!");
 }
