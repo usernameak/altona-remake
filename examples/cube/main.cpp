@@ -129,11 +129,7 @@ void MyApp::OnPaint3D()
   static sInt time;
   if(sHasWindowFocus())
   {
-#if  sRENDERER==sRENDER_DX11
-      time = sGetFrameTime();
-#else
       time = Timer.GetTime();
-#endif
   }
 
   // set camera
