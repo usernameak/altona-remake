@@ -1237,7 +1237,7 @@ sTexture2D *sGetCurrentBackZBuffer(void)
   return 0;
 }
 
-void sSetRendertarget(const sRect *vrp,sInt flags,sU32 clearcolor,sTexture2D **tex,sInt count)
+/*void sSetRendertarget(const sRect *vrp,sInt flags,sU32 clearcolor,sTexture2D **tex,sInt count)
 {
   sVERIFY(0);
   
@@ -1297,6 +1297,63 @@ void sSetRendertargetCube(sTextureCube* tex,sTexCubeFace face,sInt cf, sU32 cc)
 void sGrabScreen(class sTexture2D *tex, sGrabFilterFlags filter, const sRect *dst, const sRect *src)
 {
   sFatal(L"sGrabScreen not implemented!");
+}*/
+
+void sSetTarget(const sTargetPara &para) {
+  //sVERIFY(tex == 0);
+
+  // find rect
+
+  /*sRect r;
+  if (vrp)
+    r = *vrp;
+  else
+    r.Init(0, 0, DXScreenMode.ScreenX, DXScreenMode.ScreenY);*/
+  if(para.Flags & sST_SCISSOR) {
+    glViewport(para.Window.x0, DXScreenMode.ScreenY - para.Window.y1, para.Window.SizeX(), para.Window.SizeY());
+    glScissor(para.Window.x0, DXScreenMode.ScreenY - para.Window.y1, para.Window.SizeX(), para.Window.SizeY());
+    glEnable(GL_SCISSOR_TEST);
+  } else {
+    glDisable(GL_SCISSOR_TEST);
+    glViewport(0, 0, DXScreenMode.ScreenX, DXScreenMode.ScreenY);
+  }
+
+  // clear
+
+  glDepthMask(1);
+  glColorMask(1, 1, 1, 1);
+  glStencilMask(1);
+  glClearColor(para.ClearColor[0].x, para.ClearColor[0].y, para.ClearColor[0].z, para.ClearColor[0].w);
+  glClearDepth(1.0f);
+
+  sInt mode = 0;
+  if (para.Flags & sST_CLEARCOLOR)
+    mode |= GL_COLOR_BUFFER_BIT;
+  if (para.Flags & sST_CLEARDEPTH)
+    mode |= GL_DEPTH_BUFFER_BIT;
+
+  glClear(mode);
+}
+
+sTexture2D *sGetRTDepthBuffer() {
+  //sFatal(L"sGetRTDepthBuffer is not implemented for OpenGL");
+  return sNULL;
+}
+
+sTexture2D *sGetScreenDepthBuffer(sInt screen)
+{
+  //sFatal(L"sGetScreenDepthBuffer is not implemented for OpenGL");
+  return sNULL;
+}
+
+sTexture2D *sGetScreenColorBuffer(sInt screen)
+{
+  //sFatal(L"sGetScreenColorBuffer is not implemented for OpenGL");
+  return sNULL;
+}
+
+void sCopyTexture(const sCopyTexturePara &para) {
+  //sFatal(L"sCopyTexture is not implemented for OpenGL");
 }
 
 void sBeginSaveRT(const sU8 *&data, sS32 &pitch, enum sTextureFlags &flags)

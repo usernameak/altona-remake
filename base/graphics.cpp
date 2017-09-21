@@ -28,13 +28,13 @@ sHooks *sPostFlipHook = 0;
 sHooks *sGraphicsLostHook = 0;
 
 
-#if sRENDERER == sRENDER_DX11 || sRENDERER == sRENDER_DX9 || sRENDERER == sRENDER_OGLES2
+//#if sRENDERER == sRENDER_DX11 || sRENDERER == sRENDER_DX9 || sRENDERER == sRENDER_OGLES2
 #define RENDERTARGET_OLD_TO_NEW 1
-#define RENDERTARGET_NEW_TO_OLD 0
-#else // sRENDERER == sRENDER_OGL
-#define RENDERTARGET_OLD_TO_NEW 0
-#define RENDERTARGET_NEW_TO_OLD 1
-#endif
+//#define RENDERTARGET_NEW_TO_OLD 0
+//#else // sRENDERER == sRENDER_OGL
+//#define RENDERTARGET_OLD_TO_NEW 0
+//#define RENDERTARGET_NEW_TO_OLD 1
+//#endif
 
 /****************************************************************************/
 // globals
