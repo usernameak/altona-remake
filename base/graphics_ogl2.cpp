@@ -76,6 +76,14 @@ void GLError(sU32 err,const sChar *file,sInt line,const sChar *system)
 //static sCBufferBase *CurrentCBs[sCBUFFER_MAXSLOT*sCBUFFER_SHADERTYPES];
 static sScreenMode DXScreenMode;
 
+static struct sFBO {
+  GLuint GLName;
+};
+
+#define sMAX_FBO 256;
+sGLFBO sFBOs[sMAX_FBO];
+sInt sFBOCount = 0;
+
 /****************************************************************************/
 
 struct sGeoBuffer
@@ -1300,26 +1308,6 @@ void sGrabScreen(class sTexture2D *tex, sGrabFilterFlags filter, const sRect *ds
 }*/
 
 void sSetTarget(const sTargetPara &para) {
-  //sVERIFY(tex == 0);
-
-  // find rect
-
-  /*sRect r;
-  if (vrp)
-    r = *vrp;
-  else
-    r.Init(0, 0, DXScreenMode.ScreenX, DXScreenMode.ScreenY);*/
-  if(para.Flags & sST_SCISSOR) {
-    glViewport(para.Window.x0, DXScreenMode.ScreenY - para.Window.y1, para.Window.SizeX(), para.Window.SizeY());
-    glScissor(para.Window.x0, DXScreenMode.ScreenY - para.Window.y1, para.Window.SizeX(), para.Window.SizeY());
-    glEnable(GL_SCISSOR_TEST);
-  } else {
-    glDisable(GL_SCISSOR_TEST);
-    glViewport(0, 0, DXScreenMode.ScreenX, DXScreenMode.ScreenY);
-  }
-
-  // clear
-
   glDepthMask(1);
   glColorMask(1, 1, 1, 1);
   glStencilMask(1);
@@ -1331,6 +1319,18 @@ void sSetTarget(const sTargetPara &para) {
     mode |= GL_COLOR_BUFFER_BIT;
   if (para.Flags & sST_CLEARDEPTH)
     mode |= GL_DEPTH_BUFFER_BIT;
+
+  if(!(para.Flags & sST_SCISSOR)) {
+    glClear(mode);
+  }
+  if (para.Window.SizeX() <= 0 || para.Window.SizeY() <= 0) {
+    glViewport(0, 0, 0, 0);
+    glScissor(0, 0, 0, 0);
+  } else {
+    glViewport(para.Window.x0, DXScreenMode.ScreenY - para.Window.y1, para.Window.SizeX(), para.Window.SizeY());
+    glScissor(para.Window.x0, DXScreenMode.ScreenY - para.Window.y1, para.Window.SizeX(), para.Window.SizeY());
+  }
+  glEnable(GL_SCISSOR_TEST);
 
   glClear(mode);
 }
@@ -1470,19 +1470,24 @@ void sSetTexture(sInt stage,class sTextureBase *tex)
         sVERIFY(0);
         break;
       case sTEX_CUBE:
-        sVERIFY(0);
+        glActiveTexture(GL_TEXTURE0 + stage);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, tex->GLName);
+        glDisable(GL_TEXTURE_2D);
+        glDisable(GL_TEXTURE_3D);
+        glEnable(GL_TEXTURE_CUBE_MAP);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, tex->Mipmaps - 1);
         break;
     }
   }
   else
   {
-//    glActiveTexture(GL_TEXTURE0+stage);
+    glActiveTexture(GL_TEXTURE0+stage);
 
-//    glDisable(GL_TEXTURE_2D);
-//    glDisable(GL_TEXTURE_CUBE_MAP);
-//    glDisable(GL_TEXTURE_3D);
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_TEXTURE_CUBE_MAP);
+    glDisable(GL_TEXTURE_3D);
 
-//    glActiveTexture(GL_TEXTURE0);
+    glActiveTexture(GL_TEXTURE0);
   }
 }
 
