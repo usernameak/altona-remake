@@ -35,7 +35,7 @@ class sRenderTargetManager_
   sArray<Reference> Refs;
 
   sTexture2D *ScreenProxy;
-  sBool ScreenProxyDirty;
+  bool ScreenProxyDirty;
 
   Target *Find(sTextureBase *);
   const sRect *Window;
@@ -66,7 +66,7 @@ public:
   void SetScreen(const sRect *window);
   void SetScreen(const sTargetSpec &spec);
   sTexture2D *ReadScreen();                   // grab screen to texture
-  sTexture2D *WriteScreen(sBool finish=0);    // queue a texture for write-to-screen. return 0 for direct screen rendering
+  sTexture2D *WriteScreen(bool finish=0);    // queue a texture for write-to-screen. return 0 for direct screen rendering
   void SetTarget(sTexture2D *tex,sInt clrflags=0,sU32 clrcol=0,sTexture2D *dep=0); // set rendertarget. tex might be 0
   void FinishScreen();                                // write back te
 };

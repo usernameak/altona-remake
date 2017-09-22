@@ -45,15 +45,15 @@ public:
   sArrayRange() : Begin(0), End(0)                    {} // empty range
   sArrayRange(T *beg,T *end) : Begin(beg), End(end)   {}
 
-  sINLINE sBool IsEmpty() const                       { return Begin == End; }
+  sINLINE bool IsEmpty() const                       { return Begin == End; }
   sINLINE sInt GetCount() const                       { return (sInt) (End - Begin); }
 
   sINLINE T &GetHead()                                { return *Begin; }
   sINLINE T &GetTail()                                { return *(End - 1); }
 
   sINLINE T &operator[](sInt pos) const               { return Begin[pos]; }
-  sINLINE sBool operator==(const sArrayRange &x)      { return Begin==x.Begin && End==x.End; }
-  sINLINE sBool operator!=(const sArrayRange &x)      { return Begin!=x.Begin || End!=x.End; }
+  sINLINE bool operator==(const sArrayRange &x)      { return Begin==x.Begin && End==x.End; }
+  sINLINE bool operator!=(const sArrayRange &x)      { return Begin!=x.Begin || End!=x.End; }
 
   sINLINE void RemHead()                              { ++Begin; }
   sINLINE void RemTail()                              { --End; }
@@ -186,13 +186,13 @@ public:
   sDListRange(T *beg,T *end) : Begin(beg), End(end)   {} // beg inclusive, end exclusive
   sDListRange(sDList<T,Offset> &x)                    { if(x.IsEmpty()) Begin = End = 0; else { Begin = x.GetHead(); End = x.GetNext(x.GetTail()); } }
 
-  sINLINE sBool IsEmpty() const                       { return Begin == End; }
+  sINLINE bool IsEmpty() const                       { return Begin == End; }
 
   sINLINE T &GetHead()                                { return *Begin; }
   sINLINE T &GetTail()                                { return *GetType(GetNode(End)->Prev); }
 
-  sINLINE sBool operator==(const sDListRange &x)      { return Begin==x.Begin && End==x.End; }
-  sINLINE sBool operator!=(const sDListRange &x)      { return Begin!=x.Begin || End!=x.End; }
+  sINLINE bool operator==(const sDListRange &x)      { return Begin==x.Begin && End==x.End; }
+  sINLINE bool operator!=(const sDListRange &x)      { return Begin!=x.Begin || End!=x.End; }
 
   sINLINE void RemHead()                              { Begin = GetType(GetNode(Begin)->Next); }
   sINLINE void RemTail()                              { End = GetType(GetNode(End)->Prev); }
@@ -210,7 +210,7 @@ sINLINE sDListRange<Type,Offset> sAll(sDList<Type,Offset> &x) { return sDListRan
 namespace sAlgoImpl
 {
   // Reverse range for bidirectional ranges
-  template<typename Range,sBool RandomAccess>
+  template<typename Range,bool RandomAccess>
   class ReverseRange
   {
   protected:
@@ -222,13 +222,13 @@ namespace sAlgoImpl
 
     ReverseRange(const Range &host) : Host(host)      {}
 
-    sINLINE sBool IsEmpty() const                     { return Host.IsEmpty(); }
+    sINLINE bool IsEmpty() const                     { return Host.IsEmpty(); }
 
     sINLINE ValueType &GetHead()                      { return Host.GetTail(); }
     sINLINE ValueType &GetTail()                      { return Host.GetHead(); }
 
-    sINLINE sBool operator==(const ReverseRange<Range,RandomAccess> &x) { return Host == x.Host; }
-    sINLINE sBool operator!=(const ReverseRange<Range,RandomAccess> &x) { return Host != x.Host; }
+    sINLINE bool operator==(const ReverseRange<Range,RandomAccess> &x) { return Host == x.Host; }
+    sINLINE bool operator!=(const ReverseRange<Range,RandomAccess> &x) { return Host != x.Host; }
 
     sINLINE void RemHead()                            { Host.RemTail(); }
     sINLINE void RemTail()                            { Host.RemHead(); }
@@ -236,21 +236,21 @@ namespace sAlgoImpl
 
   // Reverse range for random-access ranges
   template<typename Range>
-  class ReverseRange<Range,sTRUE> : public ReverseRange<Range,sFALSE>
+  class ReverseRange<Range,true> : public ReverseRange<Range,false>
   {
-    typedef ReverseRange<Range,sTRUE> ThisType;
+    typedef ReverseRange<Range,true> ThisType;
 
   public:
     typedef ThisType DirectType;
     typedef typename Range::ValueType ValueType;
     enum { IsRandomAccess = 1 };
 
-    ReverseRange(const Range &host) : ReverseRange<Range,sFALSE>(host) {}
+    ReverseRange(const Range &host) : ReverseRange<Range,false>(host) {}
 
-    sINLINE sInt GetCount() const                       { return ReverseRange<Range,sFALSE>::Host.GetCount(); }
+    sINLINE sInt GetCount() const                       { return ReverseRange<Range,false>::Host.GetCount(); }
 
-    sINLINE ValueType &operator[](sInt pos) const       { return ReverseRange<Range,sFALSE>::Host[ReverseRange<Range,sFALSE>::Host.GetCount() - 1 - pos]; }
-    sINLINE ThisType Slice(sInt first,sInt last) const  { sInt cnt = ReverseRange<Range,sFALSE>::Host.GetCount(); return ReverseRange(ReverseRange<Range,sFALSE>::Host.Slice(cnt-1-last,cnt-1-first)); }
+    sINLINE ValueType &operator[](sInt pos) const       { return ReverseRange<Range,false>::Host[ReverseRange<Range,false>::Host.GetCount() - 1 - pos]; }
+    sINLINE ThisType Slice(sInt first,sInt last) const  { sInt cnt = ReverseRange<Range,false>::Host.GetCount(); return ReverseRange(ReverseRange<Range,false>::Host.Slice(cnt-1-last,cnt-1-first)); }
 
     sINLINE DirectType GetDirect() const                { return *this; }
   };
@@ -298,7 +298,7 @@ namespace sAlgoImpl
 
   // Range accessors
   template<typename T>
-  sINLINE sBool IsEmpty(const AutoAnyBase &range,WrappedType<T>)
+  sINLINE bool IsEmpty(const AutoAnyBase &range,WrappedType<T>)
   {
     return ((const AutoAny<T> &) range).Val.IsEmpty();
   }
@@ -338,8 +338,8 @@ namespace sAlgoImpl
 /****************************************************************************/
 
 // Less and greater (straightforward).
-template<typename T> struct sCmpLess    { sINLINE sBool operator()(const T &a,const T &b) const { return a<b; } };
-template<typename T> struct sCmpGreater { sINLINE sBool operator()(const T &a,const T &b) const { return b<a; } };
+template<typename T> struct sCmpLess    { sINLINE bool operator()(const T &a,const T &b) const { return a<b; } };
+template<typename T> struct sCmpGreater { sINLINE bool operator()(const T &a,const T &b) const { return b<a; } };
 
 // Less and greater of a designated member (key): Implementation helpers
 namespace sAlgoImpl
@@ -349,10 +349,10 @@ namespace sAlgoImpl
   {
     KeyType T::*Key;
     sINLINE MemberLess(KeyType T::*key) : Key(key)                    {}
-    sINLINE sBool operator()(const T &a,const T &b) const             { return a.*Key < b.*Key; }
-    sINLINE sBool operator()(const T &a,const KeyType &b) const       { return a.*Key < b; }
-    sINLINE sBool operator()(const KeyType &a,const T &b) const       { return a < b.*Key; }
-    sINLINE sBool operator()(const KeyType &a,const KeyType &b) const { return a < b; }
+    sINLINE bool operator()(const T &a,const T &b) const             { return a.*Key < b.*Key; }
+    sINLINE bool operator()(const T &a,const KeyType &b) const       { return a.*Key < b; }
+    sINLINE bool operator()(const KeyType &a,const T &b) const       { return a < b.*Key; }
+    sINLINE bool operator()(const KeyType &a,const KeyType &b) const { return a < b; }
   };
 
   template<typename T,typename KeyType>
@@ -360,10 +360,10 @@ namespace sAlgoImpl
   {
     KeyType T::*Key;
     sINLINE MemberGreater(KeyType T::*key) : Key(key)                 {}
-    sINLINE sBool operator()(const T &a,const T &b) const             { return b.*Key < a.*Key; }
-    sINLINE sBool operator()(const T &a,const KeyType &b) const       { return b < a.*Key; }
-    sINLINE sBool operator()(const KeyType &a,const T &b) const       { return b.*Key < a; }
-    sINLINE sBool operator()(const KeyType &a,const KeyType &b) const { return b < a; }
+    sINLINE bool operator()(const T &a,const T &b) const             { return b.*Key < a.*Key; }
+    sINLINE bool operator()(const T &a,const KeyType &b) const       { return b < a.*Key; }
+    sINLINE bool operator()(const KeyType &a,const T &b) const       { return b.*Key < a; }
+    sINLINE bool operator()(const KeyType &a,const KeyType &b) const { return b < a; }
   };
 
   // Specializations for when the comparands are pointers
@@ -372,10 +372,10 @@ namespace sAlgoImpl
   {
     KeyType T::*Key;
     sINLINE MemberPtrLess(KeyType T::*key) : Key(key)                 {}
-    sINLINE sBool operator()(const T *a,const T *b) const             { return a->*Key < b->*Key; }
-    sINLINE sBool operator()(const T *a,const KeyType &b) const       { return a->*Key < b; }
-    sINLINE sBool operator()(const KeyType &a,const T *b) const       { return a < b->*Key; }
-    sINLINE sBool operator()(const KeyType &a,const KeyType &b)       { return a < b; }
+    sINLINE bool operator()(const T *a,const T *b) const             { return a->*Key < b->*Key; }
+    sINLINE bool operator()(const T *a,const KeyType &b) const       { return a->*Key < b; }
+    sINLINE bool operator()(const KeyType &a,const T *b) const       { return a < b->*Key; }
+    sINLINE bool operator()(const KeyType &a,const KeyType &b)       { return a < b; }
   };
 
   template<typename T,typename KeyType>
@@ -383,10 +383,10 @@ namespace sAlgoImpl
   {
     KeyType T::*Key;
     sINLINE MemberPtrGreater(KeyType T::*key) : Key(key)              {}
-    sINLINE sBool operator()(const T *a,const T *b) const             { return b->*Key < a->*Key; }
-    sINLINE sBool operator()(const T *a,const KeyType &b) const       { return b < a->*Key; }
-    sINLINE sBool operator()(const KeyType &a,const T *b) const       { return b->*Key < a; }
-    sINLINE sBool operator()(const KeyType &a,const KeyType &b) const { return b < a; }
+    sINLINE bool operator()(const T *a,const T *b) const             { return b->*Key < a->*Key; }
+    sINLINE bool operator()(const T *a,const KeyType &b) const       { return b < a->*Key; }
+    sINLINE bool operator()(const KeyType &a,const T *b) const       { return b->*Key < a; }
+    sINLINE bool operator()(const KeyType &a,const KeyType &b) const { return b < a; }
   };
 }
 

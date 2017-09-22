@@ -400,7 +400,7 @@ void ACDoc::_Permute()
   UsePermute = OldUse;
 }
 
-sBool ACDoc::_IsDecl()
+bool ACDoc::_IsDecl()
 {
   if(Scan.Token==sTOK_NAME)
   {
@@ -522,7 +522,7 @@ ACVar *ACDoc::_DeclPost(ACType *type,sInt usages)
   {
     ACFunc *func = new ACFunc;
     var = func;
-    sBool first = 1;
+    bool first = 1;
     while(Scan.Errors==0 && Scan.Token!=')')
     {
       if(!first)
@@ -1173,7 +1173,7 @@ ACLiteral *ACDoc::_Literal()
 void ACDoc::_ParameterList(ACExpression **patch)
 {
   ACExpression *parameter;
-  sBool first = 1;
+  bool first = 1;
 
   Scan.Match('(');
   while(Scan.Errors==0 && Scan.Token!=')')

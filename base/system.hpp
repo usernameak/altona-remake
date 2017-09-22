@@ -36,7 +36,7 @@ void sRestart();
 sInt sGetSystemFlags();
 void sSetErrorCode(sInt i=1);           // set the commandline error code. 0=OK, 1=ERROR
 
-extern sBool sGUIEnabled;
+extern bool sGUIEnabled;
 
 /****************************************************************************/
 
@@ -71,7 +71,7 @@ enum sInitSystemFlags
 
 /****************************************************************************/
 
-sBool sIsSubsystemRunning(const sChar *name);
+bool sIsSubsystemRunning(const sChar *name);
 void sAddSubsystem(const sChar *name,sInt priority,void (*init)(),void (*exit)());
 void sSetRunlevel(sInt priority);
 sInt sGetRunlevel();
@@ -112,11 +112,11 @@ struct sDateAndTime
   bool operator >=(const sDateAndTime &x) const   { return Compare(x) >= 0; }
 };
 
-sBool sExecuteShell(const sChar *cmdline);
-sBool sExecuteShellDetached(const sChar *cmdline);
-sBool sExecuteShell(const sChar *cmdline,class sTextBuffer *tb);
-sBool sExecuteOpen(const sChar *file);
-sBool sGetEnvironmentVariable(const sStringDesc &dst,const sChar *var);
+bool sExecuteShell(const sChar *cmdline);
+bool sExecuteShellDetached(const sChar *cmdline);
+bool sExecuteShell(const sChar *cmdline,class sTextBuffer *tb);
+bool sExecuteOpen(const sChar *file);
+bool sGetEnvironmentVariable(const sStringDesc &dst,const sChar *var);
 
 void sEnableGUI();
 
@@ -128,14 +128,14 @@ sDateAndTime sGetDateAndTime(); // local time
 sDateAndTime sAddLocalTime(sDateAndTime origin,sInt seconds);
 sS64 sDiffLocalTime(sDateAndTime a,sDateAndTime b); // a-b (returns difference in seconds)
 sU8 sGetFirstDayOfWeek(); //! Gets first day of week, depending on users locale setting. (0=Sunday)
-sBool sIsLeapYear(sU16 year);
-sBool sIsDateValid(sU16 year, sU8 month, sU8 day);
-sBool sIsDateValid(const sDateAndTime &date);
+bool sIsLeapYear(sU16 year);
+bool sIsDateValid(sU16 year, sU8 month, sU8 day);
+bool sIsDateValid(const sDateAndTime &date);
 sInt sGetDaysInMonth(sU16 year, sU8 month);
 sU8 sGetDayOfWeek(const sDateAndTime &date);
 
-void sCatchCtrlC(sBool enable=1);
-sBool sGotCtrlC();
+void sCatchCtrlC(bool enable=1);
+bool sGotCtrlC();
 
 #if sPLATFORM==sPLAT_WINDOWS || sPLATFORM==sPLAT_LINUX 
 // system logger: writes to syslog on linux/unix (normal sLog on win)
@@ -143,7 +143,7 @@ void sSysLogInit(const sChar *appname);
 void sSysLog(const sChar *module,const sChar *text);
 sPRINTING1(sSysLogF,sFormatStringBuffer buf; sFormatStringBaseCtx(buf,format);buf,sSysLog(arg1,buf.Get());,const sChar *)
 
-sBool sDaemonize(); // turns the process into a daemon (if successful)
+bool sDaemonize(); // turns the process into a daemon (if successful)
 
 sInt sGetNumInstances(); // returns the number of times, the application is currently running
 #endif
@@ -153,18 +153,18 @@ const sChar *sGetCommandLine();
 
 extern sHooks *sFrameHook;        // called every frame
 extern sHooks *sNewDeviceHook;    // called when new io devices where attached
-extern sHooks1<sBool &> *sAltF4Hook;      // os wants to terminate app. set bool to 0 to prevent
-extern sHooks1<sBool> *sActivateHook;     // called when app is activated/deactivated
+extern sHooks1<bool &> *sAltF4Hook;      // os wants to terminate app. set bool to 0 to prevent
+extern sHooks1<bool> *sActivateHook;     // called when app is activated/deactivated
 extern sHooks1<sStringDesc> *sCrashHook;  // called when app is crashed (after stacktrace is generated)
 extern sHooks *sCheckCapsHook;    // this is your last chance to check device caps...
-extern sHooks2<const sInput2Event &,sBool &> *sInputHook; // called on input (for debugging)
+extern sHooks2<const sInput2Event &,bool &> *sInputHook; // called on input (for debugging)
                                                           // when setting bool param to true in hook input
                                                           // is not send to application
 
 
 
 
-sBool sStackTrace(const sStringDesc &tgt,sInt skipCount=1,sInt maxCount=8); // call stack trace for sFatal etc. return sFALSE if not implemented.
+bool sStackTrace(const sStringDesc &tgt,sInt skipCount=1,sInt maxCount=8); // call stack trace for sFatal etc. return false if not implemented.
 
 // if called within App::OnPaint, prevent recursive painting this once.
 void sPreventPaint();
@@ -234,13 +234,13 @@ sLanguage sGetLanguage();
 // obtaining a license for example, this is only possible with a trial version.
 // This function is inlined, because the compiler is able to optimize/remove surrounding code,
 // so it is harder "patch" the demo to a full title.
-sINLINE sBool sIsTrialVersion() { return sTRUE; }
+sINLINE bool sIsTrialVersion() { return true; }
 sU32 sGetDemoTimeOut();   // 0 : never, otherwise timeout time in ms
 #else
 // A trial version is a full title, with limited functionality only.
 // It actually contains the whole content and logic of the full title.
 // To unlock all features, the user has to obtain a license.
-sBool sIsTrialVersion();
+bool sIsTrialVersion();
 sINLINE sU32 sGetDemoTimeOut() { return 0; }   // 0 : never, otherwise timeout time in ms
 #endif
 
@@ -266,7 +266,7 @@ struct sSysMemInfo
 sInt sGetSystemMemInfo(sSysMemInfo* info=0, sInt count=0);
 
 sS64 sGetUsedMainMemory();          // negative result: memory free
-void sEnableMemoryAllocation(sBool enable);
+void sEnableMemoryAllocation(bool enable);
 
 /****************************************************************************/
 /***                                                                      ***/
@@ -307,7 +307,7 @@ enum sThreadPriority
 };
 
 typedef void (sThreadFunc)(class sThread *, void *);
-//typedef sBool (sThreadFuncBool)(sThread *, void *);
+//typedef bool (sThreadFuncBool)(sThread *, void *);
 
 /****************************************************************************/
 
@@ -377,7 +377,7 @@ class sThread
   sU32 ThreadId;
 #endif
 
-  volatile sBool TerminateFlag;
+  volatile bool TerminateFlag;
   sThreadFunc *Code;
   void *Userdata;
   sU8 *Stack;
@@ -389,7 +389,7 @@ public:
   ~sThread();
 
   void Terminate()          { TerminateFlag = 1; }
-  sBool CheckTerminate()     { return !TerminateFlag; }
+  bool CheckTerminate()     { return !TerminateFlag; }
   sThreadContext *GetContext() { return Context; } 
   void SetHomeCore(sInt core);
 };
@@ -415,7 +415,7 @@ public:
   ~sThreadLock();
 
   void Lock();
-  sBool TryLock();
+  bool TryLock();
   void Unlock();
 };
 
@@ -425,17 +425,17 @@ class sThreadEvent
 {
 #if sPLATFORM==sPLAT_LINUX || sPLATFORM==sPLAT_IOS
   volatile sU32 Signaled;
-  sBool ManualReset;
+  bool ManualReset;
 #else
   void *EventHandle;
 #endif
 public:
-  sThreadEvent(sBool manual=sFALSE);    // with manual == sFALSE the signal gets deactivated be first waiting thread
-  // use manual == sTRUE to disable event only by Reset
+  sThreadEvent(bool manual=false);    // with manual == false the signal gets deactivated be first waiting thread
+  // use manual == true to disable event only by Reset
   // (can be usefull to synchronising multiple threads)
   ~sThreadEvent();
 
-  sBool Wait(sInt timeout=-1);    // 0 for immediate return, -1 for infinite wait
+  bool Wait(sInt timeout=-1);    // 0 for immediate return, -1 for infinite wait
   void Signal();                  // the signal is consumed by the first thread for automatic events
   void Reset();                   // go into nonsignaled state
 };
@@ -591,12 +591,12 @@ public:
 
   // may be called by producer
 
-  sBool IsFull()      { return Write >= Read+max; }
+  bool IsFull()      { return Write >= Read+max; }
   void AddTail(T *e)  { sInt i=Write; sVERIFY(i < Read+max); Data[i&(max-1)] = e; sWriteBarrier(); Write=i+1; }
 
   // may be called by consumer
 
-  sBool IsEmpty()     { return Read >= Write; }
+  bool IsEmpty()     { return Read >= Write; }
   T *RemHead()        { sInt i=Read; if(i>=Write) return 0; T *e=Data[i&(max-1)]; sWriteBarrier(); Read=i+1; return e; }
 
   // this is an approximation!
@@ -623,13 +623,13 @@ public:
   ~sLockQueue()  {}
 
   // may be called by producer
-  sBool IsFull()      { ScopeLock s(&Lock); return Write >= Read+max; }
-  sBool AddTail(const T &e)  { ScopeLock s(&Lock); if(Write >= Read+max) return 0; Data[Write&(max-1)] = e; Write++; return 1; }
+  bool IsFull()      { ScopeLock s(&Lock); return Write >= Read+max; }
+  bool AddTail(const T &e)  { ScopeLock s(&Lock); if(Write >= Read+max) return 0; Data[Write&(max-1)] = e; Write++; return 1; }
 
   // may be called by consumer
 
-  sBool IsEmpty()     { ScopeLock s(&Lock); return Read >= Write; }
-  sBool RemHead(T &e) { ScopeLock s(&Lock); if(Read>=Write) return 0; e=Data[Read&(max-1)]; Read++; return 1; }
+  bool IsEmpty()     { ScopeLock s(&Lock); return Read >= Write; }
+  bool RemHead(T &e) { ScopeLock s(&Lock); if(Read>=Write) return 0; e=Data[Read&(max-1)]; Read++; return 1; }
   const T& Front()    { ScopeLock s(&Lock); sVERIFY(!IsEmpty()); return Data[Read&(max-1)]; } // WARNING: may break when class is used by more than one consumer!
 
   // this is an approximation!
@@ -775,15 +775,15 @@ enum
 sU32 sGetKeyQualifier();                    // get shift-state sKEYQ
 void sInput2ClearQueue();
 void sInput2SendEvent(const sInput2Event& event);
-sBool sInput2PopEvent(sInput2Event& event, sInt time);
-sBool sInput2PeekEvent(sInput2Event& event, sInt time);
+bool sInput2PopEvent(sInput2Event& event, sInt time);
+bool sInput2PeekEvent(sInput2Event& event, sInt time);
 
 sInt sMakeUnshiftedKey(sInt ascii);
 void sSetMouse(sInt x,sInt y);
 void sSetMouseCenter();
-sBool sCheckBreakKey();
+bool sCheckBreakKey();
 
-sBool sInput2IsKeyboardKey(sInt key);
+bool sInput2IsKeyboardKey(sInt key);
 
 /****************************************************************************/
 /***                                                                      ***/
@@ -817,19 +817,19 @@ protected:
 public:
   sFile();
   virtual ~sFile();
-  virtual sBool Close();                      // only needed to get error code. the error code is accumulative!
-  virtual sBool Read(void *data,sDInt size);  // read bytes. may change mapping.
-  virtual sBool Write(const void *data,sDInt size); // write bytes, may change mapping.
+  virtual bool Close();                      // only needed to get error code. the error code is accumulative!
+  virtual bool Read(void *data,sDInt size);  // read bytes. may change mapping.
+  virtual bool Write(const void *data,sDInt size); // write bytes, may change mapping.
   virtual sU8 *Map(sS64 offset,sDInt size);  // map file (independent from SetOffset()) (may fail)  
-  virtual sBool SetOffset(sS64 offset);       // seek to offset
+  virtual bool SetOffset(sS64 offset);       // seek to offset
   virtual sS64 GetOffset();                   // get offset
-  virtual sBool SetSize(sS64);                // change size of file on disk
+  virtual bool SetSize(sS64);                // change size of file on disk
   virtual sS64 GetSize();                     // get size
 
   // asynchronous interface. expect this to be unimplemented for certain file handlers
   // normal on disk files and uncompressed files from a pack file should work tho.
   virtual sFileReadHandle BeginRead(sS64 offset,sDInt size,void *destbuffer=0, sFilePriorityFlags prio=sFP_NORMAL);  // begin reading
-  virtual sBool DataAvailable(sFileReadHandle handle);  // data valid?
+  virtual bool DataAvailable(sFileReadHandle handle);  // data valid?
   virtual void *GetData(sFileReadHandle handle);  // access data (only valid if you didn't specify the buffer yourself!)
   virtual void EndRead(sFileReadHandle handle);   // the data buffer may be reused now
 
@@ -851,13 +851,13 @@ class sFailsafeFile : public sFile // file that stores to a different name and r
 public:
   sFailsafeFile(sFile *host,const sChar *curName,const sChar *tgtName);
   virtual ~sFailsafeFile();
-  virtual sBool Close();
-  virtual sBool Read(void *data,sDInt size)                 { sVERIFYFALSE; return 0; }
-  virtual sBool Write(const void *data,sDInt size)          { return Host->Write(data,size); }
+  virtual bool Close();
+  virtual bool Read(void *data,sDInt size)                 { sVERIFYFALSE; return 0; }
+  virtual bool Write(const void *data,sDInt size)          { return Host->Write(data,size); }
   virtual sU8 *Map(sS64 offset,sDInt size)                  { return Host->Map(offset,size); }
-  virtual sBool SetOffset(sS64 offset)                      { return Host->SetOffset(offset); }
+  virtual bool SetOffset(sS64 offset)                      { return Host->SetOffset(offset); }
   virtual sS64 GetOffset()                                  { return Host->GetOffset(); }
-  virtual sBool SetSize(sS64 newSize)                       { return Host->SetSize(newSize); }
+  virtual bool SetSize(sS64 newSize)                       { return Host->SetSize(newSize); }
   virtual sS64 GetSize()                                    { return Host->GetSize(); }
 };
 
@@ -866,7 +866,7 @@ class sFileHandler
 public:
   virtual ~sFileHandler();
   virtual sFile *Create(const sChar *name,sFileAccess access);
-  virtual sBool Exists(const sChar *name);
+  virtual bool Exists(const sChar *name);
 };
 
 void sAddFileHandler(sFileHandler *);
@@ -875,8 +875,8 @@ void sRemFileHandler(sFileHandler *);
 class sFile *sCreateFile(const sChar *name,sFileAccess access=sFA_READ);
 class sFile *sCreateFailsafeFile(const sChar *name,sFileAccess access=sFA_READ);
 
-class sFile *sCreateMemFile(const void *data,sDInt size,sBool owndata=1,sInt blocksize=1);  // readonly
-class sFile *sCreateMemFile(void *data,sDInt size,sBool owndata=1,sInt blocksize=1,sFileAccess access=sFA_READ);
+class sFile *sCreateMemFile(const void *data,sDInt size,bool owndata=1,sInt blocksize=1);  // readonly
+class sFile *sCreateMemFile(void *data,sDInt size,bool owndata=1,sInt blocksize=1,sFileAccess access=sFA_READ);
 class sFile *sCreateMemFile(const sChar *name);
 
 class sFile *sCreateGrowMemFile();
@@ -893,13 +893,13 @@ public:
 
   sCalcMD5File();
   ~sCalcMD5File();
-  sBool Close();
-  sBool Read(void *data,sDInt size);
-  sBool Write(const void *data,sDInt size);
+  bool Close();
+  bool Read(void *data,sDInt size);
+  bool Write(const void *data,sDInt size);
   sU8 *Map(sS64 offset,sDInt size);
-  sBool SetOffset(sS64 offset);
+  bool SetOffset(sS64 offset);
   sS64 GetOffset();
-  sBool SetSize(sS64);
+  bool SetSize(sS64);
   sS64 GetSize();
 };
 
@@ -909,21 +909,21 @@ public:
 /***                                                                      ***/
 /****************************************************************************/
 
-sBool sCheckFile(const sChar *name);
+bool sCheckFile(const sChar *name);
 sU8 *sLoadFile(const sChar *name);
 sU8 *sLoadFile(const sChar *name,sDInt &size);
-sBool sSaveFile(const sChar *name,const void *data,sDInt bytes);
-sBool sSaveFileFailsafe(const sChar *name,const void *data,sDInt bytes);
+bool sSaveFile(const sChar *name,const void *data,sDInt bytes);
+bool sSaveFileFailsafe(const sChar *name,const void *data,sDInt bytes);
 sChar *sLoadText(const sChar *name);
 //sStream *sOpenText(const sChar *name);
-sBool sSaveTextAnsi(const sChar *name,const sChar *data);
-sBool sSaveTextUnicode(const sChar *name,const sChar *data);
-sBool sSaveTextUTF8(const sChar *name,const sChar *data);
-sBool sSaveTextAnsiIfDifferent(const sChar *name,const sChar *data); // for ASC/makeproject etc.
-sBool sBackupFile(const sChar *name);
+bool sSaveTextAnsi(const sChar *name,const sChar *data);
+bool sSaveTextUnicode(const sChar *name,const sChar *data);
+bool sSaveTextUTF8(const sChar *name,const sChar *data);
+bool sSaveTextAnsiIfDifferent(const sChar *name,const sChar *data); // for ASC/makeproject etc.
+bool sBackupFile(const sChar *name);
 
-sBool sFilesEqual(const sChar *name1,const sChar *name2);
-sBool sFileCalcMD5(const sChar *name, sChecksumMD5 &md5);
+bool sFilesEqual(const sChar *name1,const sChar *name2);
+bool sFileCalcMD5(const sChar *name, sChecksumMD5 &md5);
 
 #if !sSTRIPPED && sPLATFORM==sPLAT_WINDOWS
 // enable a rough emulation of seek time for async file io with given seek time seektime_in_ms>0
@@ -954,30 +954,30 @@ enum sDirEntryFlags
   sDEF_EXISTS = 0x0004,
 };
 
-sBool sCopyFile(const sChar *source,const sChar *dest,sBool failifexists=0);
-sBool sCopyFileFailsafe(const sChar *source,const sChar *dest,sBool failifexists=0);
-sBool sRenameFile(const sChar *source,const sChar *dest, sBool overwrite=sFALSE);
-sBool sFindFile(sChar *foundname, sInt foundnamesize, const sChar *path,const sChar *pattern = 0);
+bool sCopyFile(const sChar *source,const sChar *dest,bool failifexists=0);
+bool sCopyFileFailsafe(const sChar *source,const sChar *dest,bool failifexists=0);
+bool sRenameFile(const sChar *source,const sChar *dest, bool overwrite=false);
+bool sFindFile(sChar *foundname, sInt foundnamesize, const sChar *path,const sChar *pattern = 0);
 #if sPLATFORM==sPLAT_WINDOWS || sPLATFORM==sPLAT_LINUX 
-sBool sLoadDir(sArray<sDirEntry> &list,const sChar *path,const sChar *pattern=0);
+bool sLoadDir(sArray<sDirEntry> &list,const sChar *path,const sChar *pattern=0);
 sDateAndTime sFromFileTime(sU64 fileTime); // OS specific times, e.g. LastWriteTime
 sU64 sToFileTime(sDateAndTime time);
-sBool sSetFileTime(const sChar *name, sU64 lastwritetime);
+bool sSetFileTime(const sChar *name, sU64 lastwritetime);
 #endif
-sBool sChangeDir(const sChar *name);
+bool sChangeDir(const sChar *name);
 void  sGetCurrentDir(const sStringDesc &str);
 void  sGetTempDir(const sStringDesc &str);
 void  sGetAppDataDir(const sStringDesc &str);
-sBool sGetFileInfo(const sChar *name,sDirEntry *);
-sBool sGetDiskSizeInfo(const sChar *path, sS64 &availablesize, sS64 &totalsize);
-sBool sMakeDir(const sChar *);          // make one directory
-sBool sMakeDirAll(const sChar *);       // make all directories. may fail with strage paths.
-sBool sCheckDir(const sChar *);
-sBool sDeleteFile(const sChar *);
-sBool sDeleteDir(const sChar *name);
-sBool sGetFileWriteProtect(const sChar *,sBool &prot);
-sBool sSetFileWriteProtect(const sChar *,sBool prot);
-sBool sIsBelowCurrentDir(const sChar *relativePath);
+bool sGetFileInfo(const sChar *name,sDirEntry *);
+bool sGetDiskSizeInfo(const sChar *path, sS64 &availablesize, sS64 &totalsize);
+bool sMakeDir(const sChar *);          // make one directory
+bool sMakeDirAll(const sChar *);       // make all directories. may fail with strage paths.
+bool sCheckDir(const sChar *);
+bool sDeleteFile(const sChar *);
+bool sDeleteDir(const sChar *name);
+bool sGetFileWriteProtect(const sChar *,bool &prot);
+bool sSetFileWriteProtect(const sChar *,bool prot);
+bool sIsBelowCurrentDir(const sChar *relativePath);
 
 /****************************************************************************/
 /***                                                                      ***/
@@ -993,7 +993,7 @@ public:
   virtual ~sVideoWriter();
 
   // Writes a frame of video (ARGB8888)
-  virtual sBool WriteFrame(const sU32 *data) = 0;
+  virtual bool WriteFrame(const sU32 *data) = 0;
 };
 
 sVideoWriter *sCreateVideoWriter(const sChar *filename,const sChar *codec,sF32 fps,sInt xRes,sInt yRes);
@@ -1004,7 +1004,7 @@ sVideoWriter *sCreateVideoWriter(const sChar *filename,const sChar *codec,sF32 f
 /***                                                                      ***/
 /****************************************************************************/
 
-sBool sGetUserName(const sStringDesc &dest, sInt joypadId);
+bool sGetUserName(const sStringDesc &dest, sInt joypadId);
 
 /****************************************************************************/
 

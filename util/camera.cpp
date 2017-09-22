@@ -117,8 +117,8 @@ sFreeCamera::sFreeCamera()
   LookSpeed = 0.002f;
   Damping = 0.98f;
   Moving = 0;
-  MouseControl = sTRUE;
-  JoypadControl = sTRUE;
+  MouseControl = true;
+  JoypadControl = true;
 }
 
 void sFreeCamera::OnFrame(sInt delta,sViewport &vp)
@@ -223,7 +223,7 @@ void sFreeCamera::PrintPos()
 #if 0
 sCameraXSI::sCameraXSI()
 {
-  StickyMode = sTRUE;
+  StickyMode = true;
   Init();
 }
 
@@ -238,7 +238,7 @@ void sCameraXSI::Init()
   EulerRot.Init(0,0,0);
   Scale.Init(1.0f,1.0f,1.0f);
   Distance = 10;
-  DollyActive = sFALSE;
+  DollyActive = false;
   DollyStep   = 0.0f;
 }
 
@@ -286,7 +286,7 @@ void sCameraXSI::OnDrag(const sMouseData &md)
       if (!DollyActive)
       {
         DollyStep = Distance/200.0f;
-        DollyActive = sTRUE;
+        DollyActive = true;
       }
 
       sF32 speed = md.MouseButtons==4 ? 0.5f :
@@ -298,7 +298,7 @@ void sCameraXSI::OnDrag(const sMouseData &md)
     }
     else
     {
-      DollyActive = sFALSE;
+      DollyActive = false;
     }
   }
   if ((KeyMask&XSI_SELECT) && (md.MouseButtons&sMB_MIDDLE))
@@ -306,7 +306,7 @@ void sCameraXSI::OnDrag(const sMouseData &md)
     if (!DollyActive)
     {
       DollyStep = Distance/200.0f;
-      DollyActive = sTRUE;
+      DollyActive = true;
     }
 
     sF32 speed = 1.0f;

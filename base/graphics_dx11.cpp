@@ -71,7 +71,7 @@ static ID3D11Buffer *DXQuadList;
 static sTexture2D *DXBackBufferTex[MAXSCREENS];
 static sTexture2D *DXZBufferTex[MAXSCREENS];
 static sTexture2D *DXRTZBufferTex;
-static sBool DXRenderTargetActive;
+static bool DXRenderTargetActive;
 static sInt DXPresentInterval;
 static sInt DXScreenCount;
 
@@ -165,7 +165,7 @@ void DXError(sU32 err,const sChar *file,sInt line,const sChar *system);
 static sGraphicsStats Stats;
 static sGraphicsStats BufferedStats;
 static sGraphicsStats DisabledStats;
-static sBool StatsEnable;
+static bool StatsEnable;
 
 static sInt RenderClippingFlag;
 static sU32 RenderClippingData[4096];
@@ -176,7 +176,7 @@ static sU32 RenderClippingData[4096];
 /***                                                                      ***/
 /****************************************************************************/
 
-void ConvertFlags(sU32 flags,sInt &mm,D3D11_BIND_FLAG &bind,D3D11_USAGE &usage,DXGI_FORMAT &fmt_res,DXGI_FORMAT &fmt_tex,DXGI_FORMAT &fmt_view,sBool &ds);
+void ConvertFlags(sU32 flags,sInt &mm,D3D11_BIND_FLAG &bind,D3D11_USAGE &usage,DXGI_FORMAT &fmt_res,DXGI_FORMAT &fmt_tex,DXGI_FORMAT &fmt_view,bool &ds);
 
 LRESULT WINAPI MsgProcMultiscreen(HWND win,UINT msg,WPARAM wparam,LPARAM lparam)
 {
@@ -184,7 +184,7 @@ LRESULT WINAPI MsgProcMultiscreen(HWND win,UINT msg,WPARAM wparam,LPARAM lparam)
   {
   case WM_CLOSE:
     {
-      sBool mayexit = 1;
+      bool mayexit = 1;
       sAltF4Hook->Call(mayexit);
       if(mayexit)
         sExit(); 
@@ -517,7 +517,7 @@ void InitGFX(sInt flags_,sInt xs_,sInt ys_)
     if((1ULL<<i)&avail)
     {
       sInt mm;
-      sBool ds;
+      bool ds;
       D3D11_BIND_FLAG bind;
       D3D11_USAGE usage;
       DXGI_FORMAT fmt_res;
@@ -772,7 +772,7 @@ void sSetRenderClipping(sRect *r,sInt count)
   RenderClippingFlag = 1;
 }
 
-sBool sRender3DBegin()
+bool sRender3DBegin()
 {
   if(!DXActive)
     return 0;
@@ -803,7 +803,7 @@ struct cbd
   sMatrix44 ms_ss;
 };
 
-void sRender3DEnd(sBool flip)
+void sRender3DEnd(bool flip)
 {
   // checking sRender3DBEgin / End nesting
 
@@ -865,7 +865,7 @@ void sSetDesiredFrameRate(sF32 rate)
 }
 
 
-void SetXSIModeD3D(sBool enable)
+void SetXSIModeD3D(bool enable)
 {
 }
 
@@ -875,7 +875,7 @@ void SetXSIModeD3D(sBool enable)
 /***                                                                      ***/
 /****************************************************************************/
 
-sBool sSetOversizeScreen(sInt xs,sInt ys,sInt fsaa,sBool mayfail)
+bool sSetOversizeScreen(sInt xs,sInt ys,sInt fsaa,bool mayfail)
 {
   sScreenMode sm;
   sGetScreenMode(sm);
@@ -1081,7 +1081,7 @@ void sGetScreenMode(sScreenMode &sm)
   sm = DXScreenMode;
 }
 
-sBool sSetScreenMode(const sScreenMode &smorg)
+bool sSetScreenMode(const sScreenMode &smorg)
 {
   sScreenMode sm;
 
@@ -1162,7 +1162,7 @@ void sSetTarget(const sTargetPara &para)
 
   DXRenderTargetActive = 1;
 
-  sBool ms = 0;
+  bool ms = 0;
   
   if(!(para.Flags & sST_NOMSAA) && !(para.Flags & sST_READZ))
   {
@@ -1372,7 +1372,7 @@ sGpuToCpu::sGpuToCpu(sInt flags,sInt xs,sInt ys)
   DXGI_FORMAT fmt_res,fmt_tex,fmt_view;
   D3D11_USAGE usage;
   D3D11_BIND_FLAG bind;
-  sBool ds;
+  bool ds;
   sInt mm;
 
   ConvertFlags(flags,mm,bind,usage,fmt_res,fmt_tex,fmt_view,ds);
@@ -1467,15 +1467,15 @@ void sCopyTexture(const sCopyTexturePara &para)
 /***                                                                      ***/
 /****************************************************************************/
 
-void sConvertsRGBTex(sBool e)
+void sConvertsRGBTex(bool e)
 {
   sVERIFYFALSE;
 }
 
-sBool sConvertsRGBTex()
+bool sConvertsRGBTex()
 {
   sVERIFYFALSE;
-  return sFALSE;
+  return false;
 }
 
 sTexture2D *sGetCurrentFrontBuffer() { return 0; }
@@ -1505,7 +1505,7 @@ void sGetGraphicsStats(sGraphicsStats &stat)
   stat = BufferedStats;
 }
 
-void sEnableGraphicsStats(sBool enable)
+void sEnableGraphicsStats(bool enable)
 {
   if(!enable && StatsEnable)
   {
@@ -2629,14 +2629,14 @@ void sCopyCubeFace(sTexture2D *dest, sTextureCube *src, sTexCubeFace cf)
 {
 }
 
-sBool sReadTexture(sReader &s, sTextureBase *&tex)
+bool sReadTexture(sReader &s, sTextureBase *&tex)
 {
-  return sFALSE;
+  return false;
 }
 
 /****************************************************************************/
 
-void ConvertFlags(sU32 flags,sInt &mm,D3D11_BIND_FLAG &bind,D3D11_USAGE &usage,DXGI_FORMAT &fmt_res,DXGI_FORMAT &fmt_tex,DXGI_FORMAT &fmt_view,sBool &ds)
+void ConvertFlags(sU32 flags,sInt &mm,D3D11_BIND_FLAG &bind,D3D11_USAGE &usage,DXGI_FORMAT &fmt_res,DXGI_FORMAT &fmt_tex,DXGI_FORMAT &fmt_view,bool &ds)
 {
   ds = 0;
   fmt_tex = DXGI_FORMAT_UNKNOWN;
@@ -2749,7 +2749,7 @@ sU64 sGetAvailTextureFormats()
 
 /****************************************************************************/
 
-void sPackDXT(sU8 *d,sU32 *bmp,sInt xs,sInt ys,sInt format,sBool dither)
+void sPackDXT(sU8 *d,sU32 *bmp,sInt xs,sInt ys,sInt format,bool dither)
 {
 //  sInt formatflags = format;
   format &= sTEX_FORMAT;
@@ -2874,7 +2874,7 @@ void sTexture2D::Create2(sInt flags)
   D3D11_BIND_FLAG bind;
   D3D11_USAGE usage;
   DXGI_FORMAT fmt_res,fmt_tex,fmt_view;
-  sBool ds;
+  bool ds;
 
   ConvertFlags(flags,Mipmaps,bind,usage,fmt_res,fmt_tex,fmt_view,ds);
   if(usage==D3D11_USAGE_DYNAMIC)
@@ -3097,7 +3097,7 @@ void sTextureCube::Create2(sInt flags)
   D3D11_BIND_FLAG bind;
   D3D11_USAGE usage;
   DXGI_FORMAT fmt_res,fmt_tex,fmt_view;
-  sBool ds;
+  bool ds;
 
   ConvertFlags(flags,Mipmaps,bind,usage,fmt_res,fmt_tex,fmt_view,ds);
   if(usage==D3D11_USAGE_DYNAMIC)
@@ -3227,7 +3227,7 @@ sTexture3D::sTexture3D(sInt xs, sInt ys, sInt zs, sU32 flags)
   D3D11_BIND_FLAG bind;
   D3D11_USAGE usage;
   DXGI_FORMAT fmt_res,fmt_tex,fmt_view;
-  sBool ds;
+  bool ds;
 
   ConvertFlags(flags,Mipmaps,bind,usage,fmt_res,fmt_tex,fmt_view,ds);
   if(usage==D3D11_USAGE_DYNAMIC)
@@ -3739,7 +3739,7 @@ sCSBuffer::sCSBuffer(sInt flags,sInt elements,sInt elementsize,const void *initd
   D3D11_BIND_FLAG bind;
 
   sInt mm_dummy;
-  sBool ds_dummy;
+  bool ds_dummy;
   D3D11_USAGE usage_dummy;
   ConvertFlags(Flags,mm_dummy,bind,usage_dummy,fmt_res,fmt_tex,fmt_view,ds_dummy);
   fmt_uav = fmt_view;
@@ -3957,7 +3957,7 @@ void sComputeShader::SetTexture(sInt n,sTextureBase *tex,sInt tflags)
     DXsrv[n] = tex->DXTexView;
 }
 
-void sComputeShader::SetUAV(sInt n,sTextureBase *tex,sBool clear)
+void sComputeShader::SetUAV(sInt n,sTextureBase *tex,bool clear)
 {
   UAV[n] = tex;
   DXuavp[n] = 0;

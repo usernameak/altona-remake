@@ -53,7 +53,7 @@ class sScannerSource
 public:
   sScannerSource();
   virtual ~sScannerSource() {}    // destructor has to be virtual
-  virtual sBool Refill() { return 1; }  // call this every linefeed (at least)
+  virtual bool Refill() { return 1; }  // call this every linefeed (at least)
   const sChar *ScanPtr;           // *ScanPtr++ to scan forward
   sInt Line;                      // line reference for error messages
   sInt BeginOfFile;               // beginning of line, may be plus some whitespace or comments
@@ -63,9 +63,9 @@ public:
 class sScannerSourceText : public sScannerSource
 {
   const sChar *Start;
-  sBool DeleteMe;
+  bool DeleteMe;
 public:
-  sScannerSourceText(const sChar *buffer,sBool deleteme=0);
+  sScannerSourceText(const sChar *buffer,bool deleteme=0);
   ~sScannerSourceText();
 };
 
@@ -78,8 +78,8 @@ class sScannerSourceFile : public sScannerSource
 public:
   sScannerSourceFile();
   ~sScannerSourceFile();
-  sBool Load(const sChar *filename);
-  sBool Refill();
+  bool Load(const sChar *filename);
+  bool Refill();
 };
 
 class sScanner
@@ -105,7 +105,7 @@ private:
     sS64 CharsLeftInFile;
     sInt Line;
     void Init(const sChar *text);
-    sBool InitFile(const sChar *filename);
+    bool InitFile(const sChar *filename);
     void Exit();
   };
 */
@@ -124,9 +124,9 @@ public:
   sScanner();
   ~sScanner();
   void Init();                                          // full initialisation, delete all tokens
-  sBool StartFile(const sChar *filename, sBool reporterror=sTRUE);  // start parsing
+  bool StartFile(const sChar *filename, bool reporterror=true);  // start parsing
   void Start(const sChar *text);
-  sBool IncludeFile(const sChar *filename);             // include file, no errors generated if file not found
+  bool IncludeFile(const sChar *filename);             // include file, no errors generated if file not found
   void AddToken(const sChar *name,sInt token);          // add a single token
   void AddTokens(const sChar *SingleCharacterTokens);   // like AddTokens(L"+-*/")
   void RemoveToken(const sChar *name);                  // remove a single token
@@ -175,12 +175,12 @@ public:
   sInt ScanInt();
   sF32 ScanFloat();
   sInt ScanChar();
-  sBool ScanRaw(sPoolString &, sInt opentoken, sInt closetoken);
-  sBool ScanRaw(sTextBuffer &, sInt opentoken, sInt closetoken);
-  sBool ScanName(sPoolString &);
-  sBool ScanString(sPoolString &);
-  sBool ScanNameOrString(sPoolString &);
-  sBool ScanLine(sTextBuffer &);
+  bool ScanRaw(sPoolString &, sInt opentoken, sInt closetoken);
+  bool ScanRaw(sTextBuffer &, sInt opentoken, sInt closetoken);
+  bool ScanName(sPoolString &);
+  bool ScanString(sPoolString &);
+  bool ScanNameOrString(sPoolString &);
+  bool ScanLine(sTextBuffer &);
   void Match(sInt token);
   void MatchName(const sChar *);
   void MatchString(const sChar *);
@@ -190,9 +190,9 @@ public:
 
   // these function check if a token was found, consume it if true, and do nothing if false
 
-  sBool IfToken(sInt tok);
-  sBool IfName(const sPoolString name);
-  sBool IfString(const sPoolString name);
+  bool IfToken(sInt tok);
+  bool IfName(const sPoolString name);
+  bool IfString(const sPoolString name);
 };
 
 enum sScannerTokens
@@ -258,26 +258,26 @@ namespace sScannerUtil
   // Tries to parse a string property like
   //   name = "value";
   // and returns true if the given property was found.
-  sBool StringProp(sScanner *scan,const sChar *name,sPoolString &tgt);
-  sBool StringProp(sScanner *scan,const sChar *name,const sStringDesc &tgt);
+  bool StringProp(sScanner *scan,const sChar *name,sPoolString &tgt);
+  bool StringProp(sScanner *scan,const sChar *name,const sStringDesc &tgt);
 
   // Int property
-  sBool IntProp(sScanner *scan,const sChar *name,sInt &tgt);
+  bool IntProp(sScanner *scan,const sChar *name,sInt &tgt);
 
   // Float property
-  sBool FloatProp(sScanner *scan,const sChar *name,sF32 &tgt);
+  bool FloatProp(sScanner *scan,const sChar *name,sF32 &tgt);
 
   // GUID property (name="{bla-bla-blah-blah}";)
-  sBool GUIDProp(sScanner *scan,const sChar *name,sGUID &tgt);
+  bool GUIDProp(sScanner *scan,const sChar *name,sGUID &tgt);
 
-  // Optional boolean property (set tgt to sTRUE if "name;" found)
-  sBool OptionalBoolProp(sScanner *scan,const sChar *name,sBool &tgt);
+  // Optional boolean property (set tgt to true if "name;" found)
+  bool OptionalBoolProp(sScanner *scan,const sChar *name,bool &tgt);
 
   // Enum property (choices given as a pattern for sFindChoice)
-  sBool EnumProp(sScanner *scan,const sChar *name,const sChar *choices,sInt &tgt);
+  bool EnumProp(sScanner *scan,const sChar *name,const sChar *choices,sInt &tgt);
 
   // Flags property (pattern like for sFindFlag)
-  sBool FlagsProp(sScanner *scan,const sChar *name,const sChar *pattern,sInt &tgt);
+  bool FlagsProp(sScanner *scan,const sChar *name,const sChar *pattern,sInt &tgt);
 }
 
 /****************************************************************************/
@@ -334,7 +334,7 @@ class sRegex
   sArray<sRegexMarker *> Success;
 
   sRegexState *Start,*End;
-  sBool Valid;
+  bool Valid;
   const sChar *Scan;
   sInt GroupId;
   const sChar *OriginalPattern;
@@ -353,7 +353,7 @@ class sRegex
   sRegexState *_Repeat(sRegexState *o);
   sRegexState *_Cat(sRegexState *o);
   sRegexState *_Expr(sRegexState *o);
-  sBool PrepareAll(const sChar *expr);
+  bool PrepareAll(const sChar *expr);
 
   // state machine maintainance
 
@@ -368,15 +368,15 @@ public:
 
   sRegex();
   ~sRegex();
-  sBool SetPattern(const sChar *expr); 
-  sBool MatchPattern(const sChar *string);
+  bool SetPattern(const sChar *expr); 
+  bool MatchPattern(const sChar *string);
   void DebugDump();
 
   // querying the captured strings.
 
   sInt GetMatchCount() { return Valid ? Success.GetCount() : 0; }
   sInt GetGroupCount() { return GroupId; }
-  sBool GetGroup(sInt n,const sStringDesc &desc,sInt match=0);
+  bool GetGroup(sInt n,const sStringDesc &desc,sInt match=0);
 };
 
 /****************************************************************************/

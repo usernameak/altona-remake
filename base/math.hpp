@@ -75,7 +75,7 @@ enum
 /***                                                                      ***/
 /****************************************************************************/
 
-// Finds real roots (=Nullstellen) of at² + bt + c, puts them into t,
+// Finds real roots (=Nullstellen) of atï¿½ + bt + c, puts them into t,
 // and returns how many there are. Not very fast, but handles all
 // degenerate cases and is quite accurate.
 sInt sSolveQuadratic(sF32 t[],sF32 a,sF32 b,sF32 c);
@@ -136,8 +136,8 @@ public:
   sF32 LengthSq() const                           { return x*x+y*y; }
 
   operator sFRect() const                         { return sFRect(x,y); }
-  inline sBool operator==(sVector2Arg v) const    { return x==v.x && y==v.y; }
-  inline sBool operator!=(sVector2Arg v) const    { return x!=v.x || y!=v.y; }
+  inline bool operator==(sVector2Arg v) const    { return x==v.x && y==v.y; }
+  inline bool operator!=(sVector2Arg v) const    { return x!=v.x || y!=v.y; }
 };
 
 class sVector31
@@ -167,8 +167,8 @@ public:
 
   inline sF32 &operator[](sInt i)                   { return (&x)[i]; }
   inline const sF32 &operator[](sInt i) const       { return (&x)[i]; }
-  inline sBool operator==(sVector31Arg v)const	    { return x==v.x && y==v.y && z==v.z; }
-  inline sBool operator!=(sVector31Arg v)const	    { return x!=v.x || y!=v.y || z!=v.z; }
+  inline bool operator==(sVector31Arg v)const	    { return x==v.x && y==v.y && z==v.z; }
+  inline bool operator!=(sVector31Arg v)const	    { return x!=v.x || y!=v.y || z!=v.z; }
 };
 
 class sVector30
@@ -219,8 +219,8 @@ public:
   
   inline sF32 &operator[](sInt i)                 { return (&x)[i]; }
   inline const sF32 &operator[](sInt i) const     { return (&x)[i]; }
-  inline sBool operator==(sVector30Arg v)const	  { return x==v.x && y==v.y && z==v.z; }
-  inline sBool operator!=(sVector30Arg v)const	  { return x!=v.x || y!=v.y || z!=v.z; }
+  inline bool operator==(sVector30Arg v)const	  { return x==v.x && y==v.y && z==v.z; }
+  inline bool operator!=(sVector30Arg v)const	  { return x!=v.x || y!=v.y || z!=v.z; }
 };
 
 class sVector4
@@ -261,8 +261,8 @@ public:
   inline sF32 &operator[](sInt i)                 { return (&x)[i]; }
   inline const sF32 &operator[](sInt i) const     { return (&x)[i]; }
 
-  sBool operator==(sVector4Arg v)const;
-  inline sBool operator!=(sVector4Arg v)const     { return x!=v.x||y!=v.y||z!=v.z; }
+  bool operator==(sVector4Arg v)const;
+  inline bool operator!=(sVector4Arg v)const     { return x!=v.x||y!=v.y||z!=v.z; }
 };
 
 inline sU32 sMakeColorRGBA(sF32 *p) { sVector4 c(p[0],p[1],p[2],p[3]); return c.GetColor(); }
@@ -489,8 +489,8 @@ public:
   void InvertOrthogonal();  // invert a matrix that is Orthogonal but not Orthonormal
   sF32 Determinant3x3() const;    // calculate determinant of 3x3 part of matrix
 
-  sBool Invert3();
-  sBool Invert34();
+  bool Invert3();
+  bool Invert34();
 
   void Orthonormalize();    // Gram-Schmidt orthonormalization, doesn't touch l
   void Init(sQuaternionArg , sVector31Arg );
@@ -549,8 +549,8 @@ public:
   void Invert()                                         { sMatrix44 mat(*this); Invert(mat); }
   sF32 Determinant() const;
 
-  sBool operator==(const sMatrix44 &mat) const;
-  sBool operator!=(const sMatrix44 &mat) const          { return !(*this == mat); }
+  bool operator==(const sMatrix44 &mat) const;
+  bool operator!=(const sMatrix44 &mat) const          { return !(*this == mat); }
 
   void Scale(sF32 x, sF32 y, sF32 z);
   void Orthonormalize();    // Gram-Schmidt orthonormalization
@@ -691,9 +691,9 @@ public:
   void Init(const sAABBoxC &);
   void Clear();
 
-  sBool HitPoint(sVector31Arg p) const;
-  sBool HitRay(sF32 &dist,const sRay &ray) const;
-  sBool HitInvRay(sF32 &dist,sVector31Arg origin,sVector30Arg invDir) const;
+  bool HitPoint(sVector31Arg p) const;
+  bool HitRay(sF32 &dist,const sRay &ray) const;
+  bool HitInvRay(sF32 &dist,sVector31Arg origin,sVector30Arg invDir) const;
   void Add(const sAABBox &box);
   void Add(sVector31Arg p);
   void Add(const sAABBox &box,const sMatrix34 &mat);
@@ -704,19 +704,19 @@ public:
   void MakePoints(sVector31 *points) const;
   sF32 CalcArea()const;
   sF32 CalcVolume()const;
-  sBool IsEmpty() const;
-  sBool IsValid() const;    // check if min<=max (empty bboxes are valid)
+  bool IsEmpty() const;
+  bool IsValid() const;    // check if min<=max (empty bboxes are valid)
 
-  sBool Intersects(const sAABBox &b) const;
-  sBool IntersectsXZ(const sAABBox &b) const;
-  sBool IntersectsMovingBox(const sAABBox &box,sVector30Arg v,sF32 tMin,sF32 tMax) const;
-  sBool IntersectsMovingBoxInv(const sAABBox &box,sVector30Arg invV,sF32 tMin,sF32 tMax) const;
+  bool Intersects(const sAABBox &b) const;
+  bool IntersectsXZ(const sAABBox &b) const;
+  bool IntersectsMovingBox(const sAABBox &box,sVector30Arg v,sF32 tMin,sF32 tMax) const;
+  bool IntersectsMovingBoxInv(const sAABBox &box,sVector30Arg invV,sF32 tMin,sF32 tMax) const;
   sF32 DistanceToSq(sVector31Arg p) const;
   sF32 DistanceTo(sVector31Arg p) const { return sFSqrt(DistanceToSq(p)); }
   sInt Classify(sVector30Arg n, sF32 d);
 
   sAABBox &operator*=(const sMatrix34 &m);
-  sBool operator==(const sAABBox& b)const { return Min==b.Min&&Max==b.Max; }
+  bool operator==(const sAABBox& b)const { return Min==b.Min&&Max==b.Max; }
 };
 
 inline sAABBox operator* (const sAABBox &bbox,const sMatrix34 &m)  { sAABBox r=bbox; r*=m; return r; }
@@ -779,24 +779,24 @@ public:
   sRay() {}
   sRay(sVector31Arg s,sVector30Arg d) : Start(s),Dir(d) {}
 
-  sBool HitTriangle(sF32 &dist,sVector31Arg p0,sVector31Arg p1,sVector31Arg p2) const;
-  sBool HitTriangleDoubleSided(sF32 &dist,sVector31Arg p0,sVector31Arg p1,sVector31Arg p2) const;
-  sBool HitTriangleBary(sF32 &dist,sVector31Arg p0,sVector31Arg p1,sVector31Arg p2,sF32 &u0,sF32 &u1,sF32 &u2) const;
-  sBool HitPlane(sVector31 &intersect,sVector4Arg plane) const;
-  sBool HitPlaneDoubleSided(sVector31 &intersect,sVector4Arg plane) const;
-  sBool HitSphere(sF32 *dist, sVector31Arg center, sF32 radius) const;
-  sBool HitAABB(sF32 &min, sF32 &max, const sVector31& bbmin,const sVector31& bbmax)const;
-  sBool HitBilinearPatch(sF32 &dist,const sVector31 &p00,const sVector31 &p01,const sVector31 &p10,const sVector31 &p11,sF32 *uOut,sF32 *vOut) const;
+  bool HitTriangle(sF32 &dist,sVector31Arg p0,sVector31Arg p1,sVector31Arg p2) const;
+  bool HitTriangleDoubleSided(sF32 &dist,sVector31Arg p0,sVector31Arg p1,sVector31Arg p2) const;
+  bool HitTriangleBary(sF32 &dist,sVector31Arg p0,sVector31Arg p1,sVector31Arg p2,sF32 &u0,sF32 &u1,sF32 &u2) const;
+  bool HitPlane(sVector31 &intersect,sVector4Arg plane) const;
+  bool HitPlaneDoubleSided(sVector31 &intersect,sVector4Arg plane) const;
+  bool HitSphere(sF32 *dist, sVector31Arg center, sF32 radius) const;
+  bool HitAABB(sF32 &min, sF32 &max, const sVector31& bbmin,const sVector31& bbmax)const;
+  bool HitBilinearPatch(sF32 &dist,const sVector31 &p00,const sVector31 &p01,const sVector31 &p10,const sVector31 &p11,sF32 *uOut,sF32 *vOut) const;
   sInt IntersectPlane(sF32 &t, sVector4Arg plane)const;  // 0 not intersection, 1 normal intersection, 2 ray in plane
 
   // warning: (out)dist is NOT ACCURATE, but about in the area of where it should be.
-  //sBool HitCappedCylinder(sVector31Arg cylstart, sVector31Arg cylend, sF32 radius, sF32 *dist=0) const; 
+  //bool HitCappedCylinder(sVector31Arg cylstart, sVector31Arg cylend, sF32 radius, sF32 *dist=0) const; 
 };
 
 inline sRay operator* (const sRay &r,const sMatrix34 &m) { sRay x(r.Start*m,r.Dir*m); return x; }
 
 // ird : 1 / ray dir
-sBool sIntersectRayAABB(sF32 &min, sF32 &max, const sVector31 &ro, const sVector30 &ird, const sVector31 &bbmin, const sVector31 &bbmax);
+bool sIntersectRayAABB(sF32 &min, sF32 &max, const sVector31 &ro, const sVector30 &ird, const sVector31 &bbmin, const sVector31 &bbmax);
 
 inline sWriter& operator| (sWriter &s,const sRay &a) { s | a.Start | a.Dir;  return s; }
 inline sReader& operator| (sReader &s,      sRay &a) { s | a.Start | a.Dir;  return s; }
@@ -851,26 +851,26 @@ public:
   sInt IsInside(const sOBBox &b) const; // more work than for AABBs!
 
   // Just the rejection test (fully outside yes/no)
-  sINLINE sBool IsOutside(const sAABBoxC &b) const
+  sINLINE bool IsOutside(const sAABBoxC &b) const
   {
     for(sInt i=0;i<6;i++)
     {
       sF32 m = b.Center ^ Planes[i];
       sF32 n = b.Radius ^ AbsPlanes[i];
-      if(m+n<0.0f) return sTRUE;
+      if(m+n<0.0f) return true;
     }
 
-    return sFALSE;
+    return false;
   }
 
-  sINLINE sBool IsOutside(const sAABBox &b) const
+  sINLINE bool IsOutside(const sAABBox &b) const
   {
     sAABBoxC box;
     box.Init(b);
     return IsOutside(box);
   }
 
-  sBool IsOutside(const sOBBox &b) const; // more work than for AABBs!
+  bool IsOutside(const sOBBox &b) const; // more work than for AABBs!
 
   void Transform(const sFrustum &src,const sMatrix34 &mat);
   void Transform(const sFrustum &src,const sMatrix34CM &mat);
@@ -953,7 +953,7 @@ public:
   void Invert(); // warning: sSRTs are not closed under invert!
 
   void ToString(const sStringDesc &outStr) const;
-  sBool FromString(const sChar *str);
+  bool FromString(const sChar *str);
 };
 
 inline sWriter& operator| (sWriter &s,const sSRT &a) { s | a.Scale | a.Rotate | a.Translate; return s; }
@@ -1096,13 +1096,13 @@ struct sFilter2Pole
 /***                                                                      ***/
 /****************************************************************************/
 
-// x,y = 8:16 (größere zahlen loopen)
+// x,y = 8:16 (grï¿½ï¿½ere zahlen loopen)
 
 sF32 sPerlin2D(sInt x,sInt y,sInt mask=255,sInt seed=0);  
 sF32 sPerlin3D(sInt x,sInt y,sInt z,sInt mask=255,sInt seed=0);  
 void sPerlinDerive3D(sInt x,sInt y,sInt z,sInt mask,sInt seed,sF32 &value,sVector30 &dir);
 
-// x,y = 0..256 (größere zahlen loopen)
+// x,y = 0..256 (grï¿½ï¿½ere zahlen loopen)
 // mode = 0: x
 // mode = 1: abs(x)
 // mode = 2: sin(x*sPI)
@@ -1116,8 +1116,8 @@ sF32 sPerlin2D(sF32 x,sF32 y,sInt octaves=1,sF32 falloff=1.0f,sInt mode=0,sInt s
 /***                                                                      ***/
 /****************************************************************************/
 
-sBool sGetIntersection(sVector2Arg u1, sVector2Arg u2, sVector2Arg v1, sVector2Arg v2, sF32 *s=sNULL, sF32 *t=sNULL, sVector2 *p=sNULL);
-sBool sGetIntersection(sVector2Arg u1, sVector2Arg u2, const sFRect &rect, sF32 *s=sNULL, sVector2 *p=sNULL);
+bool sGetIntersection(sVector2Arg u1, sVector2Arg u2, sVector2Arg v1, sVector2Arg v2, sF32 *s=sNULL, sF32 *t=sNULL, sVector2 *p=sNULL);
+bool sGetIntersection(sVector2Arg u1, sVector2Arg u2, const sFRect &rect, sF32 *s=sNULL, sVector2 *p=sNULL);
 
 // check two line segments for intersection, returns 0 : no intersection, 1 : intersection, 2 : coincident lines with overlapping segments
 // line segment0 : [ls0,ls0+ld0], line segment1 : [ls1,ls1+ld1]

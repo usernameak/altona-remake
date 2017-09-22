@@ -287,8 +287,8 @@ struct sMessage
   void Send() const;                      // send now!
   void Drag(const struct sWindowDrag &) const;  // misuse message to send dragging. can't post dragging :-)
   static void Pump();                     // send enqued messages
-  sBool IsEmpty() const { return Type==0; }     // true for unset message
-  sBool IsValid() const { return Type!=0; }     // true for set message
+  bool IsEmpty() const { return Type==0; }     // true for unset message
+  bool IsValid() const { return Type!=0; }     // true for set message
   void Clear() { Type=0; Target=0; Code=0; Func1=0; }
 };
 
@@ -456,8 +456,8 @@ public:
   sInt GetCount() const                 { return Used; }
   sInt GetItemCount() const             { return Items.GetCount(); }
   sInt GetItemSize() const              { return ItemSize; }
-  sBool IsEmpty() const                 { return Used==0; }
-  sBool IsFull() const                  { return Used==Alloc; }
+  bool IsEmpty() const                 { return Used==0; }
+  bool IsFull() const                  { return Used==Alloc; }
 
   void AddTail(const T &e)              { if(Used>=Alloc) Grow(); GetUnsafe(Used) = e; Used++; }
   T* AddTail()                          { if(Used>=Alloc) Grow(); T *ptr = &(GetUnsafe(Used)); Used++; return ptr; }
@@ -625,7 +625,7 @@ public:
 /***                                                                      ***/
 /****************************************************************************/
 
-const sChar *sAddToStringPool(const sChar *s,sInt len, sBool *isnew=0);
+const sChar *sAddToStringPool(const sChar *s,sInt len, bool *isnew=0);
 const sChar *sAddToStringPool2(const sChar *a,sInt al,const sChar *b,sInt bl);
 void sClearStringPool();       
 extern const sChar *sPoolStringEmpty;
@@ -656,7 +656,7 @@ public:
   bool operator>=(const sPoolString &s) const { return sCmpString(Buffer,s.Buffer)>=0; }
   sChar operator[](sInt i) const              { return Buffer[i]; }
   sInt Count() const                          { return sGetStringLen(Buffer); }
-  sBool IsEmpty() const                       { return Buffer[0]==0; }
+  bool IsEmpty() const                       { return Buffer[0]==0; }
   sU32 GetHash() const                        { return sHashString(Buffer); }
 
   void Add(const sChar *a,const sChar *b)     { Buffer = sAddToStringPool2(a,sGetStringLen(a),b,sGetStringLen(b)); }
@@ -666,10 +666,10 @@ inline sReader& operator| (sReader &s,sPoolString &a) { sInt len; s | len; sChar
 
 template<int size> inline sString<size>::sString(const sPoolString &s) { sCopyString(Buffer,s,size); }
 template<int size> inline sString<size> &sString<size>::operator =(const sPoolString &s) { if (s) sCopyString(Buffer,s,size); else Buffer[0]=0; return *this; }
-template<int size> inline sBool sString<size>::operator ==(const sPoolString &s) const { return sCmpString(Buffer,s)==0; }
-template<int size> inline sBool sString<size>::operator !=(const sPoolString &s) const { return sCmpString(Buffer,s)!=0; }
-template<int size> inline sBool sString<size>::operator >(const sPoolString &s) const { return sCmpString(Buffer,s)>0; }
-template<int size> inline sBool sString<size>::operator <(const sPoolString &s) const { return sCmpString(Buffer,s)<0; }
+template<int size> inline bool sString<size>::operator ==(const sPoolString &s) const { return sCmpString(Buffer,s)==0; }
+template<int size> inline bool sString<size>::operator !=(const sPoolString &s) const { return sCmpString(Buffer,s)!=0; }
+template<int size> inline bool sString<size>::operator >(const sPoolString &s) const { return sCmpString(Buffer,s)>0; }
+template<int size> inline bool sString<size>::operator <(const sPoolString &s) const { return sCmpString(Buffer,s)<0; }
 
 
 template<class t0>
@@ -743,7 +743,7 @@ protected:
   void *Rem(const void *key);
   void GetAll(sArray<void *> *a);
 
-  virtual sBool CompareKey(const void *k0,const void *k1)=0;
+  virtual bool CompareKey(const void *k0,const void *k1)=0;
   virtual sU32 HashKey(const void *key)=0;
 };
 
@@ -754,7 +754,7 @@ template<class KeyType,class ValueType>
 class sHashTable : public sHashTableBase
 {
 protected:
-  sBool CompareKey(const void *k0,const void *k1)    { return (*(const KeyType *)k0)==(*(const KeyType *)k1); }
+  bool CompareKey(const void *k0,const void *k1)    { return (*(const KeyType *)k0)==(*(const KeyType *)k1); }
   sU32 HashKey(const void *key)                      { return ((const KeyType *)key)->Hash(); }
 public:
   sHashTable(sInt s=0x4000,sInt n=0x100) : sHashTableBase(s,n)  {}
@@ -872,11 +872,11 @@ public:
   void Set(sInt n);               // set to 1. with autogrow.
   void Clear(sInt n);             // set to 0. with autogrow.
   void Assign(sInt n,sInt v);     // set to (v&1). with autogrow.
-  sBool Get(sInt n);              // get bit. may read beyond end of data, but will not grow data.
+  bool Get(sInt n);              // get bit. may read beyond end of data, but will not grow data.
   void ClearAll();                // clear all. bits grown after this are cleared too.
   void SetAll();                  // set all. bits grown after this are set too.
 
-  sBool NextBit(sInt &n);         // iterate. return false if last bit. start with n==-1.
+  bool NextBit(sInt &n);         // iterate. return false if last bit. start with n==-1.
 
   // it would not hurt to add serialization
 };
@@ -900,19 +900,19 @@ protected:
 
   sU8 *Ptr;
   sDInt BSize, Pos;
-  sBool Owner, Readonly;
+  bool Owner, Readonly;
 
 public:
 
-  sBool Open(sDInt size);   // creates new buffer
-  sBool Open(const void *buffer, sDInt size, sBool iamowner=sFALSE); // opens buffer readonly
-  sBool Open(void *buffer, sDInt size, sBool iamowner=sFALSE); // opens buffer read/write
-  sBool Open(sStream &str); // loads other stream into memory
+  bool Open(sDInt size);   // creates new buffer
+  bool Open(const void *buffer, sDInt size, bool iamowner=false); // opens buffer readonly
+  bool Open(void *buffer, sDInt size, bool iamowner=false); // opens buffer read/write
+  bool Open(sStream &str); // loads other stream into memory
 
   sStreamMemory();
   explicit sStreamMemory(sDInt size);
-  sStreamMemory(const void *buffer, sDInt size, sBool iamowner=sFALSE);
-  sStreamMemory(void *buffer,sDInt size, sBool iamowner=sFALSE);
+  sStreamMemory(const void *buffer, sDInt size, bool iamowner=false);
+  sStreamMemory(void *buffer,sDInt size, bool iamowner=false);
   explicit sStreamMemory(sStream &str);
 
   void  *Detach(sDInt *size);
@@ -920,13 +920,13 @@ public:
   // sStream impl
   ~sStreamMemory();
   sInt  GetFlags();
-  sBool  Close();
+  bool  Close();
   sDInt Read(void *ptr, sDInt count);
   sDInt Write(const void *ptr, sDInt count);
   sSize Seek(sSize pos);
   sSize SeekEnd(sSize offset);
   sSize SeekCur(sSize offset);
-  sBool EOF_();
+  bool EOF_();
   sSize Tell();
   sSize Size();
   const void *GetPtr(sDInt &count);
@@ -943,25 +943,25 @@ protected:
 
   sStream *Str;
   sSize   PPos, PSize, Pos;
-  sBool   Owner;
+  bool   Owner;
 
 public:
 
-  sBool Open(sStream &str, sSize from, sSize size, sBool clone=sFALSE);
+  bool Open(sStream &str, sSize from, sSize size, bool clone=false);
 
   sStreamPart();
-  sStreamPart(sStream &str, sSize from, sSize size, sBool clone=sFALSE);
+  sStreamPart(sStream &str, sSize from, sSize size, bool clone=false);
 
   // sStream impl
   ~sStreamPart();
   sInt  GetFlags();
-  sBool Close();
+  bool Close();
   sDInt Read(void *ptr, sDInt count);
   sDInt Write(const void *ptr, sDInt count);
   sSize Seek(sSize pos);
   sSize SeekEnd(sSize offset);
   sSize SeekCur(sSize offset);
-  sBool EOF_();
+  bool EOF_();
   sSize Tell();
   sSize Size();
   sStream *Clone();
@@ -986,7 +986,7 @@ protected:
 
 public:
 
-  sBool Open(sStream &str, sDInt granule=65536);
+  bool Open(sStream &str, sDInt granule=65536);
 
   sStreamCache();
   sStreamCache(sStream &str, sDInt granule=65536);
@@ -994,10 +994,10 @@ public:
   // sStream impl
   ~sStreamCache();
   sInt  GetFlags();
-  sBool Close();
+  bool Close();
   sDInt Read(void *ptr, sDInt count);
   sDInt Write(const void *ptr, sDInt count);
-  sBool EOF_();
+  bool EOF_();
 
   using sStream::Read;
   using sStream::Write;
@@ -1024,19 +1024,19 @@ protected:
 
 public:
 
-  sBool Open();
-  sStreamTemp(sBool open=sFALSE);
+  bool Open();
+  sStreamTemp(bool open=false);
 
   // sStream impl
   ~sStreamTemp();
   sInt  GetFlags();
-  sBool Close();
+  bool Close();
   sDInt Read(void *ptr, sDInt count);
   sDInt Write(const void *ptr, sDInt count);
   sSize Seek(sSize pos);
   sSize Tell();
   sSize Size();
-  sBool EOF_();
+  bool EOF_();
   sStream *Clone();
 
   using sStream::Read;

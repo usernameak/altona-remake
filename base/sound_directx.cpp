@@ -221,7 +221,7 @@ static void SoundThreadCode(sThread *thread, void *userdata)
 /****************************************************************************/
 /****************************************************************************/
 
-sBool sSetSoundHandler(sInt freq,sSoundHandler handler,sInt latency,sInt flags)
+bool sSetSoundHandler(sInt freq,sSoundHandler handler,sInt latency,sInt flags)
 {
   HRESULT hr;
   DSBUFFERDESC dsbd;
@@ -299,11 +299,11 @@ sBool sSetSoundHandler(sInt freq,sSoundHandler handler,sInt latency,sInt flags)
 
   sUnlockSound();
   sPingSound();
-  return sTRUE;
+  return true;
 error:
   sClearSoundHandler();
   sUnlockSound();
-  return sFALSE;
+  return false;
 }
 
 void sClearSoundHandler()
@@ -333,7 +333,7 @@ void sClearSoundInHandler()
   sUnlockSound();
 }
 
-sBool sSetSoundInHandler(sInt freq,sSoundHandler handler,sInt latency)
+bool sSetSoundInHandler(sInt freq,sSoundHandler handler,sInt latency)
 {
   HRESULT hr;
   DSCBUFFERDESC desc;

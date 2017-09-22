@@ -19,7 +19,7 @@
 #include "util/image.hpp"
 #include "shaders.hpp"
 
-sISGUI(sTRUE);
+sISGUI(true);
 
 /****************************************************************************/
 

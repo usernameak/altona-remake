@@ -8,12 +8,12 @@
 #include "shadercomp/shadercomp.hpp"
 #include "base/system.hpp"
 
-sISGUI(sFALSE)
+sISGUI(false)
 
 /****************************************************************************/
 
-sBool Level11=0;
-sBool PcOnly=0;
+bool Level11=0;
+bool PcOnly=0;
 
 void Compiler::Run(const sChar *fn)
 {

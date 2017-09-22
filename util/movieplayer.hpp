@@ -39,19 +39,19 @@ public:
   virtual void Play()=0;
 
   // returns if movie is (still) playing
-  virtual sBool IsPlaying()=0;
+  virtual bool IsPlaying()=0;
 
   // renders movie to screen
   // the zoom parameter specifies what happens if the aspect ratios of movie
   // and screen are mismatched:
-  // sFALSE: letterbox/pillarbox
-  // sTRUE: zoom in and crop
+  // false: letterbox/pillarbox
+  // true: zoom in and crop
   // this function might write to less than the full screen (in case of aspect
   // ratio mismatch) or even nothing (because of an error), so make sure you
   // clear the frame buffer beforehand!
   // Also, using this to render into a render target might not work under all
   // circumstances.
-  virtual void RenderToScreen(sBool zoom=sFALSE);
+  virtual void RenderToScreen(bool zoom=false);
 
   // sets volume. parameter is linear between 0 and 1
   virtual void SetVolume(sF32 volume)=0;

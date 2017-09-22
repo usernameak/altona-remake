@@ -259,7 +259,7 @@ void Compiler::_Global()
     else if(Scan.IfName(L"include_asc"))
     {
       sPoolString filename;
-      sBool mayfail = Scan.IfName(L"mayfail");
+      bool mayfail = Scan.IfName(L"mayfail");
       Scan.ScanString(filename);
       Scan.Match(';');
       if(!Scan.Errors)

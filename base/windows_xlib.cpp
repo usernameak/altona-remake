@@ -39,7 +39,7 @@ static Cursor Cursors[sMP_MAX];
 static sU32 Color[MAX_COLORS][2]; // [0]=X color index, [1]=RGB color
 static XftColor ColorXFT[MAX_COLORS];
 static Region EmptyRegion,UpdateRegion;
-static sBool UpdateRegionGC,UpdateRegionXft,UpdateRegionXR;
+static bool UpdateRegionGC,UpdateRegionXft,UpdateRegionXR;
 static Region ClipStack[MAX_CLIPS];
 static sInt ClipIndex;
 static sRect ClipBounds;
@@ -179,7 +179,7 @@ static void sRegionBoundingRect(Region region,sRect &r)
   r.Init(rect.x,rect.y,rect.x+rect.width,rect.y+rect.height);
 }
 
-static sBool sRectsIntersect(const sRect &a,const sRect &b)
+static bool sRectsIntersect(const sRect &a,const sRect &b)
 {
   return sMax(a.x0,b.x0) < sMin(a.x1,b.x1) && sMax(a.y0,b.y0) < sMin(a.y1,b.y1);
 }
@@ -287,14 +287,14 @@ sInt sGetWindowMode()
   Atom *data, type;
   sInt  format;
   long unsigned int size, ba;
-  XGetWindowProperty(sXDisplay(), sXWndFrontBuffer, XInternAtom(sXDisplay(), "_NET_WM_STATE", sFALSE)
-    , 0, sMAX_U64, sFALSE, XA_ATOM, &type, &format, &size, &ba, (unsigned char **) &data);
+  XGetWindowProperty(sXDisplay(), sXWndFrontBuffer, XInternAtom(sXDisplay(), "_NET_WM_STATE", false)
+    , 0, sMAX_U64, false, XA_ATOM, &type, &format, &size, &ba, (unsigned char **) &data);
   
   if (type != None)
   {
-    Atom hidden_atom = XInternAtom(sXDisplay(), "_NET_WM_STATE_HIDDEN", sFALSE);
-    Atom vmaximized_atom = XInternAtom(sXDisplay(), "_NET_WM_STATE_MAXIMIZED_VERT", sFALSE);
-    Atom hmaximized_atom = XInternAtom(sXDisplay(), "_NET_WM_STATE_MAXIMIZED_HORZ", sFALSE);
+    Atom hidden_atom = XInternAtom(sXDisplay(), "_NET_WM_STATE_HIDDEN", false);
+    Atom vmaximized_atom = XInternAtom(sXDisplay(), "_NET_WM_STATE_MAXIMIZED_VERT", false);
+    Atom hmaximized_atom = XInternAtom(sXDisplay(), "_NET_WM_STATE_MAXIMIZED_HORZ", false);
     for (sInt i = 0; i < size; i++) {
       if(data[i] == hidden_atom) {
         mode = sWM_MINIMIZED;
@@ -312,7 +312,7 @@ sInt sGetWindowMode()
   return mode;
 }
 
-sBool sHasWindowFocus()
+bool sHasWindowFocus()
 {
   Window focusWin;
   int focusState;
@@ -359,7 +359,7 @@ sChar *sGetClipboard()
   return result;
 }
 
-void sEnableFileDrop(sBool enable)
+void sEnableFileDrop(bool enable)
 {
 }
 
@@ -371,18 +371,18 @@ const sChar *sGetDragDropFile()
 
 /****************************************************************************/
 
-sBool sSystemOpenFileDialog(const sChar *label,const sChar *extensions,sInt flags,const sStringDesc &buffer)
+bool sSystemOpenFileDialog(const sChar *label,const sChar *extensions,sInt flags,const sStringDesc &buffer)
 {
   sLogF(L"xlib",L"sSystemOpenFileDialog\n");
-  return sFALSE;
+  return false;
 }
 
 /****************************************************************************/
 
-sBool sSystemMessageDialog(const sChar *label,sInt flags)
+bool sSystemMessageDialog(const sChar *label,sInt flags)
 {
   sLogF(L"xlib",L"sSystemMessageDialog\n");
-  return sFALSE;
+  return false;
 }
 
 /****************************************************************************/
@@ -395,9 +395,9 @@ static void sChangedRegions()
 {
   sRegionBoundingRect(ClipStack[ClipIndex],ClipBounds);
   
-  UpdateRegionGC = sTRUE;
-  UpdateRegionXft = sTRUE;
-  UpdateRegionXR = sTRUE;
+  UpdateRegionGC = true;
+  UpdateRegionXft = true;
+  UpdateRegionXR = true;
 }
 
 static void sSetGCRegion()
@@ -405,7 +405,7 @@ static void sSetGCRegion()
   if(UpdateRegionGC)
   {
     XSetRegion(sXDisplay(),sXGC,ClipStack[ClipIndex]);
-    UpdateRegionGC = sFALSE;
+    UpdateRegionGC = false;
   }
 }
 
@@ -414,7 +414,7 @@ static void sSetXRRegion()
   if(UpdateRegionXR)
   {
     XRenderSetPictureClipRegion(sXDisplay(),XPict,ClipStack[ClipIndex]);
-    UpdateRegionXR = sFALSE;
+    UpdateRegionXR = false;
   }
 }
 
@@ -445,7 +445,7 @@ void sClipPush()
   sChangedRegions();
 }
 
-sBool sXUpdateEmpty()
+bool sXUpdateEmpty()
 {
   return XEmptyRegion(UpdateRegion) != 0;
 }
@@ -832,7 +832,7 @@ void sImage2D::Stretch(const sRect &source,const sRect &dest)
 struct sFont2DPrivate
 {
   XftFont *Font;
-  sBool Underline,Strikeout;
+  bool Underline,Strikeout;
   sInt TextColor,BackColor;
 };
 
@@ -951,12 +951,12 @@ sFont2D::sLetterDimensions sFont2D::sGetLetterDimensions(const sChar letter)
   return result;
 }
 
-sBool sFont2D::LetterExists(sChar letter)
+bool sFont2D::LetterExists(sChar letter)
 {
-  sBool ret = sTRUE;
+  bool ret = true;
   FT_Face face = XftLockFace(prv->Font);
   if (FT_Get_Char_Index(face, letter) == 0) {
-    ret = sFALSE;
+    ret = false;
   }
   XftUnlockFace(prv->Font);
   return ret;
@@ -1098,7 +1098,7 @@ void sFont2D::PrintBasic(sInt flags,const sRect *r,sInt x,sInt y,const sChar *te
   if(UpdateRegionXft)
   {
     XftDrawSetClip(XDraw,ClipStack[ClipIndex]);
-    UpdateRegionXft = sFALSE;
+    UpdateRegionXft = false;
   }
   
   if((flags & sF2P_OPAQUE) && r)

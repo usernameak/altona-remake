@@ -77,11 +77,11 @@ void sCollect()
   GCFlag = 1;
 }
 
-// exit==sTRUE: application exit, forces collection of all objects
+// exit==true: application exit, forces collection of all objects
 // iterates collection until all objects are destroyed or gives warning if not all roots are removed
 // without this flag in the case of sRemRoot in collected objects or in root object dtors
 // objects are not collected before shutdown
-void sCollector(sBool exit=sFALSE)   
+void sCollector(bool exit=false)   
 {
   if(!exit)
   {
@@ -145,7 +145,7 @@ void sInitGC()
 void sExitGC()
 {
   sCollect();
-  sCollector(sTRUE);
+  sCollector(true);
 
   if(GCRoots->GetCount())
     sLogF(L"mem",L"GC warning: memory leak, not all root objects freed\n");
@@ -603,7 +603,7 @@ void sTextFileWriter::Flush()
 {
   const sInt BUFFER_SIZE = 2048;
   sU8 buffer[BUFFER_SIZE];
-  sBool lastWasCR = sFALSE;
+  bool lastWasCR = false;
 
   // convert in small chunks
   const sChar *data = Buffer.Get();
@@ -673,7 +673,7 @@ public:
     delete Entries;
   }
 
-  const sChar *Add(const sChar *s,sInt len, sBool *isnew)
+  const sChar *Add(const sChar *s,sInt len, bool *isnew)
   {
     sStringPoolEntry *e;
     sStringPoolEntry **hp;
@@ -686,7 +686,7 @@ public:
     {
       if(sCmpMem(e->Data,s,len*sizeof(sChar))==0 && e->Data[len]==0)
       {
-        if (isnew) *isnew=sFALSE;
+        if (isnew) *isnew=false;
         return e->Data;
       }
       e = e->Next;
@@ -700,7 +700,7 @@ public:
     e->Next = *hp;
     *hp = e;
 
-    if (isnew) *isnew=sTRUE;
+    if (isnew) *isnew=true;
     return e->Data;
   }
 };
@@ -708,7 +708,7 @@ public:
 static sStringPool_ *sStringPool;
 const sChar *sPoolStringEmpty;
 
-const sChar *sAddToStringPool(const sChar *s,sInt len, sBool *isnew)
+const sChar *sAddToStringPool(const sChar *s,sInt len, bool *isnew)
 {
   return sStringPool->Add(s,len,isnew);
 }
@@ -1262,7 +1262,7 @@ sBitVector::~sBitVector()
   delete[] Data;
 }
 
-sBool sBitVector::Get(sInt n)
+bool sBitVector::Get(sInt n)
 {
   sPtr b = n>>BITSHIFT;
   if(b<Words)
@@ -1293,7 +1293,7 @@ void sBitVector::Assign(sInt n,sInt v)
   Data[byte] |= ((v&1)<<(n&BITMASK));
 }
 
-sBool sBitVector::NextBit(sInt &n)
+bool sBitVector::NextBit(sInt &n)
 {
   sVERIFY(NewVal==0);
 

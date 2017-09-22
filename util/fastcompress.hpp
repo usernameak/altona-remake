@@ -37,7 +37,7 @@ class sFastLzpCompressor
   sInt BitShift;
 
   sU32 PWritePos;
-  sBool PFirstBlock;
+  bool PFirstBlock;
 
   void StartWrite(sU8 *ptr);
   void EndWrite();
@@ -69,7 +69,7 @@ class sFastLzpCompressor
   sINLINE void PutByte(sU8 value) { *RawPos++ = value; }
   void PutExpGolomb(sU32 value);
 
-  sInt CompressChunk(sU32 nBytes,sBool isLast);
+  sInt CompressChunk(sU32 nBytes,bool isLast);
   void Reset();
 
 public:
@@ -77,12 +77,12 @@ public:
   ~sFastLzpCompressor();
 
   // EITHER: Everything at once
-  sBool Compress(sFile *dest,sFile *src);
+  bool Compress(sFile *dest,sFile *src);
 
   // OR: Piecewise I/O (normal write operations)
   void StartPiecewise();
-  sBool WritePiecewise(sFile *dest,const void *buffer,sDInt size);
-  sBool EndPiecewise(sFile *dest);
+  bool WritePiecewise(sFile *dest,const void *buffer,sDInt size);
+  bool EndPiecewise(sFile *dest);
 };
 
 // The corresponding decompressor.
@@ -95,7 +95,7 @@ class sFastLzpDecompressor
 
   sU32 PReadPos;
   sU32 PBlockEnd;
-  sBool PIsLast;
+  bool PIsLast;
 
   const sU8 *RawPos;
   sU32 BitBuffer;
@@ -132,7 +132,7 @@ class sFastLzpDecompressor
 
   sU32 GetExpGolomb();
 
-  sInt DecompressChunk(sU32 blockLen,sBool &last,sU8 *&ptr);
+  sInt DecompressChunk(sU32 blockLen,bool &last,sU8 *&ptr);
   void Reset();
 
   sU32 ReadLen(const sU8* ptr);
@@ -142,11 +142,11 @@ public:
   ~sFastLzpDecompressor();
 
   // EITHER: Everything at once
-  sBool Decompress(sFile *dest,sFile *src);
+  bool Decompress(sFile *dest,sFile *src);
 
   // OR: Piecewise I/O (normal read operations)
   void StartPiecewise();
-  sBool ReadPiecewise(sFile *src,void *buffer,sDInt size);
+  bool ReadPiecewise(sFile *src,void *buffer,sDInt size);
   void EndPiecewise();
 };
 
@@ -166,14 +166,14 @@ public:
 
   // either open for reading or writing, not both. sFastLzpFile owns host.
   // it's freed immediately if Open fails!
-  sBool Open(sFile *host,sBool writing); 
+  bool Open(sFile *host,bool writing); 
 
   static sFile *OpenRead(sFile *host);
   static sFile *OpenWrite(sFile *host);
 
-  virtual sBool Close();
-  virtual sBool Read(void *data,sDInt size);
-  virtual sBool Write(const void *data,sDInt size);
+  virtual bool Close();
+  virtual bool Read(void *data,sDInt size);
+  virtual bool Write(const void *data,sDInt size);
   virtual sS64 GetSize();
 };
 

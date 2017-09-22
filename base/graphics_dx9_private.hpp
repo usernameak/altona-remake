@@ -41,7 +41,7 @@ protected:
   friend void sSetScreen(const sRect &rect,sU32 *data);
   friend void sResolveTargetPrivate();
 */
-  friend void sRender3DEnd(sBool flip);
+  friend void sRender3DEnd(bool flip);
   friend void sSetTarget(const struct sTargetPara &para);
   friend void sResolveTargetPrivate(class sTextureBase *tex);
   friend void sCopyTexture(const struct sCopyTexturePara &para);
@@ -63,7 +63,7 @@ protected:
   };
   struct IDirect3DSurface9 *Surf2D;       // used only by DXBackBuffer
   struct IDirect3DSurface9 *MultiSurf2D;  // used by DXBackBuffer and multisampled rendertargets
-  virtual void OnLostDevice(sBool reinit=sFALSE);
+  virtual void OnLostDevice(bool reinit=false);
   sU32 ResolveFlags;                      // RF_???
   sU32 DXFormat;
 
@@ -135,7 +135,7 @@ protected:
   sInt SizeX,SizeY;
   sInt Flags;
   sInt DXFormat;
-  sBool Locked;
+  bool Locked;
   
   sTexture2D *SrcTex;
   sInt SrcMipLevel;

@@ -64,7 +64,7 @@ void GLError(sU32 err,const sChar *file,sInt line,const sChar *system)
   sDPrint(buffer);
   sFatal(buffer);
 }
-#define GLErr(hr) { sBool err=!(hr); if(err) GLError(0,sTXT(__FILE__),__LINE__,L"opengl"); }
+#define GLErr(hr) { bool err=!(hr); if(err) GLError(0,sTXT(__FILE__),__LINE__,L"opengl"); }
 #define GLERR() { sInt err=glGetError(); if(err) GLError(err,sTXT(__FILE__),__LINE__,L"opengl"); }
 
 /****************************************************************************/
@@ -76,12 +76,13 @@ void GLError(sU32 err,const sChar *file,sInt line,const sChar *system)
 //static sCBufferBase *CurrentCBs[sCBUFFER_MAXSLOT*sCBUFFER_SHADERTYPES];
 static sScreenMode DXScreenMode;
 
-static struct sFBO {
+struct sFBO {
   GLuint GLName;
+  sTargetPara para;
 };
 
-#define sMAX_FBO 256;
-sGLFBO sFBOs[sMAX_FBO];
+#define sMAX_FBO 256
+sFBO sFBOs[sMAX_FBO];
 sInt sFBOCount = 0;
 
 /****************************************************************************/
@@ -433,6 +434,33 @@ void sGeometry::Draw(sDrawRange *ir,sInt irc,sInt instancecount, sVertexOffset *
 
 /****************************************************************************/
 /***                                                                      ***/
+/***   FBO                                                                ***/
+/***                                                                      ***/
+/****************************************************************************/
+
+static sFBO *sFindFBO(sTargetPara *para) {
+  for(sInt i = 0; i < sFBOCount; i++) {
+    sFBO *fbo = &sFBOs[i];
+    if(fbo->para == para) {
+      return fbo;
+    }
+  }
+
+  sVERIFY(sFBOCount < sMAX_FBO)
+  sFBO *fbo = &sFBOs[sFBOCount++];
+  glGenFramebuffersEXT(1, &fbo->GLName);
+  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo->GLName);
+  GLERR();
+  for(sInt i = 0; i < 4; i++) {
+    if(!para->Target[i]) continue;
+    sSetTexture(0, para->Target[i]);
+    glFramebufferTexture2DEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_EXT + i,
+      GL_TEXTURE_2D, para->Target[i]->GLName, para->Mipmap);
+  }
+}
+
+/****************************************************************************/
+/***                                                                      ***/
 /***   Viewport                                                           ***/
 /***                                                                      ***/
 /****************************************************************************/
@@ -443,9 +471,9 @@ void sGeometry::Draw(sDrawRange *ir,sInt irc,sInt instancecount, sVertexOffset *
 /***                                                                      ***/
 /****************************************************************************/
 
-sBool sReadTexture(sReader &s, sTextureBase *&tex)
+bool sReadTexture(sReader &s, sTextureBase *&tex)
 {
-  return sFALSE;
+  return false;
 }
 
 sU64 sGetAvailTextureFormats()
@@ -615,7 +643,7 @@ void sTextureCube::EndLoad()
 
 /****************************************************************************/
 
-void sPackDXT(sU8 *d,sU32 *bmp,sInt xs,sInt ys,sInt format,sBool dither)
+void sPackDXT(sU8 *d,sU32 *bmp,sInt xs,sInt ys,sInt format,bool dither)
 {
   sVERIFY("sPackDXT not supported with opengl")
 }
@@ -657,7 +685,7 @@ void sMaterial::SetVariant(sInt variants)
 {
 }
 
-void sMaterial::Set(sCBufferBase **cbuffers,sInt cbcount,sBool additive)
+void sMaterial::Set(sCBufferBase **cbuffers,sInt cbcount,sInt additive)
 {
   SetStates();
 
@@ -1206,7 +1234,7 @@ void sGetScreenMode(sScreenMode &sm)
   sm = DXScreenMode;
 }
 
-sBool sSetScreenMode(const sScreenMode &sm)
+bool sSetScreenMode(const sScreenMode &sm)
 {
   DXScreenMode = sm;
   return 1;
@@ -1373,7 +1401,7 @@ void sEndReadTexture()
 {
 }
 
-void sRender3DEnd(sBool flip)
+void sRender3DEnd(bool flip)
 {
   sPreFlipHook->Call();
 #if sPLATFORM == sPLAT_WINDOWS
@@ -1390,7 +1418,7 @@ void sRender3DFlush()
 {
 }
 
-sBool sRender3DBegin()
+bool sRender3DBegin()
 {
   // prepare rendering
 
@@ -1545,7 +1573,7 @@ void sGeometry::EndGrid()
   sFatal(L"EndGrid not implemented!");
 }
 
-void sEnableGraphicsStats(sBool enable)
+void sEnableGraphicsStats(bool enable)
 {
 }
 

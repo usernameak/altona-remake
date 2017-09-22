@@ -84,7 +84,7 @@ struct sStsQueue
   sInt TaskCount;
   sInt SubTaskCount;
   sInt ExeCount;
-  volatile sBool DontSteal;       // please don' steal my last task :-)
+  volatile bool DontSteal;       // please don' steal my last task :-)
 };
 
 class sStsThread
@@ -99,15 +99,15 @@ class sStsThread
   sInt Index;                     // index of this thread in manager
   sThreadLock WorkloadReadLock;
 
-//  volatile sBool Running; 
+//  volatile bool Running; 
   void DecreaseSync(sStsTask *t);
 public:
-  sStsThread(sStsManager *,sInt index,sInt taskcount,sBool thread);
+  sStsThread(sStsManager *,sInt index,sInt taskcount,bool thread);
   ~sStsThread();
 
   void AddTask(sStsTask *);
   void StealTasksFrom(sStsThread *);
-  sBool Execute();
+  bool Execute();
 
   sInt GetIndex() { return Index; }
 };
@@ -137,11 +137,11 @@ class sStsManager
 //  sU8 *AllocBytes(sInt bytes);
 //  template <class T> T *Alloc(sInt count=1) { return (T *) AllocBytes(sizeof(T)*count); }
 
-  volatile sBool Running;         // Indicate running state to threads
+  volatile bool Running;         // Indicate running state to threads
   sU32 TotalTasksLeft;
 
 
-  sBool StealTasks(sInt to);      // implementation of thread stealing
+  bool StealTasks(sInt to);      // implementation of thread stealing
 
   sDList2<sStsWorkload> FreeWorkloads;
   sDList2<sStsWorkload> ActiveWorkloads;
@@ -166,7 +166,7 @@ public:
   void EndWorkload(sStsWorkload *);
 
 
-  sBool HelpWorkload(sStsWorkload *wl); // build your own while-loop instead of using SyncWorkload
+  bool HelpWorkload(sStsWorkload *wl); // build your own while-loop instead of using SyncWorkload
 
 //  sStsSync *NewSync();            // manage memory for syncs yourself...
   void AddSync(sStsTask *t,sStsSync *s); 

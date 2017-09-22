@@ -294,7 +294,7 @@ void sGui_::SendMouse(const sGui_::Event &ie)
 {
   sWindowDrag dd;
   sWindow *w;
-  sBool changed;
+  bool changed;
   sInt rawkey;
 
   sU32 key = ie.Key;
@@ -527,7 +527,7 @@ void sGui_::OnPaint3d()
 }
 
 
-sBool sGui_::RecShortcut(sWindow *w,sU32 key)
+bool sGui_::RecShortcut(sWindow *w,sU32 key)
 {
   if(w->Parent)
   {
@@ -602,7 +602,7 @@ void sGui_::AddBackWindow(sWindow *w)
   ProcessPost();
 }
 
-void sGui_::AddFloatingWindow(sWindow *w,const sChar *title, sBool closeable)
+void sGui_::AddFloatingWindow(sWindow *w,const sChar *title, bool closeable)
 {
   w->AddBorder(new sSizeBorder);
   if (closeable)
@@ -788,7 +788,7 @@ sWindow *sGui_::HitWindow(sInt x,sInt y)
   return RecHitWindow(Root,x,y,0);
 }
 
-sWindow *sGui_::RecHitWindow(sWindow *w,sInt x,sInt y,sBool border) const
+sWindow *sGui_::RecHitWindow(sWindow *w,sInt x,sInt y,bool border) const
 {
   sWindow *c;
   sWindow *t;
@@ -1097,7 +1097,7 @@ void sGui_::RectHL(const sRect &r,sInt colh,sInt coll) const
   sRect2D(r.x1-1,r.y0+1,r.x1,r.y1-1,coll);
 }
 
-void sGui_::RectHL(const sRect &r, sBool invert) const
+void sGui_::RectHL(const sRect &r, bool invert) const
 {
   if (invert)
     RectHL(r,sGC_LOW2,sGC_HIGH2);
@@ -1105,7 +1105,7 @@ void sGui_::RectHL(const sRect &r, sBool invert) const
     RectHL(r,sGC_HIGH2,sGC_LOW2);
 }
 
-void sGui_::PaintHandle(sInt x,sInt y,sBool select) const
+void sGui_::PaintHandle(sInt x,sInt y,bool select) const
 {
   sRect r(x-3,y-3,x+4,y+4);
 
@@ -1114,13 +1114,13 @@ void sGui_::PaintHandle(sInt x,sInt y,sBool select) const
   sRect2D(r,select?sGC_SELECT:sGC_BACK);
 }
 
-sBool sGui_::HitHandle(sInt x,sInt y,sInt mx,sInt my) const
+bool sGui_::HitHandle(sInt x,sInt y,sInt mx,sInt my) const
 {
   sRect r(x-3,y-3,x+4,y+4);
   return r.Hit(mx,my);
 }
 
-void sGui_::PaintButtonBorder(sRect &r,sBool pressed) const
+void sGui_::PaintButtonBorder(sRect &r,bool pressed) const
 {
   if(!pressed)
   {

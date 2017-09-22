@@ -64,7 +64,7 @@ private:
   sWireNamespace::FormInstance *FindInstance(sObject *obj);
   sWindow *FindWindow(sPoolString name,sInt index=0);
 
-  sBool ProcessEndWasCalled;
+  bool ProcessEndWasCalled;
   sInt CurrentScreen;
   sWindow *FullscreenWindow;
   const sChar *CurrentToolName;
@@ -75,7 +75,7 @@ private:
   const sChar *Filename;
 
 //  void Error(const sChar *str);
-  sWireNamespace::FormInstance *_FormName(sBool window);
+  sWireNamespace::FormInstance *_FormName(bool window);
   void _Key(sU32 &key,sInt &qual,sInt &hit);
 
   void _ScreenAlign(sLayoutFrameWindow *lfw);
@@ -97,7 +97,7 @@ private:
 
   // private stuff
 
-  void AddForm(const sChar *classname,sObject *win,const sChar *instancename,sBool iswindow);
+  void AddForm(const sChar *classname,sObject *win,const sChar *instancename,bool iswindow);
   void DoLayout();
   sMessage DragMessage;
   sWindow *DragModeFocus;
@@ -105,8 +105,8 @@ private:
   sWindow *MainWindow;
   sU32 QualScope;
 
-  sBool IsGlobal(sU32 m);
-  sBool CanBeGlobal(sU32 m);
+  bool IsGlobal(sU32 m);
+  bool CanBeGlobal(sU32 m);
 public:
   sMenuFrame *CurrentMenu;                    // menu creation. strictly intern
 private:
@@ -136,11 +136,11 @@ public:
 
   // windows handling
 
-  sBool HandleKey(sWindow *win,sU32 key);
-  sBool HandleCommand(sWindow *win,sInt cmd);
-  sBool HandleShortcut(sWindow *win,sU32 key) { return 0; }
-  sBool HandleDrag(sWindow *win,const sWindowDrag &dd,sInt hit);
-  sBool OnShortcut(sU32 key);
+  bool HandleKey(sWindow *win,sU32 key);
+  bool HandleCommand(sWindow *win,sInt cmd);
+  bool HandleShortcut(sWindow *win,sU32 key) { return 0; }
+  bool HandleDrag(sWindow *win,const sWindowDrag &dd,sInt hit);
+  bool OnShortcut(sU32 key);
 
   // registration
 
@@ -160,7 +160,7 @@ public:
   template<class T> void AddParaFloat (const sChar *classname,const sChar *commandname,const sMessage &msg,sF32 T::*ptr,sF32 min,sF32 max,sF32 step) { AddPara1(classname,commandname,msg,sWPT_FLOAT ,(sDInt)(&(((T*)0)->*ptr)),0,min,max,step); }
   template<class T> void AddParaChoice(const sChar *classname,const sChar *commandname,const sMessage &msg,sInt T::*ptr,const sChar *choices)        { AddPara1(classname,commandname,msg,sWPT_CHOICE,(sDInt)(&(((T*)0)->*ptr)),choices,0,0,0); }
   template<class T> void AddParaBool  (const sChar *classname,const sChar *commandname,const sMessage &msg,sInt T::*ptr)                             { AddPara1(classname,commandname,msg,sWPT_CHOICE,(sDInt)(&(((T*)0)->*ptr)),L"off|on",0,0,0); }
-//  template<class T> void AddParaColor (const sChar *classname,const sChar *commandname,const sMessage &msg,sU32 T::*ptr,sBool alpha)                 { AddPara1(classname,commandname,msg,sInt(alpha?sWPT_ARGB:sWPT_RGB),(sDInt)(&(((T*)0)->*ptr))); }
+//  template<class T> void AddParaColor (const sChar *classname,const sChar *commandname,const sMessage &msg,sU32 T::*ptr,bool alpha)                 { AddPara1(classname,commandname,msg,sInt(alpha?sWPT_ARGB:sWPT_RGB),(sDInt)(&(((T*)0)->*ptr))); }
   void ProcessFile(const sChar *name);
   void ProcessText(const sChar *text,const sChar *reffilename=0);   // filename is for error messages
   void ProcessText(const sChar8 *text,const sChar *reffilename=0);
@@ -173,7 +173,7 @@ public:
   void SetSubSwitch(sPoolString name,sInt nr);
   sInt GetSubSwitch(sPoolString name);
   sInt GetScreen() { return LayoutFrame->GetSwitch(); }
-  void SetFullscreen(sWindow *,sBool toggle=1);
+  void SetFullscreen(sWindow *,bool toggle=1);
   void Popup(const sChar *name);
   void CmdClosePopup();
   void CmdSwitchScreen(sDInt screen);
@@ -204,10 +204,10 @@ public:
   ~sWireClientWindow();
   virtual void InitWire(const sChar *name);
 
-  virtual sBool OnCheckHit(const sWindowDrag &dd) { return 0; }
-  sBool OnKey(sU32 key) { return sWire->HandleKey(this,key); }
-  sBool OnCommand(sInt cmd) { return sWire->HandleCommand(this,cmd); }
-  sBool OnShortcut(sU32 key) { return sWire->HandleShortcut(this,key); }
+  virtual bool OnCheckHit(const sWindowDrag &dd) { return 0; }
+  bool OnKey(sU32 key) { return sWire->HandleKey(this,key); }
+  bool OnCommand(sInt cmd) { return sWire->HandleCommand(this,cmd); }
+  bool OnShortcut(sU32 key) { return sWire->HandleShortcut(this,key); }
   void OnDrag(const sWindowDrag &dd) { sWire->HandleDrag(this,dd,OnCheckHit(dd)); }
 
   // common functions
@@ -230,9 +230,9 @@ public:
 class sWireGridFrame : public sGridFrame
 {
 public:
-  sBool OnKey(sU32 key) { if(sGridFrame::OnKey(key)) return 1; return sWire->HandleKey(this,key); }
-  sBool OnCommand(sInt cmd) { return sWire->HandleCommand(this,cmd); }
-  sBool OnShortcut(sU32 key) { return sWire->HandleShortcut(this,key); }
+  bool OnKey(sU32 key) { if(sGridFrame::OnKey(key)) return 1; return sWire->HandleKey(this,key); }
+  bool OnCommand(sInt cmd) { return sWire->HandleCommand(this,cmd); }
+  bool OnShortcut(sU32 key) { return sWire->HandleShortcut(this,key); }
   void OnDrag(const sWindowDrag &dd) { sWire->HandleDrag(this,dd,0); }
 
   void InitWire(const sChar *name);

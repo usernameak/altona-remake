@@ -42,7 +42,7 @@
 
 /****************************************************************************/
 
-extern void sCollector(sBool exit = sFALSE);
+extern void sCollector(bool exit = false);
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -135,7 +135,7 @@ static char *FromWideFileName(const sChar *str)
   return buffer;
 }
 
-static sBool NormalizePathR(const sStringDesc &desc, sInt &inPos, sInt outPos, sInt count)
+static bool NormalizePathR(const sStringDesc &desc, sInt &inPos, sInt outPos, sInt count)
 {
   // copy first part up to and including slash/null
   for (sInt i = 0; i < count; i++)
@@ -152,7 +152,7 @@ static sBool NormalizePathR(const sStringDesc &desc, sInt &inPos, sInt outPos, s
     else if (sCmpStringLen(cur, L"../", 3) == 0 || sCmpString(cur, L"..") == 0) // "../" = pop
     {
       inPos += 2 + (cur[2] != 0);
-      return sFALSE;
+      return false;
     }
     else
     {
@@ -164,7 +164,7 @@ static sBool NormalizePathR(const sStringDesc &desc, sInt &inPos, sInt outPos, s
     }
   }
 
-  return sTRUE;
+  return true;
 }
 
 static void NormalizePath(const sStringDesc &desc)
@@ -197,7 +197,7 @@ void sCDECL sFatalImpl(const sChar *str)
 }
 
 static int sDebugFile = -1;
-static sBool sDPrintFlag = sFALSE;
+static bool sDPrintFlag = false;
 
 void sDPrint(const sChar *text)
 {
@@ -226,7 +226,7 @@ void sDPrint(const sChar *text)
     fputs(buffer, stderr);
   }
 
-  sDPrintFlag = sTRUE;
+  sDPrintFlag = true;
 }
 
 void sPrint(const sChar *text)
@@ -236,14 +236,14 @@ void sPrint(const sChar *text)
   fputs(buffer, stdout);
 }
 
-static volatile sBool sCtrlCFlag = sFALSE;
+static volatile bool sCtrlCFlag = false;
 
 static void sCtrlCHandler(int signal)
 {
-  sCtrlCFlag = sTRUE;
+  sCtrlCFlag = true;
 }
 
-void sCatchCtrlC(sBool enable)
+void sCatchCtrlC(bool enable)
 {
   struct sigaction action;
 
@@ -254,7 +254,7 @@ void sCatchCtrlC(sBool enable)
   sigaction(SIGTERM, &action, 0);
 }
 
-sBool sGotCtrlC()
+bool sGotCtrlC()
 {
   return sCtrlCFlag;
 }
@@ -353,9 +353,9 @@ sU64 sToFileTime(sDateAndTime time)
   return mktime(&t);
 }
 
-sBool sStackTrace(const sStringDesc &tgt, sInt skipCount, sInt maxCount)
+bool sStackTrace(const sStringDesc &tgt, sInt skipCount, sInt maxCount)
 {
-  return sFALSE; // no stack traces on linux yet.
+  return false; // no stack traces on linux yet.
 }
 
 static char sLogAppName[256];
@@ -383,7 +383,7 @@ void sSysLog(const sChar *module, const sChar *text)
     syslog(sLogFacility | LOG_NOTICE, "%s", txt);
 }
 
-sBool sDaemonize()
+bool sDaemonize()
 {
   return daemon(1, 1) == 0;
 }
@@ -413,7 +413,7 @@ sInt sGetRandomSeed()
   return check.Hash[0];
 }
 
-sBool sExecuteShell(const sChar *cmdline)
+bool sExecuteShell(const sChar *cmdline)
 {
   size_t size = sGetStringLen(cmdline) * 6 + 1;
   char *s = new char[size];
@@ -423,12 +423,12 @@ sBool sExecuteShell(const sChar *cmdline)
   return result < 0;
 }
 
-sBool sExecuteShellDetachedLinuxImpl(const char *progname, const char *const *cmdline)
+bool sExecuteShellDetachedLinuxImpl(const char *progname, const char *const *cmdline)
 {
   switch (fork())
   {
   case -1:
-    return sFALSE;
+    return false;
     break;
   case 0:
     daemon(1, 0);
@@ -436,24 +436,24 @@ sBool sExecuteShellDetachedLinuxImpl(const char *progname, const char *const *cm
     exit(0);
     break;
   default:
-    return sTRUE;
+    return true;
   }
 }
 
-sBool sExecuteShellDetached(const sChar *cmdline)
+bool sExecuteShellDetached(const sChar *cmdline)
 {
   size_t size = sGetStringLen(cmdline) * 6 + 1;
   char *s = new char[size];
   wcstombs(s, cmdline, size);
   const char *const *list = new const char *[2]{"-c", s};
-  sBool result = sExecuteShellDetachedLinuxImpl("sh", list);
+  bool result = sExecuteShellDetachedLinuxImpl("sh", list);
   delete s;
   delete list;
   return result;
 }
 
 // copy-pasted from stackoverflow with love
-sBool sExecuteShell(const sChar *cmdline, sTextBuffer *tb)
+bool sExecuteShell(const sChar *cmdline, sTextBuffer *tb)
 {
   size_t size = sGetStringLen(cmdline) * 6 + 1;
   char *s = new char[size];
@@ -461,7 +461,7 @@ sBool sExecuteShell(const sChar *cmdline, sTextBuffer *tb)
 
   FILE *output = popen(s, "r");
   if (output == NULL)
-    return sFALSE;
+    return false;
   delete s;
   char buf[256];
   sChar buf2[256 / sizeof(sChar) * 6];
@@ -473,10 +473,10 @@ sBool sExecuteShell(const sChar *cmdline, sTextBuffer *tb)
     tb->Print(buf2);
   }
   pclose(output);
-  return sTRUE;
+  return true;
 }
 
-sBool sExecuteOpen(const sChar *file)
+bool sExecuteOpen(const sChar *file)
 {
   size_t size = sGetStringLen(file) * 6 + 1;
   char *s = new char[size];
@@ -484,7 +484,7 @@ sBool sExecuteOpen(const sChar *file)
 
   const char *const *list = new const char *[1]{s};
 
-  sBool result = sExecuteShellDetachedLinuxImpl("xdg-open", list);
+  bool result = sExecuteShellDetachedLinuxImpl("xdg-open", list);
 
   delete s;
   delete list;
@@ -503,7 +503,7 @@ sBool sExecuteOpen(const sChar *file)
 class sRootFileHandler : public sFileHandler
 {
   sFile *Create(const sChar *name, sFileAccess access);
-  sBool Exists(const sChar *name);
+  bool Exists(const sChar *name);
 };
 
 class sRootFile : public sFile
@@ -512,24 +512,24 @@ class sRootFile : public sFile
   sFileAccess Access;
   sS64 Size;
   sS64 Offset;
-  sBool Ok;
+  bool Ok;
 
   sS64 MapOffset;
   sDInt MapSize;
   sU8 *MapPtr;     // 0 = mapping not active
-  sBool MapFailed; // 1 = we tryed once to map and it didn't work, do don't try again
+  bool MapFailed; // 1 = we tryed once to map and it didn't work, do don't try again
   sRootFileHandler *Handler;
 
 public:
   sRootFile(int file, sFileAccess access, sRootFileHandler *h);
   ~sRootFile();
-  sBool Close();
-  sBool Read(void *data, sDInt size);
-  sBool Write(const void *data, sDInt size);
+  bool Close();
+  bool Read(void *data, sDInt size);
+  bool Write(const void *data, sDInt size);
   sU8 *Map(sS64 offset, sDInt size);
-  sBool SetOffset(sS64 offset);
+  bool SetOffset(sS64 offset);
   sS64 GetOffset();
-  sBool SetSize(sS64);
+  bool SetSize(sS64);
   sS64 GetSize();
 };
 
@@ -542,7 +542,7 @@ sADDSUBSYSTEM(RootFileHandler, 0x28, sAddRootFilesystem, 0);
 
 /****************************************************************************/
 
-sBool sRootFileHandler::Exists(const sChar *name)
+bool sRootFileHandler::Exists(const sChar *name)
 {
   struct stat st;
   return stat(FromWideFileName(name), &st) == 0;
@@ -614,7 +614,7 @@ sRootFile::~sRootFile()
     Close();
 }
 
-sBool sRootFile::Close()
+bool sRootFile::Close()
 {
   sVERIFY(File != -1);
 
@@ -626,15 +626,15 @@ sBool sRootFile::Close()
   return Ok;
 }
 
-sBool sRootFile::Read(void *data, sDInt size)
+bool sRootFile::Read(void *data, sDInt size)
 {
   sVERIFY(File != -1)
       sVERIFY(size <= 0x7fffffff);
 
-  sBool result = sTRUE;
+  bool result = true;
   ssize_t rd = read(File, data, size);
   if (rd == -1 || rd != size)
-    result = sFALSE;
+    result = false;
 
   if (!result)
     Ok = 0;
@@ -642,15 +642,15 @@ sBool sRootFile::Read(void *data, sDInt size)
   return result;
 }
 
-sBool sRootFile::Write(const void *data, sDInt size)
+bool sRootFile::Write(const void *data, sDInt size)
 {
   sVERIFY(File != -1);
   sVERIFY(size <= 0x7fffffff);
 
-  sBool result = sTRUE;
+  bool result = true;
   ssize_t wr = write(File, data, size);
   if (wr == -1 || wr != size)
-    result = sFALSE;
+    result = false;
 
   if (!result)
     Ok = 0;
@@ -697,12 +697,12 @@ sU8 *sRootFile::Map(sS64 offset, sDInt size)
   return MapPtr;
 }
 
-sBool sRootFile::SetOffset(sS64 offset)
+bool sRootFile::SetOffset(sS64 offset)
 {
   sVERIFY(File != -1)
 
       Offset = offset;
-  sBool result = (lseek64(File, offset, SEEK_SET) == offset);
+  bool result = (lseek64(File, offset, SEEK_SET) == offset);
   if (!result)
     Ok = 0;
   return result;
@@ -713,7 +713,7 @@ sS64 sRootFile::GetOffset()
   return Offset;
 }
 
-sBool sRootFile::SetSize(sS64 size)
+bool sRootFile::SetSize(sS64 size)
 {
   sVERIFY(File != -1);
   if (Ok)
@@ -732,7 +732,7 @@ sS64 sRootFile::GetSize()
 
 /****************************************************************************/
 
-sBool sLoadDir(sArray<sDirEntry> &list, const sChar *path, const sChar *pattern)
+bool sLoadDir(sArray<sDirEntry> &list, const sChar *path, const sChar *pattern)
 {
   if (!pattern)
     pattern = L"*";
@@ -787,13 +787,13 @@ sBool sLoadDir(sArray<sDirEntry> &list, const sChar *path, const sChar *pattern)
     }
 
     closedir(dir);
-    return sTRUE;
+    return true;
   }
   else
-    return sFALSE;
+    return false;
 }
 
-sBool sChangeDir(const sChar *name)
+bool sChangeDir(const sChar *name)
 {
   const char *dir = FromWideFileName(name);
   if (dir[0] == '~' && !dir[1]) // home dir
@@ -814,12 +814,12 @@ void sGetTempDir(const sStringDesc &str)
   sCopyString(str, "/tmp");
 }
 
-sBool sMakeDir(const sChar *name)
+bool sMakeDir(const sChar *name)
 {
   return mkdir(FromWideFileName(name), 0733) == 0;
 }
 
-sBool sCheckDir(const sChar *name)
+bool sCheckDir(const sChar *name)
 {
   DIR *dir = opendir(FromWideFileName(name));
   if (dir)
@@ -828,7 +828,7 @@ sBool sCheckDir(const sChar *name)
   return dir != 0;
 }
 
-sBool sCopyFile(const sChar *source, const sChar *dest, sBool failifexists)
+bool sCopyFile(const sChar *source, const sChar *dest, bool failifexists)
 {
   sLogF(L"file", L"copy from <%s>\n", source);
   sLogF(L"file", L"copy to   <%s>\n", dest);
@@ -838,10 +838,10 @@ sBool sCopyFile(const sChar *source, const sChar *dest, sBool failifexists)
   if (!buf)
   {
     sLogF(L"file", L"copy failed: couldn't allocate temp buffer!\n");
-    return sFALSE;
+    return false;
   }
 
-  sBool ok = sFALSE;
+  bool ok = false;
   int fdin = open(FromWideFileName(source), O_RDONLY);
   if (fdin >= 0)
   {
@@ -872,7 +872,7 @@ sBool sCopyFile(const sChar *source, const sChar *dest, sBool failifexists)
         unlink(FromWideFileName(dest));
       }
       else
-        ok = sTRUE;
+        ok = true;
     }
     else
       sLogF(L"file", L"copy failed: error opening output file!\n");
@@ -886,7 +886,7 @@ sBool sCopyFile(const sChar *source, const sChar *dest, sBool failifexists)
   return ok;
 }
 
-sBool sRenameFile(const sChar *source, const sChar *dest, sBool overwrite /*=sFALSE*/)
+bool sRenameFile(const sChar *source, const sChar *dest, bool overwrite /*=false*/)
 {
   sLogF(L"file", L"rename from <%s>\n", source);
   sLogF(L"file", L"rename to   <%s>\n", dest);
@@ -895,46 +895,46 @@ sBool sRenameFile(const sChar *source, const sChar *dest, sBool overwrite /*=sFA
   const char *destconv = strdupa(FromWideFileName(dest));
 
   if (!overwrite && sCheckFile(source) && sCheckFile(dest)) // this is not entirely safe (non-atomic!)
-    return sFALSE;
+    return false;
 
   if (rename(srcconv, destconv) == 0)
-    return sTRUE;
+    return true;
   else
   {
     sLogF(L"file", L"rename failed to <%s>\n", dest);
-    return sFALSE;
+    return false;
   }
 }
 
-sBool sDeleteFile(const sChar *name)
+bool sDeleteFile(const sChar *name)
 {
   return unlink(FromWideFileName(name)) == 0;
 }
 
-sBool sGetFileWriteProtect(const sChar *filename, sBool &prot)
+bool sGetFileWriteProtect(const sChar *filename, bool &prot)
 {
   int ret = access(FromWideFileName(filename), W_OK);
 
   if (ret == 0)
   {
-    prot = sFALSE;
-    return sTRUE;
+    prot = false;
+    return true;
   }
   else if (ret == -1 && errno == EACCES)
   {
-    prot = sTRUE;
-    return sTRUE;
+    prot = true;
+    return true;
   }
   else
-    return sFALSE;
+    return false;
 }
 
-sBool sSetFileWriteProtect(const sChar *filename, sBool prot)
+bool sSetFileWriteProtect(const sChar *filename, bool prot)
 {
   return chmod(FromWideFileName(filename), prot ? 0444 : 0644) == 0;
 }
 
-sBool sIsBelowCurrentDir(const sChar *relativePath)
+bool sIsBelowCurrentDir(const sChar *relativePath)
 {
   sString<4096> here, there;
 
@@ -946,7 +946,7 @@ sBool sIsBelowCurrentDir(const sChar *relativePath)
   return sCheckPrefix(there, here);
 }
 
-sBool sGetFileInfo(const sChar *name, sDirEntry *de)
+bool sGetFileInfo(const sChar *name, sDirEntry *de)
 {
   struct stat64 st;
 
@@ -957,7 +957,7 @@ sBool sGetFileInfo(const sChar *name, sDirEntry *de)
 
   const char *cname = FromWideFileName(name);
   if (stat64(cname, &st) != 0)
-    return sFALSE;
+    return false;
 
   de->Flags = sDEF_EXISTS;
   if (S_ISDIR(st.st_mode))
@@ -968,7 +968,7 @@ sBool sGetFileInfo(const sChar *name, sDirEntry *de)
   de->Size = st.st_size;
   de->LastWriteTime = st.st_mtime;
 
-  return sTRUE;
+  return true;
 }
 
 /****************************************************************************/
@@ -977,7 +977,7 @@ sBool sGetFileInfo(const sChar *name, sDirEntry *de)
 /***                                                                      ***/
 /****************************************************************************/
 
-static sBool sThreadInitialized = sFALSE;
+static bool sThreadInitialized = false;
 static pthread_key_t sThreadKey, sContextKey;
 static sThreadContext sEmergencyThreadContext;
 
@@ -1122,7 +1122,7 @@ void sInitThread()
   sEmergencyThreadContext.MemTypeStack[0] = sAMF_HEAP;
   pthread_setspecific(sContextKey, &sEmergencyThreadContext);
 
-  sThreadInitialized = sTRUE;
+  sThreadInitialized = true;
 }
 
 /****************************************************************************/
@@ -1161,7 +1161,7 @@ void sThreadLock::Lock()
 
 /****************************************************************************/
 
-sBool sThreadLock::TryLock()
+bool sThreadLock::TryLock()
 {
   return pthread_mutex_trylock((pthread_mutex_t *)CriticalSection) == 0;
 }
@@ -1178,7 +1178,7 @@ void sThreadLock::Unlock()
 // THIS IS UNTESTED, MAY CONTAIN BUGS AND IS DEFINITELY INEFFICIENT.
 // It's also outright dangerous on anything that's not x86!
 
-sThreadEvent::sThreadEvent(sBool manual)
+sThreadEvent::sThreadEvent(bool manual)
 {
   Signaled = 0;
   ManualReset = manual;
@@ -1190,7 +1190,7 @@ sThreadEvent::~sThreadEvent()
 {
 }
 
-sBool sThreadEvent::Wait(sInt timeout)
+bool sThreadEvent::Wait(sInt timeout)
 {
   if (ManualReset) // manual reset
   {
@@ -1199,12 +1199,12 @@ sBool sThreadEvent::Wait(sInt timeout)
       while (!Signaled)
         pthread_yield();
 
-      return sTRUE;
+      return true;
     }
 
     sInt start = sGetTime();
     sU32 tDiff;
-    sBool okay = sFALSE;
+    bool okay = false;
     do
     {
       okay = Signaled;
@@ -1223,7 +1223,7 @@ sBool sThreadEvent::Wait(sInt timeout)
       while ((gotit = sAtomicSwap(&Signaled, 0)) == 0)
         pthread_yield();
 
-      return sTRUE;
+      return true;
     }
 
     sInt start = sGetTime();
@@ -1265,7 +1265,8 @@ public:
       : Device(sINPUT2_TYPE_KEYBOARD, num)
   {
     keys.HintSize(256);
-    keys.AddManyInit(256, sFALSE);
+    bool _false = false;
+    keys.AddManyInit(256, &_false);
     sInput2RegisterDevice(&Device);
   }
 
@@ -1286,7 +1287,7 @@ public:
     InputThreadLock->Unlock();
   }
 
-  sStaticArray<sBool> keys;
+  sStaticArray<bool> keys;
 
 private:
   sInput2DeviceImpl<sINPUT2_KEYBOARD_MAX> Device;
@@ -1563,7 +1564,7 @@ void sInit(sInt flags, sInt xs, sInt ys)
 extern void sXClipPushUpdate();
 extern void sXClearUpdate();
 extern void sXGetUpdateBoundingRect(sRect &r);
-extern sBool sXUpdateEmpty();
+extern bool sXUpdateEmpty();
 
 static sInt sXLookupKeySym(KeySym sym)
 {
@@ -1718,7 +1719,7 @@ static void sXMessageLoop()
 
   if (sAppPtr && sXWndFrontBuffer)
   {
-    sBool done = sFALSE;
+    bool done = false;
     static const sInt buttonKey[10] = {0, sKEY_LMB, sKEY_MMB, sKEY_RMB, sKEY_WHEELUP, sKEY_WHEELDOWN, 0, 0, sKEY_X1MB, sKEY_X2MB};
     static const sInt buttonMask[10] = {0, sMouseData::sMB_LEFT, sMouseData::sMB_MIDDLE, sMouseData::sMB_RIGHT, 0, 0, 0, 0, sMouseData::sMB_X1, sMouseData::sMB_X2};
 
@@ -1730,7 +1731,7 @@ static void sXMessageLoop()
       {
         sFrameHook->Call();
 
-        sBool app_fullpaint = sFALSE;
+        bool app_fullpaint = false;
 
         if (sGetApp())
         {
@@ -1741,6 +1742,11 @@ static void sXMessageLoop()
 
         //sGetApp()->OnPrepareFrame();
 
+        if (!app_fullpaint && (sSystemFlags & sISF_3D))
+        {
+          Render3D();
+        }
+        
         if ((sSystemFlags & sISF_2D) && !sExitFlag)
         {
           Window root;
@@ -1760,11 +1766,6 @@ static void sXMessageLoop()
           sCollector();
         }
 
-        if (!app_fullpaint && (sSystemFlags & sISF_3D))
-        {
-          Render3D();
-        }
-
         if (sSystemFlags & sISF_3D || sSystemFlags & sISF_CONTINUOUS)
           sUpdateWindow();
       }
@@ -1777,7 +1778,7 @@ static void sXMessageLoop()
         {
         case DestroyNotify:
           sDelete(sAppPtr);
-          done = sTRUE;
+          done = true;
           break;
 
         case Expose:
@@ -1877,13 +1878,13 @@ static void sXMessageLoop()
         {
           sAppPtr->OnEvent(sAE_EXIT);
           sCollect();
-          sCollector(sTRUE);
+          sCollector(true);
 
           if (sSystemFlags & sISF_3D)
             ExitGFX();
 
           XDestroyWindow(dpy, sXWndFrontBuffer);
-          done = sTRUE;
+          done = true;
         }
         if(!(sSystemFlags & sISF_3D)) {break;} // this workaround sucks
       }
@@ -1893,7 +1894,7 @@ static void sXMessageLoop()
 
     sSetRunlevel(0x80);
     sCollect();
-    sCollector(sTRUE);
+    sCollector(true);
 
     if (sSystemFlags & sISF_3D)
       ExitGFX();
@@ -1902,7 +1903,7 @@ static void sXMessageLoop()
   {
     sSetRunlevel(0x80);
     sCollect();
-    sCollector(sTRUE);
+    sCollector(true);
 
     if (sSystemFlags & sISF_3D)
       ExitGFX();
@@ -1928,7 +1929,7 @@ class sLinuxJoypad : public sJoypad
   
   int fd;
   sU8 AxisMapping[ABS_MAX+1];
-  sBool FirstEvent;
+  bool FirstEvent;
   
   sJoypadData State;
   
@@ -1942,7 +1943,7 @@ public:
   sLinuxJoypad(const sChar *filename);
   ~sLinuxJoypad();
   
-  sBool IsConnected();
+  bool IsConnected();
   void GetData(sJoypadData &data);
   void GetName(const sStringDesc &name); 
   void SetMotor(sInt slow,sInt fast);
@@ -1955,7 +1956,7 @@ sInt sLinuxJoypad::TranslateTimestamp(sU32 inTimestamp)
   if(FirstEvent)
   {
     TimestampOffset = sGetTime() - inTimestamp;
-    FirstEvent = sFALSE;
+    FirstEvent = false;
   }
   
   return inTimestamp + TimestampOffset;
@@ -2010,7 +2011,7 @@ void sLinuxJoypad::Open(const sChar *filename)
   }
   
   // we have everything, fill out State struct
-  FirstEvent = sTRUE;
+  FirstEvent = true;
   State.ButtonMask = (1<<nButton)-1; // we just take the native button numbering
   State.AnalogMask = 0;
   State.PovMask = 0;
@@ -2141,7 +2142,7 @@ sLinuxJoypad::~sLinuxJoypad()
   Close();
 }
 
-sBool sLinuxJoypad::IsConnected()
+bool sLinuxJoypad::IsConnected()
 {
   return fd >= 0;
 }
@@ -2247,7 +2248,7 @@ public:
 
     return ptr;
   }
-  sBool Free(void *ptr)
+  bool Free(void *ptr)
   {
     //    sAtomicAdd(&sMemoryUsed, -(sDInt)size);
     free(ptr);
@@ -2355,9 +2356,9 @@ int main(int argc, char **argv)
 
   sFrameHook = new sHooks;
   sNewDeviceHook = new sHooks;
-  sActivateHook = new sHooks1<sBool>;
+  sActivateHook = new sHooks1<bool>;
 #if !sSTRIPPED
-  sInputHook = new sHooks2<const sInput2Event &, sBool &>;
+  sInputHook = new sHooks2<const sInput2Event &, bool &>;
   sDebugOutHook = new sHooks1<const sChar *>;
 #endif
 
@@ -2394,7 +2395,7 @@ sVideoWriter *sCreateVideoWriter(const sChar *filename, const sChar *codec, sF32
 
 /****************************************************************************/
 
-void sEnableKeyboard(sBool v) {}
+void sEnableKeyboard(bool v) {}
 
 sInt sGetNumInstances()
 {

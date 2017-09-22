@@ -94,7 +94,7 @@ void sWriter::Begin(sFile *file)
   sVERIFY(!sSerBufferUsed);   // multiple file reader/writers not supported with STATICMEM
   BufferSize = sSerBufferSize;
   Buffer = sSerBuffer;
-  sSerBufferUsed = sTRUE;   
+  sSerBufferUsed = true;   
 #endif
 
   Data = Buffer;
@@ -107,7 +107,7 @@ void sWriter::Begin(sFile *file)
   sClear(WOH);
 }
 
-sBool sWriter::End()
+bool sWriter::End()
 {
   if(Ok && !File->Write(Buffer,Data-Buffer))
     Ok = 0;
@@ -115,7 +115,7 @@ sBool sWriter::End()
   sFreeMem(Buffer);
   Buffer = 0;
 #else
-  sSerBufferUsed = sFALSE;
+  sSerBufferUsed = false;
 #endif
   return Ok;
 }
@@ -213,7 +213,7 @@ sInt sWriter::RegisterPtr(void *obj)
   return WOCount++;
 }
 
-sBool sWriter::IsRegistered(void *obj)
+bool sWriter::IsRegistered(void *obj)
 {
   sWriteLink *e;
 
@@ -405,7 +405,7 @@ sReader::~sReader()
   sFreeMem(Buffer);
   sFreeMem(ROL);
 #else
-  sSerBufferUsed = sFALSE;
+  sSerBufferUsed = false;
 #endif
 }
 
@@ -432,7 +432,7 @@ void sReader::Begin(sFile *file)
   }
 #else
   sVERIFY(!sSerBufferUsed);   // multiple file reader/writers not supported with STATICMEM
-  sSerBufferUsed = sTRUE;
+  sSerBufferUsed = true;
   BufferSize = sSerBufferSize;
   Buffer = sSerBuffer;
   Data = CheckEnd = LoadEnd = Buffer;
@@ -443,13 +443,13 @@ void sReader::Begin(sFile *file)
   ROL[0] = 0;
 }
 
-sBool sReader::End()
+bool sReader::End()
 {
 #if !STATICMEM
   sFreeMem(Buffer);
   Buffer = 0;
 #else
-  sSerBufferUsed = sFALSE;
+  sSerBufferUsed = false;
 #endif
   File = 0;
   Map = 0;
@@ -571,15 +571,15 @@ void sReader::Footer()
   U32(v); if(v!=sMAKE4('>','>','>','>')) Ok = 0;
 }
 
-sBool sReader::PeekFooter()
+bool sReader::PeekFooter()
 {
   const sU8 *tmp = Data;
   sU32 v;
   Check();
-  sBool result = sFALSE;
+  bool result = false;
   U32(v);
   if(v==sMAKE4('>','>','>','>'))
-    result = sTRUE;
+    result = true;
   Data = tmp;
   return result;
 }

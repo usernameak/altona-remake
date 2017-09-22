@@ -147,7 +147,7 @@ void sStsThreadFunc(class sThread *thread, void *_user)
 
 /****************************************************************************/
 
-sStsThread::sStsThread(sStsManager *m,sInt index,sInt taskcount,sBool thread)
+sStsThread::sStsThread(sStsManager *m,sInt index,sInt taskcount,bool thread)
 {
   Manager = m;
   Index = index;
@@ -220,13 +220,13 @@ void sStsThread::DecreaseSync(sStsTask *t)
   }
 }
 
-sBool sStsThread::Execute()
+bool sStsThread::Execute()
 {
   sStsWorkload *wl;
 
   // grab next task
 
-  sBool fail = 1;
+  bool fail = 1;
   sInt start=0;
   sInt end=0;
   void *data=0;
@@ -234,7 +234,7 @@ sBool sStsThread::Execute()
   sStsTask *killtask = 0;
   sInt count = 0;
   sStsQueue *qu = 0;
-  sBool TryDeleteWorkload = 0;
+  bool TryDeleteWorkload = 0;
   WorkloadReadLock.Lock();
   sFORALL_LIST(Manager->ActiveWorkloads,wl)
   {
@@ -519,7 +519,7 @@ void sStsManager::SyncWorkload(sStsWorkload *wl)
   }
 }
 
-sBool sStsManager::HelpWorkload(sStsWorkload *wl)
+bool sStsManager::HelpWorkload(sStsWorkload *wl)
 {
   if(wl->Mode==sSWM_RUNNING)
   {
@@ -625,7 +625,7 @@ void sStsManager::Finish()
   // make thread[0] join the team
 
 //  Threads[0]->Running=1;
-  sBool x=0;
+  bool x=0;
   for(;;)
   {
     Threads[0]->WorkloadReadLock.Lock();
@@ -643,7 +643,7 @@ void sStsManager::Finish()
 
   // wait till all tasks sleep savely.
 /*
-  sBool ok;
+  bool ok;
   for(;;)
   {
     ok = 1;
@@ -705,7 +705,7 @@ sU8 *sStsManager::AllocBytes(sInt bytes)
   return (sU8 *)sPtr(r-bytes);
 }
 */
-sBool sStsManager::StealTasks(sInt to)
+bool sStsManager::StealTasks(sInt to)
 {
   sInt bestt=-1;
   sInt bestn=0;

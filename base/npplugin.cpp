@@ -79,9 +79,9 @@ NPError OSCALL NP_Shutdown()
 extern HINSTANCE WInstance;
 extern void sInitEmergencyThread();
 extern void sInitKeys();
-extern void SetXSIModeD3D(sBool enable);
+extern void SetXSIModeD3D(bool enable);
 extern LRESULT WINAPI MsgProc(HWND win,UINT msg,WPARAM wparam,LPARAM lparam);
-extern void sCollector(sBool exit);
+extern void sCollector(bool exit);
 extern sInt sSystemFlags;
 extern void ExitGFX();
 extern void ResizeGFX(sInt x,sInt y);
@@ -89,7 +89,7 @@ extern HWND sHWND, sExternalWindow;
 extern sApp *sAppPtr;
 extern sInt sExitFlag;
 extern sInt sFatalFlag;
-extern sBool sAllocMemEnabled;
+extern bool sAllocMemEnabled;
 extern sInt DXMayRestore;
 extern HDC sGDIDC;
 extern void Render3D();
@@ -112,7 +112,7 @@ static void AltonaThreadFunc(sThread *thread, void *user)
 
   sInitKeys();
   sSetRunlevel(0x80);
-  SetXSIModeD3D(sTRUE);
+  SetXSIModeD3D(true);
 
   sMain();
 
@@ -123,7 +123,7 @@ static void AltonaThreadFunc(sThread *thread, void *user)
       sInput2Event event;
       while (sInput2PopEvent(event, sGetTime())) {
 #if !sSTRIPPED
-        sBool skip = sFALSE;
+        bool skip = false;
         sInputHook->Call(event, skip);
         if (!skip)
 #endif
@@ -131,7 +131,7 @@ static void AltonaThreadFunc(sThread *thread, void *user)
       }
     }
 
-    sBool app_fullpaint = sFALSE;
+    bool app_fullpaint = false;
 #if sRENDERER==sRENDER_DX9 || sRENDERER==sRENDER_DX11
     DXMayRestore = 1;
     if(sGetApp())
@@ -192,7 +192,7 @@ static void AltonaThreadFunc(sThread *thread, void *user)
 
   sDelete(sAppPtr);
   sCollect();
-  sCollector(sTRUE);
+  sCollector(true);
   sSetRunlevel(0x80);
 
   if(sSystemFlags & sISF_3D)
@@ -208,7 +208,7 @@ LRESULT WINAPI NppMsgProc(HWND win,UINT msg,WPARAM wparam,LPARAM lparam)
 
   //  sDPrintF(L"msg(%0x8) %08x %08x %08x\n",sGetTime(),msg,wparam,lparam);
   //sInt i,t;
-  //sBool mouse=0;
+  //bool mouse=0;
 
   switch(msg)
   {
@@ -236,7 +236,7 @@ LRESULT WINAPI NppMsgProc(HWND win,UINT msg,WPARAM wparam,LPARAM lparam)
       EndPaint(win,&ps);
       sGDIDC = 0;
       //      sPingSound();
-      sCollector(sFALSE);
+      sCollector(false);
     }
     else
     {
@@ -309,7 +309,7 @@ LRESULT WINAPI NppMsgProc(HWND win,UINT msg,WPARAM wparam,LPARAM lparam)
     {
       // We only need to send a deactivate event,
       // because activation is handled in WM_ACTIVATE.
-      sActivateHook->Call(sFALSE);
+      sActivateHook->Call(false);
     }
 
     if(!(sSystemFlags&sISF_FULLSCREEN))
@@ -352,12 +352,12 @@ NPError NPP_Initialize()
   //CoInitialize(NULL);
   sFrameHook = new sHooks;
   sNewDeviceHook = new sHooks;
-  sActivateHook = new sHooks1<sBool>;
+  sActivateHook = new sHooks1<bool>;
   sCrashHook = new sHooks1<sStringDesc>;
-  sAltF4Hook = new sHooks1<sBool &>;
+  sAltF4Hook = new sHooks1<bool &>;
   sCheckCapsHook = new sHooks;
 #if !sSTRIPPED
-  sInputHook = new sHooks2<const sInput2Event &,sBool &>;
+  sInputHook = new sHooks2<const sInput2Event &,bool &>;
   sDebugOutHook = new sHooks1<const sChar*>;
 #endif
 

@@ -171,8 +171,8 @@ struct Form              // there may be multiple windows of same kind!
 {
   sPoolString Symbol;            // symbolic name
   sPoolString Text;             // name for user
-  sBool IsWindow;               // this is a window.
-  sBool IsInScreen;             // window was used in screen.
+  bool IsWindow;               // this is a window.
+  bool IsInScreen;             // window was used in screen.
   const sChar *ClassName;       // sObject::GetClassName()
   CommandTool *CurrentTool;     // current active tool
   sArray<FormInstance> Instances;    // the actual data (windows)
@@ -250,7 +250,7 @@ struct Layout                   // a part of the screen layout tree
   Form *Window;          // link to window (class)
   sInt Index;                   // link to window (index)
   sInt Position;                // position when the window was last layouted, -1 when it was never layouted
-  sBool Align;                  // TRUE when window is right/bottom aligned
+  bool Align;                  // TRUE when window is right/bottom aligned
   sInt InitialPosition;         // position for initial layout, negative for position relative to right/bottom, 0 for normal layout.
 };
 
@@ -395,7 +395,7 @@ void sLayoutFrameSize::OnCalcSize()
   }
 }
 
-void sWireMasterAltF4(sBool &stop,void *user)
+void sWireMasterAltF4(bool &stop,void *user)
 {
   if (sWire->OnShortcut(sKEY_ESCAPE|sKEYQ_SHIFT))
   {
@@ -523,7 +523,7 @@ sWindow *sWireMasterWindow::FindWindow(sPoolString name,sInt index)
 
 /****************************************************************************/
 
-void sWireMasterWindow::AddForm(const sChar *name,sObject *obj,const sChar *instancename,sBool iswindow)
+void sWireMasterWindow::AddForm(const sChar *name,sObject *obj,const sChar *instancename,bool iswindow)
 {
   Form *wc;
 
@@ -802,7 +802,7 @@ sInt sWireMasterWindow::GetSubSwitch(sPoolString name)
   return LayoutFrame->GetSubSwitch(name);
 }
 
-void sWireMasterWindow::SetFullscreen(sWindow *win,sBool toggle)
+void sWireMasterWindow::SetFullscreen(sWindow *win,bool toggle)
 {
   if(toggle && win==FullscreenWindow)
     win = 0;
@@ -886,12 +886,12 @@ void sWireMasterWindow::FormChangeTool(sWireNamespace::Form *wc,sWireNamespace::
 
 /****************************************************************************/
 
-sBool sWireMasterWindow::CanBeGlobal(sU32 m) 
+bool sWireMasterWindow::CanBeGlobal(sU32 m) 
 {
   return (m & QUAL_GLOBAL) || (m & QUAL_SCOPEMASK); 
 }
 
-sBool sWireMasterWindow::IsGlobal(sU32 m) 
+bool sWireMasterWindow::IsGlobal(sU32 m) 
 {
   return (m & QUAL_GLOBAL) || (m & QualScope); 
 }
@@ -902,7 +902,7 @@ void sWireMasterWindow::SwitchScope(sInt scope)
 }
 
 
-sBool sWireMasterWindow::OnShortcut(sU32 key)
+bool sWireMasterWindow::OnShortcut(sU32 key)
 {
   Shortcut *sc;
   if(key&sKEYQ_SHIFT) key |= sKEYQ_SHIFT;
@@ -919,7 +919,7 @@ sBool sWireMasterWindow::OnShortcut(sU32 key)
   return 0;
 }
 
-sBool sWireMasterWindow::HandleKey(sWindow *win,sU32 key)
+bool sWireMasterWindow::HandleKey(sWindow *win,sU32 key)
 {
   Form *wc;
   FormInstance *inst;
@@ -1025,7 +1025,7 @@ sBool sWireMasterWindow::HandleKey(sWindow *win,sU32 key)
   return 0;
 }
 
-sBool sWireMasterWindow::HandleCommand(sWindow *win,sInt cmd)
+bool sWireMasterWindow::HandleCommand(sWindow *win,sInt cmd)
 {
   FormInstance *inst = 0;
   switch(cmd)
@@ -1045,13 +1045,13 @@ sBool sWireMasterWindow::HandleCommand(sWindow *win,sInt cmd)
 }
 
 
-sBool sWireMasterWindow::HandleDrag(sWindow *win,const sWindowDrag &dd,sInt hit)
+bool sWireMasterWindow::HandleDrag(sWindow *win,const sWindowDrag &dd,sInt hit)
 {
   Form *wc;
   FormInstance *inst;
   CommandDrag *drag;
   Shortcut *sc;
-  sBool ok;
+  bool ok;
   sU32 key;
   sU32 keyq;
 
@@ -1341,7 +1341,7 @@ void sWireMasterWindow::Help(sWindow *window)
 /****************************************************************************/
 /****************************************************************************/
 
-FormInstance *sWireMasterWindow::_FormName(sBool window)
+FormInstance *sWireMasterWindow::_FormName(bool window)
 {
   Form *form=0;
   FormInstance *inst=0;
@@ -1419,7 +1419,7 @@ void sWireMasterWindow::_Key(sU32 &key,sInt &qual,sInt &hit)
     else if(Scan->Name == L"X5")          key = KEY_X5;
     else if(Scan->Name == L"PAUSE")       key = sKEY_PAUSE;
     else if(Scan->Name == L"MENU")        key = sKEY_WINM;
-    else if(Scan->Name == L"DROPFILES") { key = sKEY_DROPFILES; sEnableFileDrop(sTRUE); }
+    else if(Scan->Name == L"DROPFILES") { key = sKEY_DROPFILES; sEnableFileDrop(true); }
     else if(Scan->Name == L"WHEELUP")     key = sKEY_WHEELUP;
     else if(Scan->Name == L"WHEELDOWN")   key = sKEY_WHEELDOWN;
     else if(Scan->Name == L"NULL")        key = KEY_NULL;
@@ -1617,7 +1617,7 @@ void sWireMasterWindow::_ScreenLevel(sLayoutFrameWindow *parent)
 {
   sLayoutFrameWindow *lfw = 0;
 //  sLayoutFrameWindow *child;
-  sBool childs = 0;  // 0:can not 1:may 2:must ... have childs
+  bool childs = 0;  // 0:can not 1:may 2:must ... have childs
 
   if(Scan->IfName(L"horizontal"))
   {

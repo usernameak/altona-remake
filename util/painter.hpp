@@ -57,7 +57,7 @@ public:
   // shapes
   void Box(const sFRect &r,const sU32 col);
   void Box(const sFRect &r,const sU32 *colors);
-  void Line(sF32 x0,sF32 y0,sF32 x1,sF32 y1,sU32 c0,sU32 c1,sBool skiplastpixel=0);
+  void Line(sF32 x0,sF32 y0,sF32 x1,sF32 y1,sU32 c0,sU32 c1,bool skiplastpixel=0);
 
   // fonts. select unique fontid as you like
   void RegisterFont(sInt fontid,const sChar *name,sInt height,sInt style);
@@ -66,8 +66,8 @@ public:
   sF32 GetHeight(sInt fontid);
 
   // debbuging textures
-  void PaintTexture(sTexture2D* tex, sU32 col=0xffffffff, sInt xs=-1, sInt ys=-1, sInt xo=0, sInt yo=0, sBool noalpha=sTRUE);
-  void PaintTexture(class sTextureCube *tex, sInt xs=-1, sInt ys=-1, sInt xo=0, sInt yo=0, sBool noalpha=sTRUE);
+  void PaintTexture(sTexture2D* tex, sU32 col=0xffffffff, sInt xs=-1, sInt ys=-1, sInt xo=0, sInt yo=0, bool noalpha=true);
+  void PaintTexture(class sTextureCube *tex, sInt xs=-1, sInt ys=-1, sInt xo=0, sInt yo=0, bool noalpha=true);
 };
 
 /****************************************************************************/

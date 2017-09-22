@@ -35,17 +35,17 @@ public:
   virtual sInt GetSpeed()=0;
   virtual sInt GetBeat()=0;
   virtual void GetLoop(sInt &start,sInt &end)=0;
-  virtual sBool GetPlaying()=0;
-  virtual sBool GetLooping()=0;
-  virtual sBool GetScratching()=0;
+  virtual bool GetPlaying()=0;
+  virtual bool GetLooping()=0;
+  virtual bool GetScratching()=0;
 
   // playing
-  virtual void EnableLoop(sBool loop)=0;
-  virtual void EnablePlaying(sBool play)=0;
+  virtual void EnableLoop(bool loop)=0;
+  virtual void EnablePlaying(bool play)=0;
   // "Scratching" means that someone is scratching the timeline right now, *not* that
   // scratching is (dis)allowed! That depends only on whether the relevant messages are
   // wired (or not).
-  virtual void EnableScratching(sBool scratch)=0;
+  virtual void EnableScratching(bool scratch)=0;
   virtual void SeekBeat(sInt beat)=0;
 };
 
@@ -57,9 +57,9 @@ class sTimerTimeline : public sTimelineInterface
   sInt LoopStart;                 // 16:16 start of loop
   sInt LoopEnd;                   // 16:16 end of loop. the loop is set if start<end
   sInt Speed;                     // 16:16 time_beat = time_seconds * Speed / 0x10000
-  sBool LoopEnable;               // activate looping.
-  sBool Playing;                  // handled by Start()/Stop()
-  sBool Scratching;               // special mode: like play, but with time frozen
+  bool LoopEnable;               // activate looping.
+  bool Playing;                  // handled by Start()/Stop()
+  bool Scratching;               // special mode: like play, but with time frozen
 
   sInt LastTime;
   sInt Time;
@@ -74,12 +74,12 @@ public:
   sInt GetBeat();
   sInt GetSpeed();
   void GetLoop(sInt &start,sInt &end);
-  sBool GetPlaying();
-  sBool GetLooping();
-  sBool GetScratching();
-  void EnableLoop(sBool loop);
-  void EnablePlaying(sBool play);
-  void EnableScratching(sBool scratch);
+  bool GetPlaying();
+  bool GetLooping();
+  bool GetScratching();
+  void EnableLoop(bool loop);
+  void EnablePlaying(bool play);
+  void EnableScratching(bool scratch);
   void SeekBeat(sInt beat);
 };
 
@@ -90,9 +90,9 @@ class sMusicTimeline : public sTimelineInterface
   sInt LoopStart;                 // 16:16 start of loop
   sInt LoopEnd;                   // 16:16 end of loop. the loop is set if start<end
   sInt Speed;                     // 16:16 time_beat = time_seconds * Speed / 0x10000
-  sBool LoopEnable;               // activate looping.
-  sBool Playing;                  // handled by Start()/Stop()
-  sBool Scratching;               // special mode: like play, but with time frozen
+  bool LoopEnable;               // activate looping.
+  bool Playing;                  // handled by Start()/Stop()
+  bool Scratching;               // special mode: like play, but with time frozen
 
   sInt LastTime;
   sInt Time;
@@ -115,12 +115,12 @@ public:
   sInt GetBeat();
   sInt GetSpeed();
   void GetLoop(sInt &start,sInt &end);
-  sBool GetPlaying();
-  sBool GetLooping();
-  sBool GetScratching();
-  void EnableLoop(sBool loop);
-  void EnablePlaying(sBool play);
-  void EnableScratching(sBool scratch);
+  bool GetPlaying();
+  bool GetLooping();
+  bool GetScratching();
+  void EnableLoop(bool loop);
+  void EnablePlaying(bool play);
+  void EnableScratching(bool scratch);
   void SeekBeat(sInt beat);
 };
 
@@ -174,7 +174,7 @@ class sWinTimeline : public sWireClientWindow
 protected:
   sInt Height;
   sTimelineInterface *Timeline;
-  sBool DecimalTimebase; // false: use powers of 2 (for music); true: use powers of 10 (seconds/frames etc.)
+  bool DecimalTimebase; // false: use powers of 2 (for music); true: use powers of 10 (seconds/frames etc.)
 
 public:
   sCLASSNAME_NONEW(sWinTimeline);
@@ -191,7 +191,7 @@ public:
   void DragScratch(const sWindowDrag &dd);
   void DragMark(const sWindowDrag &dd);
 
-  void SetDecimalTimebase(sBool enable);
+  void SetDecimalTimebase(bool enable);
 };
 
 /****************************************************************************/
@@ -226,7 +226,7 @@ public:
   void InitWire(const sChar *name);
   void SetDragLockFlags(DragLockFlag flags);
 
-  sBool OnCheckHit(const sWindowDrag &dd);
+  bool OnCheckHit(const sWindowDrag &dd);
   void OnCalcSize();
   void OnPaint2D();
 

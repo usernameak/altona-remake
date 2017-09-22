@@ -260,7 +260,7 @@ sTexture2D *sRenderTargetManager_::ReadScreen()
   return ScreenProxy;
 }
 
-sTexture2D *sRenderTargetManager_::WriteScreen(sBool finish)
+sTexture2D *sRenderTargetManager_::WriteScreen(bool finish)
 {
   if(ToTexture && finish)
   {

@@ -104,7 +104,7 @@ void sPrintBlob(sTextBuffer &tb, sArray<sU8> &blob);
 
 sCompileResult::sCompileResult()
 {
-  Valid = sFALSE;
+  Valid = false;
   Errors = L"";
 #if sCOMP_DX9_ENABLE
   sSetMem(&D3D9,0,sizeof(D3D9));
@@ -130,7 +130,7 @@ void sCompileResult::Reset()
     cgDestroyProgram(Cg.Program);
 #endif // sCOMP_CG_ENABLE
   ShaderBlobs.Reset();
-  Valid = sFALSE;
+  Valid = false;
   Errors = L"";
 }
 
@@ -154,7 +154,7 @@ static struct sShaderCompiler
 static sInt CompilerCount=0;
 
 
-sBool sShaderCompile(sCompileResult &result, sInt stype, sInt dtype, const sChar *source, sInt len, sInt flags /*=0*/, const sChar *name/*=0*/)
+bool sShaderCompile(sCompileResult &result, sInt stype, sInt dtype, const sChar *source, sInt len, sInt flags /*=0*/, const sChar *name/*=0*/)
 {
   for(sInt i=0;i<CompilerCount;i++)
   {
@@ -165,13 +165,13 @@ sBool sShaderCompile(sCompileResult &result, sInt stype, sInt dtype, const sChar
       if(!name) name = L"main";
       sChar8 name8[64];
       sCopyString(name8,name,64);
-      sBool check = (*ShaderCompiler[i].Func)(result,stype,dtype,flags,buffer,len,name8);
+      bool check = (*ShaderCompiler[i].Func)(result,stype,dtype,flags,buffer,len,name8);
       sDeleteArray(buffer);
       return check;
     }
   }
   sPrintF(L"no shader compiler found for 0x%08x -> 0x%08x\n",stype,dtype);
-  return sFALSE;
+  return false;
 }
 
 void sRegisterCompiler(sInt stype, sInt dtype, sCompilerFunc func)
@@ -225,7 +225,7 @@ const sChar8* GetProfile(sInt type)
 }
 
 
-static sBool sCompileDX9(sCompileResult &result, sInt stype, sInt dtype, sInt flags, const sChar8 *src, sInt len, const sChar8 *name)
+static bool sCompileDX9(sCompileResult &result, sInt stype, sInt dtype, sInt flags, const sChar8 *src, sInt len, const sChar8 *name)
 {
 #if sCOMP_DX9_ENABLE
   ID3DXBuffer *bytecode;
@@ -250,9 +250,9 @@ static sBool sCompileDX9(sCompileResult &result, sInt stype, sInt dtype, sInt fl
 #endif
 
   if(D3DXCompileShader(src,len,0,0,name,profile8,d3dflags,&bytecode,&result.D3D9.Errors,&result.D3D9.CTable)!=D3D_OK)
-    result.Valid = sFALSE;
+    result.Valid = false;
   else
-    result.Valid = sTRUE;
+    result.Valid = true;
 
   // print errors and warnings
   if(result.D3D9.Errors)
@@ -265,14 +265,14 @@ static sBool sCompileDX9(sCompileResult &result, sInt stype, sInt dtype, sInt fl
   if(!result.Valid)
   {
     sRelease(bytecode);
-    return sFALSE;
+    return false;
   }
 
   // get source code
   sAddShaderBlob(result.ShaderBlobs,dtype,bytecode->GetBufferSize(),(const sU8*)bytecode->GetBufferPointer());
   return result.Valid;
 #else
-  return sFALSE;
+  return false;
 #endif // sCOMP_DX9_ENABLE
 }
 
@@ -281,13 +281,13 @@ static sBool sCompileDX9(sCompileResult &result, sInt stype, sInt dtype, sInt fl
 
 /****************************************************************************/
 
-static sBool GetCgError(const sStringDesc &errors)
+static bool GetCgError(const sStringDesc &errors)
 {
 #if sCOMP_CG_ENABLE
   CGerror error;
   const sChar8 *string = cgGetLastErrorString(&error);
 
-  if(error==CG_NO_ERROR) return sFALSE;
+  if(error==CG_NO_ERROR) return false;
 
   sErrorString temp0;
   sErrorString temp1;
@@ -300,13 +300,13 @@ static sBool GetCgError(const sStringDesc &errors)
       sCopyString(temp1,msg,0x4000);
   }
   sSPrintF(errors,L"%s\n%s",temp0,temp1);
-  return sTRUE;
+  return true;
 #else
-  return sTRUE;
+  return true;
 #endif
 }
 
-static sBool sCompileCg(sCompileResult &result, sInt stype, sInt dtype, sInt flags, const sChar8 *src, sInt len, const sChar8 *name)
+static bool sCompileCg(sCompileResult &result, sInt stype, sInt dtype, sInt flags, const sChar8 *src, sInt len, const sChar8 *name)
 {
 #if sCOMP_CG_ENABLE
   if(result.Cg.Program)
@@ -329,27 +329,27 @@ static sBool sCompileCg(sCompileResult &result, sInt stype, sInt dtype, sInt fla
 
   sAddShaderBlob(result.ShaderBlobs,dtype,size,(const sU8*)out8);
 
-  result.Valid = sTRUE;
+  result.Valid = true;
   sDeleteArray(src8);
-  return sTRUE;
+  return true;
 
 error:
 
-  result.Valid = sFALSE;
+  result.Valid = false;
   sDeleteArray(src8);
-  return sFALSE;
+  return false;
 #else
   sLogF(L"asc",L"sCOMP_CG_ENABLE == 0 no cg compiler available\n");
-  return sFALSE;
+  return false;
 #endif // sCOMP_CG_ENABLE
 }
 
 
-static sBool sCompileDummy(sCompileResult &result, sInt stype, sInt dtype, sInt flags, const sChar8 *src, sInt len, const sChar8 *name)
+static bool sCompileDummy(sCompileResult &result, sInt stype, sInt dtype, sInt flags, const sChar8 *src, sInt len, const sChar8 *name)
 {
   sAddShaderBlob(result.ShaderBlobs,dtype,4,(const sU8 *)"dumy");
-  result.Valid = sTRUE;
-  return sTRUE;
+  result.Valid = true;
+  return true;
 }
 
 /****************************************************************************/
@@ -416,12 +416,12 @@ void sPrintBlob(sTextBuffer &tb, sArray<sU8> &blob)
 
 /****************************************************************************/
 
-sBool sShaderCompileDX(const sChar *source,const sChar *profile,const sChar *main,sU8 *&data,sInt &size,sInt flags,sTextBuffer *errors)
+bool sShaderCompileDX(const sChar *source,const sChar *profile,const sChar *main,sU8 *&data,sInt &size,sInt flags,sTextBuffer *errors)
 {
 #if sCOMP_DX9_ENABLE
   ID3D10Blob *bytecode;
   ID3D10Blob *dxerrors;
-  sBool result;
+  bool result;
 
   // unicode -> ansi conversion (cheap)
 
@@ -484,7 +484,7 @@ sBool sShaderCompileDX(const sChar *source,const sChar *profile,const sChar *mai
   delete[] src8;
   return result;
 #else
-  return sFALSE;
+  return false;
 #endif // sCOMP_DX9_ENABLE
 }
 
@@ -495,7 +495,7 @@ sBool sShaderCompileDX(const sChar *source,const sChar *profile,const sChar *mai
 /****************************************************************************/
 #if sPLATFORM == sPLAT_WINDOWS
 
-sBool sCompileExtern(sCompileCallback cb, sCompileResult &result, sInt stype, sInt dtype, sInt flags, const sChar8 *source, sInt len, const sChar8 *name)
+bool sCompileExtern(sCompileCallback cb, sCompileResult &result, sInt stype, sInt dtype, sInt flags, const sChar8 *source, sInt len, const sChar8 *name)
 {
   if(cb)
   {
@@ -512,7 +512,7 @@ sBool sCompileExtern(sCompileCallback cb, sCompileResult &result, sInt stype, sI
     }
     return result.Valid;
   }
-  return sFALSE;
+  return false;
 }
 
 #endif // sPLATFORM == sPLAT_WINDOWS

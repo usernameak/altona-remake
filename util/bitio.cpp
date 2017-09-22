@@ -14,7 +14,7 @@
 
 static sU8 WriteScratch;  // scratch byte in case of buffer overruns
 
-void sBitWriter::FlushBuffer(sBool finish)
+void sBitWriter::FlushBuffer(bool finish)
 {
   sVERIFY(Buffer != 0);
   if(BufferPtr == Buffer) // nothing to flush
@@ -26,14 +26,14 @@ void sBitWriter::FlushBuffer(sBool finish)
     {
       BufferPtr = &WriteScratch;
       BufferEnd = BufferPtr + 1;
-      Error = sTRUE;
+      Error = true;
     }
   }
   else
   {
     sDInt size = BufferPtr - Buffer;
     if(!File->Write(Buffer,size))
-      Error = sTRUE;
+      Error = true;
 
     BufferPtr = Buffer;
   }
@@ -49,7 +49,7 @@ sBitWriter::sBitWriter()
   BitsLeft = 32;
 
   Written = 0;
-  Error = sFALSE;
+  Error = false;
 }
 
 sBitWriter::~sBitWriter()
@@ -69,7 +69,7 @@ void sBitWriter::Start(sU8 *outBuffer,sDInt bufferSize)
   BitBuffer = 0;
   BitsLeft = 32;
   Written = 0;
-  Error = sFALSE;
+  Error = false;
 }
 
 void sBitWriter::Start(sFile *outFile)
@@ -86,7 +86,7 @@ sDInt sBitWriter::Finish()
   if(BitsLeft != 32) // might need to write last byte
     PutByte(BitBuffer >> 24);
 
-  FlushBuffer(sTRUE);
+  FlushBuffer(true);
 
   if(File)
   {
@@ -113,7 +113,7 @@ void sBitReader::RefillBuffer()
     // we may read exactly 4 bytes past without it being an error (since that's how much we buffer)
     // 4 is edge-on (will cause another refill), so check for 5
     if(++ExtraBytes == 5)
-      Error = sTRUE;
+      Error = true;
 
     BufferPtr = &ReadScratch; // read zeroes
     BufferEnd = BufferPtr + 1;
@@ -128,7 +128,7 @@ void sBitReader::RefillBuffer()
     // we may read exactly 4 bytes past without it being an error (since that's how much we buffer)
     // 4 is edge-on (will cause another refill), so check for 5
     if(++ExtraBytes == 5)
-      Error = sTRUE;
+      Error = true;
 
     BufferPtr = &ReadScratch; // read zero
     BufferEnd = BufferPtr + 1;
@@ -146,7 +146,7 @@ sBitReader::sBitReader()
   BitBuffer = 0;
   BitsLeft = 0;
 
-  Error = sFALSE;
+  Error = false;
 }
 
 sBitReader::~sBitReader()
@@ -167,7 +167,7 @@ void sBitReader::Start(const sU8 *buffer,sDInt size)
   BitsLeft = 0;
 
   ExtraBytes = 0;
-  Error = sFALSE;
+  Error = false;
 
   // fill bitbuffer (as far as possible)
   for(sInt i=0;i<sMin<sDInt>(size,4);i++)
@@ -192,7 +192,7 @@ void sBitReader::Start(sFile *file)
   BitsLeft = 0;
 
   ExtraBytes = 0;
-  Error = sFALSE;
+  Error = false;
 
   // fill bitbuffer (as far as possible)
   RefillBuffer();
@@ -204,12 +204,12 @@ void sBitReader::Start(sFile *file)
   }
 }
 
-sBool sBitReader::Finish()
+bool sBitReader::Finish()
 {
   if(ExtraBytes == 4 && BitsLeft != 32) // if we read past the 4th extra byte, it's definitely an error.
-    Error = sTRUE;
+    Error = true;
 
-  sBool ok = !Error;
+  bool ok = !Error;
 
   if(File)
   {
@@ -230,7 +230,7 @@ sBool sBitReader::Finish()
   Buffer = BufferPtr = BufferEnd = 0;
   BitBuffer = 0;
   BitsLeft = 0;
-  Error = sFALSE;
+  Error = false;
 
   return ok;
 }
@@ -323,7 +323,7 @@ void sBuildHuffmanCodeLens(sInt *lens,const sU32 *freq,sInt count,sInt maxLen)
   }
 
   // build the tree
-  sBool tooLong;
+  bool tooLong;
   do
   {
     // push all nonzero frequency symbols onto heap
@@ -351,7 +351,7 @@ void sBuildHuffmanCodeLens(sInt *lens,const sU32 *freq,sInt count,sInt maxLen)
     }
 
     // calc code lengths
-    tooLong = sFALSE;
+    tooLong = false;
 
     for(sInt i=0;i<count;i++)
     {
@@ -405,7 +405,7 @@ void sBuildHuffmanCodes(sU32 *codes,sInt *lens,const sU32 *freq,sInt count,sInt 
   sBuildHuffmanCodeValues(codes,lens,count);
 }
 
-sBool sWriteHuffmanCodeLens(sBitWriter &writer,const sInt *lens,sInt count)
+bool sWriteHuffmanCodeLens(sBitWriter &writer,const sInt *lens,sInt count)
 {
   sInt lastLen = -1;
   for(sInt i=0;i<count;i++)
@@ -442,7 +442,7 @@ sBool sWriteHuffmanCodeLens(sBitWriter &writer,const sInt *lens,sInt count)
   return writer.IsOk();
 }
 
-sBool sReadHuffmanCodeLens(sBitReader &reader,sInt *lens,sInt count)
+bool sReadHuffmanCodeLens(sBitReader &reader,sInt *lens,sInt count)
 {
   sInt len = -1;
   for(sInt i=0;i<count;i++)
@@ -455,7 +455,7 @@ sBool sReadHuffmanCodeLens(sBitReader &reader,sInt *lens,sInt count)
       {
         len = reader.GetBits(5);
         if(len<1 || len>24) // that doesn't make sense
-          return sFALSE;
+          return false;
       }
       else if(reader.GetBits(1)) // len has changed
       {
@@ -464,7 +464,7 @@ sBool sReadHuffmanCodeLens(sBitReader &reader,sInt *lens,sInt count)
         {
           len += adj;
           if(len<1 || len>24) // it doesn't make any more sense here.
-            return sFALSE;
+            return false;
         } while (reader.GetBits(1));
       }
 
@@ -489,7 +489,7 @@ sFastHuffmanDecoder::~sFastHuffmanDecoder()
   delete[] CodeMap;
 }
 
-sBool sFastHuffmanDecoder::Init(const sInt *lens,sInt count)
+bool sFastHuffmanDecoder::Init(const sInt *lens,sInt count)
 {
   sVERIFY(count <= 4096); // max because of 16bit fastpath encoding
   CodeMap = new sU16[count];
@@ -521,7 +521,7 @@ sBool sFastHuffmanDecoder::Init(const sInt *lens,sInt count)
     {
       delete[] CodeMap;
       delete[] codes;
-      return sFALSE;
+      return false;
     }
 
     MaxCode[i] = code << (24 - i);
@@ -545,7 +545,7 @@ sBool sFastHuffmanDecoder::Init(const sInt *lens,sInt count)
   }
 
   delete[] codes;
-  return sTRUE;
+  return true;
 }
 
 sInt sFastHuffmanDecoder::DecodeSymbol(sBitReader &reader)

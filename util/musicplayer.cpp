@@ -44,7 +44,7 @@ sMusicPlayer::~sMusicPlayer()
     delete[] RewindBuffer;
 }
 
-sBool sMusicPlayer::LoadAndCache(const sChar *name)
+bool sMusicPlayer::LoadAndCache(const sChar *name)
 {
   sString<4096> buffer;
   sDInt size;
@@ -61,7 +61,7 @@ sBool sMusicPlayer::LoadAndCache(const sChar *name)
     RewindPos = size/4;
     sVERIFY(Stream==0);
     Status = 3;
-    return sTRUE;
+    return true;
   }
   else
   {
@@ -75,16 +75,16 @@ sBool sMusicPlayer::LoadAndCache(const sChar *name)
       RewindSize = size/4;
       RewindPos = size/4;
       sSaveFile(buffer,mem,size);
-      return sTRUE;
+      return true;
     }
     else
     {
-      return sFALSE;
+      return false;
     }
   }
 }
 
-sBool sMusicPlayer::Load(const sChar *name)
+bool sMusicPlayer::Load(const sChar *name)
 {
   sDInt size;
 
@@ -92,25 +92,25 @@ sBool sMusicPlayer::Load(const sChar *name)
     delete[] Stream;
   Stream = sLoadFile(name,size);
   StreamSize = size;
-  StreamDelete = sFALSE;
+  StreamDelete = false;
   if(Stream)
   {
-    StreamDelete = sTRUE;
+    StreamDelete = true;
     Status = 1;
-    return sTRUE;
+    return true;
   }
-  return sFALSE;
+  return false;
 }
 
-sBool sMusicPlayer::Load(sU8 *data,sInt size)
+bool sMusicPlayer::Load(sU8 *data,sInt size)
 {
   if(StreamDelete)
     delete[] Stream;
   Stream = data;
   StreamSize = size;
-  StreamDelete = sFALSE;
+  StreamDelete = false;
   Status = 1;
-  return sTRUE;
+  return true;
 }
 
 void sMusicPlayer::AllocRewind(sInt bytes)
@@ -120,7 +120,7 @@ void sMusicPlayer::AllocRewind(sInt bytes)
   RewindPos = 0;
 }
 
-sBool sMusicPlayer::Start(sInt songnr)
+bool sMusicPlayer::Start(sInt songnr)
 {
   if(Status!=0)
   {
@@ -151,7 +151,7 @@ void sMusicPlayer::InstallHandler()
   sSetSoundHandler(44100,sMusicPlayerSoundHandler,44100);
 }
 
-sBool sMusicPlayer::Handler(sS16 *buffer,sInt samples,sInt vol)
+bool sMusicPlayer::Handler(sS16 *buffer,sInt samples,sInt vol)
 {
   sInt diff,size;
   sInt result;

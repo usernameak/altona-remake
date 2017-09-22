@@ -131,14 +131,14 @@ void sTextWindow::OnPaint2D()
 
 /****************************************************************************/
 
-sBool sTextWindow::GetCursorFlash()
+bool sTextWindow::GetCursorFlash()
 {
   return (CursorTimer & 4)?0:1;
 }
 
 void sTextWindow::ResetCursorFlash()
 {
-  sBool oldcursor = GetCursorFlash();
+  bool oldcursor = GetCursorFlash();
   CursorTimer = 0;
   if(oldcursor!=GetCursorFlash())
   {
@@ -149,7 +149,7 @@ void sTextWindow::ResetCursorFlash()
 
 void sTextWindow::CmdCursorToggle()
 {
-  sBool oldcursor = GetCursorFlash();
+  bool oldcursor = GetCursorFlash();
   CursorTimer++;
   if(oldcursor!=GetCursorFlash())
   {
@@ -298,7 +298,7 @@ void sTextWindow::OnDrag(const sWindowDrag &dd)
 
 /****************************************************************************/
 
-sBool sTextWindow::BeginMoveCursor(sBool selmode)
+bool sTextWindow::BeginMoveCursor(bool selmode)
 {
   if(!selmode)
   {
@@ -326,7 +326,7 @@ sBool sTextWindow::BeginMoveCursor(sBool selmode)
   }
 }
 
-void sTextWindow::EndMoveCursor(sBool selmode)
+void sTextWindow::EndMoveCursor(bool selmode)
 {
   if(selmode)
   {
@@ -339,22 +339,22 @@ void sTextWindow::EndMoveCursor(sBool selmode)
 }
 
 // "in-line" space, but not linefeeds
-static sINLINE sBool IsLineSpace(sChar ch)
+static sINLINE bool IsLineSpace(sChar ch)
 {
   return ch == ' ' || ch == '\t';
 }
 
-sBool sTextWindow::OnKey(sU32 key)
+bool sTextWindow::OnKey(sU32 key)
 {
   if(key&sKEYQ_SHIFT) key|=sKEYQ_SHIFT;
   if(key&sKEYQ_CTRL) key|=sKEYQ_CTRL;
 
   sInt h = Font->GetHeight();
-  sBool selmode = (key & sKEYQ_SHIFT) ? 1 : 0;
+  bool selmode = (key & sKEYQ_SHIFT) ? 1 : 0;
   sInt oldpos = PrintInfo.CursorPos;
   sInt dummy;
 
-  sBool scrolltocursor = 1;
+  bool scrolltocursor = 1;
   switch(key&(0x8000ffff|sKEYQ_SHIFT|sKEYQ_CTRL))
   {
   case sKEY_WHEELUP:
@@ -1052,7 +1052,7 @@ sInt sTextWindow::GetCursorColumn() const
   return n;
 }
 
-void sTextWindow::Find(const sChar *find,sBool dir,sBool next)
+void sTextWindow::Find(const sChar *find,bool dir,bool next)
 {
   const sChar *text = Text->Get();
   sInt textlen = Text->GetCount();

@@ -31,16 +31,16 @@ class sCamera
 protected:
   enum { INPUT_X, INPUT_Y, INPUT_MBL, INPUT_MBR, INPUT_LX, INPUT_LY, INPUT_RX, INPUT_RY, };
   sInput2Scheme Scheme;
-  sBool MouseControl;
-  sBool JoypadControl;
+  bool MouseControl;
+  bool JoypadControl;
 
 public:
   sCamera();
   virtual ~sCamera();
   virtual void OnFrame(sInt delta,sViewport &vp)=0;
   virtual void OnKey(sU32 key);
-  virtual void SetMouseControl(sBool mouseControl) { MouseControl = mouseControl; }
-  virtual void SetJoypadControl(sBool joypadControl) { JoypadControl = joypadControl; }
+  virtual void SetMouseControl(bool mouseControl) { MouseControl = mouseControl; }
+  virtual void SetJoypadControl(bool joypadControl) { JoypadControl = joypadControl; }
 
   void Handle(sViewport &vp);
 };
@@ -117,7 +117,7 @@ class sCameraXSI : public sCamera
   
 
   sF32 DollyStep;
-  sBool DollyActive;
+  bool DollyActive;
 
 
   public:
@@ -132,7 +132,7 @@ class sCameraXSI : public sCamera
     sVector30 EulerRot;
     sVector30 Scale;
     sF32      Distance;
-    sBool     StickyMode;
+    bool     StickyMode;
 };
 
 /****************************************************************************/

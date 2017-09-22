@@ -108,7 +108,7 @@ sINLINE void sFastLzpCompressor::PutExpGolomb(sU32 value)
   }
 }
 
-sInt sFastLzpCompressor::CompressChunk(sU32 nBytes,sBool isLast)
+sInt sFastLzpCompressor::CompressChunk(sU32 nBytes,bool isLast)
 {
   sVERIFYSTATIC(WrapMask>0 && (WrapMask & (WrapMask+1)) == 0); // power of 2
   sVERIFYSTATIC(ChunkSize < (1<<24));
@@ -223,7 +223,7 @@ sFastLzpCompressor::~sFastLzpCompressor()
   delete[] OutBuffer;
 }
 
-sBool sFastLzpCompressor::Compress(sFile *dest,sFile *src)
+bool sFastLzpCompressor::Compress(sFile *dest,sFile *src)
 {
   sVERIFY(PWritePos == ~0u); // no piecewise I/O in progress
 
@@ -234,16 +234,16 @@ sBool sFastLzpCompressor::Compress(sFile *dest,sFile *src)
   {
     sInt nBytes = sMin<sS64>(size,ChunkSize);
     if(!src->Read(&ChunkBuffer[(CurrentPos & WrapMask)],nBytes))
-      return sFALSE;
+      return false;
 
     sInt outBytes = CompressChunk(nBytes,size==nBytes);
     if(!dest->Write(OutBuffer,outBytes))
-      return sFALSE;
+      return false;
 
     size -= nBytes;
   }
 
-  return sTRUE;
+  return true;
 }
 
 void sFastLzpCompressor::StartPiecewise()
@@ -252,10 +252,10 @@ void sFastLzpCompressor::StartPiecewise()
   
   Reset();
   PWritePos = 0;
-  PFirstBlock = sTRUE;
+  PFirstBlock = true;
 }
 
-sBool sFastLzpCompressor::WritePiecewise(sFile *dest,const void *buffer,sDInt size)
+bool sFastLzpCompressor::WritePiecewise(sFile *dest,const void *buffer,sDInt size)
 {
   sVERIFY(PWritePos != ~0u);
 
@@ -264,9 +264,9 @@ sBool sFastLzpCompressor::WritePiecewise(sFile *dest,const void *buffer,sDInt si
   {
     if(!PFirstBlock && (PWritePos & (ChunkSize-1)) == 0) // this chunk is full
     {
-      sInt outBytes = CompressChunk(ChunkSize,sFALSE);
+      sInt outBytes = CompressChunk(ChunkSize,false);
       if(!dest->Write(OutBuffer,outBytes))
-        return sFALSE;
+        return false;
     }
 
     sInt nextBoundary = (PWritePos < ChunkSize) ? ChunkSize : 2*ChunkSize;
@@ -276,25 +276,25 @@ sBool sFastLzpCompressor::WritePiecewise(sFile *dest,const void *buffer,sDInt si
     bufPtr += blockSize;
     size -= blockSize;
     PWritePos = (PWritePos + blockSize) & WrapMask;
-    PFirstBlock = sFALSE;
+    PFirstBlock = false;
   }
 
-  return sTRUE;
+  return true;
 }
 
-sBool sFastLzpCompressor::EndPiecewise(sFile *dest)
+bool sFastLzpCompressor::EndPiecewise(sFile *dest)
 {
   if(PWritePos == 0 && PFirstBlock) // nothing was written
   {
     PWritePos = ~0u;
-    return sTRUE;
+    return true;
   }
 
   sU32 cpm = CurrentPos & WrapMask;
   sU32 size = PWritePos > cpm ? (PWritePos - cpm) : (PWritePos - cpm + 2*ChunkSize);
   sVERIFY(size <= ChunkSize);
   
-  sInt outBytes = CompressChunk(size,sTRUE);
+  sInt outBytes = CompressChunk(size,true);
   PWritePos = ~0u;
   return dest->Write(OutBuffer,outBytes);
 }
@@ -350,7 +350,7 @@ sINLINE sU32 sFastLzpDecompressor::GetExpGolomb()
   }
 }
 
-sInt sFastLzpDecompressor::DecompressChunk(sU32 blockLen,sBool &last,sU8 *&ptr)
+sInt sFastLzpDecompressor::DecompressChunk(sU32 blockLen,bool &last,sU8 *&ptr)
 {
   // call after the chunk has been read+block length consumed
   // read header.
@@ -460,10 +460,10 @@ sFastLzpDecompressor::~sFastLzpDecompressor()
   delete[] InBuffer;
 }
 
-sBool sFastLzpDecompressor::Decompress(sFile *dest,sFile *src)
+bool sFastLzpDecompressor::Decompress(sFile *dest,sFile *src)
 {
   sVERIFY(PReadPos == ~0u);
-  sBool last = sFALSE;
+  bool last = false;
   sU8 *ptr;
 
   Reset();
@@ -472,21 +472,21 @@ sBool sFastLzpDecompressor::Decompress(sFile *dest,sFile *src)
   {
     // read block size
     if(!src->Read(InBuffer,3))
-      return sFALSE;
+      return false;
 
     sU32 len = ReadLen(InBuffer);
     if(len > ChunkSize+8 || !src->Read(InBuffer,len))
-      return sFALSE;
+      return false;
 
     sInt deLen = DecompressChunk(len,last,ptr);
     if(deLen == -1)
-      return sFALSE;
+      return false;
 
     if(deLen && !dest->Write(ptr,deLen))
-      return sFALSE;
+      return false;
   }
 
-  return sTRUE;
+  return true;
 }
 
 void sFastLzpDecompressor::StartPiecewise()
@@ -496,10 +496,10 @@ void sFastLzpDecompressor::StartPiecewise()
 
   PReadPos = 0;
   PBlockEnd = 0;
-  PIsLast = sFALSE;
+  PIsLast = false;
 }
 
-sBool sFastLzpDecompressor::ReadPiecewise(sFile *src,void *buffer,sDInt size)
+bool sFastLzpDecompressor::ReadPiecewise(sFile *src,void *buffer,sDInt size)
 {
   sVERIFY(PReadPos != ~0u);
   sU8 *bufPtr = (sU8 *) buffer;
@@ -509,23 +509,23 @@ sBool sFastLzpDecompressor::ReadPiecewise(sFile *src,void *buffer,sDInt size)
     if(PReadPos == PBlockEnd) // need to read new block
     {
       if(PIsLast) // was the last block, nothing more to read!
-        return sFALSE;
+        return false;
 
       sVERIFY(PReadPos == (CurrentPos & WrapMask));
 
       // read block size
       if(!src->Read(InBuffer,3))
-        return sFALSE;
+        return false;
 
       sU32 compLen = ReadLen(InBuffer);
       if(compLen > ChunkSize+8 || !src->Read(InBuffer,compLen))
-        return sFALSE;
+        return false;
 
       // try to decompress
       sU8 *ptr = 0;
       sInt deLen = DecompressChunk(compLen,PIsLast,ptr);
       if(deLen == -1)
-        return sFALSE;
+        return false;
 
       PBlockEnd = (PReadPos + deLen) & WrapMask;
     }
@@ -539,7 +539,7 @@ sBool sFastLzpDecompressor::ReadPiecewise(sFile *src,void *buffer,sDInt size)
     PReadPos = (PReadPos + blockSize) & WrapMask;
   }
 
-  return sTRUE;
+  return true;
 }
 
 void sFastLzpDecompressor::EndPiecewise()
@@ -563,11 +563,11 @@ sFastLzpFile::~sFastLzpFile()
   Close();
 }
 
-sBool sFastLzpFile::Open(sFile *host,sBool writing)
+bool sFastLzpFile::Open(sFile *host,bool writing)
 {
   Close();
   if(host == 0)
-    return sFALSE;
+    return false;
 
   Host = host;
   if(writing)
@@ -579,7 +579,7 @@ sBool sFastLzpFile::Open(sFile *host,sBool writing)
     if(!Host->Write(buffer,16))
     {
       sDelete(Host);
-      return sFALSE;
+      return false;
     }
 
     Size = 0;
@@ -593,7 +593,7 @@ sBool sFastLzpFile::Open(sFile *host,sBool writing)
     if(!Host->Read(buffer,16) || sCmpMem(buffer,"FastLZP",8)!=0)
     {
       sDelete(Host);
-      return sFALSE;
+      return false;
     }
 
     sUnalignedLittleEndianLoad64(buffer+8,(sU64&)Size);
@@ -601,13 +601,13 @@ sBool sFastLzpFile::Open(sFile *host,sBool writing)
     Decomp->StartPiecewise();
   }
 
-  return sTRUE;
+  return true;
 }
 
 sFile *sFastLzpFile::OpenRead(sFile *host)
 {
   sFastLzpFile *lzp = new sFastLzpFile;
-  if(!lzp->Open(host,sFALSE))
+  if(!lzp->Open(host,false))
     sDelete(lzp);
 
   return lzp;
@@ -616,15 +616,15 @@ sFile *sFastLzpFile::OpenRead(sFile *host)
 sFile *sFastLzpFile::OpenWrite(sFile *host)
 {
   sFastLzpFile *lzp = new sFastLzpFile;
-  if(!lzp->Open(host,sTRUE))
+  if(!lzp->Open(host,true))
     sDelete(lzp);
 
   return lzp;
 }
 
-sBool sFastLzpFile::Close()
+bool sFastLzpFile::Close()
 {
-  sBool ret = sTRUE;
+  bool ret = true;
 
   if(Comp) // if compressing, store size tag
   {
@@ -633,7 +633,7 @@ sBool sFastLzpFile::Close()
     sU8 buffer[8];
     sUnalignedLittleEndianStore64(buffer,Size);
     if(!Host || !Host->SetOffset(8) || !Host->Write(buffer,8))
-      ret = sFALSE;
+      ret = false;
 
     delete Comp;
     Comp = 0;
@@ -652,16 +652,16 @@ sBool sFastLzpFile::Close()
   return ret;
 }
 
-sBool sFastLzpFile::Read(void *data,sDInt size)
+bool sFastLzpFile::Read(void *data,sDInt size)
 {
   sVERIFY(Host && Decomp);
   return Decomp->ReadPiecewise(Host,data,size);
 }
 
-sBool sFastLzpFile::Write(const void *data,sDInt size)
+bool sFastLzpFile::Write(const void *data,sDInt size)
 {
   sVERIFY(Host && Comp);
-  sBool ret = Comp->WritePiecewise(Host,data,size);
+  bool ret = Comp->WritePiecewise(Host,data,size);
   Size += ret ? size : 0;
   return ret;
 }

@@ -56,10 +56,10 @@ void sInput2Scheme::OnGameStep(sInt delta)
       RetriggerTime[i] = RetriggerRate[i];
 
     sInput2Key* key = Bindings[i];
-    sBool connected = sFALSE;
+    bool connected = false;
     while (key) {
       if (!(key->Device->GetStatusWord() & sINPUT2_STATUS_ERROR)) {
-        connected = sTRUE;
+        connected = true;
         break;
       }
       key = key->Next;
@@ -183,18 +183,18 @@ sInt sInput2Scheme::GetTimestamp() const
 
 /****************************************************************************/
 
-sBool sInput2Scheme::Hold(sInt id) const
+bool sInput2Scheme::Hold(sInt id) const
 {
   sVERIFY2(id >= 0 && id < Bindings.GetSize(), L"sInput2Scheme::Hold(): id out of range specified with sInput2Scheme::Init()");
 
-  sBool value = sFALSE;
+  bool value = false;
   sInput2Key* key = Bindings[id];
   if (!key)
     return value;
   do {
     sF32 v = key->Device->GetAbs(key->KeyId);
     if (sFAbs(v) > key->ThresholdDigitalHi)
-      value = sMax(value, v != 0.0f ? sTRUE : sFALSE);
+      value = sMax(value, v != 0.0f ? true : false);
     key = key->Next;
   } while (key);
   return value;
@@ -226,7 +226,7 @@ sInt sInput2Scheme::Pressed(sInt id) const
   if (value)
     RetriggerTime[id] = sAbs(RetriggerDelay[id]);
   // retriggering. retrigger if RetriggerTime == 0 and key is still pressed
-  sBool permanentRetrigger = RetriggerDelay[id]<0;
+  bool permanentRetrigger = RetriggerDelay[id]<0;
   RetriggerPressed[id] = valuePositive || valueNegative || permanentRetrigger;
   if (RetriggerRate[id] && RetriggerTime[id] == 0 && RetriggerPressed[id])
     return (valuePositive || permanentRetrigger ? 1 : 0) + (valueNegative ? -1 : 0);

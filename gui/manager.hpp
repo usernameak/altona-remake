@@ -77,9 +77,9 @@ private:
 
   friend class sGuiApp;
 
-  sBool LayoutFlag;
-  sBool Shutdown;
-  sBool Paint3dFlag;
+  bool LayoutFlag;
+  bool Shutdown;
+  bool Paint3dFlag;
 
   sRect Client;
   sWindow *Root;
@@ -94,7 +94,7 @@ private:
   sInt HardStartY;
   
   sImage2D *BackBuffer;
-  sBool BackBufferUsed;
+  bool BackBufferUsed;
   sRect BackBufferRect;
 
   sArray<sWindow *> Window3D;       // while scanning the Region3D, crate a list of windows that have 3d painting
@@ -103,7 +103,7 @@ public:
 private:
 
   sWindowDrag DragData;
-  sBool Dragging;
+  bool Dragging;
 
   struct PostQueueEntry
   {
@@ -125,16 +125,16 @@ private:
   sThreadLock AsyncLock;
 
   sArray<Event> EventQueue;
-  sBool QueueEvents;              // stop processing inputs immediatly and start queueing them
-  sBool DontQueueEvents;          // this is a bad moment to start queueing, because we are just processing WM_PAINT
+  bool QueueEvents;              // stop processing inputs immediatly and start queueing them
+  bool DontQueueEvents;          // this is a bad moment to start queueing, because we are just processing WM_PAINT
 
   class sGuiApp *GuiApp;
   void RecCalcSize(sWindow *);
   void RecLayout(sWindow *);
   void RecPaint(sWindow *,const sRect &update);
   void RecPaint3d(sWindow *,const sRect &wr);
-  sBool RecShortcut(sWindow *w,sU32 key);
-  sWindow *RecHitWindow(sWindow *,sInt x,sInt y,sBool border) const;
+  bool RecShortcut(sWindow *w,sU32 key);
+  sWindow *RecHitWindow(sWindow *,sInt x,sInt y,bool border) const;
   void SendMouse(const Event &ie);
   void OnPrepareFrame();
   void OnPaint(const sRect &client,const sRect &update);
@@ -155,8 +155,8 @@ public:
   sGui_();
   ~sGui_();
   void Tag();
-  sBool HandleShiftEscape;        // this this to 0 if you want to handle SHIFT ESCAPE on your own
-  sBool TabletMode;
+  bool HandleShiftEscape;        // this this to 0 if you want to handle SHIFT ESCAPE on your own
+  bool TabletMode;
 
   void SetTheme(const sGuiTheme &theme);
 
@@ -165,10 +165,10 @@ public:
   sFont2D *PropFont;
   sFont2D *FixedFont;
   void RectHL(const sRect &r,sInt colh,sInt coll) const;
-  void RectHL(const sRect &r, sBool invert=sFALSE) const; // use default colors for thin 3d border
-  void PaintHandle(sInt x,sInt y,sBool select) const;
-  sBool HitHandle(sInt x,sInt y,sInt mx,sInt my) const;
-  void PaintButtonBorder(sRect &r,sBool pressed) const;
+  void RectHL(const sRect &r, bool invert=false) const; // use default colors for thin 3d border
+  void PaintHandle(sInt x,sInt y,bool select) const;
+  bool HitHandle(sInt x,sInt y,sInt mx,sInt my) const;
+  void PaintButtonBorder(sRect &r,bool pressed) const;
   void PaintButton(const sRect &rect,const sChar *text,sInt flags,sInt len=-1,sU32 backcolor=0) const;
   void BeginBackBuffer(const sRect &rect);
   void EndBackBuffer();
@@ -196,7 +196,7 @@ public:
 
   void AddWindow(sWindow *);      // low level add window
   void AddBackWindow(sWindow *);  // add a window that fills the whole screen
-  void AddFloatingWindow(sWindow *,const sChar *title, sBool closeable=sFALSE); // add a floating window with a size border and title
+  void AddFloatingWindow(sWindow *,const sChar *title, bool closeable=false); // add a floating window with a size border and title
   void AddPopupWindow(sWindow *); // add a popup window where the mouse is.
   void AddWindow(sWindow *,sInt x,sInt y); // add a popup window where the mouse is.
   void AddCenterWindow(sWindow *w);   // add window in center of screen

@@ -51,7 +51,7 @@ struct sWindowNotify              // update when something in range changes
   const void *Start;
   const void *End;
 
-  sBool Hit(const void *s,const void *e) const { return (e>Start && s<End); }
+  bool Hit(const void *s,const void *e) const { return (e>Start && s<End); }
   void Clear() { Start=End=0; }
   void Add(const sWindowNotify &n) { if(End==0) { *this=n; } else { if(Start>n.Start) Start=n.Start; if(End<n.End) End=n.End; } }
 };
@@ -175,9 +175,9 @@ public:
   virtual void OnLayout();
   virtual void OnCalcSize();
   virtual void OnNotify(const void *ptr, sInt size);
-  virtual sBool OnKey(sU32 key);
-  virtual sBool OnShortcut(sU32 key);
-  virtual sBool OnCommand(sInt cmd);
+  virtual bool OnKey(sU32 key);
+  virtual bool OnShortcut(sU32 key);
+  virtual bool OnCommand(sInt cmd);
   virtual void OnDrag(const sWindowDrag &dd);
 
 
@@ -198,9 +198,9 @@ public:
   void SetToolTipIfNarrow(const sChar *string,sInt len=-1,sInt space=4);
 
   void Post(sInt cmd);
-  sBool MMBScroll(const sWindowDrag &dd);
-  class sScrollBorder *AddScrolling(sBool x,sBool y);
-  void ScrollTo(const sRect &vis,sBool save);
+  bool MMBScroll(const sWindowDrag &dd);
+  class sScrollBorder *AddScrolling(bool x,bool y);
+  void ScrollTo(const sRect &vis,bool save);
   void ScrollTo(sInt x,sInt y);
 };
 

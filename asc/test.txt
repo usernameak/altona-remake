@@ -92,7 +92,7 @@ asc
     float4 SbOffsets1;      // uv offset for small blur kernel -> 4, 8, 16 texel average
     float4 SbOffsets2;      // uv offset for small blur kernel -> 4, 8, 16 texel average
 
-    extern void Set(const sVector4 &cocFar, const sVector4 &sbOffsets1, const sVector4 &sbOffsets2, sU32 copyColor, sU32 addColor, const sVector4 &depthParams, sVector4 maxUV_F, sVector4 maxUV_H, sVector4 maxUV_Q, sBool skyBlur, sBool nearBlur, sBool showGlare)
+    extern void Set(const sVector4 &cocFar, const sVector4 &sbOffsets1, const sVector4 &sbOffsets2, sU32 copyColor, sU32 addColor, const sVector4 &depthParams, sVector4 maxUV_F, sVector4 maxUV_H, sVector4 maxUV_Q, bool skyBlur, bool nearBlur, bool showGlare)
     {
       CoCFar = cocFar;
       CoCFar.w = sF32(nearBlur);  // "dynamic" branch flag
@@ -163,20 +163,20 @@ material sMtrlIppCombine : sEngBaseMtrl
 {
   header
   {
-    sBool DoF;
-    sBool Glare;
-    sBool MotionBlur;
-    sBool RawZ;
-    sBool Clamp;
+    bool DoF;
+    bool Glare;
+    bool MotionBlur;
+    bool RawZ;
+    bool Clamp;
   }
 
   new
   {
-    DoF = sFALSE;
-    Glare = sFALSE;
-    MotionBlur = sFALSE;
-    RawZ = sTRUE;
-    Clamp = sFALSE;
+    DoF = false;
+    Glare = false;
+    MotionBlur = false;
+    RawZ = true;
+    Clamp = false;
   }
 
   prepare

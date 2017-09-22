@@ -27,17 +27,17 @@
 class sEffect 
 {
   friend class sEffectManager_;
-  sBool Valid;
+  bool Valid;
 public:
 
-  sBool Active;
+  bool Active;
 
   // general interface
 
   sEffect();
   virtual ~sEffect();
-  virtual sBool OnInit();
-  virtual sBool OnInput(const sInput2Event &ie); // please use only for debugging
+  virtual bool OnInit();
+  virtual bool OnInput(const sInput2Event &ie); // please use only for debugging
 
   // these are called every frame, in this order
   virtual void OnFrame(sInt delta);
@@ -61,7 +61,7 @@ public:
   void RemoveEffect(sEffect *);
 
   void OnInit();
-  sBool OnInput(const sInput2Event &ie); 
+  bool OnInput(const sInput2Event &ie); 
 
   void OnFrame(sInt delta);
   void OnPaintPre(const class sViewport &vp); // per viewport

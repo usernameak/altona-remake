@@ -43,7 +43,7 @@ public:
   void OnPaint2D();
   void OnLayout();
   void OnCalcSize();
-  sBool OnKey(sU32 key);
+  bool OnKey(sU32 key);
   void OnDrag(const sWindowDrag &dd);
 
   sInt GetTab();

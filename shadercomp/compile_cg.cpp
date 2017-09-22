@@ -32,7 +32,7 @@ static void CGExit()
   cgDestroyContext(CGC);
 }
 
-static sBool CGError(sPoolString &errors)
+static bool CGError(sPoolString &errors)
 {
   sString<0x4000> buffer;
   CGerror error;
@@ -54,7 +54,7 @@ static sBool CGError(sPoolString &errors)
   return 1;
 }
 
-static sBool CGCompile(const sChar *source,const sChar *profile,sPoolString &result,sPoolString &errors)
+static bool CGCompile(const sChar *source,const sChar *profile,sPoolString &result,sPoolString &errors)
 {
   sChar8 *source8=0;
   const sChar8 *out8;
@@ -93,7 +93,7 @@ error:
   return 0;
 }
 
-sBool sShaderCompileCG(const sChar *source,const sChar *profile,const sChar *main,sU8 *&data_,sInt &size_,sInt flags,sTextBuffer *errors)
+bool sShaderCompileCG(const sChar *source,const sChar *profile,const sChar *main,sU8 *&data_,sInt &size_,sInt flags,sTextBuffer *errors)
 {
   sChar8 *source8=0;
   const sChar8 *out8 = 0;
@@ -147,7 +147,7 @@ error:
 
 #else
 
-sBool sShaderCompileCG(const sChar *source,const sChar *profile,const sChar *main,sU8 *&data_,sInt &size_,sInt flags,sTextBuffer *errors)
+bool sShaderCompileCG(const sChar *source,const sChar *profile,const sChar *main,sU8 *&data_,sInt &size_,sInt flags,sTextBuffer *errors)
 {
   return 0;
 }

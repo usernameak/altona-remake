@@ -22,7 +22,7 @@ typedef void (*sSoundHandler)(sS16 *data,sInt count);      // 1 count = left+rig
 
 // sound out
 
-sBool sSetSoundHandler(sInt freq,sSoundHandler,sInt latency,sInt flags=0);
+bool sSetSoundHandler(sInt freq,sSoundHandler,sInt latency,sInt flags=0);
 void sClearSoundHandler();
 sInt sGetCurrentSample();
 void sClearSoundBuffer();
@@ -38,7 +38,7 @@ enum sSoundOutFlags
 
 // sound in
 
-sBool sSetSoundInHandler(sInt freq,sSoundHandler,sInt latency);
+bool sSetSoundInHandler(sInt freq,sSoundHandler,sInt latency);
 void sSoundInput();
 sInt sGetCurrentInSample();
 

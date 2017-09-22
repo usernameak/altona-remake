@@ -649,7 +649,6 @@ typedef sCONFIG_UNICODETYPE       sChar;    // type for strings (UNICODE!)
 typedef sS64                      sSize;    // size of a file = something possibly larger than memory
 
 typedef char                      sChar8;   // only use where the API requires ascii
-typedef int                       sBool;    // use for boolean function results
 
 typedef sCONFIG_SSE               sSSE ;   // 4 x sF32
 
@@ -739,8 +738,6 @@ sMemberPtr<MemberType> sMakeMemberPtr(MemberType ClassType::*,sDInt o)
 
 /****************************************************************************/
 
-#define sTRUE   (!0)
-#define sFALSE  0
 #define sNULL   0
 #define sPI     3.1415926535897932384626433832795
 #define sPI2    6.28318530717958647692528676655901
@@ -762,8 +759,8 @@ template <class Type> sINLINE Type sMax3(Type a,Type b,Type c)      {return sMax
 template <class Type> sINLINE Type sSign(Type a)                    {return (a==0) ? Type(0) : (a>0) ? Type(1) : Type(-1);}
 template <class Type> sINLINE Type sCompare(Type a,Type b)          {return (a>b) ? 1 : ((a==b) ? 0 : -1); }
 template <class Type> sINLINE Type sClamp(Type a,Type min,Type max) {return (a>=max) ? max : (a<=min) ? min : a;}
-template <class Type> sINLINE sBool sIsInRangeIncl(Type a,Type min,Type max) {return (min<=a) && (a<=max);}
-template <class Type> sINLINE sBool sIsInRangeExcl(Type a,Type min,Type max) {return (min<=a) && (a<max);}
+template <class Type> sINLINE bool sIsInRangeIncl(Type a,Type min,Type max) {return (min<=a) && (a<=max);}
+template <class Type> sINLINE bool sIsInRangeExcl(Type a,Type min,Type max) {return (min<=a) && (a<max);}
 template <class Type> sINLINE void sSwap(Type &a,Type &b)           {Type s=a; a=b; b=s;}
 template <class Type> sINLINE Type sAlign(Type a,sInt b)            {typedef sInt check[(sizeof(Type)<=sizeof(sDInt))?1:-1]; return (Type)((((sDInt)a)+b-1)&(~(b-1)));} // doesn't work correctly if sizeof(sDInt)<sizeof(Type)
 sINLINE sS64 sAlign(sS64 a,sInt b)                                  {return ((a+b-1)&(~(b-1)));}
@@ -775,7 +772,7 @@ sInt sFindLowerPower(sInt x);
 sInt sFindHigherPower(sInt x);
 sU32 sMakeMask(sU32 max);
 sU64 sMakeMask(sU64 max);
-inline sBool sIsPower2(sInt x)                                      {return (x&(x-1)) == 0;}
+inline bool sIsPower2(sInt x)                                      {return (x&(x-1)) == 0;}
 inline sInt sDivDown(sInt a,sInt b)                                 {return a>0?a/b:-(-a/b);}
 
 template <class Type> sINLINE void sDelete(Type &a)                 {if(a) delete a; a=0;}
@@ -1054,11 +1051,11 @@ sInt sCmpStringLen(const sChar *a,const sChar *b,sInt len);   // first character
 sInt sCmpStringILen(const sChar *a,const sChar *b,sInt len);
 sInt sCmpStringPLen(const sChar *a,const sChar *b,sInt len);
 const sChar *sFindFileWithoutPath(const sChar *a);
-sBool sIsAbsolutePath(const sChar *a);
+bool sIsAbsolutePath(const sChar *a);
 void sExtractPath(const sChar *a, const sStringDesc &path);
 void sExtractPath(const sChar *a, const sStringDesc &path, const sStringDesc &filename);
 void sMakeRelativePath(const sStringDesc &path, const sChar *relTo); // make first path relative to second one if possible
-sBool sExtractPathDrive(const sChar *path, const sStringDesc &drive);
+bool sExtractPathDrive(const sChar *path, const sStringDesc &drive);
 
 sInt sFindString(const sChar *f, const sChar *s); // returns index of first occurrence of s in f or -1
 sInt sFindStringI(const sChar *f, const sChar *s); // returns index of first case insensitive occurrence of s in f or -1
@@ -1067,38 +1064,38 @@ sInt sFindFirstChar(const sChar *f,sInt c);
 sInt sFindNthChar(const sChar *f,sInt c, sInt n);
 sInt sFindChar(const sChar *f,sChar character, sInt startPos=0); // returns index of first occurrence of character after startPos
 const sChar *sFindFileExtension(const sChar *a);              // "ab.cd.ef" -> "ef"
-sBool sExtractFileExtension(const sStringDesc &d, const sChar *a, sInt nr=0);  // "ab.cd.ef" -nr==0-> "ef", "ab.cd.ef" -nr==1-> "cd"
+bool sExtractFileExtension(const sStringDesc &d, const sChar *a, sInt nr=0);  // "ab.cd.ef" -nr==0-> "ef", "ab.cd.ef" -nr==1-> "cd"
 sChar *sFindFileExtension(sChar *a);
-sBool sCheckFileExtension(const sChar *name,const sChar *ext); // example: ext = "mp.txt"
-sBool sMatchWildcard(const sChar *wild,const sChar *text,sBool casesensitive=0,sBool pathsensitive=1);    // one recursion per '*'
+bool sCheckFileExtension(const sChar *name,const sChar *ext); // example: ext = "mp.txt"
+bool sMatchWildcard(const sChar *wild,const sChar *text,bool casesensitive=0,bool pathsensitive=1);    // one recursion per '*'
 sInt sCountChar(const sChar *str,sChar c);                    // useful as sCountChar(text,'\n');
 sInt sFindChoice(const sChar *str,const sChar *choices);
-sBool sFindFlag(const sChar *str,const sChar *choices,sInt &mask_,sInt &value_);
+bool sFindFlag(const sChar *str,const sChar *choices,sInt &mask_,sInt &value_);
 //sChar *sMakeChoice(sChar * choice, const sChar * choices, sInt index);
 sInt sCountChoice(const sChar *choices);
-sBool sCheckPrefix(const sChar *string,const sChar *prefix);  // ("1234","12") -> true
-sBool sCheckSuffix(const sChar *string,const sChar *suffix);  // ("1234","34") -> true
+bool sCheckPrefix(const sChar *string,const sChar *prefix);  // ("1234","12") -> true
+bool sCheckSuffix(const sChar *string,const sChar *suffix);  // ("1234","34") -> true
 sInt sReplaceChar(sChar *string, sChar from, sChar to);
 
 void sReadString(sU32 *&data,sChar *buffer,sInt size);
 inline void sReadString(sU32 *&data,const sStringDesc &desc) { sReadString(data,desc.Buffer,desc.Size); }
 void sWriteString(sU32 *&data,const sChar *buffer);
 
-inline sBool sIsDigit(sInt i) { return (i>='0' && i<='9'); }
-inline sBool sIsLetter(sInt i) { return (i>='a' && i<='z') || (i>='A' && i<='Z') || i=='_'; }
-inline sBool sIsSpace(sInt i) { return i==' ' || i=='\t' || i=='\r' || i=='\n'; }
-inline sBool sIsHex(sInt i) { return (i>='a' && i<='f') || (i>='A' && i<='F') || (i>='0' && i<='9'); }
-sBool sIsName(const sChar *);   // c conventions: letter followed by letter or digit
+inline bool sIsDigit(sInt i) { return (i>='0' && i<='9'); }
+inline bool sIsLetter(sInt i) { return (i>='a' && i<='z') || (i>='A' && i<='Z') || i=='_'; }
+inline bool sIsSpace(sInt i) { return i==' ' || i=='\t' || i=='\r' || i=='\n'; }
+inline bool sIsHex(sInt i) { return (i>='a' && i<='f') || (i>='A' && i<='F') || (i>='0' && i<='9'); }
+bool sIsName(const sChar *);   // c conventions: letter followed by letter or digit
 sU32 sHashString(const sChar *string);
 sU32 sHashString(const sChar *string,sInt len);
-sBool sScanInt(const sChar *&scan,sInt &val);
+bool sScanInt(const sChar *&scan,sInt &val);
 #if sCONFIG_64BIT
-sBool sScanInt(const sChar *&scan,sDInt &val);
+bool sScanInt(const sChar *&scan,sDInt &val);
 #endif
-sBool sScanFloat(const sChar *&scan,sF32 &val);
-sBool sScanHex(const sChar *&scan,sInt &val, sInt maxlen=0);
-sBool sScanMatch(const sChar *&scan, const sChar *match);
-sBool sScanGUID(const sChar *&str, struct sGUID &guid);
+bool sScanFloat(const sChar *&scan,sF32 &val);
+bool sScanHex(const sChar *&scan,sInt &val, sInt maxlen=0);
+bool sScanMatch(const sChar *&scan, const sChar *match);
+bool sScanGUID(const sChar *&str, struct sGUID &guid);
 inline void sScanSpace(const sChar *&scan) { while(sIsSpace(*scan)) scan++; }
 
 void sMakeChoice(const sStringDesc &,const sChar *choices,sInt index);
@@ -1115,9 +1112,9 @@ struct sFloatInfo
   sChar Digits[20];               // zero-terminated digits, without decimal 
   sInt Exponent;                  // 1.0e0 -> Exponent = 0;
   sInt NaN;                       // if NaN, this holds all the NaN bits
-  sBool Negative;                 // sign (1 or 0)
-  sBool Denormal;                 // denormal detected during float->ascii conversion
-  sBool Infinite;                 // infinite (1 or 0)
+  bool Negative;                 // sign (1 or 0)
+  bool Denormal;                 // denormal detected during float->ascii conversion
+  bool Infinite;                 // infinite (1 or 0)
 
   void PrintE(const sStringDesc &desc); // print number in 1.2345e6 notation
   void PrintF(const sStringDesc &desc,sInt fractions); // print number in 0.0001234 notation
@@ -1135,7 +1132,7 @@ struct sFloatInfo
 
 /****************************************************************************/
 
-sBool sFormatString(const sStringDesc &,const sChar *format,const sChar **fp); // return sFALSE if text is truncated!
+bool sFormatString(const sStringDesc &,const sChar *format,const sChar **fp); // return false if text is truncated!
 
 /****************************************************************************/
 
@@ -1156,11 +1153,11 @@ struct sFormatStringBuffer
   sChar *End;
   const sChar *Format;
 
-  sBool Fill();
+  bool Fill();
   void GetInfo(sFormatStringInfo &);
-  void Add(const sFormatStringInfo &info,const sChar *buffer,sBool sign);
+  void Add(const sFormatStringInfo &info,const sChar *buffer,bool sign);
   void Print(const sChar *str);
-  template<typename Type> void PrintInt(const sFormatStringInfo &info,Type v,sBool sign);
+  template<typename Type> void PrintInt(const sFormatStringInfo &info,Type v,bool sign);
   void PrintFloat(const sFormatStringInfo &info,sF32 v);
   void PrintFloat(const sFormatStringInfo &info,sF64 v);
   const sChar *Get() { return Start; }
@@ -1272,22 +1269,22 @@ public:
   operator sChar*()            { return Buffer; }
   operator const sChar*() const { return Buffer; }
   operator sStringDesc()       { return sStringDesc(Buffer,size); }
-  sBool operator==(const sChar *s) const { return sCmpString(Buffer,s)==0; }
-  sBool operator==(const sString &s) const { return sCmpString(Buffer,s.Buffer)==0; }
-  sBool operator==(const sPoolString &s) const;
-  sBool operator!=(const sChar *s) const { return sCmpString(Buffer,s)!=0; }
-  sBool operator!=(const sString &s) const { return sCmpString(Buffer,s.Buffer)!=0; }
-  sBool operator!=(const sPoolString &s) const;
-  sBool operator>(const sChar *s) const { return sCmpString(Buffer,s)>0; }
-  sBool operator>(const sString &s) const { return sCmpString(Buffer,s.Buffer)>0; }
-  sBool operator>(const sPoolString &s) const;
-  sBool operator<(const sChar *s) const { return sCmpString(Buffer,s)<0; }
-  sBool operator<(const sString &s) const { return sCmpString(Buffer,s.Buffer)<0; }
-  sBool operator<(const sPoolString &s) const;
+  bool operator==(const sChar *s) const { return sCmpString(Buffer,s)==0; }
+  bool operator==(const sString &s) const { return sCmpString(Buffer,s.Buffer)==0; }
+  bool operator==(const sPoolString &s) const;
+  bool operator!=(const sChar *s) const { return sCmpString(Buffer,s)!=0; }
+  bool operator!=(const sString &s) const { return sCmpString(Buffer,s.Buffer)!=0; }
+  bool operator!=(const sPoolString &s) const;
+  bool operator>(const sChar *s) const { return sCmpString(Buffer,s)>0; }
+  bool operator>(const sString &s) const { return sCmpString(Buffer,s.Buffer)>0; }
+  bool operator>(const sPoolString &s) const;
+  bool operator<(const sChar *s) const { return sCmpString(Buffer,s)<0; }
+  bool operator<(const sString &s) const { return sCmpString(Buffer,s.Buffer)<0; }
+  bool operator<(const sPoolString &s) const;
   const sChar &operator[](sInt i) const { return Buffer[i]; }
   sChar &operator[](sInt i)    { return Buffer[i]; }
   sInt Count() const           { return sGetStringLen(Buffer); }
-  sBool IsEmpty() const        { return Buffer[0]==0; }
+  bool IsEmpty() const        { return Buffer[0]==0; }
   sInt Size() const            { return size; }
   void Clear()                 { Buffer[0]=0; }
 
@@ -1329,7 +1326,7 @@ extern void (*sRedirectStdOut)(const sChar *text);  // sPrintF will be send here
 void sHexDump(const void *data,sInt bytes); // dumps data as 32bit words
 void sHexByteDump(const void *data,sInt bytes); // dumps data as bytes
 void sEnableLogFilter();
-sBool sCheckLogFilter(const sChar *module);
+bool sCheckLogFilter(const sChar *module);
 
 sPRINTING1(sSPrintF,sFormatStringBuffer buf=sFormatStringBase(arg1,format);buf,;,const sStringDesc &)
 
@@ -1357,9 +1354,9 @@ sPRINTING0(sPrintScreenF,sFormatStringBuffer buf; if(format) sFormatStringBaseCt
 #define sPrintScreen
 #endif
 
-// set to sTRUE to log to console instead of debug output. useful when
+// set to true to log to console instead of debug output. useful when
 // writing test cases.
-void sEnableLogConsole(sBool enable);
+void sEnableLogConsole(bool enable);
 
 // cant define away because of sLogF(float);
 
@@ -1467,9 +1464,9 @@ sPRINTING0(sFatal,sFormatStringBuffer buf; sFormatStringBaseCtx(buf,format);buf,
 
 #define sF32U32(x) ((*(sU32*)(&(x))))
 
-inline sBool sIsInfNan(sF32 x) { return ((sF32U32(x)>>23)&0xff) == 0xff; }
-inline sBool sIsNan(sF32 x) { return ((sF32U32(x)>>23)&0xff) == 0xff && (sF32U32(x) & 0x7fffff)!=0; }
-inline sBool sIsInf(sF32 x) { return ((sF32U32(x)>>23)&0xff) == 0xff && (sF32U32(x) & 0x7fffff)==0; }
+inline bool sIsInfNan(sF32 x) { return ((sF32U32(x)>>23)&0xff) == 0xff; }
+inline bool sIsNan(sF32 x) { return ((sF32U32(x)>>23)&0xff) == 0xff && (sF32U32(x) & 0x7fffff)!=0; }
+inline bool sIsInf(sF32 x) { return ((sF32U32(x)>>23)&0xff) == 0xff && (sF32U32(x) & 0x7fffff)==0; }
 
 #if sDEBUG
 #define sTRAP_INFNAN(x) sVERIFY(!sIsInfNan(x))
@@ -1570,23 +1567,23 @@ enum sInitMemFlags                // sInitMem() flags
 
 class sMemoryHandler              // used by system to register memory handlers
 {
-  sBool ThreadSafe;               // do locking (done by sAllocMem(), ..)
+  bool ThreadSafe;               // do locking (done by sAllocMem(), ..)
   class sThreadLock *Lock_;
 public:
   sPtr Start;                     // for Free(): range of memory this handler reacts on
   sPtr End;
   sPtr MinTotalFree;              // lowest total free memory
   struct sThreadContext *Owner;   // only this context may use the handler (checked by sAllocMem(), ..)
-  sBool IncludeInSnapshot;        // some heaps may change between snapshots, like network and debug
-  sBool MayFail;                  // out of mem condition is passed to app instead of failing
-  sBool NoLeaks;                  // disable all memory leak tracking
+  bool IncludeInSnapshot;        // some heaps may change between snapshots, like network and debug
+  bool MayFail;                  // out of mem condition is passed to app instead of failing
+  bool NoLeaks;                  // disable all memory leak tracking
 
   sMemoryHandler();
   virtual ~sMemoryHandler();
 
   // allocation
   virtual void *Alloc(sPtr size,sInt align,sInt flags)=0;   // alloc mem
-  virtual sBool Free(void *)=0;   // free mem
+  virtual bool Free(void *)=0;   // free mem
   virtual sPtr MemSize(void *) { return 0; } // exact size of allocation
   virtual void Validate() {}      // check integrity of memory lists
   virtual sU32 MakeSnapshot() { return 0; }
@@ -1596,16 +1593,16 @@ public:
   virtual sCONFIG_SIZET GetFree() { return 0; }        // returns total free memory (or always 0 if not applicable)
   virtual sCONFIG_SIZET GetLargestFree() { return 0; } // returns largest possible allocation block (or always 0 if not applicable)
 
-  sBool Contains(void *ptr) { return sPtr(ptr)>=Start&&sPtr(ptr)<End; }
+  bool Contains(void *ptr) { return sPtr(ptr)>=Start&&sPtr(ptr)<End; }
 
   // thread safety
   void MakeThreadSafe();          // set up threadsafe locking
   virtual void MakeThreadUnsafe();// sometimes you need always thread safe memory
                                   // therefore this method is virtual to define empty implementation
                                   // (dtor and sExitMem directly call sMemoryHandler::MakeThreadUnsafe)
-  sBool IsThreadSafe() { return ThreadSafe; }
+  bool IsThreadSafe() { return ThreadSafe; }
   void Lock();
-  sBool TryLock();
+  bool TryLock();
   void Unlock();
 };
 
@@ -1632,7 +1629,7 @@ sMemoryHandler *sGetMemHandler(sInt slot);
 void *sAllocMem_(sPtr size,sInt align,sInt flags=0);  // malloc()
 void sFreeMem(void *ptr);         // free()
 sPtr sMemSize(void *ptr);         // returns size of allocated memory
-sBool sIsMemTypeAvailable(sInt);  // check if mem of a certain type is available at all
+bool sIsMemTypeAvailable(sInt);  // check if mem of a certain type is available at all
 sCONFIG_SIZET sGetFreeMem(sInt);  // get free memory for type (0 if not available)
 void sPushMemType(sInt);          // set default memtype (sAMF_DEFAULT)
 void sPopMemType(sInt);           // restore old default memtype. use same argument as in sPushMemType().
@@ -1642,13 +1639,13 @@ inline void sEndAlt() { sPopMemType(sAMF_HEAP|sAMF_ALT); }
 void sSetInfoForAlloc(void *ptr, const sChar *infostring);
 
 
-void sMemMark(sBool fatal=sTRUE);  // first call: set memmark. subsequent call: restore memmark
+void sMemMark(bool fatal=true);  // first call: set memmark. subsequent call: restore memmark
 void sResetMemChecksum();          // reset the checksum for memory management. 
 void sMemMarkPush(sInt id=-1);   // pushes the current memmark on the memmarkstack
 void sMemMarkPop();             // pops a memmark from the stack copies it to the current memmark (but saves the reset-flag)
 sInt sMemMarkGetId();
-sBool sIsMemMarkSet();
-void sAddMemMarkCallback(void (*cb)(sBool flush,void *user),void *user=0);
+bool sIsMemMarkSet();
+void sAddMemMarkCallback(void (*cb)(bool flush,void *user),void *user=0);
 
 void sBreakOnAllocation(sInt n);   // one id for all 
 sInt sGetMemoryAllocId();          // usefull for monitoring allocations per frame
@@ -1662,7 +1659,7 @@ sF32 sGetAllocFailTest();           // return fail probabality
 //! eg. async file reading into freed memory
 void sMemDbgLock(sPtr start, sPtr size);
 void sMemDbgUnlock(sPtr start, sPtr size);
-sBool sMemDbgCheckLock(void *ptr);
+bool sMemDbgCheckLock(void *ptr);
 
 #if sSTRIPPED
 #define sScopeNoMemFailTest()
@@ -1775,12 +1772,12 @@ T* sPlacementNew(void *ptr, ARG0 arg0, ARG1 arg1, ARG2 arg2){ return new (ptr) T
 /****************************************************************************/
 
 void sPartitionMemory(sPtr frame=0,sPtr dma=0,sPtr gfx=0);    // allocate buffers for sAllocFrame and sAllocDma, and partition gpu/cpu memory for unified architectures
-void sFrameMemDoubleBuffer(sBool enable);                     // change frame mem double buffering (useful for multithreading), results in sFlipMem
+void sFrameMemDoubleBuffer(bool enable);                     // change frame mem double buffering (useful for multithreading), results in sFlipMem
 void *sAllocFrame(sPtr size,sInt align=16);   // cpu accessable memory, not double buffered
 void *sAllocFrameBegin(sInt max,sInt align);
 void sAllocFrameEnd(void *);
-sBool sIsFrameMem(void *);
-sBool sIsDmaMem(void *);
+bool sIsFrameMem(void *);
+bool sIsDmaMem(void *);
 void *sAllocDma(sPtr size,sInt align=16);     // gpu accessable memory (cpu is write only), double buffered
 void *sAllocDmaBegin(sInt size, sInt align=16);
 void sAllocDmaEnd(void *);
@@ -1836,9 +1833,9 @@ template <class Type> struct sBaseRect
   Type CenterX() const { return (x0+x1)/2; }
   Type CenterY() const { return (y0+y1)/2; }
   Type Area() const    { return SizeX()*SizeY(); }
-  sBool IsInside(const sBaseRect &r) const { return (r.x0<x1 && r.x1>x0 && r.y0<y1 && r.y1>y0); }   // this is inside r
-  sBool IsEmpty() const { return x0==x1 || y0==y1; }
-  sBool IsValid() const { return x0<x1 && y0<y1; }
+  bool IsInside(const sBaseRect &r) const { return (r.x0<x1 && r.x1>x0 && r.y0<y1 && r.y1>y0); }   // this is inside r
+  bool IsEmpty() const { return x0==x1 || y0==y1; }
+  bool IsValid() const { return x0<x1 && y0<y1; }
 
   void Extend(Type e) { x0-=e;y0-=e;x1+=e;y1+=e; }
   void Extend(const sBaseRect &r) { x0-=r.x0;y0-=r.y0;x1+=r.x1;y1+=r.y1; }
@@ -1859,7 +1856,7 @@ template <class Type> struct sBaseRect
   int operator !=(const sBaseRect<Type> &r) const { return x0!=r.x0 || x1!=r.x1 || y0!=r.y0 || y1!=r.y1; }
   int operator ==(const sBaseRect<Type> &r) const { return x0==r.x0 && x1==r.x1 && y0==r.y0 && y1==r.y1; }
   sBaseRect<Type> & operator = (const sBaseRect<Type> &r) { x0=r.x0; x1=r.x1; y0=r.y0; y1=r.y1; return *this; }
-  sBool Hit(Type x,Type y) const { return x>=x0 && x<x1 && y>=y0 && y<y1; }
+  bool Hit(Type x,Type y) const { return x>=x0 && x<x1 && y>=y0 && y<y1; }
   void Sort() { if(x0>x1) sSwap(x0,x1); if(y0>y1) sSwap(y0,y1); }
   void Inset(Type o) { InsetX(o); InsetY(o); } 
   void Inset(const sBaseRect &r) { x0+=r.x0;y0+=r.y0;x1-=r.x1;y1-=r.y1; }
@@ -2025,9 +2022,9 @@ public:
   void CalcEnd(const sU8 *data, sInt size, sInt sizeall);
 
   void Calc(const sU8 *data,sInt size);
-  sBool Check(const sU8 *data,sInt size);
-  sBool operator== (const sChecksumMD5 &)const;
-  sBool operator!= (const sChecksumMD5 &md5)const    { return !(*this==md5); }
+  bool Check(const sU8 *data,sInt size);
+  bool operator== (const sChecksumMD5 &)const;
+  bool operator!= (const sChecksumMD5 &md5)const    { return !(*this==md5); }
 };
 
 sFormatStringBuffer& operator% (sFormatStringBuffer &f, const sChecksumMD5 &md5);
@@ -2083,7 +2080,7 @@ public:
   virtual void OnPaint2D(const sRect &client,const sRect &update);
   virtual void OnPrepareFrame();           // is called just before paint3d but not between renderbegin and renderend
   virtual void OnPaint3D();
-  virtual sBool OnPaint();                // return TRUE to do all render begin/end, prepare/paint in OnPaint and OnPrepareFrame/OnPaint3D are not called
+  virtual bool OnPaint();                // return TRUE to do all render begin/end, prepare/paint in OnPaint and OnPrepareFrame/OnPaint3D are not called
 
   virtual void OnEvent(sInt id); 
 //  virtual void OnMouse(sInt buttons,sInt x,sInt y);   // obsolete
@@ -2107,19 +2104,19 @@ enum sAppEvents
   sAE_USER = 0x1000,
 };
 
-void sSetTimerEvent(sInt time,sBool loop = 1);
+void sSetTimerEvent(sInt time,bool loop = 1);
 void sTriggerEvent(sInt event=sAE_TRIGGER);
 
 // command line parsing
-void sParseCmdLine(const sChar *cmd,sBool skipcmd=1);
-sBool sAddShellParameter(const sChar *opt, const sChar *val);
+void sParseCmdLine(const sChar *cmd,bool skipcmd=1);
+bool sAddShellParameter(const sChar *opt, const sChar *val);
 
 // omit the '-', like sGetShellSwitch(L"x");
 const sChar *sGetShellParameter(const sChar *opt,sInt n);
 sInt sGetShellParameterInt(const sChar *opt,sInt n,sInt def);
 sF32 sGetShellParameterFloat(const sChar *opt,sInt n,sF32 def);
 sU32 sGetShellParameterHex(const sChar *opt,sInt n,sU32 def);
-sBool sGetShellSwitch(const sChar *opt);
+bool sGetShellSwitch(const sChar *opt);
 
 // for short and long option, like sGetShellSwitch(L"n",L"-name","dierk2);
 const sChar *sGetShellString(const sChar *optshort,const sChar *optlong,const sChar *def=0);
@@ -2196,7 +2193,7 @@ struct sRemovePtrType<T**> { typedef T Type; };
 
 #if sALLOW_MEMDEBUG_STACKTRACE
 
-sBool sGetMemTagged();
+bool sGetMemTagged();
 void sGetCaller(const sStringDesc &filename, sInt &line);
 
 #define sTAG_CALLER() \
@@ -2317,11 +2314,11 @@ public:
   //! get pointer to the actual array. Be aware that some classes derived from sStaticArray may change this pointer as the array grows
   Type *GetData() const                 { return Data; }
   //! return true if the used counter is zero
-  sBool IsEmpty() const                 { return Used==0; }
+  bool IsEmpty() const                 { return Used==0; }
   //! return true if potential size is used up. Some classes derived from sStaticArray can grow automatically.
-  sBool IsFull() const                  { return Used==Alloc; }
+  bool IsFull() const                  { return Used==Alloc; }
   //! return true if the index provided will index a element.
-  sBool IsIndexValid(sInt p) const      { return ((unsigned) p) < ((unsigned)Used); }
+  bool IsIndexValid(sInt p) const      { return ((unsigned) p) < ((unsigned)Used); }
   //! Hints the array to allow grow to at least the specified size.
   //! - sStaticArray can only be initialized once and will not grow automatically
   void HintSize(sInt max)               { ReAlloc(max); }
@@ -2362,9 +2359,9 @@ public:
   //! Removing last element, preserving order (which is trivial)
   Type RemTail()                        { sVERIFY(Used>0); Used--; return Data[Used]; }
   //! Removing element, NOT preserving order (requires a linear search for the element)
-  sBool Rem(const Type e)               { sBool result = sFALSE; for(sInt i=0;i<Used;) if(Data[i]==e) { result = sTRUE; RemAt(i); } else i++; return result; }
+  bool Rem(const Type e)               { bool result = false; for(sInt i=0;i<Used;) if(Data[i]==e) { result = true; RemAt(i); } else i++; return result; }
   //! Removing element, preserving order (requires a linear search for the element) (requires copying elements around)
-  sBool RemOrder(const Type e)          { sBool result = sFALSE; for(sInt i=0;i<Used;) if(Data[i]==e) { result = sTRUE; RemAtOrder(i); } else i++; return result; }
+  bool RemOrder(const Type e)          { bool result = false; for(sInt i=0;i<Used;) if(Data[i]==e) { result = true; RemAtOrder(i); } else i++; return result; }
 
   //! Indexing
   sINLINE const Type &operator[](sInt p) const  { sVERIFY(IsIndexValid(p)); return Data[p]; }
@@ -2761,8 +2758,8 @@ void sGetSortPermutation(ArrayType &a,MemberType BaseType::*o, sStaticArray<sInt
 
 // one should use some kind of function template or somethig...
 
-//template <class Type> struct sCompareGreater { static sBool f(const Type a,const Type b) { return a>b; } };
-//template <class Type> struct sCompareLesser  { static sBool f(const Type a,const Type b) { return a<b; } };
+//template <class Type> struct sCompareGreater { static bool f(const Type a,const Type b) { return a>b; } };
+//template <class Type> struct sCompareLesser  { static bool f(const Type a,const Type b) { return a<b; } };
 
 /****************************************************************************/
 /***                                                                      ***/
@@ -2960,7 +2957,7 @@ const BaseType *sFind(const ArrayType &a,const BaseType &v)
 
 //! Check if a certain element is in an array by comparing the whole value
 template <class ArrayType,class BaseType> 
-sBool sFindPtr(const ArrayType &a,const BaseType *v)
+bool sFindPtr(const ArrayType &a,const BaseType *v)
 {
   sInt max = a.GetCount();
   for (sInt i=0; i<max; i++)
@@ -2991,7 +2988,7 @@ sInt sFindNextIndex(const ArrayType &a, sInt index,const BaseType &v)
 }
 
 template <class ArrayType,class BaseType> 
-sBool sContains(const ArrayType &a,const BaseType &v)
+bool sContains(const ArrayType &a,const BaseType &v)
 {
   return sFindIndex(a,v)!=-1;
 }
@@ -3140,7 +3137,7 @@ public:
   //! constructor
   sDNode() { Next = Prev = 0; }
   //! node is part of a list
-  sBool IsValid() const { return Next&&Prev; }
+  bool IsValid() const { return Next&&Prev; }
   //! remove node from list
   void Rem()   { Next->Prev = Prev; Prev->Next = Next; Reset(); }
 };
@@ -3171,7 +3168,7 @@ public:
   //! Iterate through list and count elements
   int GetCount() const            { int count=0; for (const Type* iter = GetHead(); !IsEnd(iter); iter=GetNext(iter), ++count) {} return count;}
   //! Check if list is empty
-  sBool IsEmpty() const           { return (First.Next==&Last); }
+  bool IsEmpty() const           { return (First.Next==&Last); }
 
   //! get next element in list
   const Type* GetNext(const Type* e) const            { return GetType(GetNode(e)->Next); } // { return (Type*) (((sU8*)(GetNode(e)->Next))-MO(Offset)); }
@@ -3182,13 +3179,13 @@ public:
   //! get prev element in list
   Type* GetPrev(Type* e)                              { return GetType(GetNode(e)->Prev); } // { return (Type*) (((sU8*)(GetNode(e)->Prev))-MO(Offset)); }
   //! check if first element in list
-  sBool IsFirst(const Type* e) const     { return (GetNode(e)->Prev->Prev==0); }
+  bool IsFirst(const Type* e) const     { return (GetNode(e)->Prev->Prev==0); }
   //! check if last element in list
-  sBool IsLast(const Type* e) const      { return (GetNode(e)->Next->Next==0); }
+  bool IsLast(const Type* e) const      { return (GetNode(e)->Next->Next==0); }
   //! If you call GetNext() on the last element of a list, you will get a pointer to an anchor node. You may use this pointer only to call IsEnd(), which will then return true.
-  sBool IsEnd(const Type* e) const       { return (GetNode(e)->Next==0); }
+  bool IsEnd(const Type* e) const       { return (GetNode(e)->Next==0); }
   //! If you call GetPrev() on the first element of a list, you will get a pointer to an anchor node. You may use this pointer only to call IsFirst(), which will then return true.
-  sBool IsStart(const Type* e) const     { return (GetNode(e)->Prev==0); }
+  bool IsStart(const Type* e) const     { return (GetNode(e)->Prev==0); }
 
   //! get first element of list, or the end anchor if the list is empty.
   Type* GetHead()                  { return GetType(First.Next); }
@@ -3266,16 +3263,16 @@ public:
   void Clear()                    { First.Next=&Last; First.Prev=0; Last.Next=0; Last.Prev=&First; }
   sDList2()                       { Clear(); }
   int GetCount() const            { int count=0; for (const Type* iter = GetHead(); !IsEnd(iter); iter=GetNext(iter), ++count) {} return count;}
-  sBool IsEmpty() const           { return (First.Next==&Last); }
+  bool IsEmpty() const           { return (First.Next==&Last); }
 
   const Type* GetNext(const Type* e) const            { return GetType(GetNode(e)->Next); } // { return (Type*) (((sU8*)(GetNode(e)->Next))-MO(Offset)); }
   const Type* GetPrev(const Type* e) const            { return GetType(GetNode(e)->Prev); } // { return (Type*) (((sU8*)(GetNode(e)->Prev))-MO(Offset)); }
   Type* GetNext(Type* e)                              { return GetType(GetNode(e)->Next); } // { return (Type*) (((sU8*)(GetNode(e)->Next))-MO(Offset)); }
   Type* GetPrev(Type* e)                              { return GetType(GetNode(e)->Prev); } // { return (Type*) (((sU8*)(GetNode(e)->Prev))-MO(Offset)); }
-  sBool IsFirst(const Type* e) const     { return (GetNode(e)->Prev->Prev==0); }
-  sBool IsLast(const Type* e) const      { return (GetNode(e)->Next->Next==0); }
-  sBool IsEnd(const Type* e) const       { return (GetNode(e)->Next==0); }
-  sBool IsStart(const Type* e) const     { return (GetNode(e)->Prev==0); }
+  bool IsFirst(const Type* e) const     { return (GetNode(e)->Prev->Prev==0); }
+  bool IsLast(const Type* e) const      { return (GetNode(e)->Next->Next==0); }
+  bool IsEnd(const Type* e) const       { return (GetNode(e)->Next==0); }
+  bool IsStart(const Type* e) const     { return (GetNode(e)->Prev==0); }
 
   Type* GetHead()                  { return GetType(First.Next); }
   Type* GetTail()                  { return GetType(Last.Prev); }
@@ -3358,7 +3355,7 @@ public:
   void Resize(sInt newsize) { sVERIFY(Ptr); if (Ptr) { sInt &size=*(sInt*)Ptr; sVERIFY(newsize>=0 && newsize<=size); size=newsize; }}
 
   // data retrieval
-  sBool Valid() const { return Ptr!=0; }
+  bool Valid() const { return Ptr!=0; }
   sInt GetSize() const { sVERIFY(Ptr); if (Ptr) return sInt(Ptr[0]); else return 0; } 
   template <typename T> T * GetPtr() { sVERIFY(Ptr); if (Ptr) return reinterpret_cast<T*>(Ptr+2); else return 0; }
   template <typename T> const T * GetPtr() const { sVERIFY(Ptr); if (Ptr) return reinterpret_cast<const T*>(Ptr+2); else return 0; }
@@ -3389,17 +3386,17 @@ protected:
 public:
   sMemoryHeap();
   void Init(sU8 *start,sPtr size);
-  void SetDebug(sBool clear,sInt memwall);
+  void SetDebug(bool clear,sInt memwall);
 
   sCONFIG_SIZET GetFree();
   sCONFIG_SIZET GetLargestFree();
   sPtr GetUsed();
   void DumpStats(sInt verbose=0);
-  sBool IsFree(const void *ptr) const;
+  bool IsFree(const void *ptr) const;
   void ClearFree();               // clear free memory. for debugging
 
   void *Alloc(sPtr bytes,sInt align,sInt reverse=0);
-  sBool Free(void *);
+  bool Free(void *);
   sPtr MemSize(void *);
   void Validate();
   sU32 MakeSnapshot();
@@ -3437,28 +3434,28 @@ protected:
   sInt HashShift;
   sPtr TotalFree;
 
-  sBool Clear;
+  bool Clear;
 
   sDList<sGpuHeapFreeNode,&sGpuHeapFreeNode::Node> FreeList;
   sDList<sGpuHeapFreeNode,&sGpuHeapFreeNode::Node> UnusedNodes;
   sGpuHeapFreeNode *NodeMem;
 
   void AddNode(sGpuHeapUsedNode *l);                 // add to hashtable
-  sGpuHeapUsedNode *FindNode(sPtr data,sBool remove); // find/remove from hashtable
+  sGpuHeapUsedNode *FindNode(sPtr data,bool remove); // find/remove from hashtable
 public:
   sGpuHeap();
   ~sGpuHeap();
   void Init(sU8 *start,sPtr size,sInt maxallocations=0x1000);
   void Exit();
 
-  void SetDebug(sBool clear,sInt memwall);
+  void SetDebug(bool clear,sInt memwall);
   sCONFIG_SIZET GetFree();
   sCONFIG_SIZET GetLargestFree();
   sPtr GetUsed();
 
   void Validate();
   void *Alloc(sPtr bytes,sInt align,sInt flags=0);
-  sBool Free(void *);
+  bool Free(void *);
   sPtr MemSize(void *);
   sU32 MakeSnapshot();
 };
@@ -3478,7 +3475,7 @@ public:
 
 class sSimpleMemPool
 {
-  sBool DeleteMe;
+  bool DeleteMe;
   sPtr Start;
   sPtr Current;
   sPtr End;
@@ -3557,8 +3554,8 @@ public:
 /***                                                                      ***/
 /****************************************************************************/
 
-sBool sCompES(sU8 *s, sU8 *d, sInt ssize, sInt &dsize, sInt scan);
-sBool sDeCompES(sU8 *s, sU8 *d, sInt ssize, sInt &dsize, sBool verify);
+bool sCompES(sU8 *s, sU8 *d, sInt ssize, sInt &dsize, sInt scan);
+bool sDeCompES(sU8 *s, sU8 *d, sInt ssize, sInt &dsize, bool verify);
 
 /****************************************************************************/
 /***                                                                      ***/
@@ -3722,7 +3719,7 @@ public:
 
   void AddLeak(void *ptr,sPtr size,const char *file,sInt line,sInt allocid,sInt heapid);
   void RemLeak(void *ptr);
-  sBool HasLeak() const { return LeakUsed!=0; }
+  bool HasLeak() const { return LeakUsed!=0; }
   sInt GetLeakCount() const { return LeakUsed; }
 
   sInt BeginGetLeaks(const LeakCheck *&leaks);
@@ -3756,7 +3753,7 @@ struct sMemoryLeakInfo      // combine all leaks at one location
   sInt AllocId;                 // alloc id of first leak
   sInt TotalBytes;              // total size
   sInt FirstSize;               // size of first leak
-  sBool ExtendedInfoAvailable;  // some of the contained leaks have extended informations to offer
+  bool ExtendedInfoAvailable;  // some of the contained leaks have extended informations to offer
 };
 
 struct sMemoryLeakInformationStrings
@@ -3821,7 +3818,7 @@ public:
   
   void AddLeak(void *ptr,sPtr size,const char *file,sInt line,sInt allocid,sInt heapid, const sChar *desc, sU32 descCRC);
   void RemLeak(void *ptr);
-  sBool HasLeak() const { return LeakCount!=0; }
+  bool HasLeak() const { return LeakCount!=0; }
   sInt GetLeakCount() const { return LeakCount; }
 
   void GetLeaks(sStaticArray<sMemoryLeakInfo> &,sInt minallocid);

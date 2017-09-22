@@ -574,7 +574,7 @@ sInt sStaticListWindow::OnCalcFieldHeight(sListWindow2Field *field,sObject *obj)
   return 0;
 }
 
-sBool sStaticListWindow::OnPaintField(const sRect &client,sListWindow2Field *field,sObject *obj,sInt line,sInt select)
+bool sStaticListWindow::OnPaintField(const sRect &client,sListWindow2Field *field,sObject *obj,sInt line,sInt select)
 {
   return 0;
 }
@@ -648,7 +648,7 @@ void sStaticListWindow::PaintField(const sRect &client,sInt select,const sChar *
 
 /****************************************************************************/
 
-sBool sStaticListWindow::OnEditField(const sRect &rect,sListWindow2Field *field,sObject *,sInt line)
+bool sStaticListWindow::OnEditField(const sRect &rect,sListWindow2Field *field,sObject *,sInt line)
 {
   return 0;
 }
@@ -944,7 +944,7 @@ void sStaticListWindow::AddColumn(sListWindow2Field *field,sInt width)
 /****************************************************************************/
 /****************************************************************************/
 
-sBool sStaticListWindow::Hit(sInt mx,sInt my,sInt &line,sInt &col,sRect &rect)
+sInt sStaticListWindow::Hit(sInt mx,sInt my,sInt &line,sInt &col,sRect &rect)
 {
   sInt y,yy,l;
   sRect r;
@@ -1007,7 +1007,7 @@ sBool sStaticListWindow::Hit(sInt mx,sInt my,sInt &line,sInt &col,sRect &rect)
   return 0;
 }
 
-sBool sStaticListWindow::MakeRect(sInt line,sInt col,sRect &rect)
+sInt sStaticListWindow::MakeRect(sInt line,sInt col,sRect &rect)
 {
   sInt y,yy,l;
   sRect r;
@@ -1206,7 +1206,7 @@ void sStaticListWindow::DragSelectMulti(const sWindowDrag &dd,sDInt mode)
   }
 }
 
-sBool sStaticListWindow::ForceEditField(sInt line,sInt column)
+sInt sStaticListWindow::ForceEditField(sInt line,sInt column)
 {
   sRect r;
 
@@ -1461,7 +1461,7 @@ void sStaticListWindow::CmdMoveUp(sDInt mode)
   if(mode&2)
     page = sMax(1,Inner.SizeY()/Height-1);
 
-  sBool post=0;
+  bool post=0;
   for(sInt i=0;i<page;i++)
   {
     if(IsMulti)
@@ -1506,7 +1506,7 @@ void sStaticListWindow::CmdMoveDown(sDInt mode)
 {
   if(!Array) return;
 
-  sBool post=0;
+  bool post=0;
   sInt page = 1;
   if(mode&2)
     page = sMax(1,Inner.SizeY()/Height-1);

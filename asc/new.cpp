@@ -69,11 +69,11 @@ NewMaterial::~NewMaterial()
 /****************************************************************************/
 /****************************************************************************/
 
-sBool Compiler::Process(NewCode *code,NewShader *ns,sTextBuffer *errors)
+bool Compiler::Process(NewCode *code,NewShader *ns,sTextBuffer *errors)
 {
   // general stuff
 
-  sBool ok = 1;
+  bool ok = 1;
   code->ShaderType = ns->ShaderType;
 
   // asc -> HLSL23 (dx9)
@@ -194,11 +194,11 @@ sBool Compiler::Process(NewCode *code,NewShader *ns,sTextBuffer *errors)
 
 /****************************************************************************/
 
-sBool Compiler::Process(NewShader *ns)
+bool Compiler::Process(NewShader *ns)
 {
   sTextBuffer errors;
 
-  sBool ok = 1;
+  bool ok = 1;
 
   ASC->Void();
   if(!ns->AscSource.IsEmpty())

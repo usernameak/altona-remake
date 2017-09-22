@@ -160,11 +160,11 @@ friend class sInput2Scheme;
 public:
   virtual              ~sInput2Device() {}
                        sInput2Device() { MotorSlow = MotorFast = 0; }
-  virtual void         OnGameStep(sInt time, sBool ignoreTimestamp = sFALSE, sBool mute = sFALSE) = 0;// call once per gamestep        
+  virtual void         OnGameStep(sInt time, bool ignoreTimestamp = false, bool mute = false) = 0;// call once per gamestep        
   virtual sF32         GetRel(sInt id) const = 0;                       //! get relative value of id and return zero if below threshold
   virtual sF32         GetAbs(sInt id) const = 0;                       //! get absolute value of id and return zero if below threshold
   virtual sU32         GetStatusWord() const = 0;                       //! return administrative status of device (connected, identified, ....)
-  sBool                IsStatus(sInput2Status condition) const { return (GetStatusWord()&condition)!=0; }
+  bool                IsStatus(sInput2Status condition) const { return (GetStatusWord()&condition)!=0; }
   virtual sInt         GetTimestamp() const = 0;                        //! return timestamp prior to current gamestep time
   virtual sU32         GetType() const = 0;                             //! return device type
   virtual sInt         GetId() const = 0;                               //! return device id
@@ -211,7 +211,7 @@ public:
     sClear(ValuesRel);
   }
 
-  void OnGameStep(sInt time, sBool ignoreTimestamp = sFALSE, sBool mute = sFALSE) 
+  void OnGameStep(sInt time, bool ignoreTimestamp = false, bool mute = false) 
   {
     // calculate from all applicable values
     sClear(ValuesRel);
@@ -324,10 +324,10 @@ private:
 sInput2Device* sFindInput2Device(sU32 type, sInt id);         //! find a specific sINPUT2_TYPE_??? device
 sInt sInput2NumDevices(sU32 type);                            //! find number of devices of a specific sINPUT2_TYPE_??? type
 sInt sInput2NumDevicesConnected(sInt type);                   //! find number of connected devices of a specific sINPUT2_TYPE_??? type
-void sInput2Update(sInt time, sBool ignoreTimstamp = sFALSE); //! call this once per gamestep
+void sInput2Update(sInt time, bool ignoreTimstamp = false); //! call this once per gamestep
 void sInput2RegisterDevice(sInput2Device* device);            // only use in system implementations 
 void sInput2RemoveDevice(sInput2Device* device);              // only use in system implementations
-void sInput2SetMute(sBool pause);                             //! set mute state for the WHOLE system. use for system menues.
+void sInput2SetMute(bool pause);                             //! set mute state for the WHOLE system. use for system menues.
 
 /****************************************************************************/
 
@@ -349,7 +349,7 @@ public:
 
 protected:
 
-  virtual sBool Tick(sInt delta, sF32 *out) = 0;
+  virtual bool Tick(sInt delta, sF32 *out) = 0;
   virtual void Reset() {};
 
 private:
@@ -360,7 +360,7 @@ private:
 
   sInt GetId() { return Id; }
 
-  void OnGameStep(sInt time, sBool ignoreTimestamp = sFALSE, sBool mute = sFALSE)
+  void OnGameStep(sInt time, bool ignoreTimestamp = false, bool mute = false)
   {
     if (LastTime == 0 || ignoreTimestamp)
     {
@@ -403,7 +403,7 @@ public:
     ThresholdDigitalHi = thresholdDigitalHi;
     Next = sNULL;
   }
-  sBool operator == (const sInput2Key& other) const { return Device == other.Device && KeyId == other.KeyId && ThresholdAnalog == other.ThresholdAnalog && ThresholdDigitalLo == other.ThresholdDigitalLo && ThresholdDigitalHi == other.ThresholdDigitalHi;}
+  bool operator == (const sInput2Key& other) const { return Device == other.Device && KeyId == other.KeyId && ThresholdAnalog == other.ThresholdAnalog && ThresholdDigitalLo == other.ThresholdDigitalLo && ThresholdDigitalHi == other.ThresholdDigitalHi;}
 
 private:
   const sInput2Device* Device;
@@ -444,7 +444,7 @@ public:
 
   sInt        Pressed(sInt id) const;                 //! number of presses since last gamestep
   sInt        Released(sInt id) const;                //! number of releases since last gamestep
-  sBool       Hold(sInt id) const;                    //! current status mapped to [0..1]
+  bool       Hold(sInt id) const;                    //! current status mapped to [0..1]
   sF32        Relative(sInt id) const;                //! accumulated relative movement since last gamestep
   sF32        Analog(sInt id) const;                  //! current status
   sVector2    Coords(sInt id) const;                  //! 2d vector. specify only axes as ids.
@@ -462,7 +462,7 @@ private:
   mutable sStaticArray<sInt>  RetriggerTime;
   sStaticArray<sInt>          RetriggerRate;
   sStaticArray<sInt>          RetriggerDelay;
-  mutable sStaticArray<sBool> RetriggerPressed;
+  mutable sStaticArray<bool> RetriggerPressed;
 };
 
 /****************************************************************************/

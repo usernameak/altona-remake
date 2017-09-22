@@ -248,7 +248,7 @@ void sPrintShader(sTextBuffer& tb, const sU32 *data,sInt flags)
   sU32 val;
   sInt komma;
   sInt line;
-  sBool end = sFALSE;
+  bool end = false;
   const sU32 *datastart;
 
   line = 1;
@@ -311,7 +311,7 @@ void sPrintShader(sTextBuffer& tb, const sU32 *data,sInt flags)
     }
 
     if(val == 0xffff)
-      end = sTRUE;
+      end = true;
 
 
     in = out = def = dcl = label = komma = 0;

@@ -1891,7 +1891,7 @@ void sImage::SwapEndian()
     sSwapEndianI(*ptr++);
 }
 
-sBool sImage::HasAlpha()
+bool sImage::HasAlpha()
 {
   for(sInt i=0;i<SizeX*SizeY;i++)
     if((Data[i]&0xff000000) != 0xff000000)
@@ -2089,7 +2089,7 @@ void sImage::Mul(sImage *img)
     d[i] = d[i]*s[i]/255;
 }
 
-void sImage::Blend(sImage *img, sBool premultiplied)
+void sImage::Blend(sImage *img, bool premultiplied)
 {
   sVERIFY(SizeX==img->SizeX && SizeY==img->SizeY);
   sU32 *s = img->Data;
@@ -2114,12 +2114,12 @@ sImage *sImage::Scale(sInt xs,sInt ys) const
 {
   sImage *img = new sImage;
   img->Init(xs,ys);
-  img->Scale(this, sTRUE);
+  img->Scale(this, true);
   return img;
 }
 
 
-void sImage::Scale(const sImage *src, sBool filter)
+void sImage::Scale(const sImage *src, bool filter)
 {
   sImage *dest = this;
 
@@ -2180,7 +2180,7 @@ void sImage::Scale(const sImage *src, sBool filter)
 }
 
 
-sImage *sImage::Half(sBool gammacorrect) const
+sImage *sImage::Half(bool gammacorrect) const
 {
   sImage *img;
   sU8 *d;
@@ -2439,7 +2439,7 @@ sU32 sImage::Filter(sInt x,sInt y) const
 
 /****************************************************************************/
 
-sBool sImage::Load(const sChar *name)
+bool sImage::Load(const sChar *name)
 {
   sU8 *data;
   sDInt size;
@@ -2475,7 +2475,7 @@ sBool sImage::Load(const sChar *name)
   return result;
 }
 
-sBool sImage::Save(const sChar *name)
+bool sImage::Save(const sChar *name)
 {
   const sChar *ext = sFindFileExtension(name);
   if(!sCmpStringI(ext,L"bmp")) return SaveBMP(name);
@@ -2582,7 +2582,7 @@ struct BMPHeader
 };
 #pragma pack(pop)
 
-sBool sImage::LoadBMP(const sU8 *data,sInt size)
+bool sImage::LoadBMP(const sU8 *data,sInt size)
 {
   BMPHeader *hdr;
   sInt x,y;
@@ -2725,7 +2725,7 @@ sInt sImage::SaveBMP(sU8 *data, sInt size)
 }
 
 
-sBool sImage::SaveBMP(const sChar *name)
+bool sImage::SaveBMP(const sChar *name)
 {
   SwapIfBE();
 
@@ -2734,16 +2734,16 @@ sBool sImage::SaveBMP(const sChar *name)
   sU8 *Convert = new sU8[Size];
   SaveBMP(Convert,Size);
 
-  sBool result = sSaveFile(name,Convert,Size);
+  bool result = sSaveFile(name,Convert,Size);
   delete[] Convert;
 
   SwapIfBE();
   return result;
 }
 
-sBool sImage::SavePNG(const sChar *name)
+bool sImage::SavePNG(const sChar *name)
 {
-  sBool ok = 0;
+  bool ok = 0;
   int len;
 
   sU8 *data = new sU8[SizeX*SizeY*4];
@@ -2784,24 +2784,24 @@ static sU32 Swap16(const sU8 *&scan)
   return val;
 }
 
-sBool sImage::LoadPIC(const sU8 *data,sInt size)
+bool sImage::LoadPIC(const sU8 *data,sInt size)
 {
   sU8 *d;
   sInt xs,ys,x,y;
-  sBool hasalpha;
+  bool hasalpha;
   sInt count;
   sInt i;
-  sBool ok;
+  bool ok;
   const sU8 *end = data+size;
 
   ok = 1;
 
-  if(Swap32(data)!=0x5380f634) ok = sFALSE;
+  if(Swap32(data)!=0x5380f634) ok = false;
   data+=84;
-  if(*data++!='P') ok = sFALSE;
-  if(*data++!='I') ok = sFALSE;
-  if(*data++!='C') ok = sFALSE;
-  if(*data++!='T') ok = sFALSE;
+  if(*data++!='P') ok = false;
+  if(*data++!='I') ok = false;
+  if(*data++!='C') ok = false;
+  if(*data++!='T') ok = false;
   xs = Swap16(data);
   ys = Swap16(data);
   data+=8;
@@ -2809,16 +2809,16 @@ sBool sImage::LoadPIC(const sU8 *data,sInt size)
     Init(xs,ys);
 
   hasalpha = *data++;
-  sBool compressed = sTRUE;
-  if(*data++!=8) ok = sFALSE;           // bits per channel
-  if(*data++!=2) compressed = sFALSE;    // compressed/uncompressed
-  if(*data++!=0xe0) ok = sFALSE;        // channelcode
+  bool compressed = true;
+  if(*data++!=8) ok = false;           // bits per channel
+  if(*data++!=2) compressed = false;    // compressed/uncompressed
+  if(*data++!=0xe0) ok = false;        // channelcode
   if(hasalpha)
   {
-    if(*data++!=0) ok = sFALSE;
-    if(*data++!=8) ok = sFALSE;
-    if((*data++!=2) && compressed) ok = sFALSE;
-    if(*data++!=0x10) ok = sFALSE;
+    if(*data++!=0) ok = false;
+    if(*data++!=8) ok = false;
+    if((*data++!=2) && compressed) ok = false;
+    if(*data++!=0x10) ok = false;
   }
 
   if(ok)
@@ -2937,12 +2937,12 @@ sBool sImage::LoadPIC(const sU8 *data,sInt size)
 failed:
   // This place is reached if we've tried to read past the end of the
   // raw image buffer (for RLE only currently)
-  return sFALSE;
+  return false;
 }
 
 sU16 saveantiintel(sU16 x) {return (((x&0x00ff)<<8)|((x&0xff00)>>8));}  
 
-sBool sImage::SavePIC(const sChar * name)
+bool sImage::SavePIC(const sChar * name)
 {
 #define NO_FIELD    0
 #define ODD_FIELD   1
@@ -2991,7 +2991,7 @@ sBool sImage::SavePIC(const sChar * name)
 
   sFile *file=sCreateFile(name,sFA_WRITE);
   if(!file)
-    return sFALSE;
+    return false;
 
   //  header.magic=0x5380f634;
   header.magic=0x34f68053;
@@ -3044,8 +3044,8 @@ sBool sImage::SavePIC(const sChar * name)
   }
 
   // save to disk
-  //sBool result = sSaveFile(name,picData,picSize);
-  sBool result = file->Write(picData,picSize);
+  //bool result = sSaveFile(name,picData,picSize);
+  bool result = file->Write(picData,picSize);
   delete file;
 
   // clean up
@@ -3071,7 +3071,7 @@ struct sTGAHead
   sU8 imageDescriptorByte;        // has to be 0
 };
 
-sBool sImage::LoadTGA(const sChar *name)
+bool sImage::LoadTGA(const sChar *name)
 {
   sFile *file = sCreateFile(name,sFA_READ);
 
@@ -3085,7 +3085,7 @@ sBool sImage::LoadTGA(const sChar *name)
   {
     sDPrintF(L"Unsupported TGA format. We only support uncompressed RGB / RGBA images\n");
     delete file;
-    return sFALSE;
+    return false;
   }
 
   data += 18;
@@ -3118,10 +3118,10 @@ sBool sImage::LoadTGA(const sChar *name)
 
   SwapIfBE();
   delete file;
-  return sTRUE;
+  return true;
 }
 
-sBool sImage::SaveTGA(const sChar *name)
+bool sImage::SaveTGA(const sChar *name)
 {
   sTGAHead tgaHead;
   tgaHead.ID = 0; // no ID
@@ -3181,7 +3181,7 @@ extern "C"
 
 #include "util/stb_image.h"
 
-sBool sImage::LoadJPG(const sU8 *data,sInt size)
+bool sImage::LoadJPG(const sU8 *data,sInt size)
 {
   sInt x,y;
   sInt comp;
@@ -3197,7 +3197,7 @@ sBool sImage::LoadJPG(const sU8 *data,sInt size)
   return 1;
 }
 
-sBool sImage::LoadPNG(const sU8 *data,sInt size)
+bool sImage::LoadPNG(const sU8 *data,sInt size)
 {
   return LoadJPG(data,size);
 }
@@ -3725,7 +3725,7 @@ sImageData *sConvertARGB8ToHDR(const sImageData *img, sInt format)
 /***                                                                      ***/
 /****************************************************************************/
 
-static void makecol(sU32 *c32,sU16 c0,sU16 c1,sBool opaque)
+static void makecol(sU32 *c32,sU16 c0,sU16 c1,bool opaque)
 {
   sU8 *c8 = (sU8 *) c32;
 
@@ -4067,8 +4067,8 @@ sFontMap *sImage::CreateFontPage(sFontMapInputParameter &inParam, sInt &outLette
         sSwap(characterMap[i],characterMap[j]);
 
   // extend the size of the mainbitmap until all letters fit
-  sBool doesNotFit = sTRUE;
-  sBool doubleVertical = sTRUE;
+  bool doesNotFit = true;
+  bool doubleVertical = true;
   while (doesNotFit)
   {
     sInt i;
@@ -4083,7 +4083,7 @@ sFontMap *sImage::CreateFontPage(sFontMapInputParameter &inParam, sInt &outLette
 
 
     // for all letters
-    doesNotFit = sFALSE;
+    doesNotFit = false;
 
     sArray<sRect> freeRects;
     freeRects.AddMany(1)->Init(0, 0, mbmpSizeX, mbmpSizeY);
@@ -4111,14 +4111,14 @@ sFontMap *sImage::CreateFontPage(sFontMapInputParameter &inParam, sInt &outLette
       }
       else
       {
-        doesNotFit = sTRUE;
+        doesNotFit = true;
       }
     }
   }
 
   // mark the letters which are not in the mainbitmap with height zero
-  sBool *isInMainBitmap = new sBool[outLetterCount];
-  sSetMem(isInMainBitmap,0,sizeof(sBool) * outLetterCount);
+  bool *isInMainBitmap = new bool[outLetterCount];
+  sSetMem(isInMainBitmap,0,sizeof(bool) * outLetterCount);
 
   // initialise the mainbitmap (this)
   Init(mbmpSizeX, mbmpSizeY);
@@ -4168,7 +4168,7 @@ sFontMap *sImage::CreateFontPage(sFontMapInputParameter &inParam, sInt &outLette
       if (!font->LetterExists(cm->Letter))
         continue;
 
-      isInMainBitmap[i] = sTRUE;
+      isInMainBitmap[i] = true;
 
       sInt cx = cm->X / alias;
       sInt cy = cm->Y / alias;
@@ -4193,7 +4193,7 @@ sFontMap *sImage::CreateFontPage(sFontMapInputParameter &inParam, sInt &outLette
       letterImage->SizeY = lbmpSizeY / alias;
       
       // copy (and scale) the letter
-      letterImage->Scale(guiImage,sTRUE);
+      letterImage->Scale(guiImage,true);
 
       const sInt bestFreeIndex = FindBestFit(freeRects, cx, cy + filterGapY);
       sVERIFY(-1 != bestFreeIndex); // Assume all the glyphs fit, as the bitmap size has been chosen big enough (see above)
@@ -4392,14 +4392,14 @@ void sImage::MonoToAll()
 {
   if (SizeX<1 && SizeY<1) return;
 
-  sBool inalpha=sFALSE, incolor=sFALSE;
+  bool inalpha=false, incolor=false;
   sU32 refa=Data[0]&0xff000000;
   sU32 refc=Data[0]&0x00ffffff;
 
   for(sInt i=0;i<SizeX*SizeY && (!incolor || !inalpha);i++)
   {
-    if ((Data[i]&0x00ffffff)!=refc) incolor=sTRUE;
-    if ((Data[i]&0xff000000)!=refa) inalpha=sTRUE;
+    if ((Data[i]&0x00ffffff)!=refc) incolor=true;
+    if ((Data[i]&0xff000000)!=refa) inalpha=true;
   }
 
   if (inalpha)
@@ -4683,7 +4683,7 @@ void sImageI16::FlipXY()
   }
 }
 
-sInt sImageI16::Filter(sInt x,sInt y,sBool colwrap) const
+sInt sImageI16::Filter(sInt x,sInt y,bool colwrap) const
 {
   sInt x0 = (x>>8)&(SizeX-1);
   sInt y0 = (y>>8)&(SizeY-1);
@@ -4976,7 +4976,7 @@ void sFloatImage::Power(sF32 p)
   }
 }
 
-void sFloatImage::Half(sBool linear)
+void sFloatImage::Half(bool linear)
 {
   sVERIFY((SizeX&1)==0);
   sVERIFY((SizeY&1)==0);

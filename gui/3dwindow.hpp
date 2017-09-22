@@ -14,13 +14,13 @@
 
 class s3DWindow : public sWireClientWindow
 {
-  sBool Enable;
-  sBool ScreenshotFlag;
+  bool Enable;
+  bool ScreenshotFlag;
   sF32 DragDist,DragRotX,DragRotY,DragRotZ;
   sMatrix34 DragPos;
 
   sInt QuakeTime;
-  sBool QuakeMode;
+  bool QuakeMode;
   sInt QuakeMask;
   sVector30 QuakeSpeed;
 protected:
@@ -46,7 +46,7 @@ public:
   void Tag();
   void InitWire(const sChar *name);
 
-  void SetEnable(sBool enable);
+  void SetEnable(bool enable);
 
   void OnPaint2D();
   void OnPaint3D();
@@ -58,8 +58,8 @@ public:
   virtual void Paint(sViewport &view,const sTargetSpec &spec) {}
   virtual void PaintWire(sViewport &view,const sTargetSpec &spec) {}
 
-  void Lines(sVertexBasic *vp,sInt linecount,sBool zOn=sTRUE);
-  void Circle(const sVector31 &center, const sVector30 &normal, sF32 radius, sU32 color=0xffffff00, sBool zon=sTRUE, sInt segs=32);
+  void Lines(sVertexBasic *vp,sInt linecount,bool zOn=true);
+  void Circle(const sVector31 &center, const sVector30 &normal, sF32 radius, sU32 color=0xffffff00, bool zon=true, sInt segs=32);
 
   sRay MakeRay(sInt x, sInt y); // makes ray from position within client window
   void SetCam(const sMatrix34 &mat,sF32 zoom); // move camera to position
@@ -71,8 +71,8 @@ public:
   sF32 RotY;
   sF32 RotZ;
   sU32 GridColor;
-  sBool Grid;
-  sBool Continuous;
+  bool Grid;
+  bool Continuous;
   sF32 GridUnit;
 
   sF32 SideSpeed,ForeSpeed;     // quakecam speed, default 0.000020f
@@ -85,7 +85,7 @@ public:
   void PrepareView();
 
   void SetFocus(const sAABBox &bounds,const sVector31 &center);
-  sBool OnKey(sU32 key);
+  bool OnKey(sU32 key);
   void OnDrag(const sWindowDrag &dd);
   void QuakeCam();
   void PrintGear(sPainter *p,sInt x,sInt &y);

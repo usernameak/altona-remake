@@ -18,7 +18,7 @@ void sOpenFileDialog(const sChar *label,const sChar *extensions,sInt flags,sPool
   sString<sMAXPATH> buffer;
 
   buffer = ps;
-  sBool result = sSystemOpenFileDialog(label,extensions,flags,buffer);
+  bool result = sSystemOpenFileDialog(label,extensions,flags,buffer);
   ps = buffer;
   if (sGui)
     sGui->Notify(ps);
@@ -31,7 +31,7 @@ void sOpenFileDialog(const sChar *label,const sChar *extensions,sInt flags,sPool
 
 void sOpenFileDialog(const sChar *label,const sChar *extensions,sInt flags,const sStringDesc &buffer,const sMessage &ok,const sMessage &cancel,sObject *tagme)
 {
-  sBool result = sSystemOpenFileDialog(label,extensions,flags,buffer);
+  bool result = sSystemOpenFileDialog(label,extensions,flags,buffer);
   if (sGui)
     sGui->Notify(buffer.Buffer,buffer.Size);
 
@@ -67,7 +67,7 @@ public:
   void OnLayout();
   void OnCalcSize();
   void OnPaint2D();
-  sBool OnShortcut(sU32 key);
+  bool OnShortcut(sU32 key);
 
   void CmdLeft();
   void CmdRight();
@@ -162,20 +162,20 @@ void sDialogWindow::OnPaint2D()
   sGui->PropFont->Print(sF2P_OPAQUE|sF2P_MULTILINE|sF2P_TOP|sF2P_LEFT,Client,Text.Get(),-1,5);
 }
 
-sBool sDialogWindow::OnShortcut(sU32 key)
+bool sDialogWindow::OnShortcut(sU32 key)
 {
   switch(key & (sKEYQ_MASK|sKEYQ_BREAK))
   {
   case sKEY_ESCAPE:
     CmdLeft();
-    return sTRUE;
+    return true;
 
   case sKEY_ENTER:
     CmdRight();
-    return sTRUE;
+    return true;
   }
 
-  return sFALSE;
+  return false;
 }
 
 void sDialogWindow::CmdLeft()
@@ -380,7 +380,7 @@ void sMultipleChoiceDialog::OnCalcSize()
 {
 }
 
-sBool sMultipleChoiceDialog::OnKey(sU32 key)
+bool sMultipleChoiceDialog::OnKey(sU32 key)
 {
   if(key & sKEYQ_SHIFT) key |= sKEYQ_SHIFT;
   if(key & sKEYQ_CTRL) key |= sKEYQ_CTRL;
@@ -474,7 +474,7 @@ sProgressDialog::sProgressDialog(const sChar *title,const sChar *text)
   Text = text;
   LastUpdate = 0;
   Percentage = 0.0f;
-  CancelFlag = sFALSE;
+  CancelFlag = false;
 
   BracketStack.AddTail(Bracket(0.0f,1.0f));
 }
@@ -487,7 +487,7 @@ sProgressDialog::~sProgressDialog()
 
 void sProgressDialog::OnCancel()
 {
-  CancelFlag = sTRUE;
+  CancelFlag = true;
 }
 
 void sProgressDialog::Render()
@@ -543,13 +543,13 @@ void sProgressDialog::Open(const sChar *title,const sChar *text)
   }
 }
 
-sBool sProgressDialog::Close()
+bool sProgressDialog::Close()
 {
   if(sGUIEnabled) {
     if(Instance != 0)
     {
       sGui->Update();
-      sBool ret = !Instance->CancelFlag;
+      bool ret = !Instance->CancelFlag;
 
       delete Instance;
       Instance = 0;
@@ -557,13 +557,13 @@ sBool sProgressDialog::Close()
       return ret;
     }
     else
-      return sTRUE; // no window => no cancel
+      return true; // no window => no cancel
   } else {
-    return sTRUE;
+    return true;
   }
 }
 
-void sProgressDialog::SetText(const sChar *message,sBool forceUpdate)
+void sProgressDialog::SetText(const sChar *message,bool forceUpdate)
 {
   if(Instance)
   {
@@ -573,7 +573,7 @@ void sProgressDialog::SetText(const sChar *message,sBool forceUpdate)
   }
 }
 
-sBool sProgressDialog::SetProgress(sF32 percentage)
+bool sProgressDialog::SetProgress(sF32 percentage)
 {
   sInt now = sGetTime();
 
@@ -589,7 +589,7 @@ sBool sProgressDialog::SetProgress(sF32 percentage)
     return !Instance->CancelFlag;
   }
   else
-    return sTRUE; // no progress bar -> no cancel
+    return true; // no progress bar -> no cancel
 }
 
 void sProgressDialog::PushLevel(sF32 start,sF32 end)
@@ -674,7 +674,7 @@ public:
   void OnCalcSize();
   void OnPaint2D();
   void OnDrag(const sWindowDrag &dd);
-  sBool OnKey(sU32 key);
+  bool OnKey(sU32 key);
 };
 
 sFindWindow::sFindWindow() : EditString(0,0)
@@ -768,30 +768,30 @@ void sFindWindow::OnDrag(const sWindowDrag &dd)
   }
 }
 
-sBool sFindWindow::OnKey(sU32 key)
+bool sFindWindow::OnKey(sU32 key)
 {
   switch(key & (sKEYQ_MASK|sKEYQ_BREAK))
   {
   case sKEY_ESCAPE:
     CmdCancel();
-    return sTRUE;
+    return true;
 
   case sKEY_ENTER:
     CmdOk();
-    return sTRUE;
+    return true;
 
   case sKEY_UP:
     if(Selected>0) Selected--;
     Update();
-    return sTRUE;
+    return true;
 
   case sKEY_DOWN:
     if(Selected<IncList.GetCount()-1) Selected++;
     Update();
-    return sTRUE;
+    return true;
   }
 
-  return sFALSE;
+  return false;
 }
 
 void sFindWindow::UpdateIncList()
@@ -894,7 +894,7 @@ protected:
 
 public:
 
-  sGuiThemeEditWindow(sGuiTheme &theme, sBool live) : Theme(theme), Live(live)
+  sGuiThemeEditWindow(sGuiTheme &theme, bool live) : Theme(theme), Live(live)
   {
     sCopyMem(&Buffer,&Theme,sizeof(sGuiTheme));
 
@@ -929,7 +929,7 @@ public:
 
 };
 
-void sOpenGuiThemeDialog(sGuiTheme *theme, sBool live)
+void sOpenGuiThemeDialog(sGuiTheme *theme, bool live)
 {
   if (!theme) return;
   sGui->AddFloatingWindow(new sGuiThemeEditWindow(*theme,live),L"Edit GUI theme");

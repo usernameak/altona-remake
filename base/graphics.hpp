@@ -111,14 +111,14 @@ enum
 /****************************************************************************/
 /****************************************************************************/
 
-void sSetFullscreen(sBool enable);
-sBool sGetFullscreen();
+void sSetFullscreen(bool enable);
+bool sGetFullscreen();
 
 void sSetScreenResolution(sInt resX, sInt resY);
 void sSetScreenResolution(sInt resX, sInt resY, sF32 aspectRatio);
 void sGetScreenResolution(sInt &resX, sInt &resY);
 
-sBool sSetOversizeScreen(sInt xs,sInt ys,sInt fsaa=0,sBool mayfail=0); // should be called BEFORE sInit() xs=ys=0 to disable
+bool sSetOversizeScreen(sInt xs,sInt ys,sInt fsaa=0,bool mayfail=0); // should be called BEFORE sInit() xs=ys=0 to disable
 void sGetScreenSize(sInt &xs,sInt &ys);
 sF32 sGetScreenAspect();
 void sGetScreenSafeArea(sF32 &xs, sF32 &ys); // returns values between 0 (center) and 1 (outside)
@@ -126,7 +126,7 @@ void sGetScreenSafeArea(sF32 &xs, sF32 &ys); // returns values between 0 (center
 void sSetDesiredFrameRate(sF32 rate);
 void sSetScreenGamma(sF32 gamma);       // only applied in fullscreen mode
 
-void sDbgPaintWireFrame(sBool enable);    // enable/disable wireframe fillmode for debugging
+void sDbgPaintWireFrame(bool enable);    // enable/disable wireframe fillmode for debugging
 
 /****************************************************************************/
 /***                                                                      ***/
@@ -251,7 +251,7 @@ enum sTexCubeFace
 };
 
 
-sBool sIsBlockCompression(sInt texflags);
+bool sIsBlockCompression(sInt texflags);
 sU32 sAYCoCgtoARGB(sU32 val);
 sU32 sARGBtoAYCoCg(sU32 val);
 
@@ -261,22 +261,22 @@ sU32 sARGBtoAYCoCg(sU32 val);
 /***                                                                      ***/
 /****************************************************************************/
 
-sBool sRender3DBegin();       // use Render3DBegin(); ..rendercommands .. Render3DEnd();
-void sRender3DEnd(sBool flip=1);          // for rendering without sApp (like simple tools)
+bool sRender3DBegin();       // use Render3DBegin(); ..rendercommands .. Render3DEnd();
+void sRender3DEnd(bool flip=1);          // for rendering without sApp (like simple tools)
                               // otherwise render in sApp::OnPaint3D implementation
                               // don't mix sApp::OnPaint3D and sRender3DBegin/sRender3DEnd
 void sRender3DFlush();        // called AFTER sRender3DEnd, makes sure that the DMA-chain finishes
                               // this does not flip the framebuffer, you may need to draw the image multiple times.
 void sRender3DLock();         // multithreading, if supported, thread who calls InitGFX owns lock by default
 void sRender3DUnlock();
-sBool sRender3DLockOwner();
+bool sRender3DLockOwner();
 
 sINLINE void sRender3DSuspend() {}
 sINLINE void sRender3DResume() {}
 
 sINLINE void sRender3DLock() {}
 sINLINE void sRender3DUnlock() {}
-sINLINE sBool sRender3DLockOwner() { return sTRUE; }
+sINLINE bool sRender3DLockOwner() { return true; }
 
 
 enum sFrameRateMode
@@ -357,6 +357,8 @@ struct sTargetPara
   void Init(sInt flags,sU32 clearcol=0,const sRect *window=0);
   void Init(sInt flags,sU32 clearcol,const sRect *window,sTextureBase *colorbuffer,sTextureBase *depthbuffer);
   void SetTarget(sInt i, sTextureBase *tex, sU32 clearcol);
+  bool operator==(sTargetPara* para);
+  inline bool operator==(sTargetPara para) {return *this == &para;};
 };
 
 enum sCopyTextureFlags
@@ -475,8 +477,8 @@ void sSOON_OBSOLETE sGetRendertargetSize(sInt &dx,sInt &dy);
 sF32 sSOON_OBSOLETE sGetRendertargetAspect();
 void sSetRenderClipping(sRect *,sInt count);
 
-void sPackDXT(sU8 *d,sU32 *s,sInt xs,sInt ys,sInt format,sBool dither=1);
-sBool sIsFormatDXT(sInt format);
+void sPackDXT(sU8 *d,sU32 *s,sInt xs,sInt ys,sInt format,bool dither=1);
+bool sIsFormatDXT(sInt format);
 
 // returns ptr to rendertarget data
 // very slow: use only if absolute necessary (screenshots)!!!
@@ -489,9 +491,9 @@ void sSetRenderStates(const sU32 *data, sInt count);
 sInt sRenderStateTexture(sU32 *data, sInt texstage, sU32 tflags,sF32 lodbias=0);
 */
 
-void sOBSOLETE sConvertsRGBTex(sBool e);    // to globally switch sRGB convertion on/off (hdr <-> ldr rendering)
-                                  // with sConvertsRGBTex(sTRUE), texture are converted depending on sMTF_SRGB flag
-sBool sOBSOLETE sConvertsRGBTex();
+void sOBSOLETE sConvertsRGBTex(bool e);    // to globally switch sRGB convertion on/off (hdr <-> ldr rendering)
+                                  // with sConvertsRGBTex(true), texture are converted depending on sMTF_SRGB flag
+bool sOBSOLETE sConvertsRGBTex();
 
 /****************************************************************************/
 
@@ -545,7 +547,7 @@ struct sScreenInfoXY
 {
   sInt x,y;
   void Init(sInt x_,sInt y_) { x=x_; y=y_; }
-  sBool operator==(const sScreenInfoXY& a)const { return x==a.x && y==a.y; }
+  bool operator==(const sScreenInfoXY& a)const { return x==a.x && y==a.y; }
 };
 
 struct sScreenInfo
@@ -570,7 +572,7 @@ struct sScreenInfo
 sInt sGetDisplayCount();
 void sGetScreenInfo(sScreenInfo &si,sInt flags=0,sInt display=-1);
 void sGetScreenMode(sScreenMode &sm);
-sBool sSetScreenMode(const sScreenMode &sm);
+bool sSetScreenMode(const sScreenMode &sm);
 
 /****************************************************************************/
 
@@ -629,7 +631,7 @@ struct sGraphicsStats
   sInt GeoBuffersActive;                // dx9: static geometry buffers
 };
 
-void sEnableGraphicsStats(sBool enable);  // disable stats for debug drawing, if you want. enabled is default
+void sEnableGraphicsStats(bool enable);  // disable stats for debug drawing, if you want. enabled is default
 void sGetGraphicsStats(sGraphicsStats &stat);
 
 /****************************************************************************/
@@ -730,7 +732,7 @@ struct sVertexFormatHandle : public sVertexFormatHandlePrivate
   friend sVertexFormatHandle *sCreateVertexFormat(const sU32 *discriptor);
   friend void sDestroyAllVertexFormats();
   friend void sStreamVertexFormat(sWriter &, const sVertexFormatHandle *vhandle);
-  friend void sFlushVertexFormat(sBool flush,void *user=0);
+  friend void sFlushVertexFormat(bool flush,void *user=0);
   friend class sGeometry;
 
   struct OGLDecl
@@ -749,7 +751,7 @@ private:
   sInt VertexSize[sVF_STREAMMAX];
   sInt Streams;
   sU32 AvailMask;                  // used attributes
-  sBool IsMemMarkSet;              // sSetMemMark() was called before allocating this
+  bool IsMemMarkSet;              // sSetMemMark() was called before allocating this
   sVertexFormatHandle *Next;
 
 #if sRENDERER==sRENDER_OGL2
@@ -762,7 +764,7 @@ public:
   sInt GetSize(sInt stream) const { return VertexSize[stream]; }    // size in bytes
   sInt GetCount() const { return Count; }    // element count
   sInt GetStreams() const { return Streams; }                       // highest used stream + 1. if streams 0 and 2 are used, this is 3
-  sBool Has(sInt flag) const {
+  bool Has(sInt flag) const {
     return (AvailMask & (1<<(flag & sVF_USEMASK)))!=0;
   } // check if the format has a specific attribute
   sU32 GetAvailMask() const { return AvailMask; }                   // get all available attributes
@@ -1184,7 +1186,7 @@ public:
   sShader *Link;
 
   ~sShader();
-  sShader(sInt type,const sU8 *data,sInt length,sU32 hash,sBool raw=sFALSE);
+  sShader(sInt type,const sU8 *data,sInt length,sU32 hash,bool raw=false);
   friend sShader *sCreateShader(sInt type,const sU8 *code,sInt bytes);
   friend sShader *sCreateShaderRaw(sInt type,const sU8 *code,sInt bytes);
   friend void sSetShaders(sShader *vs,sShader *ps,sShader *gs,sLinkedShader **link,sCBufferBase **cbuffers,sInt cbcount);
@@ -1207,7 +1209,7 @@ public:
 public:
   void AddRef();
   void Release();
-  sBool CheckKind(sInt);
+  bool CheckKind(sInt);
   const sU8 *GetCode(sInt &bytes);
   sShader *Bind(sVertexFormatHandle *vformat, sShader *pshader);
 
@@ -1245,14 +1247,14 @@ sShader sOBSOLETE *sCreateVS(const sU32 *data,sInt count, sInt level=sSTF_DX_20)
 sShader sOBSOLETE *sCreatePS(const sU32 *data,sInt count, sInt level=sSTF_DX_20);
 void sOBSOLETE sDeleteVS(sShader *&);
 void sOBSOLETE sDeletePS(sShader *&);
-sBool sOBSOLETE sValidVS(sShader * vsh);
-sBool sOBSOLETE sValidPS(sShader * psh);
+bool sOBSOLETE sValidVS(sShader * vsh);
+bool sOBSOLETE sValidPS(sShader * psh);
 
 // second obsolete shader interface
 
 void sOBSOLETE sReleaseShader(sShader * sh);                      // shaders are refcounted
 void sOBSOLETE sAddRefShader(sShader * sh);                       // shaders are refcounted
-sBool sOBSOLETE sCheckShader(sShader * sh,sInt type);      // checks if the shader handle is a valid shader of the given type
+bool sOBSOLETE sCheckShader(sShader * sh,sInt type);      // checks if the shader handle is a valid shader of the given type
 const sOBSOLETE sU8 *sGetShaderCode(sShader * sh,sInt &bytes);    // get code from which the shader was created
 
 /****************************************************************************/
@@ -1335,14 +1337,14 @@ public:
 
   void MakeRayPixel(sInt mx,sInt my,sRay &ray) const;    // make ray, mx and my normalized to -1..1
   void MakeRay(sF32 mx,sF32 my,sRay &ray) const;    // make ray, mx and my normalized to -1..1
-  sBool Transform(const sVector31 &p,sInt &ix,sInt &iy) const;
-  sBool Transform(const sVector31 &p,sF32 &ix,sF32 &iy) const;
+  bool Transform(const sVector31 &p,sInt &ix,sInt &iy) const;
+  bool Transform(const sVector31 &p,sF32 &ix,sF32 &iy) const;
   sInt Visible(const sAABBox &box) const { return Visible(box,ClipNear,ClipFar); }    // 0=total out, 1=clip, 2=total in
   sInt Visible(const sAABBox &box, sF32 clipnear, sF32 clipfar) const;    // 0=total out, 1=clip, 2=total in
   sInt VisibleDist(const sAABBox &box,sF32 &dist) const;    // if not total out, return distance of closest point
   sInt VisibleDist2(const sAABBox &box,sF32 &near, sF32 &far) const; // if not total out, return distance range
-  sBool Get2DBounds(const sAABBox &box,sFRect &bounds) const; // get 2D bounding box enclosing "box" in normalized clip coordinates. returns sFALSE if not visible.
-  sBool Get2DBounds(const sVector31 points[],sInt count,sFRect &bounds) const; // same as above, 2D bbox for convex hull of "points". returns sFALSE if not visible.
+  bool Get2DBounds(const sAABBox &box,sFRect &bounds) const; // get 2D bounding box enclosing "box" in normalized clip coordinates. returns false if not visible.
+  bool Get2DBounds(const sVector31 points[],sInt count,sFRect &bounds) const; // same as above, 2D bbox for convex hull of "points". returns false if not visible.
 };
 
 /****************************************************************************/
@@ -1453,7 +1455,7 @@ struct sGeoBufferPart             // This geometry owns a part of a VB/IB
   void *Init(sInt count,sInt size,sGeometryDuration duration,sInt buffertype,sInt advance=0);
   void Advance(sInt count,sInt size);
   void Clear();
-  sBool IsEmpty();
+  bool IsEmpty();
   void CloneFrom(sGeoBufferPart *);
 #endif
 };
@@ -1511,7 +1513,7 @@ private:
 
   sInt Flags;                     // flags at creation
   sInt IndexSize;                 // 2 or 4, derived from flags
-  sBool PrimMode;                 // this buffer is loaded in prim mode (Quad/Grid)
+  bool PrimMode;                 // this buffer is loaded in prim mode (Quad/Grid)
   sGeoPrim *FirstPrim;            // first primitive in single linked list
   sGeoPrim **LastPrimPtr;         // used to append to single linked list
   sGeoPrim *CurrentPrim;          // used to unlock vertex buffer
@@ -1528,7 +1530,7 @@ public:
   ~sGeometry();
   void Clear();
   void Serialize(sReader &s);
-  sBool DebugBreak;
+  bool DebugBreak;
 
   // old interface
   void sOBSOLETE BeginLoad(sInt vc,sInt ic,sInt flags,sVertexFormatHandle *,void **vp,void **ip);
@@ -1574,8 +1576,8 @@ public:
   // dynamic buffer loading, full control to update only parts of the buffer
 
   void InitDyn(sInt ic,sInt vc0,sInt vc1=0,sInt vc2=0,sInt vc3=0); // initialize for dynamic loading.
-  void *BeginDynVB(sBool discard=0,sInt stream=0);           // Get access to buffer. using "no overwrite" flag
-  void *BeginDynIB(sBool discard=0);
+  void *BeginDynVB(bool discard=0,sInt stream=0);           // Get access to buffer. using "no overwrite" flag
+  void *BeginDynIB(bool discard=0);
   void EndDynVB(sInt stream=0);                              // done acessing the buffer
   void EndDynIB();
 
@@ -1722,7 +1724,7 @@ public:
 
 // shortcut implementation for loading hardware dependant texture data
 // returns NULL if not implemented or not applicable
-sBool sReadTexture(sReader &s, sTextureBase *&tex); // tex==0: create new texture, otherwise reuse given texture
+bool sReadTexture(sReader &s, sTextureBase *&tex); // tex==0: create new texture, otherwise reuse given texture
 sINLINE sTextureBase *sReadTexture(sReader &s) { sTextureBase *tex=0; sReadTexture(s,tex); return tex; }
 sInt sReadTextureSkipLevels(sInt skiplevels);     //! skipping top miplevels for saving memory, currently not available on all platforms
                                                   //! and not guarantueed to work for all textures or skipping all requested levels
@@ -1744,7 +1746,7 @@ private:
   friend void sSetScreen(sTexture2D *tex, sGrabFilterFlags filter, const sRect *dst, const sRect *src);
 
 #if sRENDERER==sRENDER_DX9
-  virtual void OnLostDevice(sBool reinit=sFALSE);
+  virtual void OnLostDevice(bool reinit=false);
 #endif
 #if sRENDERER==sRENDER_OGL2
   sInt GLFBName;
@@ -1760,7 +1762,7 @@ public:
   sTexture2D(sInt xs,sInt ys,sU32 flags,sInt mipmaps=0);
   virtual ~sTexture2D();
 
-  void Init(sInt xs, sInt ys, sInt flags,sInt mipmaps=0, sBool force=sFALSE);
+  void Init(sInt xs, sInt ys, sInt flags,sInt mipmaps=0, bool force=false);
   void ReInit(sInt xs, sInt ys, sInt flags,sInt mipmaps=0);
   void Clear();
 
@@ -1790,7 +1792,7 @@ private:
 
   sTexCubeFace  LockedFace;
 #if sRENDERER==sRENDER_DX9
-  virtual void OnLostDevice(sBool reinit=sFALSE);
+  virtual void OnLostDevice(bool reinit=false);
 #endif
 #if sRENDERER==sRENDER_OGL2
   sU32 GLFBName[6];
@@ -1806,7 +1808,7 @@ public:
   sTextureCube(sInt dim, sInt flags, sInt mipmaps=0);
   virtual ~sTextureCube();
 
-  void Init(sInt dim, sInt flags, sInt mipmaps=0, sBool force=sFALSE);
+  void Init(sInt dim, sInt flags, sInt mipmaps=0, bool force=false);
   void Clear();
 
   void BeginLoad(sTexCubeFace cf, sU8*& data, sInt& pitch, sInt mipmap=0);
@@ -1829,7 +1831,7 @@ class sTexture3D :
 {
 private:
 #if sRENDERER==sRENDER_DX9
-  virtual void OnLostDevice(sBool reinit=sFALSE) {}
+  virtual void OnLostDevice(bool reinit=false) {}
 #endif
 
 public:
@@ -1930,8 +1932,8 @@ struct sMaterialRS
   sU8 pad[3];
   sF32 LodBias[sMTRL_MAXTEX];               // mipmap lod bias. this interface is not final, it does not get saved!
 
-  sBool operator==(const sMaterialRS& rs)const;
-  sBool operator!=(const sMaterialRS& rs)const { return !((*this)==rs); }
+  bool operator==(const sMaterialRS& rs)const;
+  bool operator!=(const sMaterialRS& rs)const { return !((*this)==rs); }
 
   void SerializeOld(sReader &s);
   void SerializeOld(sWriter &s);
@@ -2358,7 +2360,7 @@ public:
   sComputeShader(sShader *);
   ~sComputeShader();
   void SetTexture(sInt n,sTextureBase *tex,sInt tflags=sMTF_LEVEL0|sMTF_TILE);
-  void SetUAV(sInt n,sTextureBase *tex,sBool clear=1);
+  void SetUAV(sInt n,sTextureBase *tex,bool clear=1);
   void Prepare();
   void Draw(sInt xs,sInt ys,sInt zs,sInt cbcount,sCBufferBase **cbs);
   void Draw(sInt xs,sInt ys,sInt zs,sCBufferBase *cb0=0,sCBufferBase *cb1=0,sCBufferBase *cb2=0,sCBufferBase *cb3=0);
@@ -2394,10 +2396,10 @@ extern sInt sGFXResetScreenY;
 // Ryg's DXT compression
 // input: a 4x4 pixel block, A8R8G8B8. you need to handle boundary cases
 // yourself.
-// alpha=sTRUE => use DXT5 (else use DXT1)
+// alpha=true => use DXT5 (else use DXT1)
 // quality: 0=normal (okay), 1=good (slower)
 //    |128  to enable dithering
-void sCompressDXTBlock(sU8 *dest,const sU32 *src,sBool alpha,sInt quality);
+void sCompressDXTBlock(sU8 *dest,const sU32 *src,bool alpha,sInt quality);
 void sFastPackDXT(sU8 *d,sU32 *bmp,sInt xs,sInt ys,sInt format,sInt quality);
 
 /****************************************************************************/

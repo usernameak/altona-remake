@@ -58,7 +58,7 @@ const sChar *sGetWindowName();
 
 void sSetWindowMode(sInt mode);
 sInt sGetWindowMode();
-sBool sHasWindowFocus();            // does our application window have the os-focus?
+bool sHasWindowFocus();            // does our application window have the os-focus?
 void sSetWindowSize(sInt x,sInt y);
 void sSetWindowPos(sInt x,sInt y);
 void sGetWindowPos(sInt &x,sInt &y);
@@ -84,12 +84,12 @@ sChar *sGetClipboard();
 void sSetClipboard(const sU8 *data,sDInt size,sU32 serid,sInt sermode);
 sU8 *sGetClipboard(sDInt &size,sU32 serid,sInt sermode);
 
-void sEnableFileDrop(sBool enable);
+void sEnableFileDrop(bool enable);
 const sChar *sGetDragDropFile();
 
 /****************************************************************************/
 
-template <class Type> sBool sSetClipboardObject(Type *obj,sU32 serid)
+template <class Type> bool sSetClipboardObject(Type *obj,sU32 serid)
 {
 #if sPLATFORM==sPLAT_WINDOWS || sPLATFORM==sPLAT_LINUX
   sFile *file = sCreateGrowMemFile();
@@ -105,7 +105,7 @@ template <class Type> sBool sSetClipboardObject(Type *obj,sU32 serid)
 #endif
 }
 
-template <class Type> sBool sGetClipboardObject(Type *&obj,sU32 serid)
+template <class Type> bool sGetClipboardObject(Type *&obj,sU32 serid)
 {
 #if sPLATFORM==sPLAT_WINDOWS || sPLATFORM==sPLAT_LINUX
   sDInt size;
@@ -123,7 +123,7 @@ template <class Type> sBool sGetClipboardObject(Type *&obj,sU32 serid)
   return 0;
 }
 
-template <class Type> sBool sSetClipboardArray(sStaticArray<Type *>&arr,sU32 serid)
+template <class Type> bool sSetClipboardArray(sStaticArray<Type *>&arr,sU32 serid)
 {
 #if sPLATFORM==sPLAT_WINDOWS || sPLATFORM==sPLAT_LINUX
   Type *e;
@@ -147,7 +147,7 @@ template <class Type> sBool sSetClipboardArray(sStaticArray<Type *>&arr,sU32 ser
 }
 
 
-template <class Type> sBool sGetClipboardArray(sStaticArray<Type *>&arr,sU32 serid)
+template <class Type> bool sGetClipboardArray(sStaticArray<Type *>&arr,sU32 serid)
 {
 #if sPLATFORM==sPLAT_WINDOWS || sPLATFORM==sPLAT_LINUX
   Type *e;
@@ -180,7 +180,7 @@ enum sSystemFileOpenDialogFlags
   sSOF_MULTISELECT = 4,
 };
 
-sBool sSystemOpenFileDialog(const sChar *label,const sChar *extensions,sInt flags,const sStringDesc &buffer);
+bool sSystemOpenFileDialog(const sChar *label,const sChar *extensions,sInt flags,const sStringDesc &buffer);
 
 enum sSystemMessageFlags
 {
@@ -190,8 +190,8 @@ enum sSystemMessageFlags
   sSMF_YESNO = 4,
 };
 
-sBool sSystemMessageDialog(const sChar *label,sInt flags);
-sBool sSystemMessageDialog(const sChar *label,sInt flags,const sChar *title);
+bool sSystemMessageDialog(const sChar *label,sInt flags);
+bool sSystemMessageDialog(const sChar *label,sInt flags,const sChar *title);
 
 /****************************************************************************/
 /****************************************************************************/
@@ -260,7 +260,7 @@ struct sPrintInfo
   sInt QueryX;
   sInt QueryY;
   const sChar *QueryPos;
-  sBool HasSelection() { return SelectStart>=0 && SelectEnd>=0 && SelectStart<SelectEnd; }
+  bool HasSelection() { return SelectStart>=0 && SelectEnd>=0 && SelectStart<SelectEnd; }
 };
 
 enum sPrintInfoMode
@@ -296,7 +296,7 @@ public:
     sS16 Height;                    // height of the glyphs black box
   };
   sLetterDimensions sGetLetterDimensions(const sChar letter);
-  sBool LetterExists(sChar letter);
+  bool LetterExists(sChar letter);
 
   static void AddResource(const sChar *filename);
   void Init(const sChar *name,sInt size,sInt flags,sInt width=0);
