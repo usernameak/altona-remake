@@ -43,7 +43,6 @@ extern bool sGUIEnabled;
 enum sInitSystemFlags
 {
   sISF_FULLSCREEN       = 0x0001,     // create window in fullscreen
-  sISF_3D               = 0x0002,     // allow 3d rendering (DirectX)
   sISF_2D               = 0x0004,     // allow 2d rendering (GDI)
   sISF_CONTINUOUS       = 0x0008,     // update automatically
   sISF_NOVSYNC          = 0x0100,     // disable wait for VSync, for benchmarks!
@@ -54,6 +53,9 @@ enum sInitSystemFlags
   sISF_FSAA             = 0x2000,     // enable full scene anti aliasing
   sISF_NODWM            = 0x4000,     // disable Vista/Win7 Desktop Window Manager
   sISF_NOSCREENSAVE     = 0x8000,     // disable screensaver and monitor power saving
+  sISF_BUSYWAIT         = 0x10000,    // busy wait
+  sISF_3D               = 0x0002 |    // allow 3d rendering (DirectX)
+                        sISF_BUSYWAIT,// TODO: FIXME: fuck yourself linux
 
   sISF_SHADER_BEST      = 0x0000,     // use best available shader model
   sISF_SHADER_00        = 0x0010,     // revert to fixed function pipeline

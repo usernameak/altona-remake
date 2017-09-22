@@ -1727,8 +1727,8 @@ static void sXMessageLoop()
     {
       XEvent e;
 
-      if (!XPending(dpy) && !sXUpdateEmpty())
-      {
+      //if (!XPending(dpy) && !sXUpdateEmpty())
+      //{
         sFrameHook->Call();
 
         bool app_fullpaint = false;
@@ -1741,12 +1741,6 @@ static void sXMessageLoop()
         }
 
         //sGetApp()->OnPrepareFrame();
-
-        if (!app_fullpaint && (sSystemFlags & sISF_3D))
-        {
-          Render3D();
-        }
-        
         if ((sSystemFlags & sISF_2D) && !sExitFlag)
         {
           Window root;
@@ -1766,11 +1760,17 @@ static void sXMessageLoop()
           sCollector();
         }
 
+        if (!app_fullpaint && (sSystemFlags & sISF_3D))
+        {
+          Render3D();
+        }
+        
+        
         if (sSystemFlags & sISF_3D || sSystemFlags & sISF_CONTINUOUS)
           sUpdateWindow();
-      }
+      //}
 
-      while (!(sSystemFlags & sISF_3D) || XPending(dpy))
+      while (!(sSystemFlags & sISF_BUSYWAIT) || XPending(dpy))
       {
         XNextEvent(dpy, &e);
 
@@ -1886,7 +1886,7 @@ static void sXMessageLoop()
           XDestroyWindow(dpy, sXWndFrontBuffer);
           done = true;
         }
-        if(!(sSystemFlags & sISF_3D)) {break;} // this workaround sucks
+        if(!(sSystemFlags & sISF_BUSYWAIT)) {break;} // this workaround sucks
       }
     }
 
