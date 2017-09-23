@@ -27,7 +27,7 @@ sScannerSource::sScannerSource()
 
 /****************************************************************************/
 
-sScannerSourceText::sScannerSourceText(const sChar *buffer,bool deleteme)
+sScannerSourceText::sScannerSourceText(const sChar *buffer,sBool deleteme)
 {
   Start = buffer;
   ScanPtr = Start;
@@ -55,7 +55,7 @@ sScannerSourceFile::~sScannerSourceFile()
   delete ScanBuffer;
 }
 
-bool sScannerSourceFile::Load(const sChar *filename)
+sBool sScannerSourceFile::Load(const sChar *filename)
 {
   File = sCreateFile(filename,sFA_READ);
   if(!File)
@@ -103,7 +103,7 @@ bool sScannerSourceFile::Load(const sChar *filename)
   return 1;
 }
 
-bool sScannerSourceFile::Refill()
+sBool sScannerSourceFile::Refill()
 {
   sInt left = ScanBuffer+sScanner::BufferSize-ScanPtr;
   if(left<sScanner::LineSize)
@@ -129,7 +129,7 @@ bool sScannerSourceFile::Refill()
 
     // perform load
 
-    bool ok=0;
+    sBool ok=0;
     if(loadchars>0)
     {
       switch(UnicodeConversion)
@@ -221,7 +221,7 @@ void sScanner::Start(const sChar *text)
 }
 
 
-bool sScanner::StartFile(const sChar *filename, bool reporterror)
+sBool sScanner::StartFile(const sChar *filename, sBool reporterror)
 {
   Stop();
 
@@ -243,7 +243,7 @@ bool sScanner::StartFile(const sChar *filename, bool reporterror)
   }
 }
 
-bool sScanner::IncludeFile(const sChar *filename)
+sBool sScanner::IncludeFile(const sChar *filename)
 {
   sScannerSourceFile *s = new sScannerSourceFile();
   if(s->Load(sPoolString(filename)))
@@ -268,7 +268,7 @@ void sScanner::AddToken(const sChar *name,sInt token)
   tok.Token = token;
   tok.Length = sGetStringLen(name);
 
-  bool IsName = 1;
+  sBool IsName = 1;
   if(!sIsLetter(*name++))
     IsName=0;
   while(*name && IsName)
@@ -991,15 +991,15 @@ sInt sScanner::ScanChar()
   return r;
 }
 
-bool sScanner::ScanRaw(sPoolString &ps, sInt opentoken, sInt closetoken)
+sBool sScanner::ScanRaw(sPoolString &ps, sInt opentoken, sInt closetoken)
 {
   sTextBuffer tb;
-  bool result = ScanRaw(tb, opentoken, closetoken);
+  sBool result = ScanRaw(tb, opentoken, closetoken);
   ps = tb.Get();
   return result;
 }
 
-bool sScanner::ScanRaw(sTextBuffer &tb, sInt opentoken, sInt closetoken)
+sBool sScanner::ScanRaw(sTextBuffer &tb, sInt opentoken, sInt closetoken)
 {
   sInt count;
   sInt startLine = Stream->Line;
@@ -1007,7 +1007,7 @@ bool sScanner::ScanRaw(sTextBuffer &tb, sInt opentoken, sInt closetoken)
   if(Token!=opentoken)
   {
     Error(L"scan raw: open token missing");
-    return false;
+    return sFALSE;
   }
 
   count = 1;
@@ -1112,10 +1112,10 @@ bool sScanner::ScanRaw(sTextBuffer &tb, sInt opentoken, sInt closetoken)
   Match(opentoken);
   Match(closetoken);
 
-  return true;
+  return sTRUE;
 }
 
-bool sScanner::ScanLine (sTextBuffer &tb)
+sBool sScanner::ScanLine (sTextBuffer &tb)
 {
   sChar c;
   while((c=*(Stream->ScanPtr))!=0)
@@ -1123,7 +1123,7 @@ bool sScanner::ScanLine (sTextBuffer &tb)
     if (c=='\n')
     {
       Scan();
-      return true;
+      return sTRUE;
     }
     tb.PrintChar(c);
     Stream->ScanPtr++;
@@ -1132,12 +1132,12 @@ bool sScanner::ScanLine (sTextBuffer &tb)
   sString<64> msg; sSPrintF(msg, L"scan line: premature end of file reached");
   Error(msg);
 
-  return false;
+  return sFALSE;
 }
 
-bool sScanner::ScanName(sPoolString &ps)
+sBool sScanner::ScanName(sPoolString &ps)
 {
-  bool r;
+  sBool r;
   if(Token==sTOK_NAME)
   {
     ps = Name;
@@ -1153,9 +1153,9 @@ bool sScanner::ScanName(sPoolString &ps)
   return r;
 }
 
-bool sScanner::ScanString(sPoolString &ps)
+sBool sScanner::ScanString(sPoolString &ps)
 {
-  bool r;
+  sBool r;
   if(Token==sTOK_STRING)
   {
     ps = String;
@@ -1180,9 +1180,9 @@ bool sScanner::ScanString(sPoolString &ps)
   return r;
 }
 
-bool sScanner::ScanNameOrString(sPoolString &ps)
+sBool sScanner::ScanNameOrString(sPoolString &ps)
 {
-  bool r;
+  sBool r;
   if(Token==sTOK_NAME)
   {
     ps = Name;
@@ -1260,7 +1260,7 @@ void sScanner::MatchInt(sInt n)
 
 /****************************************************************************/
 
-bool sScanner::IfToken(sInt tok)
+sBool sScanner::IfToken(sInt tok)
 {
   if(Token==tok)
   {
@@ -1273,7 +1273,7 @@ bool sScanner::IfToken(sInt tok)
   }
 }
 
-bool sScanner::IfName(const sPoolString name)
+sBool sScanner::IfName(const sPoolString name)
 {
   if(Token==sTOK_NAME && Name == name)
   {
@@ -1285,7 +1285,7 @@ bool sScanner::IfName(const sPoolString name)
     return 0;
   }
 }
-bool sScanner::IfString(const sPoolString name)
+sBool sScanner::IfString(const sPoolString name)
 {
   if(Token==sTOK_STRING && String == name)
   {
@@ -1318,7 +1318,7 @@ namespace sScannerUtil
     }
   }
 
-  bool StringProp(sScanner *scan,const sChar *name,sPoolString &tgt)
+  sBool StringProp(sScanner *scan,const sChar *name,sPoolString &tgt)
   {
     if(scan->IfName(name))
     {
@@ -1326,25 +1326,25 @@ namespace sScannerUtil
       scan->ScanString(tgt);
       scan->Match(';');
 
-      return true;
+      return sTRUE;
     }
 
-    return false;
+    return sFALSE;
   }
 
-  bool StringProp(sScanner *scan,const sChar *name,const sStringDesc &tgt)
+  sBool StringProp(sScanner *scan,const sChar *name,const sStringDesc &tgt)
   {
     sPoolString str;
     if(StringProp(scan,name,str))
     {
       sCopyString(tgt,str);
-      return true;
+      return sTRUE;
     }
     else
-      return false;
+      return sFALSE;
   }
 
-  bool IntProp(sScanner *scan,const sChar *name,sInt &tgt)
+  sBool IntProp(sScanner *scan,const sChar *name,sInt &tgt)
   {
     if(scan->IfName(name))
     {
@@ -1352,13 +1352,13 @@ namespace sScannerUtil
       tgt = scan->ScanInt();
       scan->Match(';');
 
-      return true;
+      return sTRUE;
     }
     
-    return false;
+    return sFALSE;
   }
 
-  bool FloatProp(sScanner *scan,const sChar *name,sF32 &tgt)
+  sBool FloatProp(sScanner *scan,const sChar *name,sF32 &tgt)
   {
     if(scan->IfName(name))
     {
@@ -1366,13 +1366,13 @@ namespace sScannerUtil
       tgt = scan->ScanFloat();
       scan->Match(';');
 
-      return true;
+      return sTRUE;
     }
     
-    return false;
+    return sFALSE;
   }
 
-  bool GUIDProp(sScanner *scan,const sChar *name,sGUID &tgt)
+  sBool GUIDProp(sScanner *scan,const sChar *name,sGUID &tgt)
   {
     sPoolString str;
     if(StringProp(scan,name,str))
@@ -1380,25 +1380,25 @@ namespace sScannerUtil
       const sChar *p = str;
       if(!sScanGUID(p,tgt) || *p != 0)
         scan->Error(L"malformed GUID");
-      return true;
+      return sTRUE;
     }
     else
-      return false;
+      return sFALSE;
   }
 
-  bool OptionalBoolProp(sScanner *scan,const sChar *name,bool &tgt)
+  sBool OptionalBoolProp(sScanner *scan,const sChar *name,sBool &tgt)
   {
     if(scan->IfName(name))
     {
       scan->Match(';');
-      tgt = true;
-      return true;
+      tgt = sTRUE;
+      return sTRUE;
     }
 
-    return false;
+    return sFALSE;
   }
 
-  bool EnumProp(sScanner *scan,const sChar *name,const sChar *choices,sInt &tgt)
+  sBool EnumProp(sScanner *scan,const sChar *name,const sChar *choices,sInt &tgt)
   {
     if(scan->IfName(name))
     {
@@ -1413,13 +1413,13 @@ namespace sScannerUtil
       }
 
       scan->Match(';');
-      return true;
+      return sTRUE;
     }
 
-    return false;
+    return sFALSE;
   }
 
-  bool FlagsProp(sScanner *scan,const sChar *name,const sChar *pattern,sInt &tgt)
+  sBool FlagsProp(sScanner *scan,const sChar *name,const sChar *pattern,sInt &tgt)
   {
     if(scan->IfName(name))
     {
@@ -1443,10 +1443,10 @@ namespace sScannerUtil
       }
 
       scan->Match(';');
-      return true;
+      return sTRUE;
     }
 
-    return false;
+    return sFALSE;
   }
 }
 
@@ -1477,15 +1477,15 @@ struct sRegexTrans                // possible transition between states
   sRegexState *From;
   sU32 BitGroup[8];               // 0x0001..0x00ff
   const sChar *HighGroup;         // 0x0100..0xffff
-  bool Invert;                   // invert the groups
-  bool Empty;                    // transition taken without consuming
+  sBool Invert;                   // invert the groups
+  sBool Empty;                    // transition taken without consuming
   sU32 StartCaptureBits;          // start capturing for group
   sU32 StopCaptureBits;            // end capturing for group
 
   void SetBit(sChar);
   void SetChar(sChar);            // 'a'
   void SetGroup(const sChar *);   // "[a-z]"
-  bool Hit(sChar c);
+  sBool Hit(sChar c);
 };
 
 struct sRegexMarker               // a marker on the state. each character
@@ -1629,7 +1629,7 @@ void sRegexTrans::SetGroup(const sChar *c)
     }
     else
     {
-      bool found = 0;
+      sBool found = 0;
       sVERIFY(h);
       for(sInt i=0;i<h1 && !found;i++)
         if(h[i]==*c)
@@ -1644,7 +1644,7 @@ void sRegexTrans::SetGroup(const sChar *c)
     h[h1++] = 0;
 }
 
-bool sRegexTrans::Hit(sChar c)
+sBool sRegexTrans::Hit(sChar c)
 {
   if(c>=0 && c<=0xff)
   {
@@ -1989,7 +1989,7 @@ sRegexState *sRegex::_Expr(sRegexState *o)
   return p;
 }
 
-bool sRegex::PrepareAll(const sChar *expr)
+sBool sRegex::PrepareAll(const sChar *expr)
 {
   Flush();                        // initial state
   Scan = expr;
@@ -2020,7 +2020,7 @@ bool sRegex::PrepareAll(const sChar *expr)
   return 1;
 }
 
-bool sRegex::SetPattern(const sChar *expr)
+sBool sRegex::SetPattern(const sChar *expr)
 {
   const sChar *s = expr;
   sInt len = sGetStringLen(s);
@@ -2056,7 +2056,7 @@ bool sRegex::SetPattern(const sChar *expr)
   }
   *d++ = 0;
 
-  bool ok = PrepareAll(buffer);
+  sBool ok = PrepareAll(buffer);
 
   delete[] buffer;
   OriginalPattern = expr;
@@ -2164,7 +2164,7 @@ void sRegex::RemoveEmptyState()
 
 /****************************************************************************/
 
-bool sRegex::MatchPattern(const sChar *string)
+sBool sRegex::MatchPattern(const sChar *string)
 {
   sVERIFY(Valid);
 
@@ -2177,7 +2177,7 @@ bool sRegex::MatchPattern(const sChar *string)
   sArray<sRegexTrans *> newstates;
   sArray<sRegexMarker *> newmarkers;
 
-  bool first = 1;
+  sBool first = 1;
 
   while(*string || first)
   {
@@ -2231,7 +2231,7 @@ bool sRegex::MatchPattern(const sChar *string)
   return Success.GetCount()>0;
 }
 
-bool sRegex::GetGroup(sInt n,const sStringDesc &desc,sInt match)
+sBool sRegex::GetGroup(sInt n,const sStringDesc &desc,sInt match)
 {
   if(match<0 || match>=Success.GetCount() || n<0 || n>=sREGEX_MAXGROUP)
   {

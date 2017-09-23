@@ -46,8 +46,8 @@ void sTimerTimeline::OnFrame()
       sInt loopStartMs = sMulDiv(LoopStart,1000,Speed);
       sInt loopEndMs = sMulDiv(LoopEnd,1000,Speed);
 
-      bool inloop0 = oldtime>=loopStartMs && oldtime<loopEndMs;
-      bool inloop1 = Time>=loopStartMs && Time<loopEndMs;
+      sBool inloop0 = oldtime>=loopStartMs && oldtime<loopEndMs;
+      sBool inloop1 = Time>=loopStartMs && Time<loopEndMs;
 
       if(inloop0 && !inloop1)
       {
@@ -122,22 +122,22 @@ void sTimerTimeline::GetLoop(sInt &start,sInt &end)
   end = LoopEnd;
 }
 
-bool sTimerTimeline::GetPlaying()
+sBool sTimerTimeline::GetPlaying()
 {
   return Playing;
 }
 
-bool sTimerTimeline::GetLooping()
+sBool sTimerTimeline::GetLooping()
 {
   return LoopEnable;
 }
 
-bool sTimerTimeline::GetScratching()
+sBool sTimerTimeline::GetScratching()
 {
   return Scratching;
 }
 
-void sTimerTimeline::EnableLoop(bool loop)
+void sTimerTimeline::EnableLoop(sBool loop)
 {
   OnFrame();
   if(LoopEnable!=loop)
@@ -146,14 +146,14 @@ void sTimerTimeline::EnableLoop(bool loop)
   OnFrame();
 }
 
-void sTimerTimeline::EnablePlaying(bool play)
+void sTimerTimeline::EnablePlaying(sBool play)
 {
   if(Playing!=play)
     sGui->Notify(Playing);
   Playing = play;
 }
 
-void sTimerTimeline::EnableScratching(bool scratch)
+void sTimerTimeline::EnableScratching(sBool scratch)
 {
   if(Scratching!=scratch)
     sGui->Notify(Scratching);
@@ -217,8 +217,8 @@ void sMusicTimeline::OnFrame()
 /*
     if(LoopEnable)
     {
-      bool inloop0 = oldtime>=LoopStart && oldtime<LoopEnd;
-      bool inloop1 = Time>=LoopStart && Time<LoopEnd;
+      sBool inloop0 = oldtime>=LoopStart && oldtime<LoopEnd;
+      sBool inloop1 = Time>=LoopStart && Time<LoopEnd;
       if(inloop0 && !inloop1)
       {
         sVERIFY(LoopStart<LoopEnd);
@@ -291,22 +291,22 @@ void sMusicTimeline::GetLoop(sInt &start,sInt &end)
   end = LoopEnd;
 }
 
-bool sMusicTimeline::GetPlaying()
+sBool sMusicTimeline::GetPlaying()
 {
   return Playing;
 }
 
-bool sMusicTimeline::GetLooping()
+sBool sMusicTimeline::GetLooping()
 {
   return LoopEnable;
 }
 
-bool sMusicTimeline::GetScratching()
+sBool sMusicTimeline::GetScratching()
 {
   return Scratching;
 }
 
-void sMusicTimeline::EnableLoop(bool loop)
+void sMusicTimeline::EnableLoop(sBool loop)
 {
   OnFrame();
   if(LoopEnable!=loop)
@@ -315,14 +315,14 @@ void sMusicTimeline::EnableLoop(bool loop)
   OnFrame();
 }
 
-void sMusicTimeline::EnablePlaying(bool play)
+void sMusicTimeline::EnablePlaying(sBool play)
 {
   if(Playing!=play)
     sGui->Notify(Playing);
   Playing = play;
 }
 
-void sMusicTimeline::EnableScratching(bool scratch)
+void sMusicTimeline::EnableScratching(sBool scratch)
 {
   if(Scratching!=scratch)
     sGui->Notify(Scratching);
@@ -428,7 +428,7 @@ sTimeTableClip *sTimetable::Duplicate(sTimeTableClip *source)
 /****************************************************************************/
 /****************************************************************************/
 
-static sInt AlignUpToTimebase(sInt value,bool decimal)
+static sInt AlignUpToTimebase(sInt value,sBool decimal)
 {
   sInt v = 1;
 
@@ -465,7 +465,7 @@ sWinTimeline::sWinTimeline(sTimelineInterface *tl)
   Timeline = tl;
   Timeline->AddNotify(this);
 
-  DecimalTimebase = false;
+  DecimalTimebase = sFALSE;
 }
 
 void sWinTimeline::InitWire(const sChar *name)
@@ -670,7 +670,7 @@ void sWinTimeline::DragMark(const sWindowDrag &dd)
 {
 }
 
-void sWinTimeline::SetDecimalTimebase(bool enable)
+void sWinTimeline::SetDecimalTimebase(sBool enable)
 {
   DecimalTimebase = enable;
   Update();
@@ -717,7 +717,7 @@ void sWinTimetable::SetDragLockFlags(DragLockFlag flags)
   DragLockFlags = flags;
 }
 
-bool sWinTimetable::OnCheckHit(const sWindowDrag &dd)
+sBool sWinTimetable::OnCheckHit(const sWindowDrag &dd)
 {
   sRect r;
   sTimeTableClip *te;

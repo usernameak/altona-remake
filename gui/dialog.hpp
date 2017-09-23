@@ -64,7 +64,7 @@ public:
   ~sMultipleChoiceDialog();
   void OnPaint2D();
   void OnCalcSize();
-  bool OnKey(sU32 key);
+  sBool OnKey(sU32 key);
   void OnDrag(const sWindowDrag &dd);
 
   void AddItem(const sChar *text,const sMessage &,sU32 shortcut);
@@ -94,7 +94,7 @@ class sProgressDialog
   sInt LastUpdate;
 
   sRect WindowRect;
-  bool CancelFlag;
+  sBool CancelFlag;
 
   sArray<Bracket> BracketStack;
   
@@ -109,10 +109,10 @@ class sProgressDialog
 
 public:
   static void Open(const sChar *title,const sChar *text);
-  static bool Close(); // returns false if user pressed cancel
+  static sBool Close(); // returns sFALSE if user pressed cancel
 
-  static void SetText(const sChar *message,bool forceUpdate=true);
-  static bool SetProgress(sF32 percentage); // returns false if user pressed cancel
+  static void SetText(const sChar *message,sBool forceUpdate=sTRUE);
+  static sBool SetProgress(sF32 percentage); // returns sFALSE if user pressed cancel
 
   // Use PushLevel when starting a sub-operation that would by itself call SetProgress();
   // you can "nest" progress bars this way. After push level, a progress of [0,1] will map to
@@ -136,7 +136,7 @@ struct sProgressDialogScope
 
 /****************************************************************************/
 
-void sOpenGuiThemeDialog(sGuiTheme *theme, bool live=true);
+void sOpenGuiThemeDialog(sGuiTheme *theme, sBool live=sTRUE);
 
 /****************************************************************************/
 

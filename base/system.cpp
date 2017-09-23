@@ -13,25 +13,25 @@
 
 sInt sSystemFlags = 0;
 sInt sExitFlag = 0;
-bool sGUIEnabled = false;
+sBool sGUIEnabled = false;
 
 sApp *sAppPtr = 0;
 sHooks *sFrameHook = 0;
 sHooks *sNewDeviceHook = 0;
-sHooks1<bool &> *sAltF4Hook = 0;
-sHooks1<bool> *sActivateHook = 0;
+sHooks1<sBool &> *sAltF4Hook = 0;
+sHooks1<sBool> *sActivateHook = 0;
 sHooks1<sStringDesc> *sCrashHook = 0;
 sHooks *sCheckCapsHook = 0;
 
 #if !sSTRIPPED
-sHooks2<const sInput2Event &,bool &> *sInputHook = 0;
+sHooks2<const sInput2Event &,sBool &> *sInputHook = 0;
 sHooks1<const sChar*> *sDebugOutHook = 0;
 #endif
 
 
 void (*sRedirectStdOut)(const sChar *text) = sNULL;
 
-bool sAllocMemEnabled = true;
+sBool sAllocMemEnabled = sTRUE;
 
 /****************************************************************************/
 /****************************************************************************/
@@ -61,9 +61,9 @@ void sApp::OnPrepareFrame()
 {
 }
 
-bool sApp::OnPaint()
+sBool sApp::OnPaint()
 {
-  return false;
+  return sFALSE;
 }
 
 void sApp::OnEvent(sInt)
@@ -179,14 +179,14 @@ static struct sSubsystem
   const sChar *Name;
   void (*Init)();
   void (*Exit)();
-  bool Running;
+  sBool Running;
 } Subsystems[256];
 static sInt SubsystemCount;
 static sInt SubsystemPriority;
 
-bool sIsSubsystemRunning(const sChar *name)
+sBool sIsSubsystemRunning(const sChar *name)
 {
-  bool result = false;
+  sBool result = sFALSE;
 
   sInt i = SubsystemCount;
   while (i-- && !result)
@@ -342,7 +342,7 @@ sU8 sGetFirstDayOfWeek()
 }
 #endif
 
-bool sIsLeapYear(sU16 year)
+sBool sIsLeapYear(sU16 year)
 {
   // Every 4th year is a leap year.
   // Years that are multiple of 100 are special. Only those that are multiple of 400 are leap years.
@@ -360,15 +360,15 @@ sInt sGetDaysInMonth(sU16 year, sU8 month)
   return daysInMonth[month - 1];
 }
 
-bool sIsDateValid(sU16 year, sU8 month, sU8 day)
+sBool sIsDateValid(sU16 year, sU8 month, sU8 day)
 {
-  if (year < 1 || year > sMAX_U16) return false;
-  if (month < 1 || month > 12) return false;
-  if (day < 1) return false;
+  if (year < 1 || year > sMAX_U16) return sFALSE;
+  if (month < 1 || month > 12) return sFALSE;
+  if (day < 1) return sFALSE;
   return day <= sGetDaysInMonth(year, month);
 }
 
-bool sIsDateValid(const sDateAndTime &date)
+sBool sIsDateValid(const sDateAndTime &date)
 {
   return sIsDateValid(date.Year, date.Month, date.Day);
 }
@@ -403,17 +403,17 @@ sFile::~sFile()
   delete[] MapFakeMem;
 }
 
-bool sFile::Close()
+sBool sFile::Close()
 {
   return 0;
 }
 
-bool sFile::Read(void *data,sDInt size)
+sBool sFile::Read(void *data,sDInt size)
 {
   return 0;
 }
 
-bool sFile::Write(const void *data,sDInt size)
+sBool sFile::Write(const void *data,sDInt size)
 {
   return 0;
 }
@@ -423,7 +423,7 @@ sU8 *sFile::Map(sS64 offset,sDInt size)
   return 0;
 }
 
-bool sFile::SetOffset(sS64 offset)
+sBool sFile::SetOffset(sS64 offset)
 {
   return 0;
 }
@@ -433,7 +433,7 @@ sS64 sFile::GetOffset()
   return 0;
 }
 
-bool sFile::SetSize(sS64)
+sBool sFile::SetSize(sS64)
 {
   return 0;
 }
@@ -454,7 +454,7 @@ void sFile::EndRead(sFileReadHandle handle)
   sFatal(L"asynchronous io not supported");
 }
 
-bool sFile::DataAvailable(sFileReadHandle handle)
+sBool sFile::DataAvailable(sFileReadHandle handle)
 {
   sFatal(L"asynchronous io not supported");
   return 0;
@@ -547,14 +547,14 @@ sFailsafeFile::~sFailsafeFile()
   Close();
 }
 
-bool sFailsafeFile::Close()
+sBool sFailsafeFile::Close()
 {
   if(!Host || !Host->Close())
-    return false;
+    return sFALSE;
 
   sDelete(Host);
 
-  return sRenameFile(CurrentName,TargetName,true);
+  return sRenameFile(CurrentName,TargetName,sTRUE);
   // you'd probably want to fsync here on Linux.
 }
 
@@ -569,7 +569,7 @@ sFile *sFileHandler::Create(const sChar *name,sFileAccess access)
   return 0;
 };
 
-bool sFileHandler::Exists(const sChar *name)
+sBool sFileHandler::Exists(const sChar *name)
 {
   sFile *f=Create(name,sFA_READ);
   delete f;
@@ -626,13 +626,13 @@ sFile *sCreateFailsafeFile(const sChar *name,sFileAccess access)
   }
 }
 
-bool sCheckFile(const sChar *name)
+sBool sCheckFile(const sChar *name)
 {
   for(sInt i=FileHandlerCount-1;i>=0;i--)
     if (FileHandlers[i]->Exists(name))
-      return true;
+      return sTRUE;
 
-  return false;
+  return sFALSE;
 }
 
 
@@ -663,28 +663,28 @@ class sMemFile : public sFile
 {
   sU8 *Data;
   sDInt Size;
-  bool Ownage;
+  sBool Ownage;
   sDInt Used;
   sDInt Offset;
   sInt BlockSize;
   sFileAccess Access;
 public:
-  sMemFile(const void *data,sDInt size,bool owndata,sInt bsize=1);
-  sMemFile(void *data,sDInt size,bool owndata,sInt bsize=1,sFileAccess access=sFA_READ);
+  sMemFile(const void *data,sDInt size,sBool owndata,sInt bsize=1);
+  sMemFile(void *data,sDInt size,sBool owndata,sInt bsize=1,sFileAccess access=sFA_READ);
   ~sMemFile();
-  bool Read(void *data,sDInt size);  // read bytes
-  bool Write(const void *data,sDInt size); // write bytes, may change mapping.
+  sBool Read(void *data,sDInt size);  // read bytes
+  sBool Write(const void *data,sDInt size); // write bytes, may change mapping.
   sU8 *Map(sS64 offset,sDInt size);  // map file (from offset) (may fail)  
-  bool SetOffset(sS64 offset);       // seek to offset
+  sBool SetOffset(sS64 offset);       // seek to offset
   sS64 GetOffset();                   // get offset
   sS64 GetSize();                     // get size
 
   sFileReadHandle BeginRead(sS64 offset,sDInt size,void *destbuffer, sFilePriorityFlags prio/*=0*/);
-  bool DataAvailable(sFileReadHandle handle);
+  sBool DataAvailable(sFileReadHandle handle);
   void EndRead(sFileReadHandle handle);
 };
 
-sMemFile::sMemFile(const void *data,sDInt size,bool owndata,sInt bsize/*=1*/)
+sMemFile::sMemFile(const void *data,sDInt size,sBool owndata,sInt bsize/*=1*/)
 {
   Data = (sU8*)data;  // loose const, but only allow reading
   Size = size;
@@ -695,7 +695,7 @@ sMemFile::sMemFile(const void *data,sDInt size,bool owndata,sInt bsize/*=1*/)
   Access = sFA_READ;
 }
 
-sMemFile::sMemFile(void *data,sDInt size,bool owndata,sInt bsize/*=1*/,sFileAccess access/*=sFA_READ*/)
+sMemFile::sMemFile(void *data,sDInt size,sBool owndata,sInt bsize/*=1*/,sFileAccess access/*=sFA_READ*/)
 {
   Data = (sU8*)data;
   Size = size;
@@ -712,7 +712,7 @@ sMemFile::~sMemFile()
     delete[] Data;
 }
 
-bool sMemFile::Read(void *data,sDInt size)
+sBool sMemFile::Read(void *data,sDInt size)
 {
   if(Offset+size<=Size && (Access==sFA_READ || Access==sFA_READRANDOM || Access==sFA_READWRITE))
   {
@@ -724,7 +724,7 @@ bool sMemFile::Read(void *data,sDInt size)
   return 0;
 }
 
-bool sMemFile::Write(const void *data,sDInt size)
+sBool sMemFile::Write(const void *data,sDInt size)
 {
   if(Offset+size <= Size && (Access==sFA_WRITE || Access==sFA_WRITEAPPEND || Access==sFA_READWRITE))
   {
@@ -753,7 +753,7 @@ sU8 *sMemFile::Map(sS64 offset,sDInt size)
     return 0;
 }
 
-bool sMemFile::SetOffset(sS64 offset)
+sBool sMemFile::SetOffset(sS64 offset)
 {
   if(offset>=0 && offset<=Size)
   {
@@ -797,7 +797,7 @@ sFileReadHandle sMemFile::BeginRead(sS64 offset,sDInt size,void *destbuffer, sFi
   return 1;
 }
 
-bool sMemFile::DataAvailable(sFileReadHandle handle)
+sBool sMemFile::DataAvailable(sFileReadHandle handle)
 {
   return handle==1;
 }
@@ -808,12 +808,12 @@ void sMemFile::EndRead(sFileReadHandle handle)
 
 /****************************************************************************/
 
-sFile *sCreateMemFile(const void *data,sDInt size,bool owndata,sInt blocksize/*=1*/)
+sFile *sCreateMemFile(const void *data,sDInt size,sBool owndata,sInt blocksize/*=1*/)
 {
   return new sMemFile(data,size,owndata,blocksize);
 }
 
-sFile *sCreateMemFile(void *data,sDInt size,bool owndata,sInt blocksize/*=1*/,sFileAccess access/*=sFA_READ*/)
+sFile *sCreateMemFile(void *data,sDInt size,sBool owndata,sInt blocksize/*=1*/,sFileAccess access/*=sFA_READ*/)
 {
   return new sMemFile(data,size,owndata,blocksize,access);
 }
@@ -833,7 +833,7 @@ sFile *sCreateMemFile(const sChar *name)
     return 0;
   }
   sDelete(file);
-  return new sMemFile(data,size,true);
+  return new sMemFile(data,size,sTRUE);
 }
 
 /****************************************************************************/
@@ -848,10 +848,10 @@ class sGrowMemFile : public sFile
 public:
   sGrowMemFile();
   ~sGrowMemFile();
-  bool Read(void *data,sDInt size);
-  bool Write(const void *data,sDInt size);
+  sBool Read(void *data,sDInt size);
+  sBool Write(const void *data,sDInt size);
   sU8 *Map(sS64 offset,sDInt size);
-  bool SetOffset(sS64 offset);
+  sBool SetOffset(sS64 offset);
   sS64 GetOffset();
   sS64 GetSize();
 };
@@ -869,7 +869,7 @@ sGrowMemFile::~sGrowMemFile()
   delete[] Data;
 }
 
-bool sGrowMemFile::Read(void *data,sDInt size)
+sBool sGrowMemFile::Read(void *data,sDInt size)
 {
   if(Offset+size<=Used)
   {
@@ -883,7 +883,7 @@ bool sGrowMemFile::Read(void *data,sDInt size)
   }
 }
 
-bool sGrowMemFile::Write(const void *data,sDInt size)
+sBool sGrowMemFile::Write(const void *data,sDInt size)
 {
   // enlarge buffer
 
@@ -921,7 +921,7 @@ sU8 *sGrowMemFile::Map(sS64 offset,sDInt size)
     return 0;
 }
 
-bool sGrowMemFile::SetOffset(sS64 offset)
+sBool sGrowMemFile::SetOffset(sS64 offset)
 {
   Offset = sDInt(offset);
   return 1;
@@ -947,11 +947,11 @@ class sFile *sCreateGrowMemFile()
 
 /****************************************************************************/
 
-bool sCopyFileFailsafe(const sChar *source,const sChar *dest,bool failifexists/*=0*/)
+sBool sCopyFileFailsafe(const sChar *source,const sChar *dest,sBool failifexists/*=0*/)
 {
   sString<sMAXPATH> temp;
   temp.PrintF(L"%s_%016x.fail.tmp",dest,sGetTimeUS());
-  bool result = sCopyFile(source,temp,failifexists);
+  sBool result = sCopyFile(source,temp,failifexists);
   if(result)
     return sRenameFile(temp,dest,!failifexists);
   return result;
@@ -974,20 +974,20 @@ sCalcMD5File::~sCalcMD5File()
 {
 }
 
-bool sCalcMD5File::Close()
+sBool sCalcMD5File::Close()
 {
   TotalCount += TempCount;
   Checksum.CalcEnd(TempBuf,TempCount,TotalCount);
-  return true;
+  return sTRUE;
 }
 
-bool sCalcMD5File::Read(void *data,sDInt size)
+sBool sCalcMD5File::Read(void *data,sDInt size)
 {
   sFatal(L"sFileMakeMD5::Read not supported");
-  return false;
+  return sFALSE;
 }
 
-bool sCalcMD5File::Write(const void *data,sDInt size)
+sBool sCalcMD5File::Write(const void *data,sDInt size)
 {
   const sU8 *ptr = (const sU8*) data;
   sDInt count = size;
@@ -1012,7 +1012,7 @@ bool sCalcMD5File::Write(const void *data,sDInt size)
       // size was smaller than tempbuffer, we are done
       sCopyMem(TempBuf,TempBuf+done,TempCount-done);
       TempCount -= done;
-      return true;
+      return sTRUE;
     }
 
     TempCount = 0;
@@ -1032,7 +1032,7 @@ bool sCalcMD5File::Write(const void *data,sDInt size)
     sCopyMem(TempBuf,ptr,TempCount);
   }
 
-  return true;
+  return sTRUE;
 }
 
 sU8 *sCalcMD5File::Map(sS64 offset,sDInt size)
@@ -1040,10 +1040,10 @@ sU8 *sCalcMD5File::Map(sS64 offset,sDInt size)
   return 0;
 }
 
-bool sCalcMD5File::SetOffset(sS64 offset)
+sBool sCalcMD5File::SetOffset(sS64 offset)
 {
   sFatal(L"sFileMakeMD5::SetOffset not supported\n");
-  return false;
+  return sFALSE;
 }
 
 sS64 sCalcMD5File::GetOffset()
@@ -1051,10 +1051,10 @@ sS64 sCalcMD5File::GetOffset()
   return TotalCount;
 }
 
-bool sCalcMD5File::SetSize(sS64)
+sBool sCalcMD5File::SetSize(sS64)
 {
   sFatal(L"sFileMakeMD5::SetOffset not supported\n");
-  return false;
+  return sFALSE;
 }
 
 sS64 sCalcMD5File::GetSize()
@@ -1214,37 +1214,37 @@ sChar *sLoadText(const sChar *name)
 }
 
 
-bool sSaveFile(const sChar *name,const void *data,sDInt bytes)
+sBool sSaveFile(const sChar *name,const void *data,sDInt bytes)
 {
   sFile *file=sCreateFile(name,sFA_WRITE);
   if (!file) return 0;
-  bool ret=file->Write(data,bytes);
+  sBool ret=file->Write(data,bytes);
   delete file;
   return ret;
 }
 
-bool sSaveFileFailsafe(const sChar *name,const void *data,sDInt bytes)
+sBool sSaveFileFailsafe(const sChar *name,const void *data,sDInt bytes)
 {
   sFile *file = sCreateFailsafeFile(name,sFA_WRITE);
   if(!file) return 0;
-  bool ret = file->Write(data,bytes);
+  sBool ret = file->Write(data,bytes);
   ret &= file->Close();
   delete file;
   return ret;
 }
 
-bool sSaveTextUnicode(const sChar *name,const sChar *data)
+sBool sSaveTextUnicode(const sChar *name,const sChar *data)
 {
   sFile *file=sCreateFile(name,sFA_WRITE);
   if (!file) return 0;
   sU16 code = 0xfeff;
   file->Write(&code,2);
-  bool ret=file->Write(data,sGetStringLen(data)*2);
+  sBool ret=file->Write(data,sGetStringLen(data)*2);
   delete file;
   return ret;
 }
 
-bool sSaveTextUTF8(const sChar *name,const sChar *data)
+sBool sSaveTextUTF8(const sChar *name,const sChar *data)
 {
   sInt len = sGetStringLen(data);
   sU8 *buffer = new sU8[len*4+4];
@@ -1273,12 +1273,12 @@ bool sSaveTextUTF8(const sChar *name,const sChar *data)
     }
   }
   *d++ = 0x00;
-  bool ok = sSaveFile(name,buffer,d-buffer);
+  sBool ok = sSaveFile(name,buffer,d-buffer);
   delete[] buffer;
   return ok;
 }
 
-bool sSaveTextAnsi(const sChar *name,const sChar *data)
+sBool sSaveTextAnsi(const sChar *name,const sChar *data)
 {
   sFile *file = sCreateFile(name,sFA_WRITE);
   if(!file)
@@ -1286,7 +1286,7 @@ bool sSaveTextAnsi(const sChar *name,const sChar *data)
 
   const sInt BUFFER_SIZE = 2048;
   sU8 buffer[BUFFER_SIZE];
-  bool lastWasCR = false;
+  sBool lastWasCR = sFALSE;
 
   // convert in small chunks
   while(*data)
@@ -1315,7 +1315,7 @@ bool sSaveTextAnsi(const sChar *name,const sChar *data)
   return 1;
 }
 
-bool sSaveTextAnsiIfDifferent(const sChar *name,const sChar *data)
+sBool sSaveTextAnsiIfDifferent(const sChar *name,const sChar *data)
 {
   sString<sMAXPATH> origname;
   sString<sMAXPATH> tempname;
@@ -1325,7 +1325,7 @@ bool sSaveTextAnsiIfDifferent(const sChar *name,const sChar *data)
   tempname=origname;
   tempname.Add(L"_new");
   if(!sSaveTextAnsi(tempname,data))
-    return false;
+    return sFALSE;
 
   if (sCheckFile(origname))
   {
@@ -1334,26 +1334,26 @@ bool sSaveTextAnsiIfDifferent(const sChar *name,const sChar *data)
     {
       sDPrintF(L"new version of <%s> identical to old one, not saving.\n",name);
       sDeleteFile(tempname);
-      return true;
+      return sTRUE;
     }
 
     // not identical, delete original file
 //    sPrintF(L"!!! WRITE %q\n",name);
     if(!sDeleteFile(origname))
-      return false;
+      return sFALSE;
   }
 
   // then rename temp to target filename
   if(!sRenameFile(tempname,origname))
   {
     sDeleteFile(tempname);
-    return false;
+    return sFALSE;
   }
 
-  return true;
+  return sTRUE;
 }
 
-bool sFilesEqual(const sChar *name1,const sChar *name2)
+sBool sFilesEqual(const sChar *name1,const sChar *name2)
 {
   sFile *file1 = sCreateFile(name1);
   sFile *file2 = sCreateFile(name2);
@@ -1361,7 +1361,7 @@ bool sFilesEqual(const sChar *name1,const sChar *name2)
   {
     sDelete(file1);
     sDelete(file2);
-    return false;
+    return sFALSE;
   }
 
   static const sInt bufferSize = 1024;
@@ -1387,7 +1387,7 @@ bool sFilesEqual(const sChar *name1,const sChar *name2)
 
 #if sPLATFORM==sPLAT_WINDOWS && sPLATFORM==sPLAT_LINUX // this is obvisously stupid...
 
-bool sBackupFile(const sChar *name)
+sBool sBackupFile(const sChar *name)
 {
   sArray<sDirEntry> dir;
   sDirEntry *ent;
@@ -1419,7 +1419,7 @@ bool sBackupFile(const sChar *name)
 
 #endif
 
-bool sFileCalcMD5(const sChar *name, sChecksumMD5 &md5)
+sBool sFileCalcMD5(const sChar *name, sChecksumMD5 &md5)
 {
   const sInt BufSize = 65536;
   sU8 buffer[BufSize];
@@ -1443,7 +1443,7 @@ bool sFileCalcMD5(const sChar *name, sChecksumMD5 &md5)
 
     md5.CalcEnd(buffer,left,sInt(size));
     sDelete(file);
-    return true;
+    return sTRUE;
   }
 failed:
   md5.Hash[0] = 0;
@@ -1451,7 +1451,7 @@ failed:
   md5.Hash[2] = 0;
   md5.Hash[3] = 0;
   sDelete(file);
-  return false;
+  return sFALSE;
 }
 
 /****************************************************************************/
@@ -1464,7 +1464,7 @@ failed:
 // "//aa/bb/cc"      windows network paths
 // "/aa/bb/cc"       unix absolute paths
 
-bool sMakeDirAll(const sChar *path)
+sBool sMakeDirAll(const sChar *path)
 {
   sString<sMAXPATH> canon;
   sString<sMAXPATH> test;
@@ -1510,7 +1510,7 @@ bool sMakeDirAll(const sChar *path)
 
   // now the remainder is in the form "aa/bb/cc\0"
 
-  bool ok = 1;
+  sBool ok = 1;
   while(canon[pos] && ok)
   {
     // find next dir
@@ -1594,13 +1594,13 @@ sInt sInput2NumDevices(sU32 type)
   return num;
 }
 
-static bool Input2Mute = false;
-void sInput2SetMute(bool mute)
+static sBool Input2Mute = sFALSE;
+void sInput2SetMute(sBool mute)
 {
   Input2Mute = mute;
 }
 
-void sInput2Update(sInt time, bool ignoreTimestamp)
+void sInput2Update(sInt time, sBool ignoreTimestamp)
 {
   sInput2Device *dev;
   sFORALL_LIST(sInputDevice,dev)
@@ -1648,7 +1648,7 @@ void sInput2SendEvent(const sInput2Event& event)
   } else {
     // send events instantly when in tool-mode
 #if !sSTRIPPED
-    bool skip = false;
+    sBool skip = sFALSE;
     sInputHook->Call(event, skip);
     if (!skip)
 #endif
@@ -1657,22 +1657,22 @@ void sInput2SendEvent(const sInput2Event& event)
   }
 }
 
-bool sInput2PopEvent(sInput2Event& event, sInt time)
+sBool sInput2PopEvent(sInput2Event& event, sInt time)
 {
   if(!sInput2EventQueue->IsEmpty() && time >= sInput2EventQueue->Front().Timestamp) {
     sInput2EventQueue->RemHead(event);
-    return true;
+    return sTRUE;
   }
-  return false;
+  return sFALSE;
 }
 
-bool sInput2PeekEvent(sInput2Event& event, sInt time)
+sBool sInput2PeekEvent(sInput2Event& event, sInt time)
 {
   if(!sInput2EventQueue->IsEmpty() && time >= sInput2EventQueue->Front().Timestamp) {
     event = sInput2EventQueue->Front();
-    return true;
+    return sTRUE;
   }
-  return false;
+  return sFALSE;
 }
 
 extern sU32 sKeyQual;
@@ -1702,7 +1702,7 @@ sADDSUBSYSTEM(EventQueue, 0x01, sInitEventQueue, sExitEventQueue)
 
 /****************************************************************************/
 
-bool sInput2IsKeyboardKey(sInt key)
+sBool sInput2IsKeyboardKey(sInt key)
 {
   sInt pureKey = key & sKEYQ_MASK;
          // not in page 0xe000          or   key below keyboard_border

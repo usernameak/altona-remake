@@ -19,7 +19,7 @@
 #include "gui/gui.hpp"
 #include "gui.hpp"
 
-sISGUI(true);
+sISGUI(sTRUE);
 
 /****************************************************************************/
 

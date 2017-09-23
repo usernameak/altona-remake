@@ -21,18 +21,18 @@ struct sThreadContext;
 void sAddPerfMon(sInt maxThreads=8, sInt maxEvents=8000, sInt maxValues=100, sInt maxSwitches=40);
 
 // returns if perf mon is running
-bool sPerfMonInited();
+sBool sPerfMonInited();
 
 // sets the maximum and frame time for the bar graph
 void sSetPerfMonTimes(sF32 maxtime, sF32 frametime);
 
 // for turning perf mon display on/off
-void sShowPerfMon(bool show);
+void sShowPerfMon(sBool show);
 void sTogglePerfMon();
 
 // put this into your OnInput (or filter the events beforehand). 
-// If this function returns true, the input event has done something.
-bool sSendPerfMonInput(const sInput2Event &ie);
+// If this function returns sTRUE, the input event has done something.
+sBool sSendPerfMonInput(const sInput2Event &ie);
 
 
 /****************************************************************************/
@@ -146,7 +146,7 @@ void sPerfRemSwitch(sInt *ptr);
 /***                                                                      ***/
 /****************************************************************************/
 
-void sPerfIntGetValue(sInt index, const sChar *&name, sInt &value, bool &groupstart);
+void sPerfIntGetValue(sInt index, const sChar *&name, sInt &value, sBool &groupstart);
 
 void sPerfIntGetSwitch(sInt index, const sChar *&name, const sChar *&choice, sInt &value);
 void sPerfIntSetSwitch(const sChar *name, sInt newvalue);

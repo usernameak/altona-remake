@@ -36,7 +36,7 @@ class RectElement : public sObject
 public:
   sCLASSNAME(RectElement);
   RectElement();
-  sInt Add;
+  sBool Add;
   sRect Rect;
   const sChar *GetName();
 };

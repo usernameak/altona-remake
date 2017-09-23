@@ -41,12 +41,12 @@ public:
   sSplitFrame();
   void SplitLayout(sInt w);
   sInt SplitDrag(const sWindowDrag &dd,sInt mousedelta,sInt mousepos);
-  void Preset(sInt splitter,sInt value,bool align=0);
+  void Preset(sInt splitter,sInt value,sBool align=0);
   void PresetPos(sInt splitter,sInt value);
-  void PresetAlign(sInt splitter,bool align);
+  void PresetAlign(sInt splitter,sBool align);
   sInt GetPos(sInt splitter);
   sInt Knop;
-  bool Proportional;
+  sBool Proportional;
 };
 
 class sHSplitFrame : public sSplitFrame
@@ -99,8 +99,8 @@ public:
   void OnCalcSize();
   void OnLayout();
   void OnPaint2D();
-  bool OnShortcut(sU32 key);
-//  bool OnCommand(sInt cmd);
+  sBool OnShortcut(sU32 key);
+//  sBool OnCommand(sInt cmd);
 
   void AddItem(const sChar *name,const sMessage &cmd,sU32 Shortcut,sInt len=-1,sInt column=0,sU32 backcol=0);
   void AddCheckmark(const sChar *name,const sMessage &cmd,sU32 Shortcut,sInt *refptr,sInt value,sInt len=-1,sInt column=0,sU32 backcol=0,sInt buttonstyle=0);
@@ -136,7 +136,7 @@ struct sLayoutFrameWindow
   sInt Switch;                    // if sLFWM_SWITCH
   sPoolString Name;               // optional name, required to switch switch windows
   sArray<sLayoutFrameWindow *> Childs;
-  bool Proportional;
+  sBool Proportional;
 
   sMessage OnSwitch;
 
@@ -215,7 +215,7 @@ public:
   void OnLayout();
   void OnPaint2D();
   void OnDrag(const sWindowDrag &dd);
-  bool OnKey(sU32 key);
+  sBool OnKey(sU32 key);
 
   sArray<sGridFrameLayout> Layout;
   sInt Columns;
@@ -236,7 +236,7 @@ struct sGridFrameHelper
   sInt BoxWidth;                  // width of a box, usually 1
   sMessage DoneMsg;               // message to add for "done" event
   sMessage ChangeMsg;             // message to add for "change" event
-  bool Static;                   // create controls as static (if possible)
+  sBool Static;                   // create controls as static (if possible)
   
   sF32 ScaleRange;
   sF32 RotateRange;
@@ -295,7 +295,7 @@ struct sGridFrameHelper
   void ColorF(sF32 *,const sChar *config);
   void ColorPick(sU32 *,const sChar *config,sObject *tagref);
   void ColorPickF(sF32 *,const sChar *config,sObject *tagref);
-  class sColorGradientControl *Gradient(class sColorGradient *,bool alpha);
+  class sColorGradientControl *Gradient(class sColorGradient *,sBool alpha);
   void Bitmask(sU8 *x,sInt width = 1);
 
   // complex composites
@@ -329,7 +329,7 @@ struct sGridFrameTemplate
   sMessage Message;               // BOX,PUSHBUTTON: message to send when pressed
 
   void Init();
-  bool Condition(void *obj_);
+  sBool Condition(void *obj_);
   void Add(sGridFrameHelper &gh,void *obj_,const sMessage &changemsg,const sMessage &relayoutmsg);
   sGridFrameTemplate *HideCond(sInt offset,sInt mask,sInt value);
   sGridFrameTemplate *HideCondNot(sInt offset,sInt mask,sInt value);

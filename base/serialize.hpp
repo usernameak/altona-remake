@@ -33,7 +33,7 @@ class sWriter
   sInt BufferSize;
   sU8 *CheckEnd;
   sFile *File;
-  bool Ok;
+  sBool Ok;
   sU8 *Data;
 
   // object serialization
@@ -46,26 +46,26 @@ public:
   sWriter();
   ~sWriter();
   void Begin(sFile *file);
-  bool End();
+  sBool End();
   void Check();
-  bool IsOk() { return Ok; }
+  sBool IsOk() { return Ok; }
   void Fail() { Ok = 0; }
-  sINLINE bool IsReading() const { return 0; }
-  sINLINE bool IsWriting() const { return 1; }
+  sINLINE sBool IsReading() const { return 0; }
+  sINLINE sBool IsWriting() const { return 1; }
 
   sInt Header(sU32 id,sInt currentversion);
   sU32 PeekHeader() { return 0 /*sSerId::Error*/; }
-  bool PeekFooter() { return false; }
+  sBool PeekFooter() { return sFALSE; }
   sU32 PeekU32() { return 0; }
   void Footer();
   void Skip(sInt bytes);
   void Align(sInt alignment=4);
   sInt RegisterPtr(void *);
-  bool IsRegistered(void *);
+  sBool IsRegistered(void *);
   void VoidPtr(const void *obj);
   template <typename T> void Ptr(const T *obj) { VoidPtr((const void *)obj); }
   template <typename T> void Enum(const T val) { U32(val); }
-  bool If(bool c) { U32(c); return c; }
+  sBool If(sBool c) { U32(c); return c; }
   template <typename T> void Index(T *e,sStaticArray<T *> &a) { U32(e - a[0]); }
   template <typename T> void Once(T *obj) { if(If(obj && !IsRegistered(obj))){RegisterPtr(obj);obj->Serialize(*this);} Ptr(obj); }
   template <typename T> void OnceRef(T *obj) { if(If(obj && !IsRegistered(obj))){RegisterPtr(obj);obj->Serialize(*this);} Ptr(obj); }
@@ -121,7 +121,7 @@ class sReader
   const sU8 *Data;
   const sU8 *CheckEnd;
   sU8 *LoadEnd;
-  bool Ok;
+  sBool Ok;
   sS64 ReadLeft;
   sU32 LastId;
 
@@ -129,32 +129,32 @@ class sReader
   sInt ROCount;
 
 public:
-  bool DontMap;          // for debug purposes
+  sBool DontMap;          // for debug purposes
   sReader();
   ~sReader();
   void Begin(sFile *file);
-  bool End();
+  sBool End();
   void Check();
-  bool IsOk() { return Ok; }
+  sBool IsOk() { return Ok; }
   void Fail() { Ok = 0; }
   sOBSOLETE const sU8 *GetPtr(sInt bytes); // get acces to data and advance pointer
-  sINLINE bool IsReading() const { return 1; }
-  sINLINE bool IsWriting() const { return 0; }
+  sINLINE sBool IsReading() const { return 1; }
+  sINLINE sBool IsWriting() const { return 0; }
   void DebugPeek(sInt count);
 
   sInt Header(sU32 id,sInt currentversion);
   sU32 PeekHeader();
   sU32 PeekU32();
-  bool PeekFooter();
+  sBool PeekFooter();
   void Footer();
   void Skip(sInt bytes);
   void Align(sInt alignment=4);
   sInt RegisterPtr(void *);
-  bool IsRegistered(void *) { sVERIFYFALSE; return true; } // don't use. included only to make template functions compile.
+  sBool IsRegistered(void *) { sVERIFYFALSE; return sTRUE; } // don't use. included only to make template functions compile.
   void VoidPtr(void *&obj);
   template <typename T> void Ptr(T *&obj) { VoidPtr((void *&)obj); }
   template <typename T> void Enum(T &val) { sU32 v; U32(v); val=(T)v; }
-  bool If(bool c) { sU32 c1; U32(c1); return c1; }
+  sBool If(sBool c) { sU32 c1; U32(c1); return c1; }
   template <typename T> void Index(T *&e,sStaticArray<T *> &a) { sU32 n; U32(n); e = a[n]; }
   template <typename T> void Once(T *&obj) { if(If(0)){obj=new T;RegisterPtr(obj);obj->Serialize(*this); } Ptr(obj); }
   template <typename T> void OnceRef(T *&obj) { if(If(0)){obj=new T;RegisterPtr(obj);obj->Serialize(*this);Ptr(obj);} else {Ptr(obj);obj->AddRef();} }
@@ -288,7 +288,7 @@ template<class Type> Type *sLoadObject(const sChar *name)
   return obj;
 }
 
-template<class Type> bool sLoadObject(const sChar *name,Type *obj)
+template<class Type> sBool sLoadObject(const sChar *name,Type *obj)
 {
   sFile *file = sCreateFile(name,sFA_READ); if(!file) return 0; 
   sPushMemLeakDesc(sFindFileWithoutPath(name));
@@ -300,7 +300,7 @@ template<class Type> bool sLoadObject(const sChar *name,Type *obj)
   return stream.IsOk(); 
 }
 
-template<class Type> bool sSaveObject(const sChar *name,Type *obj)
+template<class Type> sBool sSaveObject(const sChar *name,Type *obj)
 {
   sFile *file = sCreateFile(name,sFA_WRITE); if(!file) return 0; 
   sWriter stream; stream.Begin(file); obj->Serialize(stream); stream.End(); 
@@ -309,7 +309,7 @@ template<class Type> bool sSaveObject(const sChar *name,Type *obj)
   delete file; return stream.IsOk(); 
 }
 
-template<class Type> bool sLoadObjectConfig(const sChar *name,Type *obj)
+template<class Type> sBool sLoadObjectConfig(const sChar *name,Type *obj)
 {
   sFile *file = sCreateFile(name,sFA_READ); if(!file) return 0; 
   sPushMemLeakDesc(sFindFileWithoutPath(name));
@@ -321,7 +321,7 @@ template<class Type> bool sLoadObjectConfig(const sChar *name,Type *obj)
   return stream.IsOk(); 
 }
 
-template<class Type> bool sSaveObjectConfig(const sChar *name,Type *obj)
+template<class Type> sBool sSaveObjectConfig(const sChar *name,Type *obj)
 {
   sFile *file = sCreateFile(name,sFA_WRITE); if(!file) return 0; 
   sWriter stream; stream.Begin(file); obj->SerializeConfig(stream); stream.End(); 
@@ -331,7 +331,7 @@ template<class Type> bool sSaveObjectConfig(const sChar *name,Type *obj)
 }
 
 
-template<class Type> bool sSaveObjectFailsafe(const sChar *name,Type *obj)
+template<class Type> sBool sSaveObjectFailsafe(const sChar *name,Type *obj)
 {
   sFile *file = sCreateFailsafeFile(name,sFA_WRITE); if(!file) return 0; 
   sWriter stream; stream.Begin(file); obj->Serialize(stream); stream.End(); 
@@ -340,16 +340,16 @@ template<class Type> bool sSaveObjectFailsafe(const sChar *name,Type *obj)
   delete file; return stream.IsOk(); 
 }
 
-template <typename T> bool sCalcObjectMD5(sChecksumMD5 &md5, T* obj)
+template <typename T> sBool sCalcObjectMD5(sChecksumMD5 &md5, T* obj)
 {
   sCalcMD5File c;
   sWriter s;
   s.Begin(&c);
   obj->Serialize(s);
-  if(!s.End()) return false;
+  if(!s.End()) return sFALSE;
   c.Close();
   md5 = c.Checksum;
-  return true;
+  return sTRUE;
 }
 
 /****************************************************************************/

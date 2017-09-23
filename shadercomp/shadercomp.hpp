@@ -27,8 +27,8 @@
 /***                                                                      ***/
 /****************************************************************************/
 
-bool sShaderCompileDX     (const sChar *source,const sChar *profile,const sChar *main,sU8 *&data,sInt &size,sInt flags=0,sTextBuffer *errors=0);
-bool sShaderCompileCG     (const sChar *source,const sChar *profile,const sChar *main,sU8 *&data,sInt &size,sInt flags=0,sTextBuffer *errors=0);
+sBool sShaderCompileDX     (const sChar *source,const sChar *profile,const sChar *main,sU8 *&data,sInt &size,sInt flags=0,sTextBuffer *errors=0);
+sBool sShaderCompileCG     (const sChar *source,const sChar *profile,const sChar *main,sU8 *&data,sInt &size,sInt flags=0,sTextBuffer *errors=0);
 
 /****************************************************************************/
 /***                                                                      ***/
@@ -53,8 +53,8 @@ struct sExternCompileBuffer
   void SetMessage(const sChar8 *msg)          { sInt i=0; for(;i<MessageSize-1&&*msg;i++) Message[i] = *msg++; Message[i] = 0; }
 };
 
-typedef bool (*sCompileCallback)(sExternCompileBuffer *buffer, sInt stype, sInt dtype, sInt flags, const sChar8 *source, sInt len, const sChar8 *name);
-//bool sCompileExtern(sCompileCallback cb, sCompileResult &result, sInt stype, sInt dtype, sInt flags, const sChar8 *source, sInt len, const sChar8 *name);
+typedef sBool (*sCompileCallback)(sExternCompileBuffer *buffer, sInt stype, sInt dtype, sInt flags, const sChar8 *source, sInt len, const sChar8 *name);
+//sBool sCompileExtern(sCompileCallback cb, sCompileResult &result, sInt stype, sInt dtype, sInt flags, const sChar8 *source, sInt len, const sChar8 *name);
 
 /****************************************************************************/
 

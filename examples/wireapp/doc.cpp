@@ -41,12 +41,12 @@ void Document::New()
 {
 }
 
-bool Document::Save()
+sBool Document::Save()
 {
   return sSaveObject(Filename,this);
 }
 
-bool Document::Load()
+sBool Document::Load()
 {
   return sLoadObject(Filename,this);
 }

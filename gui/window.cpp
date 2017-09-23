@@ -90,17 +90,17 @@ void sWindow::OnLayout()
     c->Outer = Client;
 }
 
-bool sWindow::OnKey(sU32 key)
+sBool sWindow::OnKey(sU32 key)
 {
   return 0;
 }
 
-bool sWindow::OnShortcut(sU32 key)
+sBool sWindow::OnShortcut(sU32 key)
 {
   return 0;
 }
 
-bool sWindow::OnCommand(sInt cmd)
+sBool sWindow::OnCommand(sInt cmd)
 {
   return 0;
 }
@@ -256,7 +256,7 @@ void sWindow::Post(sInt cmd)
 
 /****************************************************************************/
 
-class sScrollBorder *sWindow::AddScrolling(bool x,bool y)
+class sScrollBorder *sWindow::AddScrolling(sBool x,sBool y)
 {
   Flags |= sWF_CLIENTCLIPPING;
   if(x)
@@ -269,7 +269,7 @@ class sScrollBorder *sWindow::AddScrolling(bool x,bool y)
   return b;
 }
 
-void sWindow::ScrollTo(const sRect &r,bool save)
+void sWindow::ScrollTo(const sRect &r,sBool save)
 {
   sInt c,s;
   sRect vis;
@@ -345,7 +345,7 @@ void sWindow::ScrollTo(sInt newx,sInt newy)
 }
 
 
-bool sWindow::MMBScroll(const sWindowDrag &dd)
+sBool sWindow::MMBScroll(const sWindowDrag &dd)
 {
   switch(dd.Mode)
   {

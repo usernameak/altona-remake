@@ -86,7 +86,7 @@ void sScanConfig::Scan(const sChar *coderoot)
       sPoolString symbol;
       sPoolString name;
       sInt value = -1;
-      bool used = 0;
+      sBool used = 0;
 
       Scan.ScanName(symbol);
       if(Scan.Token==sTOK_INT)

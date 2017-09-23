@@ -107,7 +107,7 @@ static sInt DXActive=0;
 static sInt DXXSIMode=0;       // special flags for D3DCreate when used within XSI
 static sInt DXStreamsUsed = 0;   // number of streams used by last sGeometry::Draw(). used for caching.
 static sInt DXInstanceSet = 0;    // number of streams for which instancing information was set
-static bool Render3DInProgress=0;    // flagging started scene with d3d->BeginScene
+static sBool Render3DInProgress=0;    // flagging started scene with d3d->BeginScene
 static sDInt DXTotalTextureMem = 0;
 
 static sGeoBufferPart DXQuadIndex;
@@ -116,7 +116,7 @@ static sVertexOffset NoVertexOffset;
 static sGraphicsStats Stats;
 static sGraphicsStats BufferedStats;
 static sGraphicsStats DisabledStats;
-static bool StatsEnable;
+static sBool StatsEnable;
 
 static sTextureBase *CurrentTexture[sMTRL_MAXVSTEX+sMTRL_MAXPSTEX];
 static sShader *CurrentVS;
@@ -124,7 +124,7 @@ static sShader *CurrentPS;
 static BOOL CurrentVSBools[16];
 static BOOL CurrentPSBools[16];
 static sVertexFormatHandle *CurrentMtrlVFormat=0;
-static bool DontCheckMtrlPrepare=false;
+static sBool DontCheckMtrlPrepare=sFALSE;
 
 static D3DCAPS9 DXCaps;
 static sInt DXShaderProfile;
@@ -132,7 +132,7 @@ static sInt DXShaderProfile;
 static sInt RenderClippingFlag;
 static sU32 RenderClippingData[4096];
 
-static bool ConvertsRGB = true;
+static sBool ConvertsRGB = sTRUE;
 
 static D3DDEVTYPE DevType = D3DDEVTYPE_HAL;
 
@@ -457,7 +457,7 @@ void InitGFX(sInt flags_,sInt xs_,sInt ys_)
     sInt max = DXRTCount;                         // this is tricky: create new DXRenderTargets[] 
     DXRTCount = 0;                                // directly over old DXRenderTargets[].
     for (sInt i=0; i<max; i++)
-      DXRenderTargets[i]->OnLostDevice(true);
+      DXRenderTargets[i]->OnLostDevice(sTRUE);
     sVERIFY(max==DXRTCount);                      // check if the trick really worked...
     sGeoBufferReset1();
     sFORALL(*AllOccQueryNodes,qn)
@@ -641,7 +641,7 @@ void ResizeGFX(sInt x,sInt y)  // this is called when the windows size changes
   }
 }
 
-void SetXSIModeD3D(bool enable)
+void SetXSIModeD3D(sBool enable)
 {
   DXXSIMode = enable;
 }
@@ -673,7 +673,7 @@ void sCreateZBufferRT(sInt xs,sInt ys)
 /***                                                                      ***/
 /****************************************************************************/
 
-bool sSetOversizeScreen(sInt xs,sInt ys,sInt fsaa,bool mayfail)
+sBool sSetOversizeScreen(sInt xs,sInt ys,sInt fsaa,sBool mayfail)
 {
   sScreenMode sm;
   sGetScreenMode(sm);
@@ -725,7 +725,7 @@ void GetScreenFormats(sInt display,sInt &flags,D3DFORMAT &color,D3DFORMAT &depth
   // assume defaults:
 
   if(display==-1) display = D3DADAPTER_DEFAULT;
-  bool windowed = (flags & sSM_FULLSCREEN)?0:1;
+  sBool windowed = (flags & sSM_FULLSCREEN)?0:1;
   color = D3DFMT_A8R8G8B8;
   displayfmt = D3DFMT_X8R8G8B8;
   if(FAILED(DX9->CheckDeviceType(display,DevType,displayfmt,color,windowed)))
@@ -944,7 +944,7 @@ void sGetScreenMode(sScreenMode &sm)
   sm = DXScreenMode;
 }
 
-bool sSetScreenMode(const sScreenMode &smorg)
+sBool sSetScreenMode(const sScreenMode &smorg)
 {
   sScreenMode sm;
 
@@ -987,12 +987,12 @@ bool sSetScreenMode(const sScreenMode &smorg)
 /***                                                                      ***/
 /****************************************************************************/
 
-void sConvertsRGBTex(bool e)
+void sConvertsRGBTex(sBool e)
 {
   ConvertsRGB = e;
 }
 
-bool sConvertsRGBTex()
+sBool sConvertsRGBTex()
 {
   return ConvertsRGB;
 }
@@ -1002,7 +1002,7 @@ bool sConvertsRGBTex()
 void sClearRendertargetPrivate(sInt flags,sU32 color)
 {
   // clear with scissor?
-  bool noscissor=(flags&sCLEAR_NOSCISSOR);
+  sBool noscissor=(flags&sCLEAR_NOSCISSOR);
   flags &= sCLEAR_ALL;
 
   if(!DXActiveZB)
@@ -1110,7 +1110,7 @@ void sSetRendertargetPrivate(sTextureBase *tex,sInt xs,sInt ys,const sRect *vrp,
       zb = DXZBufferRT;
   }
 
-  bool change = 0;
+  sBool change = 0;
   sInt miplevel = (flags&0xff00)>>8;
   sInt changemsaa = (DXActiveRTFlags ^ flags) & sRTF_NO_MULTISAMPLING;
 
@@ -1438,7 +1438,7 @@ void sSetTarget(const sTargetPara &para)
   IDirect3DSurface9 *dest;
   sTextureBase *tex;
   sVERIFY(Render3DInProgress);
-  bool change = 0;
+  sBool change = 0;
 
   // clear flags
 
@@ -1488,7 +1488,7 @@ void sSetTarget(const sTargetPara &para)
 
   // check for MSAA
 
-  bool msaa = 1;
+  sBool msaa = 1;
   if(para.Flags & sST_NOMSAA)       // really don't want msaa
     msaa = 0;
   if(para.Flags & sST_READZ)        // can't resolve z buffer, so we have to disable msaa
@@ -2094,7 +2094,7 @@ void sGetGraphicsStats(sGraphicsStats &stat)
   stat = BufferedStats;
 }
 
-void sEnableGraphicsStats(bool enable)
+void sEnableGraphicsStats(sBool enable)
 {
   if(!enable && StatsEnable)
   {
@@ -2136,7 +2136,7 @@ void sSetTexture(sInt binding, class sTextureBase* tex)
   }
 }
 
-void sDbgPaintWireFrame(bool enable)
+void sDbgPaintWireFrame(sBool enable)
 {
   DXErr(DXDev->SetRenderState(D3DRS_FILLMODE,enable?D3DFILL_WIREFRAME:D3DFILL_SOLID));
 }
@@ -2154,7 +2154,7 @@ void sSetRenderStates(const sU32* data, sInt count)
     // overwrite sRGB convertion for switching ldr <-> hdr rendering
     if (index >= sMS_SAMPLERSTATE && index<sMS_SAMPLEREND && (((index-sMS_SAMPLERSTATE)&(sMS_SAMPLEROFFSET-1))) == D3DSAMP_SRGBTEXTURE)
     {
-      if (ConvertsRGB==false)
+      if (ConvertsRGB==sFALSE)
         value = 0;
     }
 
@@ -2308,7 +2308,7 @@ void sVertexFormatHandle::Create()
   for(i=0;i<sVF_STREAMMAX;i++)
     b[i] = 0;
 
-  bool dontcreate=false;
+  sBool dontcreate=sFALSE;
   i = 0;
   sInt j = 0;
   while(Data[i])
@@ -2666,7 +2666,7 @@ sInt sGeoBuffer::CheckSize(sInt count,sInt size)
 /****************************************************************************/
 
 
-static void DumpGeoBuffers(bool all=false)
+static void DumpGeoBuffers(sBool all=sFALSE)
 {
   sLogF(L"gfx",L"===> %d <===\n",sGeoBufferCount);
   for(sInt i=0;i<sGeoBufferCount;i++)
@@ -2727,7 +2727,7 @@ sGeoBuffer *sFindFreeGeoBuffer()
 
 #if sDEBUG
   if(sGeoBufferCount>=sCOUNTOF(sGeoBuffers))
-    DumpGeoBuffers(true);
+    DumpGeoBuffers(sTRUE);
 #endif
   sVERIFY(sGeoBufferCount < sCOUNTOF(sGeoBuffers));
   return &sGeoBuffers[sGeoBufferCount++];
@@ -2808,7 +2808,7 @@ void sGeoBufferPart::Clear()
   Count = 0;
 }
 
-bool sGeoBufferPart::IsEmpty()
+sBool sGeoBufferPart::IsEmpty()
 {
   return Buffer==0;
 }
@@ -3074,14 +3074,14 @@ void sGeometry::InitDyn(sInt ic,sInt vc0,sInt vc1,sInt vc2,sInt vc3)
   if(vc3) { VertexPart[3].Init(vc3,Format->GetSize(3),sGD_DYNAMIC,0,0); VertexPart[0].Buffer->Unlock(); }
 }
 
-void *sGeometry::BeginDynVB(bool discard,sInt stream)
+void *sGeometry::BeginDynVB(sBool discard,sInt stream)
 {
   if(discard) VertexPart[stream].Buffer->Discard = 1;
   VertexPart[stream].Buffer->Lock();
   return VertexPart[stream].Buffer->LockPtr;
 }
 
-void *sGeometry::BeginDynIB(bool discard)
+void *sGeometry::BeginDynIB(sBool discard)
 {
   if(discard) IndexPart.Buffer->Discard = 1;
   IndexPart.Buffer->Lock();
@@ -3715,9 +3715,9 @@ void sCopyCubeFace(sTexture2D *dest, sTextureCube *src, sTexCubeFace cf)
   }
 }
 
-bool sReadTexture(sReader &s, sTextureBase *&tex)
+sBool sReadTexture(sReader &s, sTextureBase *&tex)
 {
-  return false;
+  return sFALSE;
 }
 
 
@@ -4005,7 +4005,7 @@ void sGetGraphicsCaps(sGraphicsCaps &caps)
 /****************************************************************************/
 /****************************************************************************/
 
-void sPackDXT(sU8 *d,sU32 *bmp,sInt xs,sInt ys,sInt format,bool dither)
+void sPackDXT(sU8 *d,sU32 *bmp,sInt xs,sInt ys,sInt format,sBool dither)
 {
   sInt formatflags = format;
   format &= sTEX_FORMAT;
@@ -4229,7 +4229,7 @@ void sTexture2D::Destroy2()
   }
 }
 
-void sTexture2D::OnLostDevice(bool reinit/*=false*/)
+void sTexture2D::OnLostDevice(sBool reinit/*=sFALSE*/)
 {
   if ((Flags&sTEX_RENDERTARGET) || (Flags&sTEX_DYNAMIC))
   {
@@ -4237,7 +4237,7 @@ void sTexture2D::OnLostDevice(bool reinit/*=false*/)
     sRelease(Surf2D);
     sRelease(MultiSurf2D);
     if (reinit) 
-      Init(OriginalSizeX, OriginalSizeY, Flags, Mipmaps, true);
+      Init(OriginalSizeX, OriginalSizeY, Flags, Mipmaps, sTRUE);
 
     FrameRT = 0xffff;
     SceneRT = 0xffff;
@@ -4363,7 +4363,7 @@ void sTextureCube::Destroy2()
   sRelease(TexCube);
 }
 
-void sTextureCube::OnLostDevice(bool reinit/*false*/)
+void sTextureCube::OnLostDevice(sBool reinit/*sFALSE*/)
 {
   if ((Flags&sTEX_RENDERTARGET) || (Flags&sTEX_DYNAMIC))
   {
@@ -4431,7 +4431,7 @@ void sTextureProxy::Disconnect2()
 /***                                                                      ***/
 /****************************************************************************/
 
-void sTextureBasePrivate::OnLostDevice(bool reinit)
+void sTextureBasePrivate::OnLostDevice(sBool reinit)
 {
   sFatal(L"OnLostDevice not supported by this kind of texture\n");
 }
@@ -4853,12 +4853,12 @@ void sSetRenderClipping(sRect *r,sInt count)
   RenderClippingFlag = 1;
 }
 
-bool sRender3DBegin()
+sBool sRender3DBegin()
 {
   // restore system
 
   sVERIFY(DXActiveRT==0);
-  sVERIFY(Render3DInProgress==false);
+  sVERIFY(Render3DInProgress==sFALSE);
 
   if(!DXActive)
   {
@@ -4890,7 +4890,7 @@ bool sRender3DBegin()
     return 0;
   }
 
-  Render3DInProgress = true;
+  Render3DInProgress = sTRUE;
 
   if(SUCCEEDED(DXDev->BeginScene()))
   {
@@ -4980,7 +4980,7 @@ bool sRender3DBegin()
   return 1;
 }
 
-void sRender3DEnd(bool flip)
+void sRender3DEnd(sBool flip)
 {
   if(!Render3DInProgress)
   {
@@ -5011,7 +5011,7 @@ void sRender3DEnd(bool flip)
 
   // bla bla
 
-  Render3DInProgress = false;
+  Render3DInProgress = sFALSE;
 
   DXErr(DXDev->EndScene());
 

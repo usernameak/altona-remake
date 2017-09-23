@@ -36,7 +36,7 @@ sThreadLock::sThreadLock() {}
 sThreadLock::~sThreadLock() {}
 void sThreadLock::Lock() {  sFatal(L"not implemented"); }
 void sThreadLock::Unlock() {  sFatal(L"not implemented"); }
-bool sThreadLock::TryLock() { return 0; }
+sBool sThreadLock::TryLock() { return 0; }
 struct sThreadContext *sGetThreadContext(void) { return &sEmergencyThreadContext; }
 void sPrint(const sChar *text) {}
 void sTriggerEvent(sInt) { sFatal(L"not implemented"); }

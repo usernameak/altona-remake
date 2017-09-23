@@ -462,14 +462,14 @@ void sChecksumMD5::Calc(const sU8 *data,sInt size)
   sSwapEndianI(Hash[3]);
 }
 
-bool sChecksumMD5::Check(const sU8 *data,sInt size)
+sBool sChecksumMD5::Check(const sU8 *data,sInt size)
 {
   sChecksumMD5 c;
   c.Calc(data,size);
   return c==*this;
 }
 
-bool sChecksumMD5::operator== (const sChecksumMD5 &o)const
+sBool sChecksumMD5::operator== (const sChecksumMD5 &o)const
 {
   if(o.Hash[0]!=Hash[0]) return 0;
   if(o.Hash[1]!=Hash[1]) return 0;
@@ -1585,7 +1585,7 @@ const sChar *sFindFileExtension(const sChar *a)
     return L"";
 }
 
-bool sExtractFileExtension(const sStringDesc &d, const sChar *a, sInt nr/*=0*/)
+sBool sExtractFileExtension(const sStringDesc &d, const sChar *a, sInt nr/*=0*/)
 {
   sInt count = 0;
   const sChar *ptr = a;
@@ -1596,7 +1596,7 @@ bool sExtractFileExtension(const sStringDesc &d, const sChar *a, sInt nr/*=0*/)
   }
 
   if(nr>=count)
-    return false;
+    return sFALSE;
 
   ptr = a;
   while(*ptr && count>nr)
@@ -1616,10 +1616,10 @@ bool sExtractFileExtension(const sStringDesc &d, const sChar *a, sInt nr/*=0*/)
 }
 
 
-bool sCheckFileExtension(const sChar *name,const sChar *ext)
+sBool sCheckFileExtension(const sChar *name,const sChar *ext)
 {
   if(!name)
-    return false;
+    return sFALSE;
   sInt len1 = sGetStringLen(name);
   sInt len2 = sGetStringLen(ext);
   if(len1<len2) return 0;
@@ -1656,7 +1656,7 @@ const sChar *sFindFileWithoutPath(const sChar *a)
   return result;
 }
 
-bool sIsAbsolutePath(const sChar *a)
+sBool sIsAbsolutePath(const sChar *a)
 {
   if(a[0]!=0   && a[1]==':') return 1;      // does not handle "cdrom:"
   if(a[0]=='\\' /*&& a[1]=='\\'*/) return 1;
@@ -1664,7 +1664,7 @@ bool sIsAbsolutePath(const sChar *a)
   return 0;
 }
 
-bool sExtractPathDrive(const sChar *path, const sStringDesc &drive)
+sBool sExtractPathDrive(const sChar *path, const sStringDesc &drive)
 {
   sVERIFY(drive.Size);
   const sChar *ptr = path;
@@ -1675,10 +1675,10 @@ bool sExtractPathDrive(const sChar *path, const sStringDesc &drive)
   if(*ptr && *ptr==':')
   {
     drive.Buffer[count] = 0;
-    return true;
+    return sTRUE;
   }
   drive.Buffer[0] = 0;
-  return false;
+  return sFALSE;
 }
 
 void sExtractPath(const sChar *a, const sStringDesc &path)
@@ -1777,7 +1777,7 @@ sInt sFindChoice(const sChar *str,const sChar *choices)
   return -1;
 }
 
-bool sFindFlag(const sChar *str,const sChar *choices,sInt &mask_,sInt &value_)
+sBool sFindFlag(const sChar *str,const sChar *choices,sInt &mask_,sInt &value_)
 {
   const sChar *s = choices;
   sInt len2 = sGetStringLen(str);
@@ -1903,7 +1903,7 @@ sStringDesc sGetAppendDesc(const sStringDesc &sd)
   return result;
 }
 
-bool sCheckPrefix(const sChar *string,const sChar *prefix)
+sBool sCheckPrefix(const sChar *string,const sChar *prefix)
 {
   for(sInt i=0;prefix[i];i++)
     if(string[i]!=prefix[i])
@@ -1911,7 +1911,7 @@ bool sCheckPrefix(const sChar *string,const sChar *prefix)
   return 1;
 }
 
-bool sCheckSuffix(const sChar *string,const sChar *suffix)
+sBool sCheckSuffix(const sChar *string,const sChar *suffix)
 {
   sInt len1 = sGetStringLen(string);
   sInt len2 = sGetStringLen(suffix);
@@ -1942,7 +1942,7 @@ sInt sReplaceChar(sChar *string, sChar from, sChar to)
 /****************************************************************************/
 
 // ?=any one character,  *=zero or more characters
-bool sMatchWildcard(const sChar *wild,const sChar *text,bool casesensitive,bool pathsensitive)
+sBool sMatchWildcard(const sChar *wild,const sChar *text,sBool casesensitive,sBool pathsensitive)
 {
   for(;;)
   {
@@ -2015,7 +2015,7 @@ void sWriteString(sU32 *&data,const sChar *buffer)
 
 /****************************************************************************/
 
-bool sIsName(const sChar *s)
+sBool sIsName(const sChar *s)
 {
   if(!sIsLetter(*s++)) return 0;
   sInt c;
@@ -2052,10 +2052,10 @@ sU32 sHashString(const sChar *string,sInt len)
 
 /****************************************************************************/
 
-bool sScanInt(const sChar *&s,sInt &result)
+sBool sScanInt(const sChar *&s,sInt &result)
 {
   sU32 val = 0;
-  bool sign = 0;
+  sBool sign = 0;
   sInt overflow = 0;
   sU32 digit;
 
@@ -2104,10 +2104,10 @@ bool sScanInt(const sChar *&s,sInt &result)
 }
 
 #if sCONFIG_64BIT
-bool sScanInt(const sChar *&s,sDInt &result)
+sBool sScanInt(const sChar *&s,sDInt &result)
 {
   sU64 val = 0;
-  bool sign = 0;
+  sBool sign = 0;
   sInt overflow = 0;
   sU64 digit;
 
@@ -2156,7 +2156,7 @@ bool sScanInt(const sChar *&s,sDInt &result)
 }
 #endif
 
-bool sScanFloat(const sChar *&s,sF32 &result)
+sBool sScanFloat(const sChar *&s,sF32 &result)
 {
   sF64 val = 0;
   sF64 dec = 1;
@@ -2231,7 +2231,7 @@ bool sScanFloat(const sChar *&s,sF32 &result)
   return 1;
 }
 
-bool sScanHex(const sChar *&s,sInt &result, sInt maxlen)
+sBool sScanHex(const sChar *&s,sInt &result, sInt maxlen)
 {
   sU32 val;
   sInt c;
@@ -2258,37 +2258,37 @@ bool sScanHex(const sChar *&s,sInt &result, sInt maxlen)
   return 1;
 }
 
-bool sScanMatch(const sChar *&scan, const sChar *match)
+sBool sScanMatch(const sChar *&scan, const sChar *match)
 {
   const sChar *sp=scan;
   while (*match)
-    if (*sp++!=*match++) return false;
+    if (*sp++!=*match++) return sFALSE;
   scan=sp;
-  return true;
+  return sTRUE;
 }
 
-bool sScanGUID(const sChar *&str, sGUID &guid)
+sBool sScanGUID(const sChar *&str, sGUID &guid)
 {
   const sChar *p=str;
   sInt temp;
 
-  if (!sScanHex(p,temp,8)) return false;
+  if (!sScanHex(p,temp,8)) return sFALSE;
   guid.Data32=temp;
-  if (*p++!='-') return false;
+  if (*p++!='-') return sFALSE;
   for (sInt i=0; i<3; i++)
   {
-    if (!sScanHex(p,temp,4)) return false;
+    if (!sScanHex(p,temp,4)) return sFALSE;
     guid.Data16[i]=temp;
-    if (*p++!='-') return false;
+    if (*p++!='-') return sFALSE;
   }
   for (sInt i=0; i<6; i++)
   {
-    if (!sScanHex(p,temp,2)) return false;
+    if (!sScanHex(p,temp,2)) return sFALSE;
     guid.Data8[i]=temp;
   }
 
   str=p;
-  return true;
+  return sTRUE;
 }
 
 /****************************************************************************/
@@ -2300,7 +2300,7 @@ bool sScanGUID(const sChar *&str, sGUID &guid)
 extern "C" char * __cdecl _fcvt( double value, int count, int *dec, int *sign );
 extern "C" char * __cdecl _ecvt( double value, int count, int *dec, int *sign );
 
-bool sFormatString(const sStringDesc &desc,const sChar *s,const sChar **fp)
+sBool sFormatString(const sStringDesc &desc,const sChar *s,const sChar **fp)
 {
   sInt c;
   sInt field0;
@@ -2646,7 +2646,7 @@ void sPrintScreen(const sChar *text)
 /***                                                                      ***/
 /****************************************************************************/
 
-bool sFormatStringBuffer::Fill()
+sBool sFormatStringBuffer::Fill()
 {
 loop:
   while(*Format!='%' && *Format!=0 && Dest<End-1)
@@ -2730,7 +2730,7 @@ void sFormatStringBuffer::GetInfo(sFormatStringInfo &info)
   sVERIFY(info.Format);
 }
 
-void sFormatStringBuffer::Add(const sFormatStringInfo &info,const sChar *buffer,bool sign)
+void sFormatStringBuffer::Add(const sFormatStringInfo &info,const sChar *buffer,sBool sign)
 {
   sInt len = sGetStringLen(buffer);
   sInt field = info.Field;
@@ -2791,7 +2791,7 @@ void sFormatStringBuffer::Print(const sChar *str)
 }
 
 template<typename Type>
-void sFormatStringBuffer::PrintInt(const sFormatStringInfo &info,Type val,bool sign)
+void sFormatStringBuffer::PrintInt(const sFormatStringInfo &info,Type val,sBool sign)
 {
   sChar buf[32];
   static sChar hex[17] = L"0123456789abcdef";
@@ -2982,7 +2982,7 @@ void sFormatStringBuffer::PrintFloat(const sFormatStringInfo &info,sF32 v)
       fi.PrintF(buf,frac);
       if(info.Format=='F')     // special format: add trailing 'f'
       {
-        bool addf = 0;
+        sBool addf = 0;
         for(sInt n=0;buf[n];n++)
           if(buf[n]=='.')
             addf = 1;
@@ -3063,7 +3063,7 @@ sFormatStringBuffer& operator% (sFormatStringBuffer &f,sInt val)
   if (!*f.Format)
     return f;
 
-  bool sign=(val<0);
+  sBool sign=(val<0);
   if(sign) val = -val;
 
   sFormatStringInfo info;
@@ -3108,7 +3108,7 @@ sFormatStringBuffer& operator% (sFormatStringBuffer &f,sS64 val)
   if (!*f.Format)
     return f;
 
-  bool sign=(val<0);
+  sBool sign=(val<0);
   if(sign) val = -val;
 
   sFormatStringInfo info;
@@ -3168,7 +3168,7 @@ sFormatStringBuffer& operator% (sFormatStringBuffer &f,const sChar *str)
 {
   sString<sMAXPATH> path;
   sInt i;
-  bool q=1;
+  sBool q=1;
   const sChar *s;
   if (!*f.Format)
     return f;
@@ -3315,7 +3315,7 @@ sFormatStringBuffer& operator% (sFormatStringBuffer &f, const sRect &r)
   sFormatStringInfo info;
   f.GetInfo(info);
 
-  bool sign;
+  sBool sign;
 
   sign = (r.x0<0);
   f.PrintInt<sU32>(info,sign?-r.x0:r.x0,sign);
@@ -3766,7 +3766,7 @@ static sInt ShellParaCount;
 /***                                                                      ***/
 /****************************************************************************/
 
-void sParseCmdLine(const sChar *cmd,bool skipcmd)
+void sParseCmdLine(const sChar *cmd,sBool skipcmd)
 {
   static sChar strOne[] = L"1";
   sChar *d;
@@ -3921,9 +3921,9 @@ void sParseCmdLine(const sChar *cmd,bool skipcmd)
 
 /****************************************************************************/
 
-bool sAddShellParameter(const sChar *opt, const sChar *val)
+sBool sAddShellParameter(const sChar *opt, const sChar *val)
 {
-  bool result = true;
+  sBool result = sTRUE;
 
   // get end of ShellParaBuffer
   sChar *d = ShellParaBufferEnd;
@@ -4022,18 +4022,18 @@ sU32 sGetShellParameterHex(const sChar *opt, sInt n, sU32 def)
 
 /****************************************************************************/
 
-bool sGetShellSwitch(const sChar *opt)
+sBool sGetShellSwitch(const sChar *opt)
 {
   sInt i;
-  bool result;
+  sBool result;
 
-  result = false;
+  result = sFALSE;
 
   for(i=0;i<ShellParaCount;i++)
   {
     if(ShellParaOpt[i] && sCmpStringI(opt,ShellParaOpt[i])==0)
     {
-      result = true;
+      result = sTRUE;
 //      ShellParaOpt[i] = 0;
     }
   }
@@ -4209,7 +4209,7 @@ void sEnableLogFilter()
   *ns++ = 0;
 }
 
-bool sCheckLogFilter(const sChar *module)
+sBool sCheckLogFilter(const sChar *module)
 {
   const sChar *ps = sLogFilterPosList;
   const sChar *ns = sLogFilterNegList;
@@ -4243,9 +4243,9 @@ void sPrintWarning(const sChar *text) { sPrint(text); }
 
 #if sENABLE_DPRINT
 
-static bool enableLogConsole = false;
+static sBool enableLogConsole = sFALSE;
 
-void sEnableLogConsole(bool enable)
+void sEnableLogConsole(sBool enable)
 {
   enableLogConsole = enable;
 }
@@ -4289,7 +4289,7 @@ void sLog(const sChar *module,const sChar *text)
 }
 #else
 
-void sEnableLogConsole(bool enable)
+void sEnableLogConsole(sBool enable)
 {
 }
 
@@ -4332,13 +4332,13 @@ struct sMemoryMarkStruct
 
 static sStackArray<sMemoryMarkStruct,3> sMemoryMarks;
 static sMemoryMarkStruct sMemoryMark;     // the structure to work on
-static bool sMemoryMarkFlushVertexFormat = false;  // flag to flush vertexformats during memmark
+static sBool sMemoryMarkFlushVertexFormat = sFALSE;  // flag to flush vertexformats during memmark
 
 static sInt sMemoryAllocId;
 static sInt sMemoryBreakId;
-static sHooks1<bool> *sMemFlushHook;
+static sHooks1<sBool> *sMemFlushHook;
 static sMemoryLeakTracker *sMemoryLeaks;
-static bool sMemoryLeakCheck;
+static sBool sMemoryLeakCheck;
 static sMemoryHandler *sMemoryHandlers[sAMF_MASK+1];
 static sInt sMemoryHandlerMax;
 
@@ -4406,11 +4406,11 @@ void sMemoryHandler::Lock()
     Lock_->Lock();
 }
 
-bool sMemoryHandler::TryLock()
+sBool sMemoryHandler::TryLock()
 {
   if(ThreadSafe)
     return Lock_->TryLock();
-  return true;
+  return sTRUE;
 }
 
 void sMemoryHandler::Unlock()
@@ -4461,7 +4461,7 @@ void sMemDbgUnlock(sPtr start, sPtr size)
 #endif
 }
 
-bool sMemDbgCheckLock(void *ptr_)
+sBool sMemDbgCheckLock(void *ptr_)
 {
 #if sCFG_MEMDBG_LOCKING
   if(sDbgMemRangesLock)
@@ -4472,11 +4472,11 @@ bool sMemDbgCheckLock(void *ptr_)
     sFORALL(*sDbgMemRanges,range)
     {
       if(ptr>=range->Start&&ptr<range->End)
-        return true;
+        return sTRUE;
     }
   }
 #endif
-  return false;
+  return sFALSE;
 }
 
 
@@ -4510,7 +4510,7 @@ void sInitMem0()
     }
   }
 
-  sMemFlushHook = new sHooks1<bool>;
+  sMemFlushHook = new sHooks1<sBool>;
 
   sDumpMemoryMap();
 
@@ -4611,7 +4611,7 @@ sMemoryHandler *sGetMemHandler(sInt slot)
 }
 
 
-bool sIsMemTypeAvailable(sInt t)
+sBool sIsMemTypeAvailable(sInt t)
 {
   return sMemoryHandlers[t&sAMF_MASK]!=0;
 }
@@ -4748,7 +4748,7 @@ void sFreeMem(void *ptr)
         {
           sVERIFY(h->Owner==0 || h->Owner==tx);
           h->Lock();
-          bool r= h->Free(ptr);
+          sBool r= h->Free(ptr);
           h->Unlock();
 
           if (r) break;
@@ -4764,7 +4764,7 @@ void sFreeMem(void *ptr)
       {
         sVERIFY(h->Owner==0 || h->Owner==tx);
         h->Lock();
-        bool r= h->Free(ptr);
+        sBool r= h->Free(ptr);
         h->Unlock();
 
         if(r) break;
@@ -4845,12 +4845,12 @@ void sResetMemChecksum()
 }
 
 
-void sMemMark(bool fatal/*=true*/)
+void sMemMark(sBool fatal/*=sTRUE*/)
 {
   sU32 hash;
 
   sMemFlushHook->Call(sMemoryMarkFlushVertexFormat);
-  sMemoryMarkFlushVertexFormat = true;
+  sMemoryMarkFlushVertexFormat = sTRUE;
 
   // calculate hash over all handlers, excluding debug
   sThreadContext *tx = sGetThreadContext();
@@ -4915,12 +4915,12 @@ void sMemMark(bool fatal/*=true*/)
   sMemoryMark.Taken = 1;
 }
 
-bool sIsMemMarkSet()         // this will return true even when we are in reset memmark mode!
+sBool sIsMemMarkSet()         // this will return true even when we are in reset memmark mode!
 {
   return sMemoryMark.AllocId>0;
 }
 
-void sAddMemMarkCallback(void (*cb)(bool flush,void *user),void *user)
+void sAddMemMarkCallback(void (*cb)(sBool flush,void *user),void *user)
 {
   //if (!sMemStackActive) return;
   sMemFlushHook->Add(cb,user);
@@ -4991,7 +4991,7 @@ sMemoryLeakTracker *sGetMemoryLeakTracker()
 /***                                                                      ***/
 /****************************************************************************/
 
-static bool sFrameMemDoubleBuffered = false;
+static sBool sFrameMemDoubleBuffered = sFALSE;
 
 sPtr sMemFrameSize;
 sPtr sMemFrameLastUsed;
@@ -5066,7 +5066,7 @@ void sPartitionMemory(sPtr frame,sPtr dma,sPtr gfx)
   sMemStatMaxDMAUsed=0;
 }
 
-void sFrameMemDoubleBuffer(bool enable)
+void sFrameMemDoubleBuffer(sBool enable)
 {
   if(sFrameMemDoubleBuffered!=enable)
   {
@@ -5089,7 +5089,7 @@ void sFrameMemDoubleBuffer(bool enable)
 
 // single-threaded implementations
 
-bool sRender3DLockOwner();
+sBool sRender3DLockOwner();
 
 void *sAllocFrame(sPtr size,sInt align)
 {
@@ -5140,8 +5140,8 @@ static void *sAllocFrameBeginImpl(sThreadContext *ctx,sInt size,sInt align)
 {
 retry:
   // we remember up to two borrowed memory segments, enough free memory in one of them?
-  bool fit = ctx->FrameCurrent ? sAlign(ctx->FrameCurrent,align)+size<=ctx->FrameEnd : 0;
-  bool fitalt = ctx->FrameAltCurrent ? sAlign(ctx->FrameAltCurrent,align)+size<=ctx->FrameAltEnd : 0;
+  sBool fit = ctx->FrameCurrent ? sAlign(ctx->FrameCurrent,align)+size<=ctx->FrameEnd : 0;
+  sBool fitalt = ctx->FrameAltCurrent ? sAlign(ctx->FrameAltCurrent,align)+size<=ctx->FrameAltEnd : 0;
 
   if(fit)
   {
@@ -5257,8 +5257,8 @@ void *sAllocFrame(sPtr size,sInt align)
   {
     if(align==16)
     {
-      bool fit = ctx->FrameCurrent ? sAlign(ctx->FrameCurrent,align)+size<=ctx->FrameEnd : 0;
-      bool fitalt = ctx->FrameAltCurrent ? sAlign(ctx->FrameAltCurrent,align)+size<=ctx->FrameAltEnd : 0;
+      sBool fit = ctx->FrameCurrent ? sAlign(ctx->FrameCurrent,align)+size<=ctx->FrameEnd : 0;
+      sBool fitalt = ctx->FrameAltCurrent ? sAlign(ctx->FrameAltCurrent,align)+size<=ctx->FrameAltEnd : 0;
       if(!fit&&!fitalt)
         goto nonborrowed;   // don't discard borrowed segments for non-fitting allocation with native alignment
     }
@@ -5307,12 +5307,12 @@ void sAllocFrameEnd(void *ptr)
 
 /****************************************************************************/
 
-bool sIsFrameMem(void *ptr)
+sBool sIsFrameMem(void *ptr)
 {
   sPtr p=(sPtr)ptr;
   return p>=sMemFramePtr[sMemFrameToggle] && p<(sMemFramePtr[sMemFrameToggle]+sMemFrameSize);
 }
-bool sIsDmaMem(void *ptr)
+sBool sIsDmaMem(void *ptr)
 {
   sPtr p=(sPtr)ptr;
   return p>=sMemDmaPtr[sMemDmaToggle] && p<(sMemDmaPtr[sMemFrameToggle]+sMemDmaSize);
@@ -5340,8 +5340,8 @@ void *sAllocDma(sPtr size,sInt align)
   {
     if(align==16)
     {
-      bool fit = ctx->DmaCurrent ? sAlign(ctx->DmaCurrent,align)+size<=ctx->DmaEnd : 0;
-      bool fitalt = ctx->DmaAltCurrent ? sAlign(ctx->DmaAltCurrent,align)+size<=ctx->DmaAltEnd : 0;
+      sBool fit = ctx->DmaCurrent ? sAlign(ctx->DmaCurrent,align)+size<=ctx->DmaEnd : 0;
+      sBool fitalt = ctx->DmaAltCurrent ? sAlign(ctx->DmaAltCurrent,align)+size<=ctx->DmaAltEnd : 0;
       if(!fit&&!fitalt)
         goto nonborrowed;   // don't discard borrowed segments for non-fitting allocation with native alignment
     }
@@ -5397,8 +5397,8 @@ void *sAllocDmaBegin(sInt size, sInt align/*=16*/)
 
 retry:
   // we remember up to two borrowed memory segments, enough free memory in one of them?
-  bool fit = ctx->DmaCurrent ? sAlign(ctx->DmaCurrent,align)+size<=ctx->DmaEnd : 0;
-  bool fitalt = ctx->DmaAltCurrent ? sAlign(ctx->DmaAltCurrent,align)+size<=ctx->DmaAltEnd : 0;
+  sBool fit = ctx->DmaCurrent ? sAlign(ctx->DmaCurrent,align)+size<=ctx->DmaEnd : 0;
+  sBool fitalt = ctx->DmaAltCurrent ? sAlign(ctx->DmaAltCurrent,align)+size<=ctx->DmaAltEnd : 0;
 
   if(fit)
   {
@@ -6006,7 +6006,7 @@ void sMemoryLeakTracker2::DumpLeaks(const sChar *message,sInt minallocid,sInt he
 }
 
 
-static bool cmp(sMemoryLeakTracker2::LeakLoc *loc,sInt line,sInt heapid,const char *file)
+static sBool cmp(sMemoryLeakTracker2::LeakLoc *loc,sInt line,sInt heapid,const char *file)
 {
   if(loc->Line!=line) return 0;
   if(loc->HeapId!=heapid) return 0;
@@ -6407,7 +6407,7 @@ void sMemoryHeap::Init(sU8 *start,sPtr size)
   MinTotalFree = GetFree();
 }
 
-void sMemoryHeap::SetDebug(bool clear,sInt memwall)
+void sMemoryHeap::SetDebug(sBool clear,sInt memwall)
 {
   Clear = clear;
 }
@@ -6494,7 +6494,7 @@ sU32 sMemoryHeap::MakeSnapshot()
   return sChecksumAdler32End();
 }
 
-bool sMemoryHeap::IsFree(const void *ptr) const
+sBool sMemoryHeap::IsFree(const void *ptr) const
 {
   const sMemoryHeapFreeNode *node;
 
@@ -6587,7 +6587,7 @@ void *sMemoryHeap::Alloc(sPtr bytes,sInt align,sInt flags)
 
   if(MEMVERBOSE) Validate();
 
-  bool found = 0;
+  sBool found = 0;
   sPtr fs,fe,as,ae;
 
   if(!(flags & sAMF_ALT))
@@ -6671,7 +6671,7 @@ void *sMemoryHeap::Alloc(sPtr bytes,sInt align,sInt flags)
   return 0;
 }
 
-bool sMemoryHeap::Free(void *ptr)
+sBool sMemoryHeap::Free(void *ptr)
 {
 #if sCFG_MEMDBG_LOCKING
   if(sMemDbgCheckLock(ptr))
@@ -6886,7 +6886,7 @@ void sGpuHeap::AddNode(sGpuHeapUsedNode *l)
   HashTable[hash] = l;
 }
 
-sGpuHeapUsedNode *sGpuHeap::FindNode(sPtr data,bool remove)
+sGpuHeapUsedNode *sGpuHeap::FindNode(sPtr data,sBool remove)
 {
   sGpuHeapUsedNode *l,**p;
   sU32 hash = ((data>>4) ^ (data>>(4+HashShift))) & HashMask;
@@ -6929,7 +6929,7 @@ sPtr sGpuHeap::GetUsed()
   return End-Start-TotalFree;
 }
 
-void sGpuHeap::SetDebug(bool clear,sInt memwall)
+void sGpuHeap::SetDebug(sBool clear,sInt memwall)
 {
   Clear = clear;
 }
@@ -7045,7 +7045,7 @@ void *sGpuHeap::Alloc(sPtr bytes,sInt align,sInt flags)
 
   if(MEMVERBOSE) Validate();
 
-  bool found = 0;
+  sBool found = 0;
   sPtr fs,fe,as,ae;
 
   if((flags & sAMF_ALT))          // default is reverse allocation
@@ -7128,7 +7128,7 @@ void *sGpuHeap::Alloc(sPtr bytes,sInt align,sInt flags)
   return 0;
 }
 
-bool sGpuHeap::Free(void *ptr)
+sBool sGpuHeap::Free(void *ptr)
 {
 #if sCFG_MEMDBG_LOCKING
   if(sMemDbgCheckLock(ptr))
@@ -7279,7 +7279,7 @@ void sSimpleMemPool::Reset()
 //
 /****************************************************************************/
 
-bool sCompES(sU8 *s,sU8 *d,sInt ssize,sInt &dsize,sInt scan)
+sBool sCompES(sU8 *s,sU8 *d,sInt ssize,sInt &dsize,sInt scan)
 {
   sInt si;                        // source index  
   sInt di;                        // destination index
@@ -7441,7 +7441,7 @@ bool sCompES(sU8 *s,sU8 *d,sInt ssize,sInt &dsize,sInt scan)
 
 /****************************************************************************/
 
-bool sDeCompES(sU8 *s,sU8 *d,sInt ssize,sInt &dsize,bool verify)
+sBool sDeCompES(sU8 *s,sU8 *d,sInt ssize,sInt &dsize,sBool verify)
 {
   sInt val;                       // code byte    
   sInt si;                        // source stream index
@@ -7528,7 +7528,7 @@ bool sDeCompES(sU8 *s,sU8 *d,sInt ssize,sInt &dsize,bool verify)
     }
 
     if(di+size>dsize)
-      return false;
+      return sFALSE;
 
     switch(mode)
     {
@@ -7536,7 +7536,7 @@ bool sDeCompES(sU8 *s,sU8 *d,sInt ssize,sInt &dsize,bool verify)
       if(verify)
       {
         if(sCmpMem(d+di,d+di-pos,size)!=0)
-          return false;
+          return sFALSE;
       }
       else
       {
@@ -7548,7 +7548,7 @@ bool sDeCompES(sU8 *s,sU8 *d,sInt ssize,sInt &dsize,bool verify)
       if(verify)
       {
         if(sCmpMem(d+di,s+si,size)!=0)
-          return false;
+          return sFALSE;
       }
       else
       {
@@ -7562,7 +7562,7 @@ bool sDeCompES(sU8 *s,sU8 *d,sInt ssize,sInt &dsize,bool verify)
       {
         for(i=0;i<size;i++)
           if(d[di+i]!=data)
-            return false;
+            return sFALSE;
       }
       else
       {
@@ -7576,7 +7576,7 @@ bool sDeCompES(sU8 *s,sU8 *d,sInt ssize,sInt &dsize,bool verify)
   if(dsize==0)                    // return real decompressed size if not given
     dsize = di;
 
-  return (si==ssize) && (di==dsize);  // return false if something is strange
+  return (si==ssize) && (di==dsize);  // return sFALSE if something is strange
 }
 
 /****************************************************************************/

@@ -120,8 +120,8 @@ struct sFontMapFontDesc
   sString<256> Name;      // name of font to search by the fontsystem of the OS
   sU32         Size;      // fontsize in pixel
   sS32         YOffset;   // offset in y-direction (positive values shift the font upwards)
-  bool        Italic;    // font in italic mode
-  bool        Bold;      // font in bold mode
+  sBool        Italic;    // font in italic mode
+  sBool        Bold;      // font in bold mode
 };
 
 class sFontMapInputParameter
@@ -129,9 +129,9 @@ class sFontMapInputParameter
   public:
     sStaticArray<sFontMapFontDesc> FontsToSearchIn;
     sU32         AntiAliasingFactor;
-    bool        Mipmaps;   // font has mitmaps
-    bool        Hinting;   // font has hinting enabled
-    bool        PMAlpha;   // font supports premultiplied alpha
+    sBool        Mipmaps;   // font has mitmaps
+    sBool        Hinting;   // font has hinting enabled
+    sBool        PMAlpha;   // font supports premultiplied alpha
     sU32         Outline;   // size of outline in pixels
     sU32         Blur;      // size of blur kernel in pixels
     const sChar *Letters;   // the letters to be contained by the fontmap
@@ -162,16 +162,16 @@ struct sFontMap
 class sImage
 {
 public:
-  bool LoadBMP(const sU8 *data,sInt size);
-  bool LoadPIC(const sU8 *data,sInt size);
-  bool LoadTGA(const sChar *name);
-  bool LoadJPG(const sU8 *data,sInt size);
-  bool LoadPNG(const sU8 *data,sInt size);
+  sBool LoadBMP(const sU8 *data,sInt size);
+  sBool LoadPIC(const sU8 *data,sInt size);
+  sBool LoadTGA(const sChar *name);
+  sBool LoadJPG(const sU8 *data,sInt size);
+  sBool LoadPNG(const sU8 *data,sInt size);
 
-  bool SaveBMP(const sChar *name);
-  bool SavePIC(const sChar *name);
-  bool SaveTGA(const sChar *name);
-  bool SavePNG(const sChar *name);
+  sBool SaveBMP(const sChar *name);
+  sBool SavePIC(const sChar *name);
+  sBool SaveTGA(const sChar *name);
+  sBool SavePNG(const sChar *name);
 
   sInt SaveBMP(sU8 *data, sInt size);
 
@@ -198,7 +198,7 @@ public:
   void Serialize(sWriter &);
   void Serialize(sReader &);
 
-  bool HasAlpha();                 // TRUE when at least one pixel is alpha!=255 -> use for DXT1/DXT5 check
+  sBool HasAlpha();                 // TRUE when at least one pixel is alpha!=255 -> use for DXT1/DXT5 check
   
   void Fill(sU32 color);
 //  void Fill(sU32 srcBitmask,sU32 color);
@@ -225,7 +225,7 @@ public:
   void Add(sImage *);
   void Mul(sImage *);
   void Mul(sU32 color);
-  void Blend(sImage *, bool premultiplied);
+  void Blend(sImage *, sBool premultiplied);
   void ContrastBrightness(sInt contrast,sInt brightness); // x = (x-0.5)*c+0.5+b;
   void BlitFrom(const sImage *src, sInt sx, sInt sy, sInt dx, sInt dy, sInt width, sInt height);
   void Outline(sInt pixelCount);
@@ -248,8 +248,8 @@ public:
   
 
   sImage *Scale(sInt xs,sInt ys) const;
-  void Scale(const sImage *src, bool filter=false);
-  sImage *Half(bool gammacorrect=false) const;
+  void Scale(const sImage *src, sBool filter=sFALSE);
+  sImage *Half(sBool gammacorrect=sFALSE) const;
   sImage *Copy() const;
 
   sU32 Filter(sInt x,sInt y) const;     // 24:8 pixel, requires power 2 texture!
@@ -257,8 +257,8 @@ public:
 //  sImageData *Convert(sInt tf,sInt mip=0) const;  // obsolete
 //  void Convert(sImageData *);                     // obsolete
 
-  bool Load(const sChar *name);
-  bool Save(const sChar *name);
+  sBool Load(const sChar *name);
+  sBool Save(const sChar *name);
 
   void Diff(const sImage *img0, const sImage *img1);
 
@@ -304,7 +304,7 @@ public:
   void Mul(sImageI16 *);
   void Mul(sU16 value);
   void FlipXY(); 
-  sInt Filter(sInt x,sInt y,bool colwrap=0) const;     // 24:8 pixel, requires power 2 texture!
+  sInt Filter(sInt x,sInt y,sBool colwrap=0) const;     // 24:8 pixel, requires power 2 texture!
 };
 
 
@@ -321,7 +321,7 @@ public:
   sInt SizeY;
   sInt SizeZ;                     // for cube or volume map
   sF32 *Data;
-  bool Cubemap;                  // Interpret SizeZ as cubemap, not volumemap
+  sBool Cubemap;                  // Interpret SizeZ as cubemap, not volumemap
 
   sFloatImage();
   sFloatImage(sInt xs,sInt ys,sInt zs=1);
@@ -338,7 +338,7 @@ public:
   void Fill(sF32 r,sF32 g,sF32 b,sF32 a);
   void Scale(const sFloatImage *src,sInt xs,sInt ys); // no interpolation
   void Power(sF32 p);             // power optimized for 0.5f and 2.0f, only for RGB
-  void Half(bool linear);
+  void Half(sBool linear);
   void Downsample(sInt mip,const sFloatImage *src);
   void Normalize();
 
@@ -368,7 +368,7 @@ void Heightmap2Normalmap(sImage *dest, const sImage *src, sF32 scale /*= 1.0f*/)
 sImageData *sMergeNormalMaps(const sImageData *img0, const sImageData *img1);
 
 // HDR compression
-inline bool sCheckMRGB(sInt format) { format &= sTEX_FORMAT; return format==sTEX_MRGB8 || format==sTEX_MRGB16; }
+inline sBool sCheckMRGB(sInt format) { format &= sTEX_FORMAT; return format==sTEX_MRGB8 || format==sTEX_MRGB16; }
 void sCompressMRGB(sImageData *dst_img, sInt format, const sImageData *src_img);
 void sDecompressMRGB(sImageData *dst_img, const sImageData *src_img, sF32 alpha=1.0f);
 void sCompressMRGB(sImageData *img, sInt format);

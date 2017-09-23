@@ -27,8 +27,8 @@ public:
    
   sString<sMAXPATH> Filename;
   void New();
-  bool Load();
-  bool Save();
+  sBool Load();
+  sBool Save();
 
   template <class streamer> void Serialize_(streamer &);
   void Serialize(sReader &stream);

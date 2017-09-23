@@ -16,7 +16,7 @@
 #include "util/image.hpp"
 #include "util/rasterizer.hpp"
 
-sISGUI(true)
+sISGUI(sTRUE)
 
 /****************************************************************************/
 

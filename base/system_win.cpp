@@ -42,11 +42,11 @@
 
 #define sCRASHDUMP (sCONFIG_OPTION_XSI || sCONFIG_OPTION_AGEINGTEST)  // save crashdumps in ageing tests always
 
-// exit==true: application exit, forces collection of all objects
+// exit==sTRUE: application exit, forces collection of all objects
 // iterates collection until all objects are destroyed or gives warning if not all roots are removed
 // without this flag in the case of sRemRoot in collected objects or in root object dtors
 // objects are not collected before shutdown
-void sCollector(bool exit=false);
+void sCollector(sBool exit=sFALSE);
 
 void sPingSound();
 
@@ -62,9 +62,9 @@ void sInitEmergencyThread();
 extern sInt sSystemFlags;
 extern sInt sExitFlag;
 extern sApp *sAppPtr;
-extern bool sAllocMemEnabled;
+extern sBool sAllocMemEnabled;
 extern sInt DXMayRestore;
-static bool sTrialVersion=false;
+static sBool sTrialVersion=sFALSE;
 
 sInt sFatalFlag = 0;
 
@@ -110,7 +110,7 @@ public:
    : Device(sINPUT2_TYPE_KEYBOARD, num) 
   { 
     keys.HintSize(256);
-    keys.AddManyInit(256, false);
+    keys.AddManyInit(256, sFALSE);
     sInput2RegisterDevice(&Device);
   }
 
@@ -132,7 +132,7 @@ public:
     InputThreadLock->Unlock();
   }
 
-  sStaticArray<bool> keys;
+  sStaticArray<sBool> keys;
 
 private:
   sInput2DeviceImpl<sINPUT2_KEYBOARD_MAX> Device;
@@ -263,7 +263,7 @@ void PreInitGFX(sInt &flags,sInt &xs,sInt &ys);
 void InitGFX(sInt flags,sInt xs,sInt ys);
 void ExitGFX();
 void ResizeGFX(sInt x,sInt y);
-void SetXSIModeD3D(bool enable);
+void SetXSIModeD3D(sBool enable);
 
 /****************************************************************************/
 /***                                                                      ***/
@@ -526,7 +526,7 @@ void __cdecl sFatalImpl(const sChar *str)
 }
 
 #if sENABLE_DPRINT
-static bool sDPrintFlag=false;
+static sBool sDPrintFlag=sFALSE;
 
 
 void sDPrint(const sChar *text)
@@ -543,7 +543,7 @@ void sDPrint(const sChar *text)
 #else
   OutputDebugStringW(text);
 #endif
-  sDPrintFlag=true;
+  sDPrintFlag=sTRUE;
 }
 #endif
 
@@ -697,7 +697,7 @@ class sRootFileHandler : public sFileHandler
     sU8 *Buffer;
     sDInt Size;
     OVERLAPPED Ovl;
-    bool Active;
+    sBool Active;
     sInt Next;
   };
 
@@ -713,7 +713,7 @@ class sRootFileHandler : public sFileHandler
 public:
 
   sFile *Create(const sChar *name,sFileAccess access);
-  bool Exists(const sChar *name);
+  sBool Exists(const sChar *name);
 
   sRootFileHandler();
   ~sRootFileHandler();
@@ -725,16 +725,16 @@ class sRootFile : public sFile
   sFileAccess Access;
   sS64 Size;
   sS64 Offset;
-  bool Ok;
+  sBool Ok;
 
   sS64 MapOffset;
   sDInt MapSize;
   sU8 *MapPtr;             // 0 = mapping not active
   HANDLE MapHandle;
-  bool MapFailed;          // 1 = we tryed once to map and it didn't work, do don't try again
+  sBool MapFailed;          // 1 = we tryed once to map and it didn't work, do don't try again
   sRootFileHandler *Handler;
 
-  bool IsOverlapped;
+  sBool IsOverlapped;
   HANDLE OvlEvent;
 
 #if !sSTRIPPED
@@ -742,19 +742,19 @@ class sRootFile : public sFile
 #endif
 
 public:
-  sRootFile(HANDLE file,sFileAccess access,sRootFileHandler *h,bool isovl);
+  sRootFile(HANDLE file,sFileAccess access,sRootFileHandler *h,sBool isovl);
   ~sRootFile();
-  bool Close();
-  bool Read(void *data,sDInt size); 
-  bool Write(const void *data,sDInt size);
+  sBool Close();
+  sBool Read(void *data,sDInt size); 
+  sBool Write(const void *data,sDInt size);
   sU8 *Map(sS64 offset,sDInt size); 
-  bool SetOffset(sS64 offset);      
+  sBool SetOffset(sS64 offset);      
   sS64 GetOffset();                  
-  bool SetSize(sS64);               
+  sBool SetSize(sS64);               
   sS64 GetSize();                    
 
   sFileReadHandle BeginRead(sS64 offset,sDInt size,void *destbuffer, sFilePriorityFlags prio);  // begin reading
-  bool DataAvailable(sFileReadHandle handle);  // data valid?
+  sBool DataAvailable(sFileReadHandle handle);  // data valid?
   void *GetData(sFileReadHandle handle);  // access data (only valid if you didn't specify the buffer yourself!)
   void EndRead(sFileReadHandle handle);   // the data buffer may be reused now
 };
@@ -828,15 +828,15 @@ void sRootFileHandler::DumpFreeHandles(const sStringDesc &fillMe)
   sSPrintF(fillMe, L"Free async sRootFileHandler entries left: %d\n", freeHandleCount);
 }
 
-bool sRootFileHandler::Exists(const sChar *name)
+sBool sRootFileHandler::Exists(const sChar *name)
 {
   WIN32_FIND_DATA wfd;
   HANDLE hndl;
   hndl=FindFirstFile(name,&wfd);
   if (hndl==INVALID_HANDLE_VALUE)
-    return false;
+    return sFALSE;
   FindClose(hndl);
-  return true;
+  return sTRUE;
 }
 
 sFile *sRootFileHandler::Create(const sChar *name,sFileAccess access)
@@ -844,17 +844,17 @@ sFile *sRootFileHandler::Create(const sChar *name,sFileAccess access)
   HANDLE handle = INVALID_HANDLE_VALUE;
   static const sChar *mode[] =  {  0,L"read",L"readrandom",L"write",L"writeappend",L"readwrite"  };
 
-  bool isovl=false;
+  sBool isovl=sFALSE;
 
   switch(access)
   {
   case sFA_READ:
     handle = CreateFileW(name,GENERIC_READ,FILE_SHARE_READ,0,OPEN_EXISTING,FILE_FLAG_SEQUENTIAL_SCAN|FILE_FLAG_OVERLAPPED,0);
-    isovl=true;
+    isovl=sTRUE;
     break;
   case sFA_READRANDOM:
     handle = CreateFileW(name,GENERIC_READ,FILE_SHARE_READ,0,OPEN_EXISTING,FILE_FLAG_OVERLAPPED,0);
-    isovl=true;
+    isovl=sTRUE;
     break;
   case sFA_WRITE:
     handle = CreateFileW(name,GENERIC_WRITE,0,0,CREATE_ALWAYS,FILE_FLAG_SEQUENTIAL_SCAN,0);
@@ -883,7 +883,7 @@ sFile *sRootFileHandler::Create(const sChar *name,sFileAccess access)
 
 /****************************************************************************/
 
-sRootFile::sRootFile(HANDLE file,sFileAccess access,sRootFileHandler *h, bool isovl)
+sRootFile::sRootFile(HANDLE file,sFileAccess access,sRootFileHandler *h, sBool isovl)
 {
   File = file;
   Access = access;
@@ -920,7 +920,7 @@ sRootFile::~sRootFile()
     CloseHandle(OvlEvent);
 }
 
-bool sRootFile::Close()
+sBool sRootFile::Close()
 {
   sVERIFY(File!=INVALID_HANDLE_VALUE);
 
@@ -936,13 +936,13 @@ bool sRootFile::Close()
   return Ok;
 }
 
-bool sRootFile::Read(void *data,sDInt size)
+sBool sRootFile::Read(void *data,sDInt size)
 {
   sVERIFY(File!=INVALID_HANDLE_VALUE)
   DWORD read=0;
   sVERIFY(size<=0x7fffffff);
 
-  bool result;
+  sBool result;
   if (IsOverlapped)
   {
     OVERLAPPED ovl;
@@ -999,7 +999,7 @@ bool sRootFile::Read(void *data,sDInt size)
   return result;
 }
 
-bool sRootFile::Write(const void *data,sDInt size)
+sBool sRootFile::Write(const void *data,sDInt size)
 {
   sVERIFY(!IsOverlapped)
   sVERIFY(File!=INVALID_HANDLE_VALUE)
@@ -1013,7 +1013,7 @@ bool sRootFile::Write(const void *data,sDInt size)
   {
     DWORD written;
     sVERIFY(size<=0x7fffffff);
-    bool result = WriteFile(File,data,size,&written,0);
+    sBool result = WriteFile(File,data,size,&written,0);
     if(written!=sU32(size))
       result = 0;
     if(!result) Ok = 0;
@@ -1081,7 +1081,7 @@ sU8 *sRootFile::Map(sS64 offset,sDInt size)
   return MapPtr;
 }
 
-bool sRootFile::SetOffset(sS64 offset)
+sBool sRootFile::SetOffset(sS64 offset)
 {
   sVERIFY(File!=INVALID_HANDLE_VALUE)
 
@@ -1091,7 +1091,7 @@ bool sRootFile::SetOffset(sS64 offset)
   {
     LARGE_INTEGER o;
     o.QuadPart = offset;
-    bool result = SetFilePointerEx(File,o,0,FILE_BEGIN);
+    sBool result = SetFilePointerEx(File,o,0,FILE_BEGIN);
     if(!result) Ok = 0;
     return result;
   }
@@ -1104,7 +1104,7 @@ sS64 sRootFile::GetOffset()
   return Offset;
 }
 
-bool sRootFile::SetSize(sS64 size)
+sBool sRootFile::SetSize(sS64 size)
 {
   sVERIFY(File!=INVALID_HANDLE_VALUE)
   sVERIFY(!IsOverlapped)
@@ -1141,7 +1141,7 @@ sFileReadHandle sRootFile::BeginRead(sS64 offset,sDInt size,void *destbuffer, sF
   e.Ovl.Offset=sU32(offset);
   e.Ovl.OffsetHigh=sU32(offset>>32);
   ReadFile(File,destbuffer,size,0,&e.Ovl);
-  e.Active=true;
+  e.Active=sTRUE;
 
 #if !sSTRIPPED
   if(sFileSeekTimeEmulation_>0)
@@ -1156,12 +1156,12 @@ sFileReadHandle sRootFile::BeginRead(sS64 offset,sDInt size,void *destbuffer, sF
   return handle;
 }
 
-bool sRootFile::DataAvailable(sFileReadHandle handle)
+sBool sRootFile::DataAvailable(sFileReadHandle handle)
 {
 #if !sSTRIPPED
   sInt time = sGetTime();
   if(sFileSeekTimeEmulation_>0 && time<SeekDoneTime)
-    return false;
+    return sFALSE;
 #endif
 
   sVERIFY(handle>=0 && handle<sRootFileHandler::MAX_READENTRIES);
@@ -1171,15 +1171,15 @@ bool sRootFile::DataAvailable(sFileReadHandle handle)
   if (GetOverlappedResult(File,&e.Ovl,&read,FALSE))
   {
     sVERIFY((sDInt)read==e.Size);
-    e.Active=false;
-    return true;
+    e.Active=sFALSE;
+    return sTRUE;
   }
 
   DWORD error=GetLastError();
   if (error!=ERROR_IO_INCOMPLETE)
     sFatal(L"sRootFile: read error during async io!\n");
   
-  return false;
+  return sFALSE;
 }
 
 void *sRootFile::GetData(sFileReadHandle handle)
@@ -1218,23 +1218,23 @@ void sRootFile::EndRead(sFileReadHandle handle)
 /***                                                                      ***/
 /****************************************************************************/
 
-bool sCopyFile(const sChar *source,const sChar *dest,bool failifexists)
+sBool sCopyFile(const sChar *source,const sChar *dest,sBool failifexists)
 {
   sLogF(L"file",L"copy from <%s>\n",source);
   sLogF(L"file",L"copy to   <%s>\n",dest);
   if (CopyFileW(source,dest,failifexists))
   {
     SetFileAttributes(dest,GetFileAttributes(dest)&~FILE_ATTRIBUTE_READONLY);
-    return true;
+    return sTRUE;
   }
   else
   {
     sLogF(L"file",L"copy failed to <%s>\n",dest);
   }
-  return false;
+  return sFALSE;
 }
 
-bool sRenameFile(const sChar *source,const sChar *dest, bool overwrite/*=false*/)
+sBool sRenameFile(const sChar *source,const sChar *dest, sBool overwrite/*=sFALSE*/)
 {
   sLogF(L"file",L"rename from <%s>\n",source);
   sLogF(L"file",L"rename to   <%s>\n",dest);
@@ -1253,7 +1253,7 @@ bool sRenameFile(const sChar *source,const sChar *dest, bool overwrite/*=false*/
 // the array is highly inefficient in this case, because of large reallocations!
 // a linked list would be a siutable container
 
-bool sCheckDir(const sChar *name)
+sBool sCheckDir(const sChar *name)
 {
   HANDLE file = CreateFileW(name,GENERIC_READ,FILE_SHARE_READ,0,OPEN_EXISTING,FILE_FLAG_BACKUP_SEMANTICS,0);
   if(file!=INVALID_HANDLE_VALUE)
@@ -1261,7 +1261,7 @@ bool sCheckDir(const sChar *name)
   return file!=INVALID_HANDLE_VALUE;
 }
 
-bool sLoadDir(sArray<sDirEntry> &list,const sChar *path,const sChar *pattern)
+sBool sLoadDir(sArray<sDirEntry> &list,const sChar *path,const sChar *pattern)
 {
   const sInt sMAX_PATHNAME = 2048;
   sString<sMAX_PATHNAME> buffer;
@@ -1341,7 +1341,7 @@ sU64 sToFileTime(sDateAndTime time)
   return (sU64(ft.dwHighDateTime) << 32) + ft.dwLowDateTime;
 }
 
-bool sFindFile(sChar *foundname, sInt foundnamesize, const sChar *path, const sChar *pattern)
+sBool sFindFile(sChar *foundname, sInt foundnamesize, const sChar *path, const sChar *pattern)
 {
   const sInt sMAX_PATHNAME = 2048;
   sString<sMAX_PATHNAME> buffer;
@@ -1397,9 +1397,9 @@ void sSetProjectDir(const sChar *name)
 }
 
 
-bool sChangeDir(const sChar *dir)
+sBool sChangeDir(const sChar *dir)
 {
-  bool ok = SetCurrentDirectoryW(dir)!=0;
+  sBool ok = SetCurrentDirectoryW(dir)!=0;
   if(ok) sLogF(L"file",L"sChangeDir <%s>\n",dir);
   return ok;
 }
@@ -1416,22 +1416,22 @@ void sGetTempDir(const sStringDesc &str)
   while ((pos=sFindFirstChar(str.Buffer,'\\'))>=0) str.Buffer[pos]='/';
 }
 
-bool sMakeDir(const sChar *name)
+sBool sMakeDir(const sChar *name)
 {
   return CreateDirectoryW(name,0);
 }
 
-bool sDeleteFile(const sChar *name)
+sBool sDeleteFile(const sChar *name)
 {
   return DeleteFileW(name);
 }
 
-bool sDeleteDir(const sChar *name)
+sBool sDeleteDir(const sChar *name)
 {
   return RemoveDirectoryW(name);
 }
 
-bool sGetFileWriteProtect(const sChar *name,bool &prot)
+sBool sGetFileWriteProtect(const sChar *name,sBool &prot)
 {
   prot = 0;
   DWORD attr = GetFileAttributes(name);
@@ -1443,7 +1443,7 @@ bool sGetFileWriteProtect(const sChar *name,bool &prot)
   return 1;
 }
 
-bool sSetFileWriteProtect(const sChar *name,bool prot)
+sBool sSetFileWriteProtect(const sChar *name,sBool prot)
 {
   DWORD attr = GetFileAttributes(name);
   if(attr==INVALID_FILE_ATTRIBUTES)
@@ -1456,7 +1456,7 @@ bool sSetFileWriteProtect(const sChar *name,bool prot)
   return SetFileAttributes(name,attr)!=0;
 }
 
-bool sIsBelowCurrentDir(const sChar *relativePath)
+sBool sIsBelowCurrentDir(const sChar *relativePath)
 {
   sString<4096> currentDir;
   sString<4096> normalizedDir;
@@ -1466,13 +1466,13 @@ bool sIsBelowCurrentDir(const sChar *relativePath)
   return sCheckPrefix(normalizedDir,currentDir);
 }
 
-bool sGetFileInfo(const sChar *name,sDirEntry *de)
+sBool sGetFileInfo(const sChar *name,sDirEntry *de)
 {
   HANDLE hnd;
   FILETIME time;
   DWORD sizehigh;
   DWORD attr;
-  bool ok = 0;
+  sBool ok = 0;
 
   // clear infgo
 
@@ -1521,7 +1521,7 @@ bool sGetFileInfo(const sChar *name,sDirEntry *de)
 }
 
 
-bool sGetDiskSizeInfo(const sChar *path, sS64 &availablesize, sS64 &totalsize)
+sBool sGetDiskSizeInfo(const sChar *path, sS64 &availablesize, sS64 &totalsize)
 {
   ULARGE_INTEGER available;
   ULARGE_INTEGER total;
@@ -1532,9 +1532,9 @@ bool sGetDiskSizeInfo(const sChar *path, sS64 &availablesize, sS64 &totalsize)
 }
 
 
-bool sSetFileTime(const sChar *name, sU64 lastwritetime)
+sBool sSetFileTime(const sChar *name, sU64 lastwritetime)
 {
-  bool ok = 0;
+  sBool ok = 0;
   HANDLE hnd = CreateFileW(name,GENERIC_WRITE,0,0,OPEN_EXISTING,0,0);
   if(hnd!=INVALID_HANDLE_VALUE)
   {
@@ -1575,9 +1575,9 @@ typedef BOOL (__stdcall *PSYMFROMADDR)(HANDLE,DWORD64,PDWORD64,PSYMBOL_INFO);
 #define DEBUGHELP_STAYS_IN_MEMORY 1
 
 static HMODULE hDbgHelp = sNULL;
-static bool DbgHelpInited = false;
+static sBool DbgHelpInited = sFALSE;
 
-static bool sStackTraceFromContext(const sStringDesc &tgt,sInt skipCount,sInt maxCount,CONTEXT &ctx)
+static sBool sStackTraceFromContext(const sStringDesc &tgt,sInt skipCount,sInt maxCount,CONTEXT &ctx)
 {
 #if !sCONFIG_BUILD_STRIPPED
   HANDLE hProcess = GetCurrentProcess();
@@ -1587,10 +1587,10 @@ static bool sStackTraceFromContext(const sStringDesc &tgt,sInt skipCount,sInt ma
   if (!hDbgHelp)
   {
     hDbgHelp = LoadLibrary(L"dbghelp.dll");
-    DbgHelpInited=false;
+    DbgHelpInited=sFALSE;
   }
   if(!hDbgHelp)
-    return false;
+    return sFALSE;
 
   PSYMINITIALIZE SymInitialize = (PSYMINITIALIZE) GetProcAddress(hDbgHelp,"SymInitialize");
   PSYMCLEANUP SymCleanup = (PSYMCLEANUP) GetProcAddress(hDbgHelp,"SymCleanup");
@@ -1648,10 +1648,10 @@ static bool sStackTraceFromContext(const sStringDesc &tgt,sInt skipCount,sInt ma
       FreeLibrary(hDbgHelp);
       hDbgHelp = sNULL;
 
-      return false;
+      return sFALSE;
     }
 
-    DbgHelpInited=true;
+    DbgHelpInited=sTRUE;
   }
 
   // prepare stack walk
@@ -1722,13 +1722,13 @@ static bool sStackTraceFromContext(const sStringDesc &tgt,sInt skipCount,sInt ma
   hDbgHelp = sNULL;
 #endif
 
-  return true;
+  return sTRUE;
 #else
-  return false; // stripped builds don't implement this.
+  return sFALSE; // stripped builds don't implement this.
 #endif
 }
 
-bool sStackTrace(const sStringDesc &tgt,sInt skipCount,sInt maxCount)
+sBool sStackTrace(const sStringDesc &tgt,sInt skipCount,sInt maxCount)
 {
 #if !sCONFIG_BUILD_STRIPPED
   // grab the current thread context
@@ -1752,11 +1752,11 @@ eip_ref:
 
   HMODULE hKernel = GetModuleHandleW(L"kernel32.dll");
   if(!hKernel)
-    return false; // really, this should never happen.
+    return sFALSE; // really, this should never happen.
 
   PRTLCAPTURECONTEXT RtlCaptureContext = (PRTLCAPTURECONTEXT) GetProcAddress(hKernel,"RtlCaptureContext");
   if(!RtlCaptureContext)
-    return false; // this function needs win xp.
+    return sFALSE; // this function needs win xp.
 
   CONTEXT ctx;
   RtlCaptureContext(&ctx);
@@ -1767,7 +1767,7 @@ eip_ref:
   return sStackTraceFromContext(tgt,skipCount,maxCount,ctx);
 
 #else
-  return false; // stripped builds don't implement this.
+  return sFALSE; // stripped builds don't implement this.
 #endif
 }
 
@@ -1775,7 +1775,7 @@ eip_ref:
 
 #if sALLOW_MEMDEBUG_STACKTRACE
 
-bool sGetMemTagged() { return sGetThreadContext()->TagMemFile != 0; }
+sBool sGetMemTagged() { return sGetThreadContext()->TagMemFile != 0; }
 
 void sGetCaller(const sStringDesc &filename, sInt &line)
 {
@@ -1848,7 +1848,7 @@ static LONG MakeFatal(LPEXCEPTION_POINTERS except)
 
 namespace sWin32
 {
-  extern bool ModalDialogActive;
+  extern sBool ModalDialogActive;
 }
 
 #define INPUT2_EVENT_QUEUE_SIZE 64
@@ -1867,7 +1867,7 @@ LRESULT WINAPI MsgProc(HWND win,UINT msg,WPARAM wparam,LPARAM lparam)
 //  sDPrintF(L"msg(%0x8) %08x %08x %08x\n",sGetTime(),msg,wparam,lparam);
 
   sInt i,t;
-  //bool mouse=0;
+  //sBool mouse=0;
 
   switch(msg)
   {
@@ -1883,7 +1883,7 @@ LRESULT WINAPI MsgProc(HWND win,UINT msg,WPARAM wparam,LPARAM lparam)
 
   case WM_CLOSE:
     {
-      bool mayexit = 1;
+      sBool mayexit = 1;
       sAltF4Hook->Call(mayexit);
       if(mayexit)
         sExit(); 
@@ -1899,7 +1899,7 @@ LRESULT WINAPI MsgProc(HWND win,UINT msg,WPARAM wparam,LPARAM lparam)
       DeleteDC(sGDIDCOffscreen);
       sGDIDCOffscreen = 0;
       sCollect();
-      sCollector(true);
+      sCollector(sTRUE);
       sSetRunlevel(0x80);
 
       if(sSystemFlags & sISF_3D)
@@ -1939,7 +1939,7 @@ LRESULT WINAPI MsgProc(HWND win,UINT msg,WPARAM wparam,LPARAM lparam)
         sInput2Event event;
         while (sInput2PopEvent(event, sGetTime())) {
 #if !sSTRIPPED
-          bool skip = false;
+          sBool skip = sFALSE;
           sInputHook->Call(event, skip);
           if (!skip)
 #endif
@@ -1947,7 +1947,7 @@ LRESULT WINAPI MsgProc(HWND win,UINT msg,WPARAM wparam,LPARAM lparam)
         }
       }
 
-      bool app_fullpaint = false;
+      sBool app_fullpaint = sFALSE;
 #if sRENDERER==sRENDER_DX9 || sRENDERER==sRENDER_DX11
       DXMayRestore = 1;
       if(sGetApp())
@@ -2080,7 +2080,7 @@ LRESULT WINAPI MsgProc(HWND win,UINT msg,WPARAM wparam,LPARAM lparam)
     {
       // We only need to send a deactivate event,
       // because activation is handled in WM_ACTIVATE.
-      sActivateHook->Call(false);
+      sActivateHook->Call(sFALSE);
     }
 
     if(!(sSystemFlags&sISF_FULLSCREEN))
@@ -2162,7 +2162,7 @@ LRESULT WINAPI MsgProc(HWND win,UINT msg,WPARAM wparam,LPARAM lparam)
       sInput2SendEvent(sInput2Event(i | sKeyQual));
     }
     InputThreadLock->Lock();
-    Keyboard->keys[(lparam >> 16) & 0xff] = false;
+    Keyboard->keys[(lparam >> 16) & 0xff] = sFALSE;
     InputThreadLock->Unlock();
     break;
 
@@ -2189,7 +2189,7 @@ LRESULT WINAPI MsgProc(HWND win,UINT msg,WPARAM wparam,LPARAM lparam)
       if(i)
         sInput2SendEvent(sInput2Event(i | sKeyQual | repeat));
       InputThreadLock->Lock();
-      Keyboard->keys[(lparam >> 16) & 0xff] = true;
+      Keyboard->keys[(lparam >> 16) & 0xff] = sTRUE;
       InputThreadLock->Unlock();
     }
     break;
@@ -2387,12 +2387,12 @@ void sExternMainInit(void *p_instance, void *p_hwnd)
   sInitMem0();
   sFrameHook = new sHooks;
   sNewDeviceHook = new sHooks;
-  sActivateHook = new sHooks1<bool>;
-  sAltF4Hook = new sHooks1<bool &>;
+  sActivateHook = new sHooks1<sBool>;
+  sAltF4Hook = new sHooks1<sBool &>;
   sCrashHook = new sHooks1<sStringDesc>;
   sCheckCapsHook = new sHooks;
 #if !sSTRIPPED
-  sInputHook = new sHooks2<const sInput2Event &,bool &>;
+  sInputHook = new sHooks2<const sInput2Event &,sBool &>;
   sDebugOutHook = new sHooks1<const sChar*>;
 #endif
 
@@ -2402,7 +2402,7 @@ void sExternMainInit(void *p_instance, void *p_hwnd)
 
   // don't initialize joypad for xsi!
 #if sCONFIG_OPTION_XSI
-  SetXSIModeD3D(true);
+  SetXSIModeD3D(sTRUE);
 #endif
   sMain();
 }
@@ -2623,12 +2623,12 @@ restart:
   CoInitialize(NULL);
   sFrameHook = new sHooks;
   sNewDeviceHook = new sHooks;
-  sActivateHook = new sHooks1<bool>;
+  sActivateHook = new sHooks1<sBool>;
   sCrashHook = new sHooks1<sStringDesc>;
-  sAltF4Hook = new sHooks1<bool &>;
+  sAltF4Hook = new sHooks1<sBool &>;
   sCheckCapsHook = new sHooks;
 #if !sSTRIPPED
-  sInputHook = new sHooks2<const sInput2Event &,bool &>;
+  sInputHook = new sHooks2<const sInput2Event &,sBool &>;
   sDebugOutHook = new sHooks1<const sChar*>;
 #endif
 
@@ -2665,7 +2665,7 @@ restart:
           if(sAppPtr)
             sAppPtr->OnEvent(sAE_EXIT);
           sCollect();
-          sCollector(true);
+          sCollector(sTRUE);
 
           // now it's really going down.
 
@@ -2687,7 +2687,7 @@ restart:
   {
     sGDIDCOffscreen = 0;
     sCollect();
-    sCollector(true);
+    sCollector(sTRUE);
     sSetRunlevel(0x80);
 
     if(sSystemFlags & sISF_3D)
@@ -2831,9 +2831,9 @@ void sSysLog(const sChar *module,const sChar *text)
   sLog(module,text);
 }
 
-bool sDaemonize()
+sBool sDaemonize()
 {
-  return false;
+  return sFALSE;
 }
 
 sInt sGetRandomSeed()
@@ -2860,23 +2860,23 @@ sInt sGetRandomSeed()
   return val^rnd.Int32();
 }
 
-bool sGetEnvironmentVariable(const sStringDesc &dst,const sChar *var)
+sBool sGetEnvironmentVariable(const sStringDesc &dst,const sChar *var)
 {
   DWORD result = GetEnvironmentVariable(var,dst.Buffer,dst.Size);
   
   if(result && result<=sU32(dst.Size))
-    return true;
+    return sTRUE;
   sVERIFY(!result && GetLastError()==ERROR_ENVVAR_NOT_FOUND);
-  return false;
+  return sFALSE;
 }
 
-bool sExecuteOpen(const sChar *file)
+sBool sExecuteOpen(const sChar *file)
 {
   return sDInt(ShellExecuteW(0,L"open",file,0,L"",SW_SHOW))>=32;
 }
 
 
-bool sExecuteShell(const sChar *cmdline)
+sBool sExecuteShell(const sChar *cmdline)
 {
   sString<2048> buffer;
   buffer = cmdline;
@@ -2903,7 +2903,7 @@ bool sExecuteShell(const sChar *cmdline)
 }
 
 
-bool sExecuteShellDetached(const sChar *cmdline)
+sBool sExecuteShellDetached(const sChar *cmdline)
 {
   sString<2048> buffer;
   buffer = cmdline;
@@ -2927,7 +2927,7 @@ bool sExecuteShellDetached(const sChar *cmdline)
 // "Creating a Child Process with Redirected Input and Output"
 // the slightest change will break the code in mysterious ways!
 
-bool sExecuteShell(const sChar *cmdline,sTextBuffer *tb)
+sBool sExecuteShell(const sChar *cmdline,sTextBuffer *tb)
 {
   sString<2048> buffer;
   //buffer = cmdline;
@@ -3020,7 +3020,7 @@ bool sExecuteShell(const sChar *cmdline,sTextBuffer *tb)
   return result;
 }
 
-static volatile bool sCtrlCFlag;
+static volatile sBool sCtrlCFlag;
 extern "C" 
 {
   BOOL WINAPI sCtrlCHandler(DWORD event)
@@ -3037,17 +3037,17 @@ extern "C"
   }
 }
 
-void sCatchCtrlC(bool enable)
+void sCatchCtrlC(sBool enable)
 {
   SetConsoleCtrlHandler(sCtrlCHandler,enable!=0);
 }
 
-bool sGotCtrlC()
+sBool sGotCtrlC()
 {
   return sCtrlCFlag;
 }
 
-bool sCheckBreakKey()
+sBool sCheckBreakKey()
 {
   sU32 n = GetAsyncKeyState(VK_PAUSE);
   return (n!=0) ? 1 : 0;
@@ -3090,7 +3090,7 @@ sInt sMakeUnshiftedKey(sInt ascii)
 
 /****************************************************************************/
 
-void sSetTimerEvent(sInt time,bool loop)
+void sSetTimerEvent(sInt time,sBool loop)
 {
   SetTimer(sHWND,1,time,0);
   if(loop)
@@ -3332,7 +3332,7 @@ void sDIJoypad::Poll()
     DIDev->Acquire();
 
   count = sCOUNTOF(DIData);
-  bool sendevent = 1;
+  sBool sendevent = 1;
 getmore:
   hr = DIDev->GetDeviceData(sizeof(DIDEVICEOBJECTDATA),DIData,&count,0);
   if(hr==DIERR_INPUTLOST || hr==DIERR_NOTACQUIRED)
@@ -3559,7 +3559,7 @@ void sThreadLock::Lock()
   EnterCriticalSection((CRITICAL_SECTION*)CriticalSection);
 }
 
-bool sThreadLock::TryLock()
+sBool sThreadLock::TryLock()
 {
   return TryEnterCriticalSection((CRITICAL_SECTION*)CriticalSection);
 }
@@ -3571,7 +3571,7 @@ void sThreadLock::Unlock()
 
 /****************************************************************************/
 
-sThreadEvent::sThreadEvent(bool manual/*=false*/)
+sThreadEvent::sThreadEvent(sBool manual/*=sFALSE*/)
 {
   EventHandle = CreateEvent(0,manual?TRUE:0,0,0);
 }
@@ -3581,7 +3581,7 @@ sThreadEvent::~sThreadEvent()
   CloseHandle(EventHandle);
 }
 
-bool sThreadEvent::Wait(sInt timeout)
+sBool sThreadEvent::Wait(sInt timeout)
 {
   return WaitForSingleObject(EventHandle,timeout)==WAIT_OBJECT_0;
 }
@@ -3604,12 +3604,12 @@ void sPrintError(const sChar *text)
     sDPrint(text);    // in release mode we want info as debug output, too
 
   CONSOLE_SCREEN_BUFFER_INFO info={0};
-  bool restore_color = false;
+  sBool restore_color = sFALSE;
   if(WConOut)
   {
     if(GetConsoleScreenBufferInfo(WConOut,&info))
     {
-      restore_color = true;
+      restore_color = sTRUE;
       SetConsoleTextAttribute ( WConOut, FOREGROUND_RED|FOREGROUND_INTENSITY );
     }
   }
@@ -3624,12 +3624,12 @@ void sPrintWarning(const sChar *text)
     sDPrint(text);    // in release mode we want info as debug output, too
 
   CONSOLE_SCREEN_BUFFER_INFO info={0};
-  bool restore_color = false;
+  sBool restore_color = sFALSE;
   if(WConOut)
   {
     if(GetConsoleScreenBufferInfo(WConOut,&info))
     {
-      restore_color = true;
+      restore_color = sTRUE;
       SetConsoleTextAttribute ( WConOut, FOREGROUND_RED|FOREGROUND_GREEN|FOREGROUND_INTENSITY );
     }
   }
@@ -3716,7 +3716,7 @@ public:
     sAtomicAdd(&sMemoryUsed, (sDInt)_aligned_msize(mem,0,0));
     return mem;
   }
-  bool Free(void *ptr)
+  sBool Free(void *ptr)
   {
     sAtomicAdd(&sMemoryUsed,-(sDInt)_aligned_msize(ptr,0,0));
     _aligned_free(ptr);
@@ -3755,7 +3755,7 @@ public:
 
     return ptr;
   }
-  bool Free(void *ptr)
+  sBool Free(void *ptr)
   {
     void *po = (void*)((sPtr*)ptr)[-1];
     sAtomicAdd(&sMemoryUsed,-(sDInt)_msize_dbg(po,_NORMAL_BLOCK));
@@ -3852,7 +3852,7 @@ sLanguage sGetLanguage()
 }
 
 #if !sCONFIG_OPTION_DEMO
-bool sIsTrialVersion()
+sBool sIsTrialVersion()
 {
   return sTrialVersion;
 }
@@ -3902,13 +3902,13 @@ public:
   sVideoWriterWin32();
   ~sVideoWriterWin32();
 
-  bool Init(const sChar *filename,const sChar *codec,sF32 fps,sInt xRes,sInt yRes);
+  sBool Init(const sChar *filename,const sChar *codec,sF32 fps,sInt xRes,sInt yRes);
   void Exit();
 
-  bool AVIInit();
+  sBool AVIInit();
   void AVICleanup();
 
-  bool WriteFrame(const sU32 *data);
+  sBool WriteFrame(const sU32 *data);
 };
 
 sVideoWriterWin32::sVideoWriterWin32()
@@ -3923,7 +3923,7 @@ sVideoWriterWin32::~sVideoWriterWin32()
   Exit();
 }
 
-bool sVideoWriterWin32::Init(const sChar *filename,const sChar *codec,sF32 fps,sInt xRes,sInt yRes)
+sBool sVideoWriterWin32::Init(const sChar *filename,const sChar *codec,sF32 fps,sInt xRes,sInt yRes)
 {
   Exit();
 
@@ -3954,12 +3954,12 @@ void sVideoWriterWin32::Exit()
   sDeleteArray(ConversionBuffer);
 }
 
-bool sVideoWriterWin32::AVIInit()
+sBool sVideoWriterWin32::AVIInit()
 {
   AVISTREAMINFOW asi;
   AVICOMPRESSOPTIONS aco;
   BITMAPINFOHEADER bmi;
-  bool error = true;
+  sBool error = sTRUE;
 
   AVIFileInit();
   OverflowCounter = 0;
@@ -4014,7 +4014,7 @@ bool sVideoWriterWin32::AVIInit()
     goto cleanup;
   }
 
-  error = false;
+  error = sFALSE;
   Frame = 0;
 
 cleanup:
@@ -4033,9 +4033,9 @@ void sVideoWriterWin32::AVICleanup()
   AVIFileExit();
 }
 
-bool sVideoWriterWin32::WriteFrame(const sU32 *data)
+sBool sVideoWriterWin32::WriteFrame(const sU32 *data)
 {
-  bool error = true;
+  sBool error = sTRUE;
 
   if(Video)
   {
@@ -4093,10 +4093,10 @@ sVideoWriter *sCreateVideoWriter(const sChar *filename,const sChar *codec,sF32 f
 #pragma comment (lib,"wininet.lib")  // for InternetGetConnectedState
 #undef SECURITY_WIN32
 
-bool sGetUserName(const sStringDesc &dest, sInt joypadId)
+sBool sGetUserName(const sStringDesc &dest, sInt joypadId)
 {
   if(joypadId < 0 || joypadId >= sJOYPAD_COUNT)
-    return false;
+    return sFALSE;
 
   sChar buffer[128];
   DWORD count = sCOUNTOF(buffer);
@@ -4105,7 +4105,7 @@ bool sGetUserName(const sStringDesc &dest, sInt joypadId)
   if(GetUserNameExW(NameDisplay, buffer, &count) != 0 && buffer[0]) // sometimes it seems to return an empty string for NameDisplay
   {
     sCopyString(dest, buffer);
-    return true;
+    return sTRUE;
   }
   else
   {
@@ -4113,35 +4113,35 @@ bool sGetUserName(const sStringDesc &dest, sInt joypadId)
     if(GetUserNameW(buffer, &count) != 0)
     {
       sCopyString(dest, buffer);
-      return true;
+      return sTRUE;
     }
   }
 
-  return false;
+  return sFALSE;
 }
 
-bool sGetOnlineUserName(const sStringDesc &dest, sInt joypadId)
+sBool sGetOnlineUserName(const sStringDesc &dest, sInt joypadId)
 {
   return sGetUserName(dest, joypadId);
 }
 
-bool sIsUserOnline(sInt joypadId)
+sBool sIsUserOnline(sInt joypadId)
 {
-  bool online = InternetGetConnectedState(sNULL, 0);
+  sBool online = InternetGetConnectedState(sNULL, 0);
   return online;
 }
 
-bool sGetOnlineUserId(sU64 &dest, sInt joypadId)
+sBool sGetOnlineUserId(sU64 &dest, sInt joypadId)
 {
   sString<128> userName;
   sString<128> computerName;
 
   if(!sGetOnlineUserName(userName, joypadId))
-    return false;
+    return sFALSE;
 
   DWORD size=computerName.Size();
   if(!GetComputerNameW(computerName, &size))
-    return false;
+    return sFALSE;
 
   //Take the processId into account, to generate different IDs 
   //in case the game runs twice on the same machine (debugging on localhost)
@@ -4154,7 +4154,7 @@ bool sGetOnlineUserId(sU64 &dest, sInt joypadId)
   sSPrintF(ident, L"%s@%s.%d", userName, computerName, (sU64)processId);
 
   dest = sHashStringFNV(ident);
-  return true;
+  return sTRUE;
 }
 
 /****************************************************************************/

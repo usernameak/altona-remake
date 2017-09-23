@@ -186,7 +186,7 @@ void sBasicPainter::ClipOff()
 {
 }
 
-void sBasicPainter::PaintTexture(sTexture2D* tex,sU32 col,sInt xs,sInt ys,sInt xo,sInt yo,bool noalpha)
+void sBasicPainter::PaintTexture(sTexture2D* tex,sU32 col,sInt xs,sInt ys,sInt xo,sInt yo,sBool noalpha)
 {
   sFRect r;
   if (xs == -1 || ys == -1)
@@ -217,7 +217,7 @@ void sBasicPainter::PaintTexture(sTexture2D* tex,sU32 col,sInt xs,sInt ys,sInt x
   Mtrl->Texture[0] = old_tex;
 }
 
-void sBasicPainter::PaintTexture(sTextureCube *tex, sInt xs/*=-1*/, sInt ys/*=-1*/, sInt xo_/*=0*/, sInt yo_/*=0*/, bool noalpha/*=true*/)
+void sBasicPainter::PaintTexture(sTextureCube *tex, sInt xs/*=-1*/, sInt ys/*=-1*/, sInt xo_/*=0*/, sInt yo_/*=0*/, sBool noalpha/*=sTRUE*/)
 {
   sFRect r;
   if (xs == -1 || ys == -1)
@@ -331,7 +331,7 @@ void sBasicPainter::Box(const sFRect &r,const sU32 *col)
 #endif
 }
 
-void sBasicPainter::Line(sF32 x0,sF32 y0,sF32 x1,sF32 y1,sU32 c0,sU32 c1,bool skiplastpixel)
+void sBasicPainter::Line(sF32 x0,sF32 y0,sF32 x1,sF32 y1,sU32 c0,sU32 c1,sBool skiplastpixel)
 {
   sVertexSingle *vp;
   sVector30 d,e;

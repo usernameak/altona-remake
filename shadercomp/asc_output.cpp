@@ -275,7 +275,7 @@ void ACDoc::OutVar(ACVar *var,ACExpression *init)
     ACFunc *func = (ACFunc *) var;
     ACVar *para;
     Print(L"\n(");
-    bool first=1;
+    sBool first=1;
     sFORALL(func->Locals[SCOPE_PARA],para)
     {
       if(para->Permute==0 || ConstFoldInt(para->Permute))
@@ -308,8 +308,8 @@ void ACDoc::OutVar(ACVar *var,ACExpression *init)
     }
     if(OutputLanguage==(sSTF_HLSL45|sSTF_PIXEL))
     {
-      bool in = (var->Usages==ACF_IN);
-      bool out = ((var->Usages==ACF_OUT)||(var->Function));
+      sBool in = (var->Usages==ACF_IN);
+      sBool out = ((var->Usages==ACF_OUT)||(var->Function));
       if(in  && sCmpStringI(semantic,L"vpos")==0) semantic = L"SV_POSITION";
       if(in  && sCmpStringI(semantic,L"position")==0) semantic = L"SV_POSITION";
       if(out && sCmpStringI(semantic,L"color")==0) semantic = L"SV_TARGET0";
@@ -360,7 +360,7 @@ void ACDoc::OutVar(ACVar *var,ACExpression *init)
 
 void ACDoc::OutBlock(ACStatement *stat,sInt indent)
 {
-  bool braces = (indent==0) || stat->Next || stat->Op==ACS_VARDECL;
+  sBool braces = (indent==0) || stat->Next || stat->Op==ACS_VARDECL;
   if(braces)
     PrintF(L"\n%_{",indent);
   while(stat)
@@ -467,7 +467,7 @@ void ACDoc::OutStat(ACStatement *stat,sInt indent)
   }
 }
 
-void ACDoc::OutBinary(ACExpression *left,ACExpression *right,const sChar *name,bool brackets)
+void ACDoc::OutBinary(ACExpression *left,ACExpression *right,const sChar *name,sBool brackets)
 {
   if(brackets)
     Print(L"(");
@@ -480,7 +480,7 @@ void ACDoc::OutBinary(ACExpression *left,ACExpression *right,const sChar *name,b
     Print(L")");
 }
 
-void ACDoc::OutExpr(ACExpression *expr,bool brackets)
+void ACDoc::OutExpr(ACExpression *expr,sBool brackets)
 {
   switch(expr->Op)
   {
@@ -549,7 +549,7 @@ void ACDoc::OutExpr(ACExpression *expr,bool brackets)
     PrintF(L"%s(",expr->CastType->Name);
     {
       ACExpression *para = expr->Left;
-      bool first = 1;
+      sBool first = 1;
       while(para)
       {
         if(!first)
@@ -588,7 +588,7 @@ void ACDoc::OutExpr(ACExpression *expr,bool brackets)
 
   case ACE_CALL:
     {
-      bool handled = 0;
+      sBool handled = 0;
       if(((this->OutputLanguage & sSTF_PLATFORM)==sSTF_HLSL45) && expr->Variable)
       {
         const sChar *dim = 0;
@@ -636,7 +636,7 @@ void ACDoc::OutExpr(ACExpression *expr,bool brackets)
         if(expr->Variable)
           Print(expr->Variable->Name);
         Print(L"(");
-        bool first = 1;
+        sBool first = 1;
         while(para)
         {
           if(!first)

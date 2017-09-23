@@ -53,7 +53,7 @@ private:
     sInt y1,y2;             // y1<y2
     sInt dir;               // original direction (for winding calc)
 
-    bool operator <(const EdgeRec &b) const
+    sBool operator <(const EdgeRec &b) const
     {
       return y1 < b.y1 || y1 == b.y1 && x < b.x;
     }

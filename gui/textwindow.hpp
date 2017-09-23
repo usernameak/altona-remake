@@ -33,8 +33,8 @@ class sTextWindow : public sWindow
 
   void GetCursorPos(sInt &x,sInt &y);
   sInt FindCursorPos(sInt x,sInt y);
-  bool BeginMoveCursor(bool selmode);
-  void EndMoveCursor(bool selmode);
+  sBool BeginMoveCursor(sBool selmode);
+  void EndMoveCursor(sBool selmode);
   void Delete(sInt pos,sInt len);
   void Insert(sInt pos,const sChar *s,sInt len=-1);
   void Mark(sInt start,sInt end);
@@ -47,7 +47,7 @@ class sTextWindow : public sWindow
 
   struct UndoStep
   {
-    bool Delete;
+    sBool Delete;
     sInt Pos;
     sInt Count;
     sChar *Text;
@@ -76,15 +76,15 @@ public:
   void Tag();
   void SetText(sTextBuffer *);
   sTextBuffer *GetText() { return Text; }
-  bool HasSelection() { return MarkMode!=0; }
+  sBool HasSelection() { return MarkMode!=0; }
 
   void OnPaint2D();
-  bool OnKey(sU32 key);
+  sBool OnKey(sU32 key);
   void OnDrag(const sWindowDrag &dd);
   void OnCalcSize();
 
   void ResetCursorFlash();
-  bool GetCursorFlash();
+  sBool GetCursorFlash();
 
   sObject *TextTag;               // this tag will be hold should be object in which the textbuffer is embedded
 
@@ -99,7 +99,7 @@ public:
   sMessage ChangeMsg;
   sMessage CursorMsg;             // when cursor changes
   sMessage CursorFlashMsg;        // synchronise to cursor :-)
-  bool ShowCursorAlways;         // usually the cursor is hidden when focus is lost
+  sBool ShowCursorAlways;         // usually the cursor is hidden when focus is lost
 
   void DeleteChar();
   void DeleteBlock();
@@ -115,7 +115,7 @@ public:
   sFont2D *GetFont();
   sInt GetCursorPos() { return PrintInfo.CursorPos; }
   sInt GetCursorColumn() const;
-  void Find(const sChar *string,bool dir,bool next);
+  void Find(const sChar *string,sBool dir,sBool next);
   void GetMark(sInt &start,sInt &end);
 
   void UndoClear();
@@ -135,8 +135,8 @@ class sWireTextWindow : public sTextWindow
 {
 public:
   void InitWire(const sChar *name) { sWire->AddWindow(name,this); }
-  bool OnKey(sU32 key) { if(sWire->HandleKey(this,key)) return 1; else return sTextWindow::OnKey(key); }
-  bool OnShortcut(sU32 key) { return sWire->HandleShortcut(this,key); }
+  sBool OnKey(sU32 key) { if(sWire->HandleKey(this,key)) return 1; else return sTextWindow::OnKey(key); }
+  sBool OnShortcut(sU32 key) { return sWire->HandleShortcut(this,key); }
 };
 
 /****************************************************************************/

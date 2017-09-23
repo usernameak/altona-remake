@@ -91,17 +91,17 @@ static sINLINE sSSE sVecCmpGE(sSSE a,sSSE b)            { return _mm_cmpge_ps(a,
 static sINLINE sSSE sVecCmpLT(sSSE a,sSSE b)            { return _mm_cmpgt_ps(b,a); }
 static sINLINE sSSE sVecCmpLE(sSSE a,sSSE b)            { return _mm_cmpge_ps(b,a); }
 
-static sINLINE bool sVecAnyEQ(sSSE a,sSSE b)           { return _mm_movemask_ps(_mm_cmpeq_ps(a,b)) != 0; }
-static sINLINE bool sVecAnyGT(sSSE a,sSSE b)           { return _mm_movemask_ps(_mm_cmpgt_ps(a,b)) != 0; }
-static sINLINE bool sVecAnyGE(sSSE a,sSSE b)           { return _mm_movemask_ps(_mm_cmpge_ps(a,b)) != 0; }
-static sINLINE bool sVecAnyLT(sSSE a,sSSE b)           { return _mm_movemask_ps(_mm_cmpgt_ps(b,a)) != 0; }
-static sINLINE bool sVecAnyLE(sSSE a,sSSE b)           { return _mm_movemask_ps(_mm_cmpge_ps(b,a)) != 0; }
+static sINLINE sBool sVecAnyEQ(sSSE a,sSSE b)           { return _mm_movemask_ps(_mm_cmpeq_ps(a,b)) != 0; }
+static sINLINE sBool sVecAnyGT(sSSE a,sSSE b)           { return _mm_movemask_ps(_mm_cmpgt_ps(a,b)) != 0; }
+static sINLINE sBool sVecAnyGE(sSSE a,sSSE b)           { return _mm_movemask_ps(_mm_cmpge_ps(a,b)) != 0; }
+static sINLINE sBool sVecAnyLT(sSSE a,sSSE b)           { return _mm_movemask_ps(_mm_cmpgt_ps(b,a)) != 0; }
+static sINLINE sBool sVecAnyLE(sSSE a,sSSE b)           { return _mm_movemask_ps(_mm_cmpge_ps(b,a)) != 0; }
                                              
-static sINLINE bool sVecAllEQ(sSSE a,sSSE b)           { return _mm_movemask_ps(_mm_cmpeq_ps(a,b)) == 0xf; }
-static sINLINE bool sVecAllGT(sSSE a,sSSE b)           { return _mm_movemask_ps(_mm_cmpgt_ps(a,b)) == 0xf; }
-static sINLINE bool sVecAllGE(sSSE a,sSSE b)           { return _mm_movemask_ps(_mm_cmpge_ps(a,b)) == 0xf; }
-static sINLINE bool sVecAllLT(sSSE a,sSSE b)           { return _mm_movemask_ps(_mm_cmpgt_ps(b,a)) == 0xf; }
-static sINLINE bool sVecAllLE(sSSE a,sSSE b)           { return _mm_movemask_ps(_mm_cmpge_ps(b,a)) == 0xf; }
+static sINLINE sBool sVecAllEQ(sSSE a,sSSE b)           { return _mm_movemask_ps(_mm_cmpeq_ps(a,b)) == 0xf; }
+static sINLINE sBool sVecAllGT(sSSE a,sSSE b)           { return _mm_movemask_ps(_mm_cmpgt_ps(a,b)) == 0xf; }
+static sINLINE sBool sVecAllGE(sSSE a,sSSE b)           { return _mm_movemask_ps(_mm_cmpge_ps(a,b)) == 0xf; }
+static sINLINE sBool sVecAllLT(sSSE a,sSSE b)           { return _mm_movemask_ps(_mm_cmpgt_ps(b,a)) == 0xf; }
+static sINLINE sBool sVecAllLE(sSSE a,sSSE b)           { return _mm_movemask_ps(_mm_cmpge_ps(b,a)) == 0xf; }
 
 // ---- Conversion
 

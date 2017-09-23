@@ -266,9 +266,9 @@ sU64 sGetAvailTextureFormats()
   return ~0;
 }
 
-bool sReadTexture(sReader &s, sTextureBase *&tex)
+sBool sReadTexture(sReader &s, sTextureBase *&tex)
 {
-  return false;
+  return sFALSE;
 }
 
 /****************************************************************************/
@@ -365,7 +365,7 @@ void sTextureProxy::Disconnect2()
 
 /****************************************************************************/
 
-void sPackDXT(sU8 *d,sU32 *bmp,sInt xs,sInt ys,sInt format,bool dither)
+void sPackDXT(sU8 *d,sU32 *bmp,sInt xs,sInt ys,sInt format,sBool dither)
 {
   sFastPackDXT(d,bmp,xs,ys,format & sTEX_FORMAT,1 | (dither ? 0x80 : 0));
 }
@@ -384,7 +384,7 @@ void sMaterial::Destroy2()
 {
 }
 
-void sMaterial::Set(sCBufferBase **cbuffers,sInt cbcount,sInt additive)
+void sMaterial::Set(sCBufferBase **cbuffers,sInt cbcount,sBool additive)
 {
 }
 
@@ -454,9 +454,9 @@ void sDeleteShader2(sShader *shader)
 /***                                                                      ***/
 /****************************************************************************/
 
-bool sSetOversizeScreen(sInt xs,sInt ys,sInt fsaa,bool mayfail)
+sBool sSetOversizeScreen(sInt xs,sInt ys,sInt fsaa,sBool mayfail)
 {
-  return false;
+  return sFALSE;
 }
 
 void sGetScreenSafeArea(sF32 &xs, sF32 &ys)
@@ -549,7 +549,7 @@ void sGetScreenMode(sScreenMode &sm)
   sm = DXScreenMode;
 }
 
-bool sSetScreenMode(const sScreenMode &sm)
+sBool sSetScreenMode(const sScreenMode &sm)
 {
   DXScreenMode = sm;
   return 1;
@@ -607,7 +607,7 @@ void sEndReadTexture()
 {
 }
 
-void sRender3DEnd(bool flip)
+void sRender3DEnd(sBool flip)
 {
   sPreFlipHook->Call();
   sFlipMem();
@@ -618,7 +618,7 @@ void sRender3DFlush()
 {
 }
 
-bool sRender3DBegin()
+sBool sRender3DBegin()
 {
 #if sCONFIG_SYSTEM_WINDOWS
   PAINTSTRUCT ps;
@@ -656,7 +656,7 @@ sInt sRenderStateTexture(sU32 *data, sInt texstage, sU32 tflags,sF32 lodbias)
   return 0;
 }
 
-void sEnableGraphicsStats(bool enable)
+void sEnableGraphicsStats(sBool enable)
 {
 }
 

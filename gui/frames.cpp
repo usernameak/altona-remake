@@ -98,7 +98,7 @@ void sSplitFrame::SplitLayout(sInt t)
   ChildData[0].Pos = 0;
   ChildData[Count].Pos = t;
 
-  bool updateall=0;
+  sBool updateall=0;
 
   for(sInt i=1;i<Drag;i++)
   {
@@ -132,7 +132,7 @@ void sSplitFrame::SplitLayout(sInt t)
 
 sInt sSplitFrame::SplitDrag(const sWindowDrag &dd,sInt mousedelta,sInt mousepos)
 {
-  bool updateknop = 0;
+  sBool updateknop = 0;
   switch(dd.Mode)
   {
   case sDD_START:
@@ -168,7 +168,7 @@ sInt sSplitFrame::SplitDrag(const sWindowDrag &dd,sInt mousedelta,sInt mousepos)
   return updateknop;
 }
 
-void sSplitFrame::Preset(sInt splitter,sInt value,bool align)
+void sSplitFrame::Preset(sInt splitter,sInt value,sBool align)
 {
   MakeChildData();
   sVERIFY(splitter>=1 && splitter<Count);
@@ -181,7 +181,7 @@ void sSplitFrame::PresetPos(sInt splitter,sInt value)
   sVERIFY(splitter>=1 && splitter<Count);
   ChildData[splitter].StartPos = value;
 }
-void sSplitFrame::PresetAlign(sInt splitter,bool align)
+void sSplitFrame::PresetAlign(sInt splitter,sBool align)
 {
   MakeChildData();
   sVERIFY(splitter>=1 && splitter<Count);
@@ -234,7 +234,7 @@ void sHSplitFrame::OnPaint2D()
 {
   for(sInt i=1;i<Count;i++)
   {
-    bool press = (i==Drag);
+    sBool press = (i==Drag);
     sInt y = Client.y0 + ChildData[i].Pos - Knop;
     sRect2D(Client.x0,y       ,Client.x1,y+1     ,press?sGC_LOW:sGC_HIGH);
     sRect2D(Client.x0,y+1     ,Client.x1,y+Knop-1,sGC_BUTTON);
@@ -294,7 +294,7 @@ void sVSplitFrame::OnPaint2D()
 {
   for(sInt i=1;i<Count;i++)
   {
-    bool press = (i==Drag);
+    sBool press = (i==Drag);
     sInt p = Client.x0 + ChildData[i].Pos - Knop;
     sRect2D(p       ,Client.y0,p+1     ,Client.y1,press?sGC_LOW:sGC_HIGH);
     sRect2D(p+1     ,Client.y0,p+Knop-1,Client.y1,sGC_BUTTON);
@@ -423,7 +423,7 @@ void sMenuFrame::Kill()
   Close();
 }
 
-bool sMenuFrame::OnShortcut(sU32 key)
+sBool sMenuFrame::OnShortcut(sU32 key)
 {
   Item *item;
   if(key==sKEY_ESCAPE)
@@ -450,7 +450,7 @@ bool sMenuFrame::OnShortcut(sU32 key)
 }
 
 /* // this seems not needed anymore. sWF_AUTOKILL does it all!
-bool sMenuFrame::OnCommand(sInt cmd)
+sBool sMenuFrame::OnCommand(sInt cmd)
 {
   if(cmd==sCMD_DUMMY)
   {
@@ -578,7 +578,7 @@ public:
   void OnPaint2D()
   {
     sRect2D(Client,sGC_BACK);
-    sGui->RectHL(sRect(Client.x0+5,Client.y0+5,Client.x1-5,Client.y0+7),true);
+    sGui->RectHL(sRect(Client.x0+5,Client.y0+5,Client.x1-5,Client.y0+7),sTRUE);
   }
 };
 
@@ -1002,15 +1002,15 @@ void sGridFrame::OnPaint2D()
 
           rr.Init(r.x0+h,r.CenterY(),r.CenterX()-w/2-hh,r.CenterY()+2);
           if(rr.SizeX()>0)
-            sGui->RectHL(rr,true);
+            sGui->RectHL(rr,sTRUE);
           rr.Init(r.CenterX()+w/2+hh,r.CenterY(),r.x1-h,r.CenterY()+2);
           if(rr.SizeX()>0)
-            sGui->RectHL(rr,true);
+            sGui->RectHL(rr,sTRUE);
         }
         else
         {
           sRect2D(r,sGC_BACK);
-          sGui->RectHL(sRect(r.x0+h,r.CenterY(),r.x1-h,r.CenterY()+2),true);
+          sGui->RectHL(sRect(r.x0+h,r.CenterY(),r.x1-h,r.CenterY()+2),sTRUE);
         }
       }
       else if(lay->Flags & sGFLF_LEAD)
@@ -1071,7 +1071,7 @@ void sGridFrame::AddLabel(const sChar *str,sInt x,sInt y,sInt xs,sInt ys,sInt fl
   lay->GridRect.Init(x,y,x+xs,y+ys);
 }
 
-bool sGridFrame::OnKey(sU32 key)
+sBool sGridFrame::OnKey(sU32 key)
 {
   sInt inc = 0;
   key = key & ~sKEYQ_CAPS;
@@ -1640,7 +1640,7 @@ class sColorPickerInfo : public sObject
 {
 public:
   sCLASSNAME_NONEW(sColorPickerInfo);
-  sColorPickerInfo(sU32 *u,sF32 *f,sObject *ref,bool alpha,sMessage &msg);
+  sColorPickerInfo(sU32 *u,sF32 *f,sObject *ref,sBool alpha,sMessage &msg);
   void Tag();
 
   sU32 *UPtr;
@@ -1652,7 +1652,7 @@ public:
   void CmdOpen();
 };
 
-sColorPickerInfo::sColorPickerInfo(sU32 *u,sF32 *f,sObject *ref,bool alpha,sMessage &msg)
+sColorPickerInfo::sColorPickerInfo(sU32 *u,sF32 *f,sObject *ref,sBool alpha,sMessage &msg)
 {
   UPtr = u;
   FPtr = f;
@@ -1684,7 +1684,7 @@ void sColorPickerInfo::CmdOpen()
 
 void sGridFrameHelper::ColorPick(sU32 *ptr,const sChar *config,sObject *tagref)
 {
-  bool alpha = sFindLastChar(config,'a')!=-1;
+  sBool alpha = sFindLastChar(config,'a')!=-1;
   sColorPickerInfo *info = new sColorPickerInfo(ptr,0,tagref,alpha,ChangeMsg);
   Color(ptr,config);
   Box(L"^",sMessage(info,&sColorPickerInfo::CmdOpen));
@@ -1692,13 +1692,13 @@ void sGridFrameHelper::ColorPick(sU32 *ptr,const sChar *config,sObject *tagref)
 
 void sGridFrameHelper::ColorPickF(sF32 *ptr,const sChar *config,sObject *tagref)
 {
-  bool alpha = sFindLastChar(config,'a')!=-1;
+  sBool alpha = sFindLastChar(config,'a')!=-1;
   sColorPickerInfo *info = new sColorPickerInfo(0,ptr,tagref,alpha,ChangeMsg);
   ColorF(ptr,config);
   Box(L"^",sMessage(info,&sColorPickerInfo::CmdOpen));
 }
 
-sColorGradientControl *sGridFrameHelper::Gradient(class sColorGradient *g,bool alpha)
+sColorGradientControl *sGridFrameHelper::Gradient(class sColorGradient *g,sBool alpha)
 {
   if(Left+WideWidth>Right) NextLine();
   sColorGradientControl *con = new sColorGradientControl(g,alpha);
@@ -1793,12 +1793,12 @@ void sGridFrameTemplate::Init()
   sClear(*this);
 }
 
-bool sGridFrameTemplate::Condition(void *obj_)
+sBool sGridFrameTemplate::Condition(void *obj_)
 {
   sU8 *obj = (sU8 *) obj_;
 
   sInt val = (*(sInt *)(obj+ConditionOffset)) & ConditionMask;
-  bool cond = (val == ConditionValue);
+  sBool cond = (val == ConditionValue);
   if(Flags & sGFF_CONDNEGATE)
     cond = !cond;
   return cond;

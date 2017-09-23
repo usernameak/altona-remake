@@ -10,7 +10,7 @@
 
 class sOverlappedFrame : public sWindow
 {
-  bool BackClear;
+  sBool BackClear;
 public:
   sOverlappedFrame();
   sCLASSNAME(sOverlappedFrame);

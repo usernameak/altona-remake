@@ -20,14 +20,14 @@ namespace sPerfMon
 {
   static const sInt MAX_NESTING=8;
 
-  static bool Inited=false;
+  static sBool Inited=sFALSE;
 
   static sInt MaxThreads;
   static sInt MaxEvents;
   static sInt MaxValues;
   static sInt MaxSwitches;
-  static bool Active;
-  static bool Show=false;
+  static sBool Active;
+  static sBool Show=sFALSE;
   static sU64  StartTime;
   static sU64  MaxTime=1000000/30;
   static sU64  FrameTime=1000000/60;
@@ -61,7 +61,7 @@ namespace sPerfMon
   } *Values;
   sInt *ValueMap;
   sInt NumValues;
-  bool ValuesSorted;
+  sBool ValuesSorted;
 
   /****************************************************************************/
 
@@ -159,7 +159,7 @@ namespace sPerfMon
 
     Lock = new sThreadLock;
 
-    Inited=true;
+    Inited=sTRUE;
     sPerfAddThread();
 
   }
@@ -168,7 +168,7 @@ namespace sPerfMon
   {
     if (Inited)
     {
-      Active=false;
+      Active=sFALSE;
 
       Painter = new sPainter;
 
@@ -183,7 +183,7 @@ namespace sPerfMon
   {
     if (Inited)
     {
-      Inited=false;
+      Inited=sFALSE;
 
       sPreFlipHook->Rem(EndFrame);
       sPostFlipHook->Rem(BeginFrame);
@@ -233,7 +233,7 @@ namespace sPerfMon
       }
     }
     StartTime=sGetTimeUS();
-    if (Show) Active=true;
+    if (Show) Active=sTRUE;
     Lock->Unlock();
   }
 
@@ -243,7 +243,7 @@ namespace sPerfMon
     if (!Active) return;
     Lock->Lock();
 
-    Active=false;
+    Active=sFALSE;
     sU64 time = sGetTimeUS()-StartTime;
 
     // add end to all threads
@@ -488,7 +488,7 @@ namespace sPerfMon
       for (sInt i=0; i<NumValues; i++) for (sInt j=i+1; j<NumValues; j++)
         if (Values[ValueMap[i]].Group>Values[ValueMap[j]].Group)
           sSwap(ValueMap[i],ValueMap[j]);
-      ValuesSorted=true;
+      ValuesSorted=sTRUE;
     }
 
     sF32 maxy=(sy-sy*say)/2;
@@ -561,19 +561,19 @@ using namespace sPerfMon;
 /***                                                                      ***/
 /****************************************************************************/
 
-void sShowPerfMon(bool show) { if (!show) CurSwitch=-1; sPerfMon::Show=show; }
+void sShowPerfMon(sBool show) { if (!show) CurSwitch=-1; sPerfMon::Show=show; }
 
 void sTogglePerfMon() { Show=!Show; CurSwitch=-1; }
-bool sPerfMonInited() { return Inited; }
+sBool sPerfMonInited() { return Inited; }
 
 static const sU32 PerfMonLeft = 0; 
 static const sU32 PerfMonRight = 0;
 static const sU32 PerfMonUp = 0;
 static const sU32 PerfMonDown = 0;
 
-bool sSendPerfMonInput(const sInput2Event &ie)
+sBool sSendPerfMonInput(const sInput2Event &ie)
 {
-  if (!Inited || !Show) return false;
+  if (!Inited || !Show) return sFALSE;
 
   sScopeLock lock(Lock);
 
@@ -589,7 +589,7 @@ bool sSendPerfMonInput(const sInput2Event &ie)
       sInt nc=sCountChoice(s.Choice);
       *s.Ptr=sClamp(*s.Ptr-1,0,nc-1);
     }
-    return true;
+    return sTRUE;
   }
   else if (ie.Key==PerfMonRight || ie.Key==sKEY_RIGHT)
   {
@@ -603,7 +603,7 @@ bool sSendPerfMonInput(const sInput2Event &ie)
       sInt nc=sCountChoice(s.Choice);
       *s.Ptr=sClamp(*s.Ptr+1,0,nc-1);
     }
-    return true;
+    return sTRUE;
   }
   else if (ie.Key==PerfMonUp || ie.Key==sKEY_UP)
   {
@@ -611,7 +611,7 @@ bool sSendPerfMonInput(const sInput2Event &ie)
     {
       if (CurSwitch<NumSwitches-1) CurSwitch++;
     }
-    return true;
+    return sTRUE;
   }
   else if (ie.Key==PerfMonDown || ie.Key==sKEY_DOWN)
   {
@@ -619,10 +619,10 @@ bool sSendPerfMonInput(const sInput2Event &ie)
     {
       if (CurSwitch>-1) CurSwitch--;
     }
-    return true;
+    return sTRUE;
   }
 
-  return false;
+  return sFALSE;
 }
 
 void sSetPerfMonTimes(sF32 maxtime, sF32 frametime) 
@@ -858,7 +858,7 @@ void sPerfRemValue(const sInt *ptr)
   Lock->Unlock();
 }
 
-void sPerfIntGetValue(sInt index, const sChar *&name, sInt &value, bool &groupstart)
+void sPerfIntGetValue(sInt index, const sChar *&name, sInt &value, sBool &groupstart)
 {
   Lock->Lock();
   name=0;
@@ -874,7 +874,7 @@ void sPerfIntGetValue(sInt index, const sChar *&name, sInt &value, bool &groupst
   name=v.Name;
   value=*v.Ptr;
   if (index==0 || v.Group!=Values[index-1].Group)
-    groupstart=true;
+    groupstart=sTRUE;
 
   Lock->Unlock();
 }

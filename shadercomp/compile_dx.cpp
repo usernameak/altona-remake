@@ -20,11 +20,11 @@
 #define new sDEFINE_NEW
 
 
-bool sShaderCompileDX(const sChar *source,const sChar *profile,const sChar *main,sU8 *&data,sInt &size,sInt flags,sTextBuffer *errors)
+sBool sShaderCompileDX(const sChar *source,const sChar *profile,const sChar *main,sU8 *&data,sInt &size,sInt flags,sTextBuffer *errors)
 {
   ID3D10Blob *bytecode;
   ID3D10Blob *dxerrors;
-  bool result;
+  sBool result;
 
   result = 0;
   data = 0;
@@ -86,7 +86,7 @@ bool sShaderCompileDX(const sChar *source,const sChar *profile,const sChar *main
 
 #else
 
-bool sShaderCompileDX(const sChar *source,const sChar *profile,const sChar *main,sU8 *&data,sInt &size,sInt flags,sTextBuffer *errors)
+sBool sShaderCompileDX(const sChar *source,const sChar *profile,const sChar *main,sU8 *&data,sInt &size,sInt flags,sTextBuffer *errors)
 {
   return 0;
 }

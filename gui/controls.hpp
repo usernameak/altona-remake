@@ -60,8 +60,8 @@ public:
   void OnCalcSize();
   void OnPaint2D();
   void OnDrag(const sWindowDrag &dd);
-  bool OnKey(sU32 key);
-  bool OnCommand(sInt cmd);
+  sBool OnKey(sU32 key);
+  sBool OnCommand(sInt cmd);
 
   static void MakeShortcut(sString<64> &buffer,sU32 shortcut);    // this is awfully useful and belongs to gui.hpp or types.hpp
 };
@@ -139,8 +139,8 @@ public:
   void OnCalcSize();
   void OnPaint2D();
   void OnDrag(const sWindowDrag &dd);
-  bool OnKey(sU32 key);
-  bool OnCommand(sInt cmd);
+  sBool OnKey(sU32 key);
+  sBool OnCommand(sInt cmd);
   void FakeDropdown(sInt x,sInt y);
 private:
   void Next();
@@ -180,7 +180,7 @@ class sStringControl : public sControl
   const sChar *GetText();
 protected:
   void SetCharPos(sInt x);
-  bool Changed;
+  sBool Changed;
 public:
   sCLASSNAME(sStringControl);
   sStringControl(const sStringDesc &);
@@ -194,17 +194,17 @@ public:
   void InitString(sPoolString *pool);
   void InitString(sTextBuffer *tb);
 
-  virtual bool MakeBuffer(bool unconditional);   // if buffer needs to be updated, do that and return 1
-  virtual bool ParseBuffer();  // if buffer is valid, update value and return 1
+  virtual sBool MakeBuffer(sBool unconditional);   // if buffer needs to be updated, do that and return 1
+  virtual sBool ParseBuffer();  // if buffer is valid, update value and return 1
 
   sU32 BackColor;
   sF32 Percent;
 
   void OnCalcSize();
   void OnPaint2D();
-  bool OnKey(sU32 key);
+  sBool OnKey(sU32 key);
   void OnDrag(const sWindowDrag &dd);
-  bool OnCommand(sInt cmd);
+  sBool OnCommand(sInt cmd);
 
   sStringDesc GetBuffer();
   sStringControl *DragTogether;      // only used for ValueControl
@@ -266,7 +266,7 @@ public:
   {
     ReqSizeY = sGui->PropFont->GetHeight()+4;
   }
-  bool OnKey(sU32 key)
+  sBool OnKey(sU32 key)
   {
     if(Style & sSCS_STATIC) return 0;
     sStringControl *tie;
@@ -340,8 +340,8 @@ public:
     }
   }
 
-  bool MakeBuffer(bool unconditional);
-  bool ParseBuffer();
+  sBool MakeBuffer(sBool unconditional);
+  sBool ParseBuffer();
 };
 
 typedef sValueControl<sU8> sByteControl;
@@ -353,7 +353,7 @@ typedef sValueControl<sF32> sFloatControl;
 
 class sFlagControl : public sControl
 {
-  bool Toggle;
+  sBool Toggle;
   sInt GetValue();
   sInt CountChoices();
   void SetValue(sInt n);

@@ -21,7 +21,7 @@ class MyWindow : public sWindow
 public:
   MyWindow();
   void OnPaint2D();
-  bool BackBuffer;
+  sBool BackBuffer;
 };
 
 class MyParentWin : public sHSplitFrame

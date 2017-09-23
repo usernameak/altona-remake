@@ -58,7 +58,7 @@ void sDeleteShader2(sShader *shader);
 
 void sInitShaders();
 void sExitShaders();
-void sFlushVertexFormat(bool flush,void *user);
+void sFlushVertexFormat(sBool flush,void *user);
 
 /****************************************************************************/
 /***                                                                      ***/
@@ -163,7 +163,7 @@ void sScreenInfo::Clear()
 }
 
 #if sRENDERER!=sRENDER_DX9
-void sDbgPaintWireFrame(bool enable)
+void sDbgPaintWireFrame(sBool enable)
 {
 }
 #endif
@@ -257,14 +257,14 @@ void sDestroyZBufferRT()
 
 /****************************************************************************/
 
-bool sGetFullscreen()
+sBool sGetFullscreen()
 {
   sScreenMode sm;
   sGetScreenMode(sm);
   return (sm.Flags&sSM_FULLSCREEN)!=0;
 }
 
-void sSetFullscreen(bool enable)
+void sSetFullscreen(sBool enable)
 {
   sScreenMode sm;
   sGetScreenMode(sm);
@@ -418,7 +418,7 @@ sShader *sCreateShaderRaw(sInt type,const sU8 *code,sInt bytes)
   }
 
   sScopeMem(sAMF_HEAP);   // shaders are shared and need to be allocated on heap
-  return new sShader(type,code,bytes,hash,true);
+  return new sShader(type,code,bytes,hash,sTRUE);
 }
 
 sShader *sCreateShader(sInt type,const sU8 *code,sInt bytes)
@@ -454,7 +454,7 @@ sShader *sShader::Bind(sVertexFormatHandle *vformat, sShader *pshader)
   return this;
 }
 
-sShader::sShader(sInt type,const sU8 *data,sInt length,sU32 hash,bool raw/*=false*/)
+sShader::sShader(sInt type,const sU8 *data,sInt length,sU32 hash,sBool raw/*=sFALSE*/)
 {
   Temp = -1;
 #if sRENDERER == sRENDER_DX9
@@ -531,7 +531,7 @@ void sShader::Release()
   }
 }
 
-bool sShader::CheckKind(sInt type)
+sBool sShader::CheckKind(sInt type)
 {
   return (type&sSTF_KIND)==(Type&sSTF_KIND);
 }
@@ -556,7 +556,7 @@ void sAddRefShader(sShader * sh)
   sh->AddRef();
 }
 
-bool sCheckShader(sShader * sh,sInt type)
+sBool sCheckShader(sShader * sh,sInt type)
 {
   return sh->CheckKind(type);
 }
@@ -600,12 +600,12 @@ void sDeletePS(sShader * &handle)
   handle = 0;
 }
 
-bool sValidVS(sShader * vsh)
+sBool sValidVS(sShader * vsh)
 {
   return vsh->CheckKind(sSTF_VERTEX);
 }
 
-bool sValidPS(sShader * psh)
+sBool sValidPS(sShader * psh)
 {
   return psh->CheckKind(sSTF_PIXEL);
 }
@@ -715,7 +715,7 @@ sVertexFormatHandle *sCreateVertexFormat(const sU32 *disc)
 void sFlushOccQueryNodes();
 #endif
 
-void sFlushVertexFormat(bool flush,void *user)
+void sFlushVertexFormat(sBool flush,void *user)
 {
   if(flush)
   {
@@ -1404,7 +1404,7 @@ sInt sGetBitsPerPixel(sInt format)
 
 /****************************************************************************/
 
-bool sIsBlockCompression(sInt texflags)
+sBool sIsBlockCompression(sInt texflags)
 {
   switch(texflags&sTEX_FORMAT)
   {
@@ -1565,7 +1565,7 @@ void sTexture2D::ReInit(sInt xs, sInt ys, sInt flags,sInt mipmaps)
 }
 
 
-void sTexture2D::Init(sInt xs, sInt ys, sInt flags,sInt mipmaps, bool force/*=false*/)
+void sTexture2D::Init(sInt xs, sInt ys, sInt flags,sInt mipmaps, sBool force/*=sFALSE*/)
 {
   sInt realmip;
   sVERIFY(LoadBuffer==0);
@@ -1710,7 +1710,7 @@ sTextureCube::~sTextureCube()
 
 /****************************************************************************/
 
-void sTextureCube::Init(sInt dim, sInt flags, sInt mipmaps/*=0*/, bool force/*=false*/)
+void sTextureCube::Init(sInt dim, sInt flags, sInt mipmaps/*=0*/, sBool force/*=sFALSE*/)
 {
   sInt realmip;
   sVERIFY(LoadBuffer==0);
@@ -1982,34 +1982,34 @@ sMaterialRS::sMaterialRS()
   }
 }
 
-bool sMaterialRS::operator==(const sMaterialRS& rs)const
+sBool sMaterialRS::operator==(const sMaterialRS& rs)const
 {
   if(Flags!=rs.Flags)
-    return false;
+    return sFALSE;
   if(FuncFlags[0]!=rs.FuncFlags[0]||FuncFlags[1]!=rs.FuncFlags[1]||FuncFlags[2]!=rs.FuncFlags[2]||FuncFlags[3]!=rs.FuncFlags[3])
-    return false;
+    return sFALSE;
   if(BlendColor!=rs.BlendColor)
-    return false;
+    return sFALSE;
   if(BlendAlpha!=rs.BlendAlpha)
-    return false;
+    return sFALSE;
   if(BlendFactor!=rs.BlendFactor)
-    return false;
+    return sFALSE;
   if(StencilOps[0]!=rs.StencilOps[0]||StencilOps[1]!=rs.StencilOps[1]||StencilOps[2]!=rs.StencilOps[2]||StencilOps[3]!=rs.StencilOps[3]||StencilOps[4]!=rs.StencilOps[4]||StencilOps[5]!=rs.StencilOps[5])
-    return false;
+    return sFALSE;
   if(StencilRef!=rs.StencilRef)
-    return false;
+    return sFALSE;
   if(StencilMask!=rs.StencilMask)
-    return false;
+    return sFALSE;
   if(AlphaRef!=rs.AlphaRef)
-    return false;
+    return sFALSE;
   for(sInt i=0;i<sMTRL_MAXTEX;i++)
   {
     if(TFlags[i]!=rs.TFlags[i])
-      return false;
+      return sFALSE;
     if(LodBias[i]!=rs.LodBias[i])
-      return false;
+      return sFALSE;
   }
-  return true;
+  return sTRUE;
 }
 
 template <class streamer> static inline void SerializeMaterialRSOld(sMaterialRS &rs, streamer &s)
@@ -2581,7 +2581,7 @@ void sViewport::Prepare(sInt update)
   }
 }
 
-bool sViewport::Transform(const sVector31 &p,sInt &ix,sInt &iy) const
+sBool sViewport::Transform(const sVector31 &p,sInt &ix,sInt &iy) const
 {
   sVector4 s = p * ModelScreen;
   if(s.z>0)
@@ -2599,7 +2599,7 @@ bool sViewport::Transform(const sVector31 &p,sInt &ix,sInt &iy) const
 }
 
 
-bool sViewport::Transform(const sVector31 &p,sF32 &ix,sF32 &iy) const
+sBool sViewport::Transform(const sVector31 &p,sF32 &ix,sF32 &iy) const
 {
   sVector4 s = p * ModelScreen;
   if(s.z>0)
@@ -2826,14 +2826,14 @@ sInt sViewport::VisibleDist2(const sAABBox &box,sF32 &near, sF32 &far) const
 
 /****************************************************************************/
 
-bool sViewport::Get2DBounds(const sAABBox &box,sFRect &bounds) const
+sBool sViewport::Get2DBounds(const sAABBox &box,sFRect &bounds) const
 {
   sVector31 points[8];
   box.MakePoints(points);
   return Get2DBounds(points,8,bounds);
 }
 
-bool sViewport::Get2DBounds(const sVector31 points[],sInt count,sFRect &bounds) const
+sBool sViewport::Get2DBounds(const sVector31 points[],sInt count,sFRect &bounds) const
 {
   // Based on "Calculating Screen Coverage", Chapter 6 from "Jim Blinn's Corner:
   // Notation, Notation, Notation", Morgan-Kaufman Publishers, 2003
@@ -2842,7 +2842,7 @@ bool sViewport::Get2DBounds(const sVector31 points[],sInt count,sFRect &bounds) 
   sVector4 *proj = sALLOCSTACK(sVector4,count);
   sU32 *outcodes = sALLOCSTACK(sU32,count);
   sU32 Ocumulate = 0, Acumulate = ~0u;
-  bool anyVisible = false;
+  sBool anyVisible = sFALSE;
 
   // pass 1: project all points
   for(sInt i=0;i<count;i++)
@@ -2877,23 +2877,23 @@ bool sViewport::Get2DBounds(const sVector31 points[],sInt count,sFRect &bounds) 
     }
 
     if(out == 0)
-      anyVisible = true;
+      anyVisible = sTRUE;
   }
 
   // trivial rejection/acception
   if(Acumulate) // all outside at least one clip plane
-    return false;
+    return sFALSE;
 
   if(!Ocumulate) // none clipped
   {
     bounds.Init(xMin,yMin,xMax,yMax);
-    return true;
+    return sTRUE;
   }
 
   if(!anyVisible) // none of the points visible but they span across all clip planes
   {
     bounds.Init(-1.0f,-1.0f,1.0f,1.0f); // full screen
-    return true;
+    return sTRUE;
   }
 
   // pass 2: process clipped points
@@ -2907,7 +2907,7 @@ bool sViewport::Get2DBounds(const sVector31 points[],sInt count,sFRect &bounds) 
   }
 
   bounds.Init(xMin,yMin,xMax,yMax);
-  return true;
+  return sTRUE;
 }
 
 /****************************************************************************/
@@ -2923,7 +2923,7 @@ sF32 sGetRendertargetAspect()
   return sGFXRendertargetAspect*sGFXRendertargetY*sF32(sGFXViewRect.SizeX())/(sF32(sGFXViewRect.SizeY())*sGFXRendertargetX);
 }
 
-bool sIsFormatDXT(sInt format)
+sBool sIsFormatDXT(sInt format)
 {
   switch(format & sTEX_FORMAT)
   {
@@ -3051,7 +3051,7 @@ void sSetCBuffers(sCBufferBase **cbuffers,sInt cbcount)
         {
           // handle register collision
           CurrentCBsSlotMask[cb->Slot] = 0;    // prevent detection with itself
-          bool unhandled = 1;
+          sBool unhandled = 1;
           for(sInt k=type*sCBUFFER_MAXSLOT;k<(type+1)*sCBUFFER_MAXSLOT;k++)
           {
             if(cb->Mask & CurrentCBsSlotMask[k])
@@ -3283,7 +3283,7 @@ namespace rygdxt
   }
 
   // The color matching function (returns error metric)
-  static sInt MatchColorsBlock(const Pixel *block,const Pixel *color,sU32 &outMask,bool dither)
+  static sInt MatchColorsBlock(const Pixel *block,const Pixel *color,sU32 &outMask,sBool dither)
   {
     sU32 mask = 0;
     sInt dirr = color[0].p.r - color[1].p.r;
@@ -3508,7 +3508,7 @@ namespace rygdxt
   // The refinement function. (Clever code, part 2)
   // Tries to optimize colors to suit block contents better.
   // (By solving a least squares system via normal equations+Cramer's rule)
-  static bool RefineBlock(const Pixel *block,sU16 &max16,sU16 &min16,sU32 mask)
+  static sBool RefineBlock(const Pixel *block,sU16 &max16,sU16 &min16,sU32 mask)
   {
     static const sInt w1Tab[4] = { 3,0,2,1 };
     static const sInt prods[4] = { 0x090000,0x000900,0x040102,0x010402 };
@@ -3593,7 +3593,7 @@ namespace rygdxt
   static void CompressColorBlock(sU8 *dest,const sU32 *src,sInt qualityDither)
   {
     sInt quality = qualityDither & 0x3f;
-    bool dither = (qualityDither & 0x80) != 0;
+    sBool dither = (qualityDither & 0x80) != 0;
 
     const Pixel *block = (const Pixel *) src;
     Pixel dblock[16],color[4];
@@ -3719,7 +3719,7 @@ namespace rygdxt
 
 using namespace rygdxt;
 
-void sCompressDXTBlock(sU8 *dest,const sU32 *src,bool alpha,sInt quality)
+void sCompressDXTBlock(sU8 *dest,const sU32 *src,sBool alpha,sInt quality)
 {
   // generate tables for the first time
   if(!Inited)
@@ -3783,23 +3783,23 @@ void sFastPackDXT(sU8 *d,sU32 *bmp,sInt xs,sInt ys,sInt format,sInt quality)
       switch (format)
       {
       case sTEX_DXT1:
-        sCompressDXTBlock(d,block,false,quality);
+        sCompressDXTBlock(d,block,sFALSE,quality);
         d+=8;
         break;
       case sTEX_DXT5:
-        sCompressDXTBlock(d,block,true,quality);
+        sCompressDXTBlock(d,block,sTRUE,quality);
         d+=16;
         break;
       case sTEX_DXT5N:
         for(sInt i=0;i<16;i++)
           block[i] = (block[i] & 0x0000ff00) | ((block[i] & 0x00ff0000) << 8);
-        sCompressDXTBlock(d,block,true,quality);
+        sCompressDXTBlock(d,block,sTRUE,quality);
         d+=16;
         break;
       case sTEX_DXT5_AYCOCG:
         for(sInt i=0;i<16;i++)
           block[i] = sARGBtoAYCoCg(block[i]);
-        sCompressDXTBlock(d,block,true,quality);
+        sCompressDXTBlock(d,block,sTRUE,quality);
         d+=16;
         break;
       default:
@@ -3969,23 +3969,6 @@ void sTargetPara::Init(sInt flags,sU32 clearcol,const sTargetSpec &spec)
   else
     Init(flags,clearcol,&spec.Window,spec.Color,spec.Depth);
   Cubeface = spec.Cubeface;
-}
-
-bool sTargetPara::operator==(sTargetPara *para) {
-  if(!para) {
-    return false;
-  }
-  if(para->Flags == Flags &&
-     para->Window == Window &&
-     para->Cubeface == Cubeface &&
-     para->Mipmap == Mipmap &&
-     para->Depth == Depth) {
-      for(sInt i = 0; i < 4; i++) {
-        if(para->Target[i] != Target[i]) return false;
-      }
-      return true;
-  }
-  return false;
 }
 
 /****************************************************************************/
@@ -4195,11 +4178,11 @@ void sSetTarget(const sTargetPara &para)
   }
   else
   {
-    bool differentCols = false;
+    sBool differentCols = sFALSE;
     sInt n = 0;
     while(n<4 && para.Target[n])
     {
-      if(para.ClearColor[n] != para.ClearColor[0]) differentCols = true;
+      if(para.ClearColor[n] != para.ClearColor[0]) differentCols = sTRUE;
       n++;
     }
 

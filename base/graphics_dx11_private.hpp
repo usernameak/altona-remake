@@ -96,7 +96,7 @@ protected:
     { return DynMap.Buffer ? DynMap.Buffer->DXBuffer : DXBuffer; }
     sDInt GetOffset()
     { return DynMap.Offset; }
-    bool IsEmpty()
+    sBool IsEmpty()
     { return ElementCount==0; }
     void CloneFrom(sGeometryPrivate::Buffer *s);
   };
@@ -128,7 +128,7 @@ public:
   struct ID3D11Buffer *DXBuffer;
   sInt Size;
   sInt Bin;
-  bool IsMapped;
+  sBool IsMapped;
 };
 
 struct sCBufferMap
@@ -203,7 +203,7 @@ protected:
   struct ID3D11DepthStencilView *DXDepthView;
   struct ID3D11RenderTargetView *DXCubeRenderView[6];
   sU8 *LoadPtr;
-  bool Dynamic;
+  sBool Dynamic;
   sInt LoadMipmap;
   sInt LoadCubeFace;
   sInt DXFormat;
@@ -212,8 +212,8 @@ protected:
 
 
   class sTexture2D *MultiSampled;   // an associated multisampled texture
-  bool NeedResolve;          // before using the non-multisampled, we need to resolve
-  bool NeedAutomipmap;
+  sBool NeedResolve;          // before using the non-multisampled, we need to resolve
+  sBool NeedAutomipmap;
 
   sTextureBasePrivate();
 public:
@@ -274,7 +274,7 @@ protected:
   sInt SizeX,SizeY;
   sInt Flags;
   sInt DXFormat;
-  bool Locked;
+  sBool Locked;
 
   struct ID3D11Texture2D *Dest;
 };

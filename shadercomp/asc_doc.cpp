@@ -125,7 +125,7 @@ ACFunc::~ACFunc()
 /****************************************************************************/
 /****************************************************************************/
 
-bool ACDoc::IsValidPermutation(ACPermute *perm,sInt n)
+sBool ACDoc::IsValidPermutation(ACPermute *perm,sInt n)
 {
   ACPermuteMember *mem;
   ACExpression *ass;
@@ -243,7 +243,7 @@ ACVar *ACDoc::FindVar(sPoolString name)
   }
 }
 
-void ACDoc::AddDefTypes(const sChar *name,sInt type,bool many)
+void ACDoc::AddDefTypes(const sChar *name,sInt type,sBool many)
 {
   sString<16> buffer;
   AddDefType(name,type,0,0);
@@ -542,7 +542,7 @@ ACDoc::~ACDoc()
   sDeleteAll(Functions);
 }
 
-bool ACDoc::Parse(const sChar *source)
+sBool ACDoc::Parse(const sChar *source)
 {
   Scan.Start(source);
 

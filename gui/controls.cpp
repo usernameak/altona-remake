@@ -248,7 +248,7 @@ void sButtonControl::OnPaint2D()
 
       sClipPush();
 
-      bool select = 0;
+      sBool select = 0;
       if(Style & sBCS_TOGGLEBIT)
       {
         select = *RadioPtr & RadioValue;
@@ -266,7 +266,7 @@ void sButtonControl::OnPaint2D()
       }
       sRect2D(r3,bp);
       sClipPop();
-      sGui->RectHL(r3,true);
+      sGui->RectHL(r3,sTRUE);
       sRectHole2D(r2,r3,bp);
     }
     sGui->PropFont->Print(sF2P_OPAQUE|sF2P_LEFT|sF2P_SPACE,r,Label,LabelLength);
@@ -335,7 +335,7 @@ void sButtonControl::OnDrag(const sWindowDrag &dd)
 }
 
 
-bool sButtonControl::OnKey(sU32 key)
+sBool sButtonControl::OnKey(sU32 key)
 {
   if(!(Style&sBCS_STATIC))
   {
@@ -356,7 +356,7 @@ bool sButtonControl::OnKey(sU32 key)
   return 0;
 }
 
-bool sButtonControl::OnCommand(sInt cmd)
+sBool sButtonControl::OnCommand(sInt cmd)
 {
   switch(cmd)
   {
@@ -452,7 +452,7 @@ void sChoiceControl::InitChoices(const sChar *&s,sInt *val)
   sInt min=0;
   sInt max=0;
   sInt len;
-  bool fullmask = 0;
+  sBool fullmask = 0;
   
   Choices.Clear();
   ValueMask = 0;
@@ -621,7 +621,7 @@ void sChoiceControl::OnDrag(const sWindowDrag &dd)
   }
 }
 
-bool sChoiceControl::OnKey(sU32 key)
+sBool sChoiceControl::OnKey(sU32 key)
 {
   if(!(Style&sBCS_STATIC))
   {
@@ -646,7 +646,7 @@ bool sChoiceControl::OnKey(sU32 key)
   return 0;
 }
 
-bool sChoiceControl::OnCommand(sInt cmd)
+sBool sChoiceControl::OnCommand(sInt cmd)
 {
   switch(cmd)
   {
@@ -724,7 +724,7 @@ void sChoiceControl::Dropdown()
 void sChoiceControl::SetValue(sDInt newval)
 {
   ChoiceMulti *cm;
-  bool changed = 0;
+  sBool changed = 0;
   sFORALL(Values,cm)
   {
     sInt val = (*cm->Ptr & ~ValueMask) | ((newval)<<ValueShift);
@@ -745,7 +745,7 @@ void sChoiceControl::SetValue(sDInt newval)
 void sChoiceControl::SetDefaultValue()
 {
   ChoiceMulti *cm;
-  bool changed = 0;
+  sBool changed = 0;
   sFORALL(Values,cm)
   {
     sInt val = (*cm->Ptr & ~ValueMask) | ((cm->Default & ValueMask));
@@ -898,7 +898,7 @@ void sStringControl::OnPaint2D()
   sRect r;
 
   r = Inner;
-  sGui->RectHL(r,true);
+  sGui->RectHL(r,sTRUE);
   r.Extend(-1);
   sClipPush();
   sClipRect(r);
@@ -950,13 +950,13 @@ void sStringControl::OnPaint2D()
   sClipPop();
 }
 
-bool sStringControl::OnKey(sU32 key)
+sBool sStringControl::OnKey(sU32 key)
 {
   sInt len;
-  bool update;
-  bool change;
-  bool result;
-  bool updatemark;
+  sBool update;
+  sBool change;
+  sBool result;
+  sBool updatemark;
   sInt oldcursorpos;
 
   if(!Buffer) return 0;
@@ -1242,7 +1242,7 @@ void sStringControl::SetCharPos(sInt x)
 void sStringControl::OnDrag(const sWindowDrag &dd)
 {
   sInt pos,charPos,start,end;
-  bool update = false;
+  sBool update = sFALSE;
 
   pos = dd.MouseX - Inner.x0 - sGui->PropFont->GetWidth(L" ");
   charPos = sGui->PropFont->GetCharCountFromWidth(pos,Buffer?Buffer:L"");
@@ -1255,7 +1255,7 @@ void sStringControl::OnDrag(const sWindowDrag &dd)
     MarkEnd = 0;
     if(PrintInfo.CursorPos != charPos || PrintInfo.SelectStart != -1
       || PrintInfo.SelectEnd != -1)
-      update = true;
+      update = sTRUE;
     
     PrintInfo.CursorPos = charPos;
     PrintInfo.SelectStart = -1;
@@ -1278,12 +1278,12 @@ void sStringControl::OnDrag(const sWindowDrag &dd)
       PrintInfo.CursorPos = charPos;
       PrintInfo.SelectStart = start;
       PrintInfo.SelectEnd = end;
-      update = true;
+      update = sTRUE;
     }
     if(dd.Mode==sDD_STOP && MarkBegin==MarkEnd)
     {
       MarkMode = 0;
-      update = true;
+      update = sTRUE;
     }
     if((sGetKeyQualifier()&sKEYQ_CTRL))
       OnKey('a'|sKEYQ_CTRL);
@@ -1295,9 +1295,9 @@ void sStringControl::OnDrag(const sWindowDrag &dd)
     Update();
 }
 
-bool sStringControl::OnCommand(sInt cmd)
+sBool sStringControl::OnCommand(sInt cmd)
 {
-  bool changed = 0;
+  sBool changed = 0;
   switch(cmd)
   {
   case sCMD_ENTERFOCUS:
@@ -1341,12 +1341,12 @@ bool sStringControl::OnCommand(sInt cmd)
 
 /****************************************************************************/
 
-bool sStringControl::MakeBuffer(bool unconditional)
+sBool sStringControl::MakeBuffer(sBool unconditional)
 {
   return 0;
 }
 
-bool sStringControl::ParseBuffer()
+sBool sStringControl::ParseBuffer()
 {
   return 1;
 }
@@ -1361,7 +1361,7 @@ template <> const sChar *sByteControl::ClassName() { return L"sByteControl"; }
 
 template <> void sValueControl<sU8>::MoreInit() { RightStep = 0.25f; }
 
-template <> bool sValueControl<sU8>::MakeBuffer(bool unconditional)
+template <> sBool sValueControl<sU8>::MakeBuffer(sBool unconditional)
 {
   if(unconditional || *Value != OldValue)
   { 
@@ -1375,11 +1375,11 @@ template <> bool sValueControl<sU8>::MakeBuffer(bool unconditional)
   } 
 }
 
-template <> bool sValueControl<sU8>::ParseBuffer()
+template <> sBool sValueControl<sU8>::ParseBuffer()
 {
   const sChar *s = String;
   sInt val;
-  bool ok = 1;
+  sBool ok = 1;
   sInt code;
   
   // scan print format
@@ -1439,7 +1439,7 @@ template <> const sChar *sWordControl::ClassName() { return L"sWordControl"; }
 
 template <> void sValueControl<sU16>::MoreInit() { RightStep = 0.25f; }
 
-template <> bool sValueControl<sU16>::MakeBuffer(bool unconditional)
+template <> sBool sValueControl<sU16>::MakeBuffer(sBool unconditional)
 {
   if(unconditional || *Value != OldValue)
   { 
@@ -1453,11 +1453,11 @@ template <> bool sValueControl<sU16>::MakeBuffer(bool unconditional)
   } 
 }
 
-template <> bool sValueControl<sU16>::ParseBuffer()
+template <> sBool sValueControl<sU16>::ParseBuffer()
 {
   const sChar *s = String;
   sInt val;
-  bool ok = 1;
+  sBool ok = 1;
   sInt code;
 
   // scan print format
@@ -1517,7 +1517,7 @@ template <> const sChar *sIntControl::ClassName() { return L"sIntControl"; }
 
 template <> void sValueControl<sInt>::MoreInit() { RightStep = 0.25f; }
 
-template <> bool sValueControl<sInt>::MakeBuffer(bool unconditional)
+template <> sBool sValueControl<sInt>::MakeBuffer(sBool unconditional)
 {
   if(unconditional || *Value != OldValue)
   { 
@@ -1532,11 +1532,11 @@ template <> bool sValueControl<sInt>::MakeBuffer(bool unconditional)
   } 
 }
 
-template <> bool sValueControl<sInt>::ParseBuffer()
+template <> sBool sValueControl<sInt>::ParseBuffer()
 {
   const sChar *s = String;
   sInt val;
-  bool ok = 1;
+  sBool ok = 1;
   sInt code;
   
   // scan print format
@@ -1600,7 +1600,7 @@ template <> const sChar *sFloatControl::ClassName() { return L"sFloatControl"; }
 
 template <> void sValueControl<sF32>::MoreInit() { RightStep = 0.125f; }
 
-template <> bool sValueControl<sF32>::MakeBuffer(bool unconditional)
+template <> sBool sValueControl<sF32>::MakeBuffer(sBool unconditional)
 {
   if(unconditional || *Value != OldValue)
   { 
@@ -1614,11 +1614,11 @@ template <> bool sValueControl<sF32>::MakeBuffer(bool unconditional)
   } 
 }
 
-template <> bool sValueControl<sF32>::ParseBuffer()
+template <> sBool sValueControl<sF32>::ParseBuffer()
 {
   const sChar *s = String;
   sF32 val;
-  bool ok = 1;
+  sBool ok = 1;
   
   // scan sign
 
@@ -1772,7 +1772,7 @@ void sFlagControl::OnPaint2D()
 
 void sFlagControl::OnDrag(const sWindowDrag &dd)
 {
-  bool t;
+  sBool t;
   switch(dd.Mode)
   {
   case sDD_START:

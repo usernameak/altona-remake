@@ -22,7 +22,7 @@ static const sChar *fullshadername[] = { L"VertexShader",L"HullShader",L"DomainS
 
 /****************************************************************************/
 
-void PrintTextShader(class sTextBuffer& tb, const sChar *shader,bool skipcomment=1)
+void PrintTextShader(class sTextBuffer& tb, const sChar *shader,sBool skipcomment=1)
 {
   tb.Print(L"  \"");
   sInt whitespace = 0;
@@ -80,7 +80,7 @@ void PrintTextShader(class sTextBuffer& tb, const sChar *shader,bool skipcomment
   tb.Print(L"\\n\";\n");
 }
 
-void PrintTextShader(class sTextBuffer& tb, const sChar8 *shader,bool skipcomment=1)
+void PrintTextShader(class sTextBuffer& tb, const sChar8 *shader,sBool skipcomment=1)
 {
   tb.Print(L"  \"");
   sInt whitespace = 0;
@@ -221,7 +221,7 @@ void PrintCode(class sTextBuffer &tb,const sChar *code)
 
 static void sPrintNewShaderData(sTextBuffer &CPP,const sChar *name,NewCode *code,sStringDesc ifdef)
 {
-  bool ifor=false;
+  sBool ifor=sFALSE;
   if(code->DX9Code)
   {
     CPP.PrintF(L"#if sRENDERER==sRENDER_DX9\n");
@@ -232,7 +232,7 @@ static void sPrintNewShaderData(sTextBuffer &CPP,const sChar *name,NewCode *code
     CPP.PrintF(L"#endif\n");
     if (ifor) sAppendString(ifdef,L" ||");
     sAppendString(ifdef,L" (sRENDERER==sRENDER_DX9)");
-    ifor=true;
+    ifor=sTRUE;
   }
   if(code->DX11Code)
   {
@@ -244,7 +244,7 @@ static void sPrintNewShaderData(sTextBuffer &CPP,const sChar *name,NewCode *code
     CPP.PrintF(L"#endif\n");
     if (ifor) sAppendString(ifdef,L" ||");
     sAppendString(ifdef,L" (sRENDERER==sRENDER_DX11)");
-    ifor=true;
+    ifor=sTRUE;
   }
   if(code->GLSLCode)
   {
@@ -254,7 +254,7 @@ static void sPrintNewShaderData(sTextBuffer &CPP,const sChar *name,NewCode *code
     CPP.PrintF(L"#endif\n");
     if (ifor) sAppendString(ifdef,L" ||");
     sAppendString(ifdef,L" sRENDERER==sRENDER_OGL2");
-    ifor=true;
+    ifor=sTRUE;
   }
 }
 

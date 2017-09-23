@@ -12,7 +12,7 @@
 
 /****************************************************************************/
 
-void sMoviePlayer::RenderToScreen(bool zoom)
+void sMoviePlayer::RenderToScreen(sBool zoom)
 {
   // this is suboptimal but should do the trick for starters. You're always
   // free to override this function

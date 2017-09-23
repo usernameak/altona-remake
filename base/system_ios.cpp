@@ -90,7 +90,7 @@ void sInit(sInt flags,sInt xs,sInt ys)
   InitGFX(flags,xs,ys);
 }
 
-bool sHasWindowFocus()
+sBool sHasWindowFocus()
 {
   return 1;
 }
@@ -162,7 +162,7 @@ public:
     
     return ptr;
   }
-  bool Free(void *ptr)
+  sBool Free(void *ptr)
   {
     //    sAtomicAdd(&sMemoryUsed, -(sDInt)size);
     free(ptr);
@@ -226,7 +226,7 @@ void sExitMem1()
 /***                                                                      ***/
 /****************************************************************************/
 
-static bool sThreadInitialized = false;
+static sBool sThreadInitialized = sFALSE;
 static pthread_key_t sThreadKey, sContextKey;
 static sThreadContext sEmergencyThreadContext;
 
@@ -353,7 +353,7 @@ void sInitThread()
   sEmergencyThreadContext.MemTypeStack[0] = sAMF_HEAP;
   pthread_setspecific(sContextKey, &sEmergencyThreadContext);
   
-  sThreadInitialized = true;
+  sThreadInitialized = sTRUE;
 }
 
 /****************************************************************************/
@@ -392,7 +392,7 @@ void sThreadLock::Lock()
 
 /****************************************************************************/
 
-bool sThreadLock::TryLock()
+sBool sThreadLock::TryLock()
 {
   return pthread_mutex_trylock((pthread_mutex_t*) CriticalSection) == 0;
 }
@@ -410,7 +410,7 @@ void sThreadLock::Unlock()
 // THIS IS UNTESTED, MAY CONTAIN BUGS AND IS DEFINITELY INEFFICIENT.
 // It's also outright dangerous on anything that's not x86!
 
-sThreadEvent::sThreadEvent(bool manual)
+sThreadEvent::sThreadEvent(sBool manual)
 {
   Signaled = 0;
   ManualReset = manual;
@@ -422,7 +422,7 @@ sThreadEvent::~sThreadEvent()
 {
 }
 
-bool sThreadEvent::Wait(sInt timeout)
+sBool sThreadEvent::Wait(sInt timeout)
 {
   if(ManualReset) // manual reset
   {
@@ -431,12 +431,12 @@ bool sThreadEvent::Wait(sInt timeout)
       while(!Signaled)
         sched_yield();
       
-      return true;
+      return sTRUE;
     }
     
     sInt start = sGetTime();
     sU32 tDiff;
-    bool okay = false;
+    sBool okay = sFALSE;
     do
     {
       okay = Signaled;
@@ -456,7 +456,7 @@ bool sThreadEvent::Wait(sInt timeout)
       while((gotit = sAtomicSwap(&Signaled,0)) == 0)
         sched_yield();
       
-      return true;
+      return sTRUE;
     }
     
     sInt start = sGetTime();
@@ -524,63 +524,63 @@ void sGetMouse(sMouseData&,int,int)
 /***                                                                      ***/
 /****************************************************************************/
 /*
-bool sCheckFile(const sChar *name);
+sBool sCheckFile(const sChar *name);
 sU8 *sLoadFile(const sChar *name);
 sU8 *sLoadFile(const sChar *name,sDInt &size);
-bool sSaveFile(const sChar *name,const void *data,sDInt bytes);
-bool sSaveFileFailsafe(const sChar *name,const void *data,sDInt bytes);
+sBool sSaveFile(const sChar *name,const void *data,sDInt bytes);
+sBool sSaveFileFailsafe(const sChar *name,const void *data,sDInt bytes);
 sChar *sLoadText(const sChar *name);
 //sStream *sOpenText(const sChar *name);
-bool sSaveTextAnsi(const sChar *name,const sChar *data);
-bool sSaveTextUnicode(const sChar *name,const sChar *data);
-bool sSaveTextUTF8(const sChar *name,const sChar *data);
-bool sSaveTextAnsiIfDifferent(const sChar *name,const sChar *data); // for ASC/makeproject etc.
-bool sBackupFile(const sChar *name);
+sBool sSaveTextAnsi(const sChar *name,const sChar *data);
+sBool sSaveTextUnicode(const sChar *name,const sChar *data);
+sBool sSaveTextUTF8(const sChar *name,const sChar *data);
+sBool sSaveTextAnsiIfDifferent(const sChar *name,const sChar *data); // for ASC/makeproject etc.
+sBool sBackupFile(const sChar *name);
 
-bool sFilesEqual(const sChar *name1,const sChar *name2);
-bool sFileCalcMD5(const sChar *name, sChecksumMD5 &md5);
+sBool sFilesEqual(const sChar *name1,const sChar *name2);
+sBool sFileCalcMD5(const sChar *name, sChecksumMD5 &md5);
 */
 /****************************************************************************/
 
 void sSetProjectDir(const sChar *name) 
 { sFatal(L"not implemented"); }
-bool sCopyFile(const sChar *source,const sChar *dest,bool failifexists)
+sBool sCopyFile(const sChar *source,const sChar *dest,sBool failifexists)
 { sFatal(L"not implemented"); return 0; }
-bool sRenameFile(const sChar *source,const sChar *dest, bool overwrite)
+sBool sRenameFile(const sChar *source,const sChar *dest, sBool overwrite)
 { sFatal(L"not implemented"); return 0; }
-bool sFindFile(sChar *foundname, sInt foundnamesize, const sChar *path,const sChar *pattern)
+sBool sFindFile(sChar *foundname, sInt foundnamesize, const sChar *path,const sChar *pattern)
 { sFatal(L"not implemented"); return 0; }
-bool sLoadDir(sArray<sDirEntry> &list,const sChar *path,const sChar *pattern)
+sBool sLoadDir(sArray<sDirEntry> &list,const sChar *path,const sChar *pattern)
 { sFatal(L"not implemented"); return 0; }
 sDateAndTime sFromFileTime(sU64 fileTime) // OS specific times, e.g. LastWriteTime
 { sFatal(L"not implemented"); return sDateAndTime(); }
 sU64 sToFileTime(sDateAndTime time)
 { sFatal(L"not implemented"); return 0; }
-bool sSetFileTime(const sChar *name, sU64 lastwritetime)
+sBool sSetFileTime(const sChar *name, sU64 lastwritetime)
 { sFatal(L"not implemented"); return 0; }
-bool sChangeDir(const sChar *name)
+sBool sChangeDir(const sChar *name)
 { sFatal(L"not implemented"); return 0; }
 void  sGetCurrentDir(const sStringDesc &str)
 { sFatal(L"not implemented"); }
 void  sGetTempDir(const sStringDesc &str)
 { sFatal(L"not implemented"); }
-bool sGetFileInfo(const sChar *name,sDirEntry *)
+sBool sGetFileInfo(const sChar *name,sDirEntry *)
 { sFatal(L"not implemented"); return 0; }
-bool sGetDiskSizeInfo(const sChar *path, sS64 &availablesize, sS64 &totalsize)
+sBool sGetDiskSizeInfo(const sChar *path, sS64 &availablesize, sS64 &totalsize)
 { sFatal(L"not implemented"); return 0; }
-bool sMakeDir(const sChar *)          // make one directory
+sBool sMakeDir(const sChar *)          // make one directory
 { sFatal(L"not implemented"); return 0; }
-bool sCheckDir(const sChar *)
+sBool sCheckDir(const sChar *)
 { sFatal(L"not implemented"); return 0; }
-bool sDeleteFile(const sChar *)
+sBool sDeleteFile(const sChar *)
 { sFatal(L"not implemented"); return 0; }
-bool sDeleteDir(const sChar *name)
+sBool sDeleteDir(const sChar *name)
 { sFatal(L"not implemented"); return 0; }
-bool sGetFileWriteProtect(const sChar *,bool &prot)
+sBool sGetFileWriteProtect(const sChar *,sBool &prot)
 { sFatal(L"not implemented"); return 0; }
-bool sSetFileWriteProtect(const sChar *,bool prot)
+sBool sSetFileWriteProtect(const sChar *,sBool prot)
 { sFatal(L"not implemented"); return 0; }
-bool sIsBelowCurrentDir(const sChar *relativePath)
+sBool sIsBelowCurrentDir(const sChar *relativePath)
 { sFatal(L"not implemented"); return 0; }
 
 

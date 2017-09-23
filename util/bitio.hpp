@@ -26,9 +26,9 @@ class sBitWriter
   sInt BitsLeft;
 
   sDInt Written;
-  bool Error;
+  sBool Error;
 
-  void FlushBuffer(bool finish=false);
+  void FlushBuffer(sBool finish=sFALSE);
 
   sINLINE void PutByte(sU8 byte)
   {
@@ -47,7 +47,7 @@ public:
   void Start(sFile *outFile);                   // write to file
   sDInt Finish(); // returns number of bytes written
 
-  bool IsOk() const { return !Error; }
+  sBool IsOk() const { return !Error; }
 
   sINLINE void PutBits(sU32 bits,sInt count) // never write more than 24 bits at once!
   {
@@ -83,7 +83,7 @@ class sBitReader
   sInt BitsLeft;
 
   sInt ExtraBytes;
-  bool Error;
+  sBool Error;
 
   void RefillBuffer();
 
@@ -101,9 +101,9 @@ public:
 
   void Start(const sU8 *buffer,sDInt size);   // read from memory
   void Start(sFile *file);                    // read from file
-  bool Finish();
+  sBool Finish();
 
-  bool IsOk() { return !Error && (ExtraBytes < 4 || BitsLeft == 32); }
+  sBool IsOk() { return !Error && (ExtraBytes < 4 || BitsLeft == 32); }
 
   sINLINE void SkipBits(sInt count)
   {
@@ -209,10 +209,10 @@ void sBuildHuffmanCodeValues(sU32 *codes,const sInt *lens,sInt count);
 void sBuildHuffmanCodes(sU32 *codes,sInt *lens,const sU32 *freq,sInt count,sInt maxLen);
 
 // Encode huffman code lengths (when you need to store them)
-bool sWriteHuffmanCodeLens(sBitWriter &writer,const sInt *lens,sInt count);
+sBool sWriteHuffmanCodeLens(sBitWriter &writer,const sInt *lens,sInt count);
 
 // Decode huffman code lenghts written with above function
-bool sReadHuffmanCodeLens(sBitReader &reader,sInt *lens,sInt count);
+sBool sReadHuffmanCodeLens(sBitReader &reader,sInt *lens,sInt count);
 
 class sFastHuffmanDecoder
 {
@@ -227,7 +227,7 @@ public:
   sFastHuffmanDecoder();
   ~sFastHuffmanDecoder();
 
-  bool Init(const sInt *lens,sInt count);
+  sBool Init(const sInt *lens,sInt count);
 
   // DecodeSymbol for sBitReader and sLocalBitReader do exactly the same thing.
   // Use the second variant where speed is critical (and where you're presumably using

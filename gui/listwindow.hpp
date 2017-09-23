@@ -108,9 +108,9 @@ class sStaticListWindow : public sWireClientWindow    // static list: can't sele
 protected:
   sArray<sObject *> *Array;
   virtual sListWindowTreeInfo<sObject *> *GetTreeInfo(sObject *obj) { return 0; }
-  bool IsMulti;
+  sBool IsMulti;
 public:
-  virtual bool GetSelectStatus(sInt n) { return 0; }
+  virtual sBool GetSelectStatus(sInt n) { return 0; }
   virtual sInt GetLastSelect() { return 0; }
   virtual void SetSelectStatus(sInt n,sInt select) {}
   virtual void ClearSelectStatus() {}
@@ -146,8 +146,8 @@ public:
 
   virtual sInt OnBackColor(sInt line,sInt select,sObject *obj);
   virtual sInt OnCalcFieldHeight(sListWindow2Field *field,sObject *);
-  virtual bool OnPaintField(const sRect &client,sListWindow2Field *field,sObject *,sInt line,sInt select);
-  virtual bool OnEditField(const sRect &client,sListWindow2Field *field,sObject *,sInt line);
+  virtual sBool OnPaintField(const sRect &client,sListWindow2Field *field,sObject *,sInt line,sInt select);
+  virtual sBool OnEditField(const sRect &client,sListWindow2Field *field,sObject *,sInt line);
   virtual sInt OnCompareField(sListWindow2Field *field,sObject *o0,sObject *o1,sInt line0,sInt line1);
   void PaintField(const sRect &client,sListWindow2Field *field,sObject *,sInt line,sInt select);
   void PaintField(const sRect &client,sInt select,const sChar *text);
@@ -204,7 +204,7 @@ class sSingleListWindow : public sStaticListWindow
 {
   sInt Selected;
 protected:
-  bool GetSelectStatus(sInt n) { return Selected == n; }
+  sBool GetSelectStatus(sInt n) { return Selected == n; }
   sInt GetLastSelect() { return Selected; }
   void SetSelectStatus(sInt n,sInt select) { if(select && Selected!=n) { Selected = n; Update(); SelectMsg.Post(); } ClickMsg.Post(); }
   void ClearSelectStatus() { Selected = -1; Update(); SelectMsg.Post(); }
@@ -224,7 +224,7 @@ class sMultiListWindow : public sStaticListWindow
   sMemberPtr<sInt> Member;
 protected:
 public:
-  bool GetSelectStatus(sInt n) { return Member.Ref((Type *)((*Array)[n])); }
+  sBool GetSelectStatus(sInt n) { return Member.Ref((Type *)((*Array)[n])); }
   sInt GetLastSelect() { return (Cursor>=0 && Cursor<Array->GetCount()) ? Cursor : -1; }
   void SetSelectStatus(sInt n,sInt select) { if(select) Cursor=n; if(select != Member.Ref((Type *)((*Array)[n]))) { Member.Ref((Type *)((*Array)[n]))=select; Update(); SelectMsg.Post(); } ClickMsg.Post(); }
   void ClearSelectStatus() { sObject *t; sFORALL(*Array,t) Member.Ref((Type *)t) = 0; Update(); SelectMsg.Post(); }

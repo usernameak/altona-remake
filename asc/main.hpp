@@ -86,8 +86,8 @@ public:
 
 /****************************************************************************/
 
-extern bool Level11;
-extern bool PcOnly;
+extern sBool Level11;
+extern sBool PcOnly;
 
 class Compiler
 {
@@ -106,7 +106,7 @@ public:
   sArray<NewMaterial *> NewMtrls;
   sArray<NewMaterial *> ComputeShaders;
 
-  bool NoStrip;
+  sBool NoStrip;
 
   void _Code(sPoolString &code);
   void _CodeNoLine(sPoolString &code,sInt lineoffset);
@@ -121,8 +121,8 @@ public:
   void OutputShader(NewShader *ns);
   void OutputHPP();
   void OutputCPP();
-  bool Process(NewCode *code,NewShader *ns,sTextBuffer *errors);
-  bool Process(NewShader *ns);
+  sBool Process(NewCode *code,NewShader *ns,sTextBuffer *errors);
+  sBool Process(NewShader *ns);
   void Run(const sChar *filename);
 };
 

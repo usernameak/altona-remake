@@ -38,7 +38,7 @@ public:
   void OnCalcSize();
   void OnLayout();
   void OnPaint2D();
-  bool Inverted;
+  sBool Inverted;
 };
 
 class sThinBorder : public sWindow
@@ -79,9 +79,9 @@ public:
   void OnPaint2D();
 
   void AddMenu(sChar *name,const sMessage &msg);
-  void AddSpace(bool rightaligned=false);
+  void AddSpace(sBool rightaligned=sFALSE);
   void AddRightAligned(sWindow *w);
-  bool Bottom;
+  sBool Bottom;
 };
 
 class sScrollBorder : public sWindow
@@ -94,7 +94,7 @@ class sScrollBorder : public sWindow
   sRect ButtonX;
   sRect ButtonY;
   sRect ButtonZ;
-  bool CalcKnop(sInt &a,sInt &b,sInt client,sInt inner,sInt button,sInt scroll);
+  sBool CalcKnop(sInt &a,sInt &b,sInt client,sInt inner,sInt button,sInt scroll);
 public:
   sCLASSNAME(sScrollBorder);
   sScrollBorder();

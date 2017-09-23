@@ -27,7 +27,7 @@ extern HWND sHWND;
 
 namespace sWin32
 {
-  bool ModalDialogActive = false;
+  sBool ModalDialogActive = sFALSE;
 }
 
 #if sRENDERER==sRENDER_DX11
@@ -253,10 +253,10 @@ void sSetWindowPos(sInt x,sInt y)
   SetWindowPos(sHWND,HWND_NOTOPMOST,x,y,r.right-r.left,r.bottom-r.top,SWP_NOZORDER);
 }
 
-bool sHasWindowFocus()
+sBool sHasWindowFocus()
 {
 #if sCONFIG_OPTION_NPP
-  return true;
+  return sTRUE;
 #else
   return GetForegroundWindow()==sHWND;
 #endif
@@ -371,7 +371,7 @@ sU8 *sGetClipboard(sDInt &size,sU32 serid,sInt sermode)
 }
 
 
-void sEnableFileDrop(bool enable)
+void sEnableFileDrop(sBool enable)
 {
   DragAcceptFiles(sHWND,enable);
 }
@@ -389,7 +389,7 @@ const sChar *sGetDragDropFile()
 
 /****************************************************************************/
 
-bool sSystemOpenFileDialog(const sChar *label,const sChar *extensions,sInt flags,const sStringDesc &buffer)
+sBool sSystemOpenFileDialog(const sChar *label,const sChar *extensions,sInt flags,const sStringDesc &buffer)
 {
   sChar oldpath[2048];
   OPENFILENAMEW ofn;
@@ -416,7 +416,7 @@ bool sSystemOpenFileDialog(const sChar *label,const sChar *extensions,sInt flags
 
     // add all supported extensions
     const sChar *curExt = extensions;
-    bool first = true;
+    sBool first = sTRUE;
 
     for(;;)
     {
@@ -431,7 +431,7 @@ bool sSystemOpenFileDialog(const sChar *label,const sChar *extensions,sInt flags
       while(*curExt!='|' && *curExt)
         *extp++ = *curExt++;
 
-      first = false;
+      first = sFALSE;
     }
 
     *extp++ = 0;
@@ -489,7 +489,7 @@ bool sSystemOpenFileDialog(const sChar *label,const sChar *extensions,sInt flags
   if(len>0 && buffer.Buffer[len-1]=='\\') buffer.Buffer[len-1]=0;
 
   GetCurrentDirectoryW(sCOUNTOF(oldpath),oldpath);
-  sWin32::ModalDialogActive = true;
+  sWin32::ModalDialogActive = sTRUE;
 
   switch(flags & 3)
   {
@@ -535,7 +535,7 @@ bool sSystemOpenFileDialog(const sChar *label,const sChar *extensions,sInt flags
     break;
   }
 
-  sWin32::ModalDialogActive = false;
+  sWin32::ModalDialogActive = sFALSE;
   SetCurrentDirectoryW(oldpath);
 
   for(sInt i=0;buffer.Buffer[i];i++)
@@ -546,7 +546,7 @@ bool sSystemOpenFileDialog(const sChar *label,const sChar *extensions,sInt flags
 
 /****************************************************************************/
 
-bool sSystemMessageDialog(const sChar *label,sInt flags)
+sBool sSystemMessageDialog(const sChar *label,sInt flags)
 {
   const sChar *title = sGetWindowName();
   if((flags & 7)==sSMF_ERROR) title = L"error";
@@ -554,9 +554,9 @@ bool sSystemMessageDialog(const sChar *label,sInt flags)
   return sSystemMessageDialog(label,flags,title);
 }
 
-bool sSystemMessageDialog(const sChar *label,sInt flags,const sChar *title)
+sBool sSystemMessageDialog(const sChar *label,sInt flags,const sChar *title)
 {
-  bool result = 0;
+  sBool result = 0;
   switch(flags&7)
   {
   case sSMF_ERROR:
@@ -753,7 +753,7 @@ void sStretch2D(const sU32 *data,sInt width,const sRect &source,const sRect &des
 /***                                                                      ***/
 /****************************************************************************/
 
-static bool Render2DMode;
+static sBool Render2DMode;
 static sInt Render2DSizeX;
 static sInt Render2DSizeY;
 static HDC WMPaintDC;
@@ -1170,7 +1170,7 @@ sFont2D::sLetterDimensions sFont2D::sGetLetterDimensions(const sChar letter)
   return result;
 }
 
-bool sFont2D::LetterExists(sChar letter)
+sBool sFont2D::LetterExists(sChar letter)
 {
   SelectObject(sGDIDCOffscreen,prv->Font);
   
@@ -1204,7 +1204,7 @@ void sFont2D::PrintMarked(sInt flags,const sRect *rc,sInt x,sInt y,const sChar *
   const sChar *ot = text;
   sInt ol = len;
   sInt ox = x;
-  bool nocull = 0;
+  sBool nocull = 0;
 
   switch(pi->Mode)
   {

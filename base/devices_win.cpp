@@ -13,7 +13,7 @@
 #include "base/system.hpp"
 #include <windows.h>
 
-static bool sMidiLog, sMidiOnlyPhys;
+static sBool sMidiLog, sMidiOnlyPhys;
 
 /****************************************************************************/
 /****************************************************************************/
@@ -31,13 +31,13 @@ public:
 
   // may be called by producer
 
-  bool IsFull()      { return Write >= Read+max; }
+  sBool IsFull()      { return Write >= Read+max; }
   void AddTail(const T &e)  { sInt i=Write; sVERIFY(i < Read+max); Data[i&(max-1)] = e; sWriteBarrier(); Write=i+1; }
 
   // may be called by consumer
 
-  bool IsEmpty()     { return Read >= Write; }
-  bool RemHead(T &e)        { sInt i=Read; if(i>=Write) return 0; e=Data[i&(max-1)]; sWriteBarrier(); Read=i+1; return 1; }
+  sBool IsEmpty()     { return Read >= Write; }
+  sBool RemHead(T &e)        { sInt i=Read; if(i>=Write) return 0; e=Data[i&(max-1)]; sWriteBarrier(); Read=i+1; return 1; }
 
   // this is an approximation!
 
@@ -71,10 +71,10 @@ class sMidiHandlerWin : public sMidiHandler_
 public:
   sMidiHandlerWin();
   ~sMidiHandlerWin();
-  const sChar *GetDeviceName(bool out,sInt dev);
+  const sChar *GetDeviceName(sBool out,sInt dev);
 
-  bool HasInput();
-  bool GetInput(sMidiEvent &e);
+  sBool HasInput();
+  sBool GetInput(sMidiEvent &e);
   void Output(sMidiEvent &e);
   void Output(sU8 dev,sU8 chan,sU8 msg,sU8 val);
 };
@@ -167,7 +167,7 @@ sMidiHandlerWin::sMidiHandlerWin()
   }
 }
 
-const sChar *sMidiHandlerWin::GetDeviceName(bool out,sInt dev)
+const sChar *sMidiHandlerWin::GetDeviceName(sBool out,sInt dev)
 {
   if(out)
   {
@@ -199,12 +199,12 @@ sMidiHandlerWin::~sMidiHandlerWin()
 
 /****************************************************************************/
 
-bool sMidiHandlerWin::HasInput()
+sBool sMidiHandlerWin::HasInput()
 {
   return !InQueue.IsEmpty();
 }
 
-bool sMidiHandlerWin::GetInput(sMidiEvent &e)
+sBool sMidiHandlerWin::GetInput(sMidiEvent &e)
 {
   return InQueue.RemHead(e);
 }
@@ -227,7 +227,7 @@ void sExitMidi()
 }
 
 
-void sAddMidi(bool logging, bool onlyPhysical)
+void sAddMidi(sBool logging, sBool onlyPhysical)
 {
   sMidiLog = logging;
   sMidiOnlyPhys = onlyPhysical;

@@ -37,7 +37,7 @@ void sFocusBorder::OnPaint2D()
 
 sThickBorder::sThickBorder()
 {
-  Inverted = false;
+  Inverted = sFALSE;
 }
 
 void sThickBorder::OnCalcSize()
@@ -225,7 +225,7 @@ void sToolBorder::AddMenu(sChar *name,const sMessage &msg)
   AddChild(new sButtonControl(name,msg,sBCS_NOBORDER|sBCS_IMMEDIATE));
 }
 
-void sToolBorder::AddSpace(bool rightaligned)
+void sToolBorder::AddSpace(sBool rightaligned)
 {
   sWindow *w=new sButtonControl(L"   ",sMessage(),sBCS_NOBORDER|sBCS_STATIC);
   AddChild(w);
@@ -302,7 +302,7 @@ void sScrollBorder::OnLayout()
   }
 }
 
-bool sScrollBorder::CalcKnop(sInt &a,sInt &b,sInt client,sInt inner,sInt button,sInt scroll)
+sBool sScrollBorder::CalcKnop(sInt &a,sInt &b,sInt client,sInt inner,sInt button,sInt scroll)
 {
   sInt w = client - inner;
   if(w>0)
@@ -400,7 +400,7 @@ void sScrollBorder::OnDrag(const sWindowDrag &dd)
 {
   sInt speed = (sGetKeyQualifier()&sKEYQ_SHIFT) ? 8 : 1;
   sInt a,b;
-  bool update = 0;
+  sBool update = 0;
 
   switch(dd.Mode)
   {

@@ -67,7 +67,7 @@ void s3DWindow::InitWire(const sChar *name)
   sWire->AddKey(name,L"Reset",sMessage(this,&s3DWindow::CmdReset));
   sWire->AddKey(name,L"ResetTilt",sMessage(this,&s3DWindow::CmdResetTilt));
   sWire->AddKey(name,L"Grid",sMessage(this,&s3DWindow::CmdGrid));
-  sWire->AddChoice(name,L"Grid_",sMessage(this,&s3DWindow::CmdGrid),(sInt*)&Grid,L"-|Grid");
+  sWire->AddChoice(name,L"Grid_",sMessage(this,&s3DWindow::CmdGrid),&Grid,L"-|Grid");
   sWire->AddKey(name,L"QuakeCam",sMessage(this,&s3DWindow::CmdQuakeCam));
   sWire->AddKey(name,L"GearUp",sMessage(this,&s3DWindow::CmdGearShift,1));
   sWire->AddKey(name,L"GearDown",sMessage(this,&s3DWindow::CmdGearShift,-1));
@@ -91,9 +91,9 @@ void s3DWindow::Tag()
   sWireClientWindow::Tag();
 }
 
-bool s3DWindow::OnKey(sU32 key)
+sBool s3DWindow::OnKey(sU32 key)
 {
-  bool use = 0;
+  sBool use = 0;
   if(QuakeMode)
   {
     switch(key & (sKEYQ_MASK|sKEYQ_BREAK))
@@ -166,7 +166,7 @@ void s3DWindow::SetCam(const sMatrix34 &mat,sF32 zoom)
   mat.FindEulerXYZ2(RotX,RotY,RotZ);
 }
 
-void s3DWindow::SetEnable(bool enable)
+void s3DWindow::SetEnable(sBool enable)
 {
   if(Enable!=enable)
   {
@@ -488,7 +488,7 @@ void s3DWindow::OnPaint3D()
 }
 
 
-void s3DWindow::Lines(sVertexBasic *src,sInt linecount, bool zon)
+void s3DWindow::Lines(sVertexBasic *src,sInt linecount, sBool zon)
 {
   sVertexBasic *vp;
 
@@ -509,7 +509,7 @@ void s3DWindow::Lines(sVertexBasic *src,sInt linecount, bool zon)
 }
 
 
-void s3DWindow::Circle(const sVector31 &center, const sVector30 &normal, sF32 radius, sU32 color, bool zon, sInt segs)
+void s3DWindow::Circle(const sVector31 &center, const sVector30 &normal, sF32 radius, sU32 color, sBool zon, sInt segs)
 {
   sVertexBasic *vp;
 

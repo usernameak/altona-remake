@@ -49,7 +49,7 @@ class sColorGradientControl : public sControl
   sInt AlphaEnable;
 public:
   sCLASSNAME_NONEW(sColorGradientControl);
-  sColorGradientControl(sColorGradient *,bool alpha);
+  sColorGradientControl(sColorGradient *,sBool alpha);
   ~sColorGradientControl();
   void Tag();
 
@@ -82,7 +82,7 @@ class sColorPickerWindow : public sWindow
 
   sInt DragMode;
   sObject *TagRef;
-  bool AlphaEnable;
+  sBool AlphaEnable;
   sColorGradient *Gradient;
   sInt DragKey;
   sF32 DragStart;
@@ -92,7 +92,7 @@ class sColorPickerWindow : public sWindow
   sF32 PickHue;
   sImage *GradientImage;
   sImage *WarpImage;
-  bool GradientChanged;
+  sBool GradientChanged;
 
   sRect PaletteBoxes[32];
 
@@ -104,9 +104,9 @@ public:
   ~sColorPickerWindow();
   void Tag();
 
-  void Init(sF32 *,sObject *tagref,bool alpha);
-  void Init(sU32 *,sObject *tagref,bool alpha);
-  void Init(sColorGradient *grad,bool alpha);
+  void Init(sF32 *,sObject *tagref,sBool alpha);
+  void Init(sU32 *,sObject *tagref,sBool alpha);
+  void Init(sColorGradient *grad,sBool alpha);
   void ChangeGradient();
   void ChangeRGB();
   void ChangeHSV();
@@ -116,7 +116,7 @@ public:
   void OnCalcSize();
   void OnLayout();
   void OnDrag(const sWindowDrag &dd);
-  bool OnKey(sU32 key);
+  sBool OnKey(sU32 key);
 
   void CmdDelete();
 

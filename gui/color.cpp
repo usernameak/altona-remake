@@ -184,7 +184,7 @@ void sColorGradient::CalcUnwarped(sF32 time,sVector4 &col)
 /***                                                                      ***/
 /****************************************************************************/
 
-sColorGradientControl::sColorGradientControl(sColorGradient *g,bool alpha)
+sColorGradientControl::sColorGradientControl(sColorGradient *g,sBool alpha)
 {
   Gradient  = g;
   AlphaEnable = alpha;
@@ -302,7 +302,7 @@ void sColorPickerWindow::Tag()
 
 /****************************************************************************/
 
-void sColorPickerWindow::Init(sF32 *f,sObject *tagref,bool alpha)
+void sColorPickerWindow::Init(sF32 *f,sObject *tagref,sBool alpha)
 {
   TagRef = tagref;
   FPtr = f;
@@ -318,7 +318,7 @@ void sColorPickerWindow::Init(sF32 *f,sObject *tagref,bool alpha)
   MakeGui();
 }
 
-void sColorPickerWindow::Init(sU32 *u,sObject *tagref,bool alpha)
+void sColorPickerWindow::Init(sU32 *u,sObject *tagref,sBool alpha)
 {
   TagRef = tagref;
   UPtr = (sU8 *)u;
@@ -334,7 +334,7 @@ void sColorPickerWindow::Init(sU32 *u,sObject *tagref,bool alpha)
   MakeGui();
 }
 
-void sColorPickerWindow::Init(sColorGradient *grad,bool alpha)
+void sColorPickerWindow::Init(sColorGradient *grad,sBool alpha)
 {
   sVERIFY(grad->Keys.GetCount()>=2);
   Gradient = grad;
@@ -885,7 +885,7 @@ void sColorPickerWindow::OnDrag(const sWindowDrag &dd)
   }
 }
 
-bool sColorPickerWindow::OnKey(sU32 key)
+sBool sColorPickerWindow::OnKey(sU32 key)
 {
   switch(key & (sKEYQ_BREAK|sKEYQ_MASK))
   {

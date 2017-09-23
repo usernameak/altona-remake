@@ -64,7 +64,7 @@ void GLError(sU32 err,const sChar *file,sInt line,const sChar *system)
   sDPrint(buffer);
   sFatal(buffer);
 }
-#define GLErr(hr) { bool err=!(hr); if(err) GLError(0,sTXT(__FILE__),__LINE__,L"opengl"); }
+#define GLErr(hr) { sBool err=!(hr); if(err) GLError(0,sTXT(__FILE__),__LINE__,L"opengl"); }
 #define GLERR() { sInt err=glGetError(); if(err) GLError(err,sTXT(__FILE__),__LINE__,L"opengl"); }
 
 /****************************************************************************/
@@ -76,13 +76,12 @@ void GLError(sU32 err,const sChar *file,sInt line,const sChar *system)
 //static sCBufferBase *CurrentCBs[sCBUFFER_MAXSLOT*sCBUFFER_SHADERTYPES];
 static sScreenMode DXScreenMode;
 
-struct sFBO {
+static struct sFBO {
   GLuint GLName;
-  sTargetPara para;
 };
 
-#define sMAX_FBO 256
-sFBO sFBOs[sMAX_FBO];
+#define sMAX_FBO 256;
+sGLFBO sFBOs[sMAX_FBO];
 sInt sFBOCount = 0;
 
 /****************************************************************************/
@@ -434,33 +433,6 @@ void sGeometry::Draw(sDrawRange *ir,sInt irc,sInt instancecount, sVertexOffset *
 
 /****************************************************************************/
 /***                                                                      ***/
-/***   FBO                                                                ***/
-/***                                                                      ***/
-/****************************************************************************/
-
-static sFBO *sFindFBO(sTargetPara *para) {
-  for(sInt i = 0; i < sFBOCount; i++) {
-    sFBO *fbo = &sFBOs[i];
-    if(fbo->para == para) {
-      return fbo;
-    }
-  }
-
-  sVERIFY(sFBOCount < sMAX_FBO)
-  sFBO *fbo = &sFBOs[sFBOCount++];
-  glGenFramebuffersEXT(1, &fbo->GLName);
-  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo->GLName);
-  GLERR();
-  for(sInt i = 0; i < 4; i++) {
-    if(!para->Target[i]) continue;
-    sSetTexture(0, para->Target[i]);
-    glFramebufferTexture2DEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_EXT + i,
-      GL_TEXTURE_2D, para->Target[i]->GLName, para->Mipmap);
-  }
-}
-
-/****************************************************************************/
-/***                                                                      ***/
 /***   Viewport                                                           ***/
 /***                                                                      ***/
 /****************************************************************************/
@@ -471,9 +443,9 @@ static sFBO *sFindFBO(sTargetPara *para) {
 /***                                                                      ***/
 /****************************************************************************/
 
-bool sReadTexture(sReader &s, sTextureBase *&tex)
+sBool sReadTexture(sReader &s, sTextureBase *&tex)
 {
-  return false;
+  return sFALSE;
 }
 
 sU64 sGetAvailTextureFormats()
@@ -643,7 +615,7 @@ void sTextureCube::EndLoad()
 
 /****************************************************************************/
 
-void sPackDXT(sU8 *d,sU32 *bmp,sInt xs,sInt ys,sInt format,bool dither)
+void sPackDXT(sU8 *d,sU32 *bmp,sInt xs,sInt ys,sInt format,sBool dither)
 {
   sVERIFY("sPackDXT not supported with opengl")
 }
@@ -685,7 +657,7 @@ void sMaterial::SetVariant(sInt variants)
 {
 }
 
-void sMaterial::Set(sCBufferBase **cbuffers,sInt cbcount,sInt additive)
+void sMaterial::Set(sCBufferBase **cbuffers,sInt cbcount,sBool additive)
 {
   SetStates();
 
@@ -1234,7 +1206,7 @@ void sGetScreenMode(sScreenMode &sm)
   sm = DXScreenMode;
 }
 
-bool sSetScreenMode(const sScreenMode &sm)
+sBool sSetScreenMode(const sScreenMode &sm)
 {
   DXScreenMode = sm;
   return 1;
@@ -1401,7 +1373,7 @@ void sEndReadTexture()
 {
 }
 
-void sRender3DEnd(bool flip)
+void sRender3DEnd(sBool flip)
 {
   sPreFlipHook->Call();
 #if sPLATFORM == sPLAT_WINDOWS
@@ -1418,7 +1390,7 @@ void sRender3DFlush()
 {
 }
 
-bool sRender3DBegin()
+sBool sRender3DBegin()
 {
   // prepare rendering
 
@@ -1573,7 +1545,7 @@ void sGeometry::EndGrid()
   sFatal(L"EndGrid not implemented!");
 }
 
-void sEnableGraphicsStats(bool enable)
+void sEnableGraphicsStats(sBool enable)
 {
 }
 

@@ -365,7 +365,7 @@ void sVector4::InitPlane(sVector31Arg p0,sVector31Arg p1,sVector31Arg p2)
   w = - (p0 ^ norm);
 }
 
-bool sVector4::operator==(sVector4Arg v) const
+sBool sVector4::operator==(sVector4Arg v) const
 {
   return  x == v.x &&
           y == v.y &&
@@ -719,7 +719,7 @@ sF32 sMatrix34::Determinant3x3() const
        - (i.z*j.y*k.x + i.x*j.z*k.y + i.y*j.x*k.z);
 }
 
-bool sMatrix34::Invert3()
+sBool sMatrix34::Invert3()
 {
   // Invert a 3x3 using cofactors.  This is faster than using a generic
   // Gaussian elimination because of the loop overhead of such a method.
@@ -736,19 +736,19 @@ bool sMatrix34::Invert3()
   inv.k.z = i.x*j.y - i.y*j.x;
 
   sF32 det = i.x*inv.i.x + i.y*inv.j.x + i.z*inv.k.x;
-  if (sFAbs(det)<sEPSILON) return false;
+  if (sFAbs(det)<sEPSILON) return sFALSE;
   det=1.0f/det;
   i=inv.i*det;
   j=inv.j*det;
   k=inv.k*det;
-  return true;
+  return sTRUE;
 }
 
-bool sMatrix34::Invert34()
+sBool sMatrix34::Invert34()
 {
-  if (!Invert3()) return false;
+  if (!Invert3()) return sFALSE;
   l = sVector31(sVector30(-l)*(*this));
-  return true;
+  return sTRUE;
 }
 
 void sMatrix34::Orthonormalize ()
@@ -995,7 +995,7 @@ void sMatrix44::Orthonormalize ()
   l.Unit4();
 }
 
-bool sMatrix44::operator==(const sMatrix44 &mat) const
+sBool sMatrix44::operator==(const sMatrix44 &mat) const
 {
   return  i == mat.i &&
           j == mat.j &&
@@ -2056,7 +2056,7 @@ void sAABBox::Init(const sAABBoxC &s)
   Max = s.Center+s.Radius;
 }
 
-bool sAABBox::HitPoint(sVector31Arg p) const
+sBool sAABBox::HitPoint(sVector31Arg p) const
 {
   return (p.x>=Min.x && p.x<=Max.x &&
           p.y>=Min.y && p.y<=Max.y && 
@@ -2121,7 +2121,7 @@ void sAABBox::MakePoints(sVector31 *v) const
   v[7].Init(Min.x,Max.y,Max.z);
 }
 
-bool sAABBox::HitRay(sF32 &dist,const sRay &ray) const
+sBool sAABBox::HitRay(sF32 &dist,const sRay &ray) const
 {
   sF32 min = 0.0f, max = 1e+20f;
 
@@ -2135,19 +2135,19 @@ bool sAABBox::HitRay(sF32 &dist,const sRay &ray) const
       if(t0 > t1) sSwap(t0,t1);
       min = sMax(min,t0);
       max = sMin(max,t1);
-      if(min > max) return false;
+      if(min > max) return sFALSE;
     }
     else if(ray.Start[i] < Min[i] || ray.Start[i] > Max[i])
-      return false;
+      return sFALSE;
   }
 
   dist = min;
-  return true;
+  return sTRUE;
 }
 
 // this is *almost* the same as sIntersectRayAABB, but it handles the case where one or more
 // components of dir are zero differently (=without using IEEE infinities). 
-bool sAABBox::HitInvRay(sF32 &dist,sVector31Arg origin,sVector30Arg invDir) const
+sBool sAABBox::HitInvRay(sF32 &dist,sVector31Arg origin,sVector30Arg invDir) const
 {
   sF32 min = 0.0f, max = 1e+20f;
 
@@ -2162,7 +2162,7 @@ bool sAABBox::HitInvRay(sF32 &dist,sVector31Arg origin,sVector30Arg invDir) cons
     max = sMin(max,tMax);
   }
   else if(origin.x < Min.x || origin.x > Max.x)
-    return false;
+    return sFALSE;
 
   if(invDir.z)
   {
@@ -2174,7 +2174,7 @@ bool sAABBox::HitInvRay(sF32 &dist,sVector31Arg origin,sVector30Arg invDir) cons
     max = sMin(max,tMax);
   }
   else if(origin.z < Min.z || origin.z > Max.z)
-    return false;
+    return sFALSE;
 
   if(invDir.y)
   {
@@ -2186,13 +2186,13 @@ bool sAABBox::HitInvRay(sF32 &dist,sVector31Arg origin,sVector30Arg invDir) cons
     max = sMin(max,tMax);
   }
   else if(origin.y < Min.y || origin.y > Max.y)
-    return false;
+    return sFALSE;
 
   if(min > max)
-    return false;
+    return sFALSE;
 
   dist = min;
-  return true;
+  return sTRUE;
 
   //for(sInt i=0;i<3;i++)
   //{
@@ -2203,14 +2203,14 @@ bool sAABBox::HitInvRay(sF32 &dist,sVector31Arg origin,sVector30Arg invDir) cons
   //    if(t0 > t1) sSwap(t0,t1);
   //    min = sMax(min,t0);
   //    max = sMin(max,t1);
-  //    if(min > max) return false;
+  //    if(min > max) return sFALSE;
   //  }
   //  else if(origin[i] < Min[i] || origin[i] > Max[i])
-  //    return false;
+  //    return sFALSE;
   //}
   //
   //dist = min;
-  //return true;
+  //return sTRUE;
 }
 
 sF32 sAABBox::CalcArea()const
@@ -2227,30 +2227,30 @@ sF32 sAABBox::CalcVolume()const
   return area;
 }
 
-bool sAABBox::IsEmpty() const
+sBool sAABBox::IsEmpty() const
 {
   return (Min.x>=Max.x || Min.y>=Max.y || Min.z>=Max.z);
 }
 
 
-bool sAABBox::IsValid() const
+sBool sAABBox::IsValid() const
 {
   return (Min.x<=Max.x || Min.y<=Max.y || Min.z<=Max.z);
 }
 
-bool sAABBox::Intersects(const sAABBox &b) const
+sBool sAABBox::Intersects(const sAABBox &b) const
 {
   return sMax(Min.x,b.Min.x) <= sMin(Max.x,b.Max.x)
     && sMax(Min.y,b.Min.y) <= sMin(Max.y,b.Max.y)
     && sMax(Min.z,b.Min.z) <= sMin(Max.z,b.Max.z);
 }
 
-bool sAABBox::IntersectsXZ(const sAABBox &b) const
+sBool sAABBox::IntersectsXZ(const sAABBox &b) const
 {
   return sMax(Min.x,b.Min.x) <= sMin(Max.x,b.Max.x) && sMax(Min.z,b.Min.z) <= sMin(Max.z,b.Max.z);
 }
 
-bool sAABBox::IntersectsMovingBox(const sAABBox &box,sVector30Arg v,sF32 tMin,sF32 tMax) const
+sBool sAABBox::IntersectsMovingBox(const sAABBox &box,sVector30Arg v,sF32 tMin,sF32 tMax) const
 {
   sVector30 invV;
   invV.x = v.x ? 1.0f / v.x : 0.0f;
@@ -2259,10 +2259,10 @@ bool sAABBox::IntersectsMovingBox(const sAABBox &box,sVector30Arg v,sF32 tMin,sF
   return IntersectsMovingBoxInv(box,invV,tMin,tMax);
 }
 
-bool sAABBox::IntersectsMovingBoxInv(const sAABBox &box,sVector30Arg invV,sF32 tMin,sF32 tMax) const
+sBool sAABBox::IntersectsMovingBoxInv(const sAABBox &box,sVector30Arg invV,sF32 tMin,sF32 tMax) const
 {
   if(tMin > tMax)
-    return false;
+    return sFALSE;
 
   for(sInt i=0;i<3;i++)
   {
@@ -2280,13 +2280,13 @@ bool sAABBox::IntersectsMovingBoxInv(const sAABBox &box,sVector30Arg invV,sF32 t
       tMin = sMax(tMin,t0);
       tMax = sMin(tMax,t1);
       if(tMin > tMax) // intersection empty?
-        return false;
+        return sFALSE;
     }
     else if(Max[i] < box.Min[i] || Min[i] > box.Max[i]) // stationary along that axis, check for overlap
-      return false;
+      return sFALSE;
   }
 
-  return true;
+  return sTRUE;
 }
 
 sF32 sAABBox::DistanceToSq(sVector31Arg p) const
@@ -2357,7 +2357,7 @@ sFormatStringBuffer& operator% (sFormatStringBuffer &f,const sAABBox &bbox)
 /****************************************************************************/
 /****************************************************************************/
 
-bool sRay::HitTriangle(sF32 &dist,sVector31Arg p0,sVector31Arg p1,sVector31Arg p2) const
+sBool sRay::HitTriangle(sF32 &dist,sVector31Arg p0,sVector31Arg p1,sVector31Arg p2) const
 {
   sVector30 d1,d2,n,org,org1,org2;
   sF32 angle,e1,e2;
@@ -2387,7 +2387,7 @@ bool sRay::HitTriangle(sF32 &dist,sVector31Arg p0,sVector31Arg p1,sVector31Arg p
   return 1;
 }
 
-bool sRay::HitTriangleDoubleSided(sF32 &dist,sVector31Arg p0,sVector31Arg p1,sVector31Arg p2) const
+sBool sRay::HitTriangleDoubleSided(sF32 &dist,sVector31Arg p0,sVector31Arg p1,sVector31Arg p2) const
 {
   sVector30 d1,d2,n,org,org1,org2;
   sF32 angle,e1,e2;
@@ -2423,7 +2423,7 @@ bool sRay::HitTriangleDoubleSided(sF32 &dist,sVector31Arg p0,sVector31Arg p1,sVe
   return 1;
 }
 
-bool sRay::HitTriangleBary(sF32 &dist,sVector31Arg p0,sVector31Arg p1,sVector31Arg p2,sF32 &u0,sF32 &u1,sF32 &u2) const
+sBool sRay::HitTriangleBary(sF32 &dist,sVector31Arg p0,sVector31Arg p1,sVector31Arg p2,sF32 &u0,sF32 &u1,sF32 &u2) const
 {
   sVector30 d1,d2,n,org,org1,org2;
   sF32 angle,e1,e2;
@@ -2457,7 +2457,7 @@ bool sRay::HitTriangleBary(sF32 &dist,sVector31Arg p0,sVector31Arg p1,sVector31A
   return 1;
 }
 
-bool sRay::HitPlane(sVector31 &intersect,sVector4Arg plane) const
+sBool sRay::HitPlane(sVector31 &intersect,sVector4Arg plane) const
 {
   sF32 angle;
   sF32 dist;
@@ -2471,7 +2471,7 @@ bool sRay::HitPlane(sVector31 &intersect,sVector4Arg plane) const
   return 1;
 }
 
-bool sRay::HitPlaneDoubleSided(sVector31 &intersect,sVector4Arg plane) const
+sBool sRay::HitPlaneDoubleSided(sVector31 &intersect,sVector4Arg plane) const
 {
   sF32 angle;
   sF32 dist;
@@ -2492,7 +2492,7 @@ bool sRay::HitPlaneDoubleSided(sVector31 &intersect,sVector4Arg plane) const
 }
 
 
-bool sRay::HitSphere(sF32 *dist, sVector31Arg center, sF32 radius) const
+sBool sRay::HitSphere(sF32 *dist, sVector31Arg center, sF32 radius) const
 {
   sF32 r2=radius*radius;
   sVector30 dir2=center-Start;
@@ -2517,7 +2517,7 @@ bool sRay::HitSphere(sF32 *dist, sVector31Arg center, sF32 radius) const
 }
 
 
-bool sIntersectRayAABB(sF32 &min, sF32 &max, const sVector31 &ro, const sVector30 &ird, const sVector31 &bbmin, const sVector31 &bbmax)
+sBool sIntersectRayAABB(sF32 &min, sF32 &max, const sVector31 &ro, const sVector30 &ird, const sVector31 &bbmin, const sVector31 &bbmax)
 {
   sF32 near = (bbmin.x-ro.x)*ird.x;
   sF32 far = (bbmax.x-ro.x)*ird.x;
@@ -2526,8 +2526,8 @@ bool sIntersectRayAABB(sF32 &min, sF32 &max, const sVector31 &ro, const sVector3
   far = (temp>far) ? temp : far;
   min = (near>min) ? near : min;
   max = (far<max) ? far : max;
-  if(min>max) return false;
-  //result = (min>max) ? false : result;
+  if(min>max) return sFALSE;
+  //result = (min>max) ? sFALSE : result;
 
   near = (bbmin.y-ro.y)*ird.y;
   far = (bbmax.y-ro.y)*ird.y;
@@ -2536,8 +2536,8 @@ bool sIntersectRayAABB(sF32 &min, sF32 &max, const sVector31 &ro, const sVector3
   far = (temp>far) ? temp : far;
   min = (near>min) ? near : min;
   max = (far<max) ? far : max;
-  if(min>max) return false;
-  //result = (min>max) ? false : result;
+  if(min>max) return sFALSE;
+  //result = (min>max) ? sFALSE : result;
 
   near = (bbmin.z-ro.z)*ird.z;
   far = (bbmax.z-ro.z)*ird.z;
@@ -2546,15 +2546,15 @@ bool sIntersectRayAABB(sF32 &min, sF32 &max, const sVector31 &ro, const sVector3
   far = (temp>far) ? temp : far;
   min = (near>min) ? near : min;
   max = (far<max) ? far : max;
-  if(min>max) return false;
-  //result = (min>max) ? false : result;
+  if(min>max) return sFALSE;
+  //result = (min>max) ? sFALSE : result;
 
-  return true;
+  return sTRUE;
 }
 
-bool sRay::HitAABB(sF32 &min, sF32 &max, const sVector31& bbmin,const sVector31& bbmax)const
+sBool sRay::HitAABB(sF32 &min, sF32 &max, const sVector31& bbmin,const sVector31& bbmax)const
 {
-//  bool result = true;
+//  sBool result = sTRUE;
 
   sVector30 ird;
   ird.x = 1.0f / Dir.x;
@@ -2571,9 +2571,9 @@ bool sRay::HitAABB(sF32 &min, sF32 &max, const sVector31& bbmin,const sVector31&
   //  if(near>far) sSwap(near,far);
   //  min = near > min ? near : min;
   //  max = far < max ? far : max;
-  //  if(min>max) return false;
+  //  if(min>max) return sFALSE;
   //}
-  //return true;
+  //return sTRUE;
 }
 
 sInt sRay::IntersectPlane(sF32 &t, sVector4Arg plane)const
@@ -2591,7 +2591,7 @@ sInt sRay::IntersectPlane(sF32 &t, sVector4Arg plane)const
   return 1;
 }
 
-bool sRay::HitBilinearPatch(sF32 &dist,const sVector31 &p00,const sVector31 &p01,const sVector31 &p10,const sVector31 &p11,sF32 *uOut,sF32 *vOut) const
+sBool sRay::HitBilinearPatch(sF32 &dist,const sVector31 &p00,const sVector31 &p01,const sVector31 &p10,const sVector31 &p11,sF32 *uOut,sF32 *vOut) const
 {
   sVERIFY((uOut && vOut) || (!uOut && !vOut))
 
@@ -2631,7 +2631,7 @@ bool sRay::HitBilinearPatch(sF32 &dist,const sVector31 &p00,const sVector31 &p01
   sF32 v[2];
   sInt nSolutions = sSolveQuadratic(v, A2*C1 - A1*C2, A2*D1 - A1*D2 + B2*C1 - B1*C2, B2*D1 - B1*D2);
   sF32 currentMinT = 1e+20f;
-  bool gotOne = false;
+  sBool gotOne = sFALSE;
 
   for(sInt i=0;i<nSolutions;i++)
   {
@@ -2656,7 +2656,7 @@ bool sRay::HitBilinearPatch(sF32 &dist,const sVector31 &p00,const sVector31 &p01
     {
       if(uOut) *uOut = u, *vOut = v[i];
       currentMinT = dist = t;
-      gotOne = true;
+      gotOne = sTRUE;
     }
   }
 
@@ -2783,7 +2783,7 @@ static sF32 sDistRaySegmentSquared (const sRay &ray, const sVector31 &seg1, cons
 }
 
 
-bool sRay::HitCappedCylinder(const sVector31 &cylstart, const sVector31 &cylend, sF32 radius, sF32 *dist) const
+sBool sRay::HitCappedCylinder(const sVector31 &cylstart, const sVector31 &cylend, sF32 radius, sF32 *dist) const
 {
   sF32 d2=sDistRaySegmentSquared(*this,cylstart,cylend,dist);
   return (d2<=(radius*radius));
@@ -2898,7 +2898,7 @@ sInt sFrustum::IsInside(const sOBBox &b) const
   return result;
 }
 
-bool sFrustum::IsOutside(const sOBBox &b) const
+sBool sFrustum::IsOutside(const sOBBox &b) const
 {
   sMatrix34 mat(sDontInitialize);
   mat.Init(b.BoxToWorld);
@@ -2908,10 +2908,10 @@ bool sFrustum::IsOutside(const sOBBox &b) const
     sF32 n = b.HalfExtents.x * sFAbs(mat.i ^ Planes[i])
            + b.HalfExtents.y * sFAbs(mat.j ^ Planes[i])
            + b.HalfExtents.z * sFAbs(mat.k ^ Planes[i]);
-    if(m+n<0) return true;
+    if(m+n<0) return sTRUE;
   }
 
-  return false;
+  return sFALSE;
 }
 
 void sFrustum::Transform(const sFrustum &src,const sMatrix34 &matx)
@@ -3117,22 +3117,22 @@ void sSRT::ToString(const sStringDesc &outStr) const
     sx,sy,sz,rx,ry,rz,tx,ty,tz);
 }
 
-bool sSRT::FromString(const sChar *str)
+sBool sSRT::FromString(const sChar *str)
 {
   sU32 fields[9];
   const sChar *p = str;
 
   if(sCmpStringLen(p,L"SRT=[",5) != 0)
-    return false;
+    return sFALSE;
   
   p += 5;
   for(sInt i=0;i<9;i++)
   {
     if(!sScanHex(p,(sInt&) fields[i],8))
-      return false;
+      return sFALSE;
 
     if(*p++ != ((i == 8) ? ']' : ','))
-      return false;
+      return sFALSE;
   }
 
   Scale.x = *((const sF32 *) &fields[0]);
@@ -3145,7 +3145,7 @@ bool sSRT::FromString(const sChar *str)
   Translate.y = *((const sF32 *) &fields[7]);
   Translate.z = *((const sF32 *) &fields[8]);
 
-  return true;
+  return sTRUE;
 }
 
 /****************************************************************************/
@@ -3747,42 +3747,42 @@ sF32 sPerlin2D(sF32 x,sF32 y,sInt octaves,sF32 falloff,sInt mode,sInt seed)
 /***                                                                      ***/
 /****************************************************************************/
 
-bool sGetIntersection(sVector2Arg u1, sVector2Arg u2, sVector2Arg v1, sVector2Arg v2, sF32 *s, sF32 *t, sVector2 *p)
+sBool sGetIntersection(sVector2Arg u1, sVector2Arg u2, sVector2Arg v1, sVector2Arg v2, sF32 *s, sF32 *t, sVector2 *p)
 {
   sVector2 du(u2.x - u1.x, u2.y - u1.y);
   sVector2 dv(v2.x - v1.x, v2.y - v1.y);
   sF32 d = (dv.x * du.y - dv.y * du.x);
   if (!d)
-    return false;
+    return sFALSE;
   sF32 _t = ((v1.y - u1.y) * du.x - (v1.x - u1.x) * du.y) / d;
   if ((_t < 0)||(_t > 1))
-    return false;
+    return sFALSE;
   sF32 _s;
   if (sAbs(du.y) > 0.00001f * sMax(1.0f, sMax(sAbs(u1.y), sAbs(u2.y))))
     _s = (v1.y - u1.y + _t * dv.y) / du.y;
   else
     _s = (v1.x - u1.x + _t * dv.x) / du.x;
   if ((_s < 0)||(_s > 1))
-    return false;
+    return sFALSE;
   if (t)
     *t = _t;
   if (s)
     *s = _s;
   if (p)
     p->Init(v1.x + dv.x * _t, v1.y + dv.y * _t);
-  return true;
+  return sTRUE;
 }
 
-bool sGetIntersection(sVector2Arg u1, sVector2Arg u2, const sFRect &rect, sF32 *s, sVector2 *p)
+sBool sGetIntersection(sVector2Arg u1, sVector2Arg u2, const sFRect &rect, sF32 *s, sVector2 *p)
 {  
   sVector2 _p;
   if ((sGetIntersection(u1, u2, sVector2(rect.x0, rect.y0), sVector2(rect.x1, rect.y1), s, sNULL, &_p) && rect.Hit(_p.x, _p.y))
     || (sGetIntersection(u1, u2, sVector2(rect.x1, rect.y0), sVector2(rect.x0, rect.y1), s, sNULL, &_p) && rect.Hit(_p.x, _p.y)))
   {
     if (p) *p = _p;
-    return true;
+    return sTRUE;
   }
-  return false;
+  return sFALSE;
 }
 
 sInt sGetLineSegmentIntersection(sF32 &dist0, sF32 &dist1, sVector2Arg ls0, sVector2Arg ld0, sVector2Arg ls1, sVector2Arg ld1)

@@ -18,7 +18,7 @@ MainWindow *App;
 
 /****************************************************************************/
 
-sISGUI(true);
+sISGUI(sTRUE);
 
 RectElement::RectElement()
 {

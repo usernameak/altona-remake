@@ -22,8 +22,8 @@ sEffectManager_ *sEffectManager = 0;
 
 sEffect::sEffect() 
 {
-  Valid = false;
-  Active = true;
+  Valid = sFALSE;
+  Active = sTRUE;
   Order = 0;
 }
 
@@ -31,9 +31,9 @@ sEffect::~sEffect()
 {
 }
 
-bool sEffect::OnInit()
+sBool sEffect::OnInit()
 {
-  return false;
+  return sFALSE;
 }
 
 void sEffect::OnFrame(sInt)
@@ -52,9 +52,9 @@ void sEffect::OnPaintIPP()
 {
 }
 
-bool sEffect::OnInput(const sInput2Event &ie)
+sBool sEffect::OnInput(const sInput2Event &ie)
 {
-  return false;
+  return sFALSE;
 }
 
 /****************************************************************************/
@@ -145,7 +145,7 @@ void sEffectManager_::OnPaintIPP()
   }
 }
 
-bool sEffectManager_::OnInput(const sInput2Event &ie)
+sBool sEffectManager_::OnInput(const sInput2Event &ie)
 {
   sEffect *e;
 
