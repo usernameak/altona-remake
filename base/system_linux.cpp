@@ -1740,6 +1740,10 @@ static void sXMessageLoop()
         }
 
         //sGetApp()->OnPrepareFrame();
+<<<<<<< HEAD
+=======
+
+>>>>>>> parent of 3cb5b16... sBool -> bool
         if ((sSystemFlags & sISF_2D) && !sExitFlag)
         {
           Window root;
@@ -1765,6 +1769,7 @@ static void sXMessageLoop()
         }
         
         
+
         if (sSystemFlags & sISF_3D || sSystemFlags & sISF_CONTINUOUS)
           sUpdateWindow();
       //}
