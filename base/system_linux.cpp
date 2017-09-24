@@ -1726,8 +1726,8 @@ static void sXMessageLoop()
     {
       XEvent e;
 
-      //if (!XPending(dpy) && !sXUpdateEmpty())
-      //{
+      if (!XPending(dpy) && !sXUpdateEmpty())
+      {
         sFrameHook->Call();
 
         sBool app_fullpaint = sFALSE;
@@ -1740,10 +1740,7 @@ static void sXMessageLoop()
         }
 
         //sGetApp()->OnPrepareFrame();
-<<<<<<< HEAD
-=======
 
->>>>>>> parent of 3cb5b16... sBool -> bool
         if ((sSystemFlags & sISF_2D) && !sExitFlag)
         {
           Window root;
@@ -1767,14 +1764,12 @@ static void sXMessageLoop()
         {
           Render3D();
         }
-        
-        
 
         if (sSystemFlags & sISF_3D || sSystemFlags & sISF_CONTINUOUS)
           sUpdateWindow();
-      //}
+      }
 
-      while (!(sSystemFlags & sISF_BUSYWAIT) || XPending(dpy))
+      while (!(sSystemFlags & sISF_3D) || XPending(dpy))
       {
         XNextEvent(dpy, &e);
 
@@ -1890,7 +1885,7 @@ static void sXMessageLoop()
           XDestroyWindow(dpy, sXWndFrontBuffer);
           done = sTRUE;
         }
-        if(!(sSystemFlags & sISF_BUSYWAIT)) {break;} // this workaround sucks
+        if(!(sSystemFlags & sISF_3D)) {break;} // this workaround sucks
       }
     }
 
