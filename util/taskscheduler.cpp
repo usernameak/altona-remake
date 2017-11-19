@@ -7,8 +7,6 @@
 
 #include "base/types.hpp"
 #include "util/taskscheduler.hpp"
-#include "base/graphics.hpp"
-#include "shaders.hpp"
 
 static sU32 StatSpin;
 static sU32 StatLock;
@@ -919,7 +917,7 @@ sStsPerfMon::sStsPerfMon()
   }
   Enable = 1;
 
-  Geo = new sGeometry(sGF_QUADLIST,sVertexFormatBasic);
+  /*Geo = new sGeometry(sGF_QUADLIST,sVertexFormatBasic);
   Mtrl = new sSimpleMaterial;
   Mtrl->Flags = sMTRL_ZOFF|sMTRL_CULLOFF;
   Mtrl->Prepare(sVertexFormatBasic);
@@ -928,7 +926,7 @@ sStsPerfMon::sStsPerfMon()
   GeoUsed = 0;
   GeoAlloc = 0;
 
-  Scale = 16;
+  Scale = 16;*/
 }
 
 sStsPerfMon::~sStsPerfMon()
@@ -946,8 +944,8 @@ sStsPerfMon::~sStsPerfMon()
   delete[] OldDatas;
 
   delete[] Rects;
-  delete Geo;
-  delete Mtrl;
+  //delete Geo;
+  //delete Mtrl;
 }
 
 /****************************************************************************/
@@ -987,7 +985,7 @@ void sStsPerfMon::FlipFrame()
 
 /****************************************************************************/
 
-void sStsPerfMon::Box(sF32 x0,sF32 y0,sF32 x1,sF32 y1,sU32 col)
+/*void sStsPerfMon::Box(sF32 x0,sF32 y0,sF32 x1,sF32 y1,sU32 col)
 {
   if(GeoUsed+4>=GeoAlloc)
   {
@@ -1085,7 +1083,7 @@ void sStsPerfMon::Paint(const sTargetSpec &ts)
   // done
 
   BoxEnd();
-}
+}*/
 
 /****************************************************************************/
 

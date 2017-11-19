@@ -13,7 +13,7 @@
 
 #include "base/types.hpp"
 #include "base/system.hpp"
-#include "base/graphics.hpp"
+//#include "base/graphics.hpp"
 #include "base/windows.hpp"
 #include "base/serialize.hpp"
 #include "base/math.hpp"
@@ -29,7 +29,8 @@
 
 static sDecompressImageDataHandler DecompressImageHandler[sICT_COUNT] = { 0 };
 
-void UnpackDXT(sU32 *d32,sU8 *s,sInt level,sInt xs,sInt ys);
+
+//void UnpackDXT(sU32 *d32,sU8 *s,sInt level,sInt xs,sInt ys);
 sU64 sTotalImageDataMem;
 
 /****************************************************************************/
@@ -462,7 +463,7 @@ void sImageData::Serialize(sReader &s)
   }
 }
 
-class sTextureBase *sImageData::CreateTexture() const
+/*class sTextureBase *sImageData::CreateTexture() const
 {
   sVERIFY(CodecType == sICT_RAW); // can't create textures directly from compressed images
 
@@ -518,8 +519,8 @@ class sTextureBase *sImageData::CreateCompressedTexture() const
 
   return tex;
 }
-
-void sImageData::UpdateTexture(sTextureBase *tex) const
+*/
+/*void sImageData::UpdateTexture(sTextureBase *tex) const
 {
   sVERIFY(CodecType == sICT_RAW); // can't create textures directly from compressed images
 
@@ -752,7 +753,7 @@ void sImageData::ConvertFrom(const sImage *imgorig)
       }
       break;
 
-    case sTEX_DXT1:
+    /*case sTEX_DXT1:
     case sTEX_DXT1A:
       sPackDXT(d,img->Data,img->SizeX,img->SizeY,Format,Quality);
       d += pc/2;
@@ -763,7 +764,7 @@ void sImageData::ConvertFrom(const sImage *imgorig)
     case sTEX_DXT5_AYCOCG:
       sPackDXT(d,img->Data,img->SizeX,img->SizeY,Format,Quality);
       d += pc;
-      break;
+      break;*/
     case sTEX_ARGB32F:
       {
         sVector4 *dst = (sVector4*)Data;
@@ -916,7 +917,7 @@ void sImageData::ConvertFromCube(sImage **imgptr)
         }
         break;
 
-      case sTEX_DXT1:
+      /*case sTEX_DXT1:
       case sTEX_DXT1A:
         sPackDXT(d,images[face]->Data,images[face]->SizeX,images[face]->SizeY,Format & sTEX_FORMAT,Quality);
         d += pc/2;
@@ -927,7 +928,7 @@ void sImageData::ConvertFromCube(sImage **imgptr)
       case sTEX_DXT5_AYCOCG:
         sPackDXT(d,images[face]->Data,images[face]->SizeX,images[face]->SizeY,Format & sTEX_FORMAT,Quality);
         d += pc;
-        break;
+        break;*/
       case sTEX_ARGB32F:
         {
           sVector4 *dst = (sVector4*)d;
@@ -1143,14 +1144,14 @@ void sImageData::ConvertToCube(sImage **imgptr, sInt mipmap/*=0*/)const
       }
       break;
 
-    case sTEX_DXT1:
+    /*case sTEX_DXT1:
     case sTEX_DXT1A:
     case sTEX_DXT3:
     case sTEX_DXT5:
     case sTEX_DXT5N:
     case sTEX_DXT5_AYCOCG:
       UnpackDXT((sU32 *)d,s,Format & sTEX_FORMAT,imgptr[f]->SizeX,imgptr[f]->SizeY);
-      break;
+      break;*/
     case sTEX_ARGB32F:
       {
         sVector4 *src = (sVector4*)data;
@@ -1387,14 +1388,14 @@ void sImageData::ConvertTo(sImage *img,sInt mipmap) const
     }
     break;
 
-  case sTEX_DXT1:
+  /*case sTEX_DXT1:
   case sTEX_DXT1A:
   case sTEX_DXT3:
   case sTEX_DXT5:
   case sTEX_DXT5N:
   case sTEX_DXT5_AYCOCG:
     UnpackDXT((sU32 *)d,s,Format & sTEX_FORMAT,img->SizeX,img->SizeY);
-    break;
+    break;*/
   case sTEX_INDEX8:
     for(sInt i=0;i<pc;i++)
       img->Data[i]=Palette[s[i]];
@@ -1648,7 +1649,7 @@ void sSetDecompressHandler(sInt codecType,sDecompressImageDataHandler handler)
 
 /****************************************************************************/
 
-sTextureBase *sStreamImageAsTexture(sReader &s)
+/*sTextureBase *sStreamImageAsTexture(sReader &s)
 {
   sInt version = s.Header(sSerId::sImageData,3);
   if(version==0) return 0;
@@ -2488,7 +2489,7 @@ sBool sImage::Save(const sChar *name)
 
 /****************************************************************************/
 
-void sImage::CopyRenderTarget()
+/*void sImage::CopyRenderTarget()
 {
   const sU8 *data;
   sS32 pitch;
@@ -2514,7 +2515,7 @@ void sImage::CopyRenderTarget()
   }
   sEndSaveRT();
 }
-
+*/
 /****************************************************************************/
 
 void sImage::Diff(const sImage *img0, const sImage *img1)
@@ -3208,7 +3209,7 @@ sBool sImage::LoadPNG(const sU8 *data,sInt size)
 /***                                                                      ***/
 /****************************************************************************/
 
-class sTexture2D *sLoadTexture2D(const sChar *name,sInt formatandflags)
+/*class sTexture2D *sLoadTexture2D(const sChar *name,sInt formatandflags)
 {
   sImage *img;
   sTexture2D *tex;
@@ -3229,7 +3230,7 @@ class sTexture2D *sLoadTexture2D(const sChar *name,sInt formatandflags)
 
 /****************************************************************************/
 
-class sTexture2D *sLoadTexture2D(const sImage *img,sInt formatandflags)
+/*class sTexture2D *sLoadTexture2D(const sImage *img,sInt formatandflags)
 {
   sImageData *id;
   sTexture2D *tex;
@@ -3266,7 +3267,7 @@ class sTexture2D *sLoadTexture2D(const sImageData *img)
 
 /****************************************************************************/
 
-class sTextureCube *sLoadTextureCube(const sImageData *img)
+/*class sTextureCube *sLoadTextureCube(const sImageData *img)
 {
   sTextureCube *tex;
 
@@ -3278,7 +3279,7 @@ class sTextureCube *sLoadTextureCube(const sImageData *img)
 
 /****************************************************************************/
 
-class sTextureCube *sLoadTextureCube(const sChar *t0,const sChar *t1,const sChar *t2,const sChar *t3,const sChar *t4,const sChar *t5,sInt formatandflags)
+/*class sTextureCube *sLoadTextureCube(const sChar *t0,const sChar *t1,const sChar *t2,const sChar *t3,const sChar *t4,const sChar *t5,sInt formatandflags)
 {
   sImage *img[6];
   sTextureCube *tex=0;
@@ -3319,7 +3320,7 @@ error:
   delete data;
   return 0;
 }
-
+*/
 /****************************************************************************/
 
 /****************************************************************************/
@@ -3809,7 +3810,7 @@ static void makecol(sU32 *c32,sU16 c0,sU16 c1,sBool opaque)
     }
   }
 }
-
+/*
 void UnpackDXT(sU32 *d32,sU8 *s,sInt level,sInt xs,sInt ys)
 {
   sU16 c0,c1;
@@ -4511,7 +4512,7 @@ void sImage::Outline(sInt pixelCount)
 /***                                                                      ***/
 /****************************************************************************/
 
-void sSaveRT(const sChar *filename,sTexture2D *rt)
+/*void sSaveRT(const sChar *filename,sTexture2D *rt)
 {
   const sU8 *data;
   sS32 pitch;
@@ -4545,7 +4546,7 @@ void sSaveRT(const sChar *filename,sTexture2D *rt)
     img.SaveBMP(filename);
   }
 }
-
+*/
 
 /****************************************************************************/
 /***                                                                      ***/

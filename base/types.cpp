@@ -14,7 +14,7 @@
 #include "base/types.hpp"
 #include "base/types2.hpp" 
 #include "base/system.hpp"
-#include "base/graphics.hpp"
+//#include "base/graphics.hpp"
 
 #if sPLATFORM==sPLAT_WINDOWS && sCONFIG_64BIT
 // for _controlfp87 
@@ -5009,7 +5009,7 @@ static sU64 sMemFlipFrame;
 sDInt sMemStatMaxFrameUsed=0;
 sDInt sMemStatMaxDMAUsed=0;
 
-void sRender3DFlush();
+//void sRender3DFlush();
 
 void sPartitionMemory(sPtr frame,sPtr dma,sPtr gfx)
 {
@@ -5028,7 +5028,7 @@ void sPartitionMemory(sPtr frame,sPtr dma,sPtr gfx)
   }
   if(sMemDmaSize!=dma && dma!=1)
   {
-    sRender3DFlush();
+    //sRender3DFlush();
     sMemDmaSize = 0;
     sFreeMem((void*)sMemDmaPtr[0]); sMemDmaPtr[0] = 0;
     sFreeMem((void*)sMemDmaPtr[1]); sMemDmaPtr[1] = 0;

@@ -7,7 +7,7 @@
 #include "gui/gui.hpp"
 #include "gui/dialog.hpp"
 #include "base/windows.hpp"
-#include "base/graphics.hpp"
+//#include "base/graphics.hpp"
 #include "gui/overlapped.hpp"
 
 /****************************************************************************/
@@ -466,8 +466,8 @@ sProgressDialog::sProgressDialog(const sChar *title,const sChar *text)
   sInt ReqSizeX = 400;
   sInt ReqSizeY = sGui->PropFont->GetHeight()*5/2 + 8 + 15 + 4;
 
-  sInt sx,sy;
-  sGetScreenSize(sx,sy);
+  sInt sx = 1024,sy = 768; // FIXME:
+  //sGetScreenSize(sx,sy);
   WindowRect.Init((sx - ReqSizeX)/2,(sy - ReqSizeY) / 2,(sx + ReqSizeX + 1)/2,(sy + ReqSizeY + 1)/2);
 
   Title = title;

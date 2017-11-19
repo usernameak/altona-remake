@@ -357,6 +357,8 @@ struct sTargetPara
   void Init(sInt flags,sU32 clearcol=0,const sRect *window=0);
   void Init(sInt flags,sU32 clearcol,const sRect *window,sTextureBase *colorbuffer,sTextureBase *depthbuffer);
   void SetTarget(sInt i, sTextureBase *tex, sU32 clearcol);
+  bool operator==(sTargetPara *para);
+  inline bool operator==(sTargetPara para) { return *this == &para; };
 };
 
 enum sCopyTextureFlags

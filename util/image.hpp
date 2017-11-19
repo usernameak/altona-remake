@@ -37,7 +37,108 @@
 
 
 #include "base/types.hpp"
-#include "base/graphics.hpp"
+//#include "base/graphics.hpp"
+
+enum sTextureFlags
+{
+  sTEX_UNKNOWN = 0,  // choose a format.
+  sTEX_ARGB8888 = 1, // standard 32 bit texture
+  sTEX_QWVU8888 = 2, // interpreted as signed number, for bumpmaps
+
+  sTEX_GR16 = 3,
+  sTEX_ARGB16 = 4,
+
+  sTEX_R32F = 5, // floating point textures
+  sTEX_GR32F = 6,
+  sTEX_ARGB32F = 7,
+  sTEX_R16F = 8,
+  sTEX_GR16F = 9,
+  sTEX_ARGB16F = 10,
+
+  sTEX_A8 = 11, // alpha only
+  sTEX_I8 = 12, // Intensity only (red=green=blue= 8bit)
+
+  sTEX_DXT1 = 13,  // dxt1 without alpha
+  sTEX_DXT1A = 14, // dxt1 with one bit alpha
+  sTEX_DXT3 = 15,  // dxt3: direct 4 bit alpha
+  sTEX_DXT5 = 16,  // dxt5: interpolated 3 bit alpha
+
+  sTEX_INDEX4 = 17,
+  sTEX_INDEX8 = 18,
+
+  sTEX_MRGB8 = 19,  // 8bit scaled: HDR=M*RGB
+  sTEX_MRGB16 = 20, // 16bit scaled: HDR=M*RGB
+
+  sTEX_ARGB2101010 = 21,
+  sTEX_D24S8 = 22, // depth stencil texture
+
+  sTEX_I4 = 23,       // intensity only
+  sTEX_IA4 = 24,      // intensity+alpha
+  sTEX_IA8 = 25,      // intensity+alpha
+  sTEX_RGB5A3 = 26,   // ARGB, depending on MSB, either 0:5:5:5 or 3:4:4:4
+  sTEX_ARGB1555 = 27, // 16 bit format
+  sTEX_RGB565 = 28,
+  sTEX_DXT5N = 29,    // DXT5 for normal compression: rgba = 0g0r
+  sTEX_GR8 = 30,      // green/red as 8bit (for delta-st maps)
+  sTEX_ARGB4444 = 31, // AMIGA!
+
+  sTEX_DEPTH16NOREAD = 32, // depth buffer, can not be read
+  sTEX_DEPTH24NOREAD = 33,
+  sTEX_PCF16 = 34, // depth buffer, texture read as PCF filtered (directx9 only)
+  sTEX_PCF24 = 35,
+  sTEX_DXT5_AYCOCG = 36, // YCoCg with additional alpha DXT5 compressed (with nasty color shifts which could be reduced with YCoCg without additional alpha)
+  sTEX_DEPTH16 = 37,     // depth buffer, can be bound as texture to read
+  sTEX_DEPTH24 = 38,
+
+  sTEX_8TOIA = 39, // single 8bit channel that gets replicated to RGBA
+
+  sTEX_STRUCTURED = 40, // compute shader: structured buffer.
+  sTEX_RAW = 41,        // compute shader: raw (byte addressed) buffer
+  sTEX_UINT32 = 42,     // another format useful for compute shaders.
+
+  // don't use more than 64 texture formats, some tools use an sU64 bitmask to store sets of texture formats.
+
+  sTEX_FORMAT = 0x000000ff,       // mask for format field
+  sTEX_DYNAMIC = 0x00000100,      // you want to update the texture regulary by BeginLoad() / EndLoad()
+                                  // may need more memory on consoles, use sTEX_STREAM for textures which are updated every frame
+  sTEX_RENDERTARGET = 0x00000200, // you want to use the texture as a rendertarget.
+  sTEX_NOMIPMAPS = 0x00000400,    // no mipmaps
+  sTEX_MAIN_DEPTH = 0x00000800,   // use main render target depth stencil buffer
+  sTEX_NORMALIZE = 0x00010000,    // enable renomalization durng mipmap generation - useful for bumpmaps!
+  sTEX_SCREENSIZE = 0x00020000,   // for rendertargets: use size of screen, update when resizing, use SizeX & SizeY as shift to create half / qarter screens.
+  sTEX_SOFTWARE = 0x00040000,     // flagging sTextureSoftware type
+  sTEX_SWIZZLED = 0x00080000,     // hardware dependent swizzled texture
+  sTEX_PROXY = 0x00100000,        // flagging sTextureProxy type
+  sTEX_AUTOMIPMAP = 0x00200000,   // generate mipmaps for rendertarget
+  sTEX_STREAM = 0x00400000,       // texture is update every frame
+  sTEX_FASTDXTC = 0x00800000,     // texture uses fast dxt compression
+
+  sTEX_TILED_RT = 0x01000000, // only render/resolve the target rectangle not the complete texture
+
+  sTEX_INTERNAL = 0x10000000, // used by system to initialize texture structures for backbuffer and zbuffers
+
+  sTEX_MSAA = 0x20000000,             // multisample anti aliasing (for rendertargets)
+  sTEX_NORESOLVE = 0x40000000,        // have multisampled and non multisampled buffers, but do not actually resolve (used for zbuffers)
+  sTEX_AUTOMIPMAP_POINT = 0x80000000, // in addition to the automipmap flag: use point sampling, not best sampling
+
+  // texture types
+
+  sTEX_2D = 0x00001000, // texture type.
+  sTEX_CUBE = 0x00002000,
+  sTEX_3D = 0x00003000,
+  sTEX_BUFFER = 0x00004000,    // compute shader: buffer
+  sTEX_TYPE_MASK = 0x0000f000, // must be within lower 16 bit for sImgBlobExtract::Serialize_
+
+  // running out of bits - recycling console specific flags for DX11 compute shader features
+
+  sTEX_CS_INDEX = 0x00100000,    // Will be used as an index buffer
+  sTEX_CS_VERTEX = 0x01000000,   // Will be used as a vertex buffer
+  sTEX_CS_WRITE = 0x02000000,    // create compute shader unordered access view for this texture
+  sTEX_CS_COUNT = 0x04000000,    // add counter
+  sTEX_CS_STACK = 0x08000000,    // allow append / consume
+  sTEX_CS_INDIRECT = 0x00080000, // can be used as draw indirect buffer
+};
+
 class sImage;
 class sTextureBase;
 

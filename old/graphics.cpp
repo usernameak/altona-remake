@@ -3971,6 +3971,28 @@ void sTargetPara::Init(sInt flags,sU32 clearcol,const sTargetSpec &spec)
   Cubeface = spec.Cubeface;
 }
 
+bool sTargetPara::operator==(sTargetPara *para)
+{
+  if (!para)
+  {
+    return false;
+  }
+  if (para->Flags == Flags &&
+      para->Window == Window &&
+      para->Cubeface == Cubeface &&
+      para->Mipmap == Mipmap &&
+      para->Depth == Depth)
+  {
+    for (sInt i = 0; i < 4; i++)
+    {
+      if (para->Target[i] != Target[i])
+        return false;
+    }
+    return true;
+  }
+  return false;
+}
+
 /****************************************************************************/
 
 sCopyTexturePara::sCopyTexturePara()

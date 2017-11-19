@@ -42,10 +42,13 @@ extern sBool sGUIEnabled;
 
 enum sInitSystemFlags
 {
-  sISF_FULLSCREEN       = 0x0001,     // create window in fullscreen
-  sISF_3D               = 0x0002,     // allow 3d rendering (DirectX)
-  sISF_2D               = 0x0004,     // allow 2d rendering (GDI)
+  sISF_BUSYWAIT         = 0x10000,    // busy wait
   sISF_CONTINUOUS       = 0x0008,     // update automatically
+  sISF_FULLSCREEN       = 0x0001,     // create window in fullscreen
+  sISF_3D               = 0x0002|     // allow 3d rendering (DirectX)
+                        sISF_BUSYWAIT|
+                      sISF_CONTINUOUS,// OH SHI~
+  sISF_2D               = 0x0004,     // allow 2d rendering (GDI)
   sISF_NOVSYNC          = 0x0100,     // disable wait for VSync, for benchmarks!
   sISF_REFRAST          = 0x0200,     // use reference rasterizer (sloooow)
   sISF_NOBUSYWAIT       = 0x0400,     // no busy wait during FLIP, so you get some more multithreading  
@@ -53,7 +56,8 @@ enum sInitSystemFlags
   sISF_MINIMAL          = 0x1000,     // omit platform/OS integration components, for testing only!
   sISF_FSAA             = 0x2000,     // enable full scene anti aliasing
   sISF_NODWM            = 0x4000,     // disable Vista/Win7 Desktop Window Manager
-  sISF_NOSCREENSAVE     = 0x8000,     // disable screensaver and monitor power saving
+  sISF_NOSCREENSAVE     = 0x8000,     // disable screensaver and monitor power saving,
+  
 
   sISF_SHADER_BEST      = 0x0000,     // use best available shader model
   sISF_SHADER_00        = 0x0010,     // revert to fixed function pipeline

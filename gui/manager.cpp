@@ -7,7 +7,7 @@
 #include "gui/manager.hpp"
 #include "gui/overlapped.hpp"
 #include "base/windows.hpp"
-#include "base/graphics.hpp"
+//#include "base/graphics.hpp"
 #include "base/input2.hpp"
 
 #define DEBUGOVERDRAW 0
@@ -509,7 +509,8 @@ void sGui_::OnPaint(const sRect &client,const sRect &update)
 
 void sGui_::OnPaint3d()
 {
-  Region3D.Clear();
+  // TODO: REWRITE THAT FUCKING 3D SUBSYSTEM
+  /*Region3D.Clear();
   if(Paint3dFlag)
   {
     Window3D.Clear();
@@ -523,7 +524,7 @@ void sGui_::OnPaint3d()
   if(Region3D.Rects.GetCount())
     sSetRenderClipping(&Region3D.Rects[0],Region3D.Rects.GetCount());
   else
-    sSetRenderClipping(0,0);
+    sSetRenderClipping(0,0);*/
 }
 
 

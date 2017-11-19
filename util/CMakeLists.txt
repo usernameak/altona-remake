@@ -18,9 +18,9 @@ elseif(PROJECT_OS_LINUX)
     )
 endif(WIN32)
 
-add_library(altona_util SHARED shaders.hpp camera.cpp effect.cpp image.cpp musicplayer.cpp
-    painter.cpp scanner.cpp scanconfig.cpp shaders.cpp animation.cpp
-    movieplayer.cpp perfmon.cpp taskscheduler.cpp ipp.cpp rasterizer.cpp stb_image.cpp
+add_library(altona_util SHARED effect.cpp image.cpp musicplayer.cpp
+    scanner.cpp scanconfig.cpp animation.cpp
+     taskscheduler.cpp rasterizer.cpp stb_image.cpp
     
     )
 target_link_libraries(altona_util altona_base)

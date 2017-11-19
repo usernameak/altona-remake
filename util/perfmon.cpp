@@ -10,8 +10,8 @@
 #if sPERFMON_ENABLED
 
 #include "base/system.hpp"
-#include "base/graphics.hpp"
-#include "shaders.hpp"
+//#include "base/graphics.hpp"
+//#include "shaders.hpp"
 #include "util/painter.hpp"
 
 /****************************************************************************/

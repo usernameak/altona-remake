@@ -97,6 +97,8 @@ struct sGeoBuffer
 sGeoBuffer sGeoBuffers[sMAX_GEOBUFFER];
 sInt sGeoBufferCount;
 
+GLuint sFBO = 0;
+
 
 /****************************************************************************/
 /***                                                                      ***/
@@ -487,9 +489,34 @@ void sTexture2D::EndLoad()
     channels = GL_BGRA;
     type = GL_UNSIGNED_BYTE;
     break;
+  case sTEX_QWVU8888:
+    format = GL_RGBA8I;
+    channels = GL_BGRA_INTEGER;
+    type = GL_BYTE;
+    break;
+  case sTEX_ARGB4444:
+    format = GL_RGBA4;
+    channels = GL_BGRA;
+    type = GL_UNSIGNED_SHORT_4_4_4_4_REV;
+    break;
   case sTEX_8TOIA:
     format = GL_INTENSITY8;
     channels = GL_INTENSITY8;
+    type = GL_UNSIGNED_BYTE;
+    break;
+  case sTEX_DXT1:
+    format = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
+    channels = GL_RGB;
+    type = GL_UNSIGNED_BYTE;
+    break;
+  case sTEX_DXT3:
+    format = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+    channels = GL_RGBA;
+    type = GL_UNSIGNED_BYTE;
+    break;
+  case sTEX_DXT5:
+    format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+    channels = GL_RGBA;
     type = GL_UNSIGNED_BYTE;
     break;
   case sTEX_I8:
@@ -497,6 +524,7 @@ void sTexture2D::EndLoad()
     channels = GL_LUMINANCE8;
     type = GL_UNSIGNED_BYTE;
     break;
+  
   default:
     sFatal(L"unsupported texture format %d\n",Flags);
   }
@@ -561,7 +589,12 @@ void sTextureCube::EndLoad()
   case sTEX_ARGB8888:
     format = GL_RGBA8;
     channels = GL_BGRA;
-    type = GL_UNSIGNED_BYTE;
+    type = GL_UNSIGNED_INT_8_8_8_8_REV;
+    break;
+  case sTEX_QWVU8888:
+    format = GL_RGBA8I;
+    channels = GL_BGRA_INTEGER;
+    type = GL_BYTE;
     break;
   case sTEX_8TOIA:
     format = GL_INTENSITY8;
@@ -1309,6 +1342,10 @@ void sSetTarget(const sTargetPara &para) {
     r = *vrp;
   else
     r.Init(0, 0, DXScreenMode.ScreenX, DXScreenMode.ScreenY);*/
+  if(sFBO) {
+    glDeleteFramebuffersEXT(1, &sFBO);
+  }
+  glGenFramebuffersEXT(1, &sFBO);
   if(para.Flags & sST_SCISSOR) {
     glViewport(para.Window.x0, DXScreenMode.ScreenY - para.Window.y1, para.Window.SizeX(), para.Window.SizeY());
     glScissor(para.Window.x0, DXScreenMode.ScreenY - para.Window.y1, para.Window.SizeX(), para.Window.SizeY());
@@ -1353,7 +1390,7 @@ sTexture2D *sGetScreenColorBuffer(sInt screen)
 }
 
 void sCopyTexture(const sCopyTexturePara &para) {
-  //sFatal(L"sCopyTexture is not implemented for OpenGL");
+
 }
 
 void sBeginSaveRT(const sU8 *&data, sS32 &pitch, enum sTextureFlags &flags)
@@ -1467,10 +1504,20 @@ void sSetTexture(sInt stage,class sTextureBase *tex)
         glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAX_LEVEL,tex->Mipmaps-1);
         break;
       case sTEX_3D:
-        sVERIFY(0);
+        glActiveTexture(GL_TEXTURE0 + stage);
+        glBindTexture(GL_TEXTURE_3D, tex->GLName);
+        glDisable(GL_TEXTURE_2D);
+        glEnable(GL_TEXTURE_3D);
+        glDisable(GL_TEXTURE_CUBE_MAP);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAX_LEVEL, tex->Mipmaps - 1);
         break;
       case sTEX_CUBE:
-        sVERIFY(0);
+        glActiveTexture(GL_TEXTURE0 + stage);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, tex->GLName);
+        glDisable(GL_TEXTURE_2D);
+        glDisable(GL_TEXTURE_3D);
+        glEnable(GL_TEXTURE_CUBE_MAP);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, tex->Mipmaps - 1);
         break;
     }
   }

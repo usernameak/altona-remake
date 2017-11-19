@@ -4136,6 +4136,18 @@ public:
   sInt operator[](sInt i) const { return Get(i); }
 };
 
+struct sHalfFloat // don't try to make a fully featured halffloat class, you don't want to accidentally use it...
+{                 // Seee EEEE EMMM MMMM  MMMm mmmm mmmm mmmm  (32 bit, e-127)
+  sU16 Val;       //                      SEEE EEMM MMMM MMMM  (16 bit, e-15)
+  void Set(sF32 f) { sU32 i=sRawCast<sU32,sF32>(f); Val=sU16(((i&0x80000000)>>16)|(((i&0x7f800000)>>13)-(127<<10)+(15<<10))|((i&0x007fe000)>>13)); } // do not care about special cases :-(
+
+  // ...but we want to be able to read halffloats (we do not handle NaN & co)
+  sF32 Get() const
+  { const sU32 f = ((Val&0x8000)<<16) | (((Val&0x7c00)+0x1C000)<<13) | ((Val&0x03FF)<<13);
+    return sRawCast<sF32,sU32>(f);
+  }
+};
+
 #define sISGUI(val) void sCheckIsGUI() {if(val) sEnableGUI();}
 
 /****************************************************************************/

@@ -34,8 +34,8 @@ add_subdirectory(base)
 #include_directories(${CMAKE_SOURCE_DIR}/hlsl2glsl/include)
 add_subdirectory(util)
 add_subdirectory(gui)
-add_subdirectory(shadercomp)
-add_subdirectory(asc)
+#add_subdirectory(shadercomp)
+#add_subdirectory(asc)
 
 option(BUILD_EXAMPLES "build examples" OFF)
 

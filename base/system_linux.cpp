@@ -72,12 +72,12 @@ sU32 sKeyQual;
 /***                                                                      ***/
 /****************************************************************************/
 
-void Render3D();
+//void Render3D();
 
-void PreInitGFX(sInt &flags, sInt &xs, sInt &ys);
+/*void PreInitGFX(sInt &flags, sInt &xs, sInt &ys);
 void InitGFX(sInt flags, sInt xs, sInt ys);
 void ExitGFX();
-void ResizeGFX(sInt x, sInt y);
+void ResizeGFX(sInt x, sInt y);*/
 
 /****************************************************************************/
 
@@ -1492,7 +1492,7 @@ void sInit(sInt flags, sInt xs, sInt ys)
     if (flags & sISF_3D)
     {
       //sPrintF(L"preinitgfx");
-      PreInitGFX(flags, xs, ys);
+      //PreInitGFX(flags, xs, ys);
     }
     sPrintF(L"%x\n", flags);
 
@@ -1547,10 +1547,11 @@ void sInit(sInt flags, sInt xs, sInt ys)
     {
       //
 
-      InitGFX(flags, xs, ys);
+      
+      //InitGFX(flags, xs, ys);
     }
-    else
-      ResizeGFX(xs, ys);
+    else;
+      //ResizeGFX(xs, ys);
 
     XSynchronize(dpy, False);
 
@@ -1760,16 +1761,16 @@ static void sXMessageLoop()
           sCollector();
         }
 
-        if (!app_fullpaint && (sSystemFlags & sISF_3D))
+        /*if (!app_fullpaint && (sSystemFlags & sISF_3D))
         {
           Render3D();
-        }
+        }*/
 
-        if (sSystemFlags & sISF_3D || sSystemFlags & sISF_CONTINUOUS)
+        if (/*sSystemFlags & sISF_3D || */sSystemFlags & sISF_CONTINUOUS)
           sUpdateWindow();
       }
 
-      while (!(sSystemFlags & sISF_3D) || XPending(dpy))
+      while (!(sSystemFlags & sISF_BUSYWAIT) || XPending(dpy))
       {
         XNextEvent(dpy, &e);
 
@@ -1879,13 +1880,13 @@ static void sXMessageLoop()
           sCollect();
           sCollector(sTRUE);
 
-          if (sSystemFlags & sISF_3D)
-            ExitGFX();
+          //if (sSystemFlags & sISF_3D)
+            //ExitGFX();
 
           XDestroyWindow(dpy, sXWndFrontBuffer);
           done = sTRUE;
         }
-        if(!(sSystemFlags & sISF_3D)) {break;} // this workaround sucks
+        if(!(sSystemFlags & sISF_BUSYWAIT)) {break;} // this workaround sucks
       }
     }
 
@@ -1895,8 +1896,8 @@ static void sXMessageLoop()
     sCollect();
     sCollector(sTRUE);
 
-    if (sSystemFlags & sISF_3D)
-      ExitGFX();
+    //if (sSystemFlags & sISF_3D)
+      //ExitGFX();
   }
   else // something went wrong, clean up
   {
@@ -1904,8 +1905,8 @@ static void sXMessageLoop()
     sCollect();
     sCollector(sTRUE);
 
-    if (sSystemFlags & sISF_3D)
-      ExitGFX();
+    //if (sSystemFlags & sISF_3D);
+      //ExitGFX();
   }
 
   XCloseDisplay(dpy);
