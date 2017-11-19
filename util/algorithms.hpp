@@ -46,19 +46,19 @@ public:
   sArrayRange(T *beg,T *end) : Begin(beg), End(end)   {}
 
   sINLINE sBool IsEmpty() const                       { return Begin == End; }
-  sINLINE sInt GetCount() const                       { return (sInt) (End - Begin); }
+  sINLINE int GetCount() const                       { return (int) (End - Begin); }
 
   sINLINE T &GetHead()                                { return *Begin; }
   sINLINE T &GetTail()                                { return *(End - 1); }
 
-  sINLINE T &operator[](sInt pos) const               { return Begin[pos]; }
+  sINLINE T &operator[](int pos) const               { return Begin[pos]; }
   sINLINE sBool operator==(const sArrayRange &x)      { return Begin==x.Begin && End==x.End; }
   sINLINE sBool operator!=(const sArrayRange &x)      { return Begin!=x.Begin || End!=x.End; }
 
   sINLINE void RemHead()                              { ++Begin; }
   sINLINE void RemTail()                              { --End; }
 
-  sINLINE ThisType Slice(sInt first,sInt last) const  { return ThisType(Begin+first,Begin+last); }
+  sINLINE ThisType Slice(int first,int last) const  { return ThisType(Begin+first,Begin+last); }
 
   sINLINE DirectType GetDirect() const                { return Begin; }
 
@@ -81,7 +81,7 @@ namespace sAlgoImpl
     /* No impl. of Get, T is not an array type! */
   };
 
-  template<typename T,sInt N>
+  template<typename T,int N>
   struct GetAll<T[N]>
   {
     typedef T ValueType;
@@ -139,13 +139,13 @@ sINLINE sArrayRange<const T> sAll(const ArrayType<T,size> &x) { const T *ptr = x
 
     // if you might need generic resizing....
     template<typename T>
-    sINLINE sArrayRange<typename sAlgoImpl::GetAll<T>::ValueType> sAllResize(T &x, sInt newCount) { return sAlgoImpl::GetAll<T>::Get(x); }
+    sINLINE sArrayRange<typename sAlgoImpl::GetAll<T>::ValueType> sAllResize(T &x, int newCount) { return sAlgoImpl::GetAll<T>::Get(x); }
 
     template<template<typename> class ArrayType, typename T>
-    sINLINE sArrayRange<T> sAllResize(ArrayType<T> &x, sInt newCount)      { x.Resize(newCount); T *ptr = x.GetData(); return sArrayRange<T>(ptr,ptr+x.GetSize()); }
+    sINLINE sArrayRange<T> sAllResize(ArrayType<T> &x, int newCount)      { x.Resize(newCount); T *ptr = x.GetData(); return sArrayRange<T>(ptr,ptr+x.GetSize()); }
 
     template<template<typename,int> class ArrayType, typename T, int size>
-    sINLINE sArrayRange<T> sAllResize(ArrayType<T,size> &x, sInt newCount) { x.Resize(newCount); T *ptr = x.GetData(); return sArrayRange<T>(ptr,ptr+x.GetSize()); }
+    sINLINE sArrayRange<T> sAllResize(ArrayType<T,size> &x, int newCount) { x.Resize(newCount); T *ptr = x.GetData(); return sArrayRange<T>(ptr,ptr+x.GetSize()); }
 
     template<typename T>
     struct sArrayInfo
@@ -247,10 +247,10 @@ namespace sAlgoImpl
 
     ReverseRange(const Range &host) : ReverseRange<Range,sFALSE>(host) {}
 
-    sINLINE sInt GetCount() const                       { return ReverseRange<Range,sFALSE>::Host.GetCount(); }
+    sINLINE int GetCount() const                       { return ReverseRange<Range,sFALSE>::Host.GetCount(); }
 
-    sINLINE ValueType &operator[](sInt pos) const       { return ReverseRange<Range,sFALSE>::Host[ReverseRange<Range,sFALSE>::Host.GetCount() - 1 - pos]; }
-    sINLINE ThisType Slice(sInt first,sInt last) const  { sInt cnt = ReverseRange<Range,sFALSE>::Host.GetCount(); return ReverseRange(ReverseRange<Range,sFALSE>::Host.Slice(cnt-1-last,cnt-1-first)); }
+    sINLINE ValueType &operator[](int pos) const       { return ReverseRange<Range,sFALSE>::Host[ReverseRange<Range,sFALSE>::Host.GetCount() - 1 - pos]; }
+    sINLINE ThisType Slice(int first,int last) const  { int cnt = ReverseRange<Range,sFALSE>::Host.GetCount(); return ReverseRange(ReverseRange<Range,sFALSE>::Host.Slice(cnt-1-last,cnt-1-first)); }
 
     sINLINE DirectType GetDirect() const                { return *this; }
   };
@@ -414,21 +414,21 @@ template<typename Range,typename Pred=sCmpLess<typename Range::ValueType> >
 class sBinaryHeap
 {
   Range Store;
-  sInt Length;
+  int Length;
   Pred Less;
 
   typedef typename Range::ValueType ValueType;
 
 public:
   // Turns the given range into a (max)-Heap.
-  sBinaryHeap(const Range &range,const Pred &less=Pred(),sInt size=-1);
+  sBinaryHeap(const Range &range,const Pred &less=Pred(),int size=-1);
 
   // Changes the storage for this heap. Needed after e.g. an array resize.
   // The data needs to be there already, this is just to complete the relocation.
   void ChangeStore(const Range &range)    { Store = range; }
 
   // Returns the current length of the heap
-  sInt GetLength() const                  { return Length; }
+  int GetLength() const                  { return Length; }
 
   // Returns the top (largest) element of the heap
   ValueType Top() const                   { sVERIFY(Length > 0); return Store[0]; }
@@ -438,14 +438,14 @@ public:
 
   // Pop the largest N elements, put them in increasing order and return the corresponding range.
   // If there's less than N elements in the heap, return however many are there.
-  Range Pop(sInt N);
+  Range Pop(int N);
 };
 
 // siftdown for heap operations. we can't rely on compiler inlining, because
 // we'd have dismal performance for basic operations in debug builds.
 #define SIFTDOWN(arr,start,count,less)                    \
   {                                                       \
-    sInt root = start, child;                             \
+    int root = start, child;                             \
     while((child=root*2+1) < count)                       \
     {                                                     \
       if(child<count-1 && less(arr[child],arr[child+1]))  \
@@ -458,17 +458,17 @@ public:
   }
 
 template<typename Range,typename Pred>
-sBinaryHeap<Range,Pred>::sBinaryHeap(const Range &range,const Pred &less,sInt size)
+sBinaryHeap<Range,Pred>::sBinaryHeap(const Range &range,const Pred &less,int size)
   : Store(range), Less(less)
 {
   sVERIFYSTATIC(Range::IsRandomAccess);
-  sInt count = range.GetCount();
+  int count = range.GetCount();
   if(size == -1)
     size = count;
 
   typename Range::DirectType r = range.GetDirect();
   Length = count = sMin(count,size);
-  for(sInt i=count >> 1; --i >= 0;)
+  for(int i=count >> 1; --i >= 0;)
     SIFTDOWN(r,i,count,Less)
 }
 
@@ -476,7 +476,7 @@ template<typename Range,typename Pred>
 void sBinaryHeap<Range,Pred>::Pop()
 {
   sVERIFY(Length > 0);
-  sInt remCount = --Length; // length after pop
+  int remCount = --Length; // length after pop
 
   if(remCount > 0)
     sSwap(Store.GetHead(),Store[remCount]); // replace top with range[remCount]
@@ -486,15 +486,15 @@ void sBinaryHeap<Range,Pred>::Pop()
 }
 
 template<typename Range,typename Pred>
-Range sBinaryHeap<Range,Pred>::Pop(sInt N)
+Range sBinaryHeap<Range,Pred>::Pop(int N)
 {
   sVERIFY(N >= 0);
   
   Range range = Store;      // copy so it's in a local var (=quicker)
-  sInt count = Length;
+  int count = Length;
   N = sMin(N,count);
   
-  sInt newCount = count-N;
+  int newCount = count-N;
   Range result = range.Slice(newCount,Length);
   typename Range::DirectType r = range.GetDirect();
 
@@ -530,9 +530,9 @@ void sHeapSort(const Range &range)
 {
 #define LESS(a,b) a<b
 
-  sInt count = range.GetCount();
+  int count = range.GetCount();
   typename Range::DirectType r = range.GetDirect();
-  for(sInt i=count >> 1; --i >= 0;)
+  for(int i=count >> 1; --i >= 0;)
     SIFTDOWN(r,i,count,LESS)
 
   while(--count > 0)
@@ -556,15 +556,15 @@ void sHeapSort(const Range &range)
 template<typename Range,typename Pred>
 void sInsertionSort(const Range &range,const Pred &less)
 {
-  sInt count = range.GetCount();
+  int count = range.GetCount();
   typename Range::DirectType r = range.GetDirect();
 
-  for(sInt i=1;i<count;i++)
+  for(int i=1;i<count;i++)
   {
     if(less(r[i],r[i-1]))
     {
       typename Range::ValueType v = r[i];
-      sInt j = i;
+      int j = i;
 
       do r[j] = r[j-1], j--; while(j>0 && less(v,r[j-1]));
       r[j] = v;
@@ -575,15 +575,15 @@ void sInsertionSort(const Range &range,const Pred &less)
 template<typename Range>
 void sInsertionSort(const Range &range)
 {
-  sInt count = range.GetCount();
+  int count = range.GetCount();
   typename Range::DirectType r = range.GetDirect();
 
-  for(sInt i=1;i<count;i++)
+  for(int i=1;i<count;i++)
   {
     if(r[i]<r[i-1])
     {
       typename Range::ValueType v = r[i];
-      sInt j = i;
+      int j = i;
 
       do r[j] = r[j-1], j--; while(j>0 && v<r[j-1]);
       r[j] = v;
@@ -637,16 +637,16 @@ namespace sAlgoImpl
   // UPDATE: After some experimenting with nontrivial compares, 32 *does*
   // in fact seem like a reasonable value. Weird. That's a lot larger
   // than I would've expected.
-  static const sInt ISortThreshold = 32;
+  static const int ISortThreshold = 32;
 
   // Introsort implementation with an ordering predicate.
   // References:
   // Musser:  "Introspective sorting and selection algorithms", Software
   //   Practice and Experience, Vol. 27(8), pp. 983-993 (Aug 1997)
   template<typename Range,typename Pred>
-  void IntroSortR(const Range &range,sInt cutoff,const Pred &less)
+  void IntroSortR(const Range &range,int cutoff,const Pred &less)
   {
-    sInt count = range.GetCount();
+    int count = range.GetCount();
     typename Range::DirectType r = range.GetDirect();
 
     if(count > ISortThreshold)
@@ -660,7 +660,7 @@ namespace sAlgoImpl
         // invariant:
         //  |  <=  |  ???  | >= |
         //  0      i       j    n
-        sInt i = 0, j = count;
+        int i = 0, j = count;
 
         for(;;)
         {
@@ -679,7 +679,7 @@ namespace sAlgoImpl
         cutoff += cutoff >> 2;
 
         // recurse
-        sInt n;
+        int n;
         if((n = j+1) > 1)     IntroSortR(range.Slice(0,n),cutoff,less);
         if((n = count-i) > 1) IntroSortR(range.Slice(i,count),cutoff,less);
       }
@@ -692,9 +692,9 @@ namespace sAlgoImpl
 
   // Introsort implementation using direct less-than.
   template<typename Range>
-  void IntroSortR(const Range &range,sInt cutoff)
+  void IntroSortR(const Range &range,int cutoff)
   {
-    sInt count = range.GetCount();
+    int count = range.GetCount();
     typename Range::DirectType r = range.GetDirect();
 
     if(count > ISortThreshold)
@@ -708,7 +708,7 @@ namespace sAlgoImpl
         // invariant:
         //  |  <=  |  ???  | >= |
         //  0      i       j    n
-        sInt i = 0, j = count;
+        int i = 0, j = count;
 
         for(;;)
         {
@@ -727,7 +727,7 @@ namespace sAlgoImpl
         cutoff += cutoff >> 2;
 
         // recurse
-        sInt n;
+        int n;
         if((n = j+1) > 1)     IntroSortR(range.Slice(0,n),cutoff);
         if((n = count-i) > 1) IntroSortR(range.Slice(i,count),cutoff);
       }
@@ -762,14 +762,14 @@ void sIntroSort(const Range &range)
 // Lower bound: Assuming a sorted range, this returns the first position
 // where x could be inserted without violating the order.
 template<typename Range,typename T,typename Pred>
-sInt sLowerBound(const Range &range,const T &x,const Pred &less)
+int sLowerBound(const Range &range,const T &x,const Pred &less)
 {
-  sInt l=0, r=range.GetCount();
+  int l=0, r=range.GetCount();
   // invariant: the "crossover point" p is between range[l] and range[r],
   // i.e. for all 0<=i<l:less(range[i],x) and for all r<=i<count:!less(range[i],x)
   while(l<r)
   {
-    sInt m = l + (r-l)/2;
+    int m = l + (r-l)/2;
     if(less(range[m],x))
       l = m+1;
     else
@@ -780,12 +780,12 @@ sInt sLowerBound(const Range &range,const T &x,const Pred &less)
 }
 
 template<typename Range,typename T>
-sInt sLowerBound(const Range &range,const T &x)
+int sLowerBound(const Range &range,const T &x)
 {
-  sInt l=0, r=range.GetCount();
+  int l=0, r=range.GetCount();
   while(l<r)
   {
-    sInt m = l + (r-l)/2;
+    int m = l + (r-l)/2;
     if(range[m]<x)
       l = m+1;
     else
@@ -798,14 +798,14 @@ sInt sLowerBound(const Range &range,const T &x)
 // Upper bound: Assuming a sorted range, this returns the last position
 // where x could be inserted without violating the order.
 template<typename Range,typename T,typename Pred>
-sInt sUpperBound(const Range &range,const T &x,const Pred &less)
+int sUpperBound(const Range &range,const T &x,const Pred &less)
 {
-  sInt l=0, r=range.GetCount();
+  int l=0, r=range.GetCount();
   // invariant: the "crossover point" p is between range[l] and range[r],
   // i.e. for all 0<=i<l:!less(x,range[i]) and for all r<=i<count:less(x,range[i])
   while(l<r)
   {
-    sInt m = l + (r-l)/2;
+    int m = l + (r-l)/2;
     if(!less(x,range[m]))
       l = m+1;
     else
@@ -816,12 +816,12 @@ sInt sUpperBound(const Range &range,const T &x,const Pred &less)
 }
 
 template<typename Range,typename T>
-sInt sUpperBound(const Range &range,const T &x)
+int sUpperBound(const Range &range,const T &x)
 {
-  sInt l=0, r=range.GetCount();
+  int l=0, r=range.GetCount();
   while(l<r)
   {
-    sInt m = l + (r-l)/2;
+    int m = l + (r-l)/2;
     if(!(x<range[m]))
       l = m+1;
     else
@@ -864,25 +864,25 @@ Range sAllGreaterThan(const Range &range,const T &x)
 template<typename Range,typename T,typename Pred>
 Range sAllEqual(const Range &range,const T &x,const Pred &less)
 {
-  sInt l = sLowerBound(range,x,less);
-  sInt count = sUpperBound(range.Slice(l,range.GetCount()),x,less);
+  int l = sLowerBound(range,x,less);
+  int count = sUpperBound(range.Slice(l,range.GetCount()),x,less);
   return range.Slice(l,l+count);
 }
 
 template<typename Range,typename T>
 Range sAllEqual(const Range &range,const T &x)
 {
-  sInt l = sLowerBound(range,x);
-  sInt count = sUpperBound(range.Slice(l,range.GetCount()),x);
+  int l = sLowerBound(range,x);
+  int count = sUpperBound(range.Slice(l,range.GetCount()),x);
   return range.Slice(l,l+count);
 }
 
 // Find first: Assuming a sorted range, returns the index of the first
 // occurence of item x (or -1 if not found)
 template<typename Range,typename T,typename Pred>
-sInt sFindFirst(const Range &range,const T &x,const Pred &less)
+int sFindFirst(const Range &range,const T &x,const Pred &less)
 {
-  sInt l = sLowerBound(range,x,less);
+  int l = sLowerBound(range,x,less);
   if(l < range.GetCount() && range[l] == x)
     return l;
   else
@@ -890,9 +890,9 @@ sInt sFindFirst(const Range &range,const T &x,const Pred &less)
 }
 
 template<typename Range,typename T>
-sInt sFindFirst(const Range &range,const T &x)
+int sFindFirst(const Range &range,const T &x)
 {
-  sInt l = sLowerBound(range,x);
+  int l = sLowerBound(range,x);
   if(l < range.GetCount() && range[l] == x)
     return l;
   else

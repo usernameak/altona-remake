@@ -43,15 +43,15 @@ public:
 
   // Rasterize everything currently specified with the given fill convention and color.
   // This also clears all active draw commands.
-  void RasterizeAll(sU32 color, sInt fillConvention); 
+  void RasterizeAll(sU32 color, int fillConvention); 
 
 private:
   struct EdgeRec
   {
     EdgeRec *Prev,*Next;    // Linked list
-    sInt x,dx;              // fixed point
-    sInt y1,y2;             // y1<y2
-    sInt dir;               // original direction (for winding calc)
+    int x,dx;              // fixed point
+    int y1,y2;             // y1<y2
+    int dir;               // original direction (for winding calc)
 
     sBool operator <(const EdgeRec &b) const
     {
@@ -61,11 +61,11 @@ private:
 
   EdgeRec EHead,*Head;
   sArray<EdgeRec> Edges;
-  sInt MinY,MaxY;
+  int MinY,MaxY;
   sVector2 Pos;
 
   sImage *Target;
-  sInt TargetHeight; // in scaled, fixed-point units
+  int TargetHeight; // in scaled, fixed-point units
 };
 
 /****************************************************************************/

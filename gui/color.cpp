@@ -121,8 +121,8 @@ void sColorGradient::Calc(sF32 time,sVector4 &col)
 
 void sColorGradient::CalcUnwarped(sF32 time,sVector4 &col)
 {
-  sInt max = Keys.GetCount();
-  sInt pos;
+  int max = Keys.GetCount();
+  int pos;
   sVERIFY(max>=2);
 
   if(time<=Keys[0].Time)
@@ -210,12 +210,12 @@ void sColorGradientControl::OnPaint2D()
   sGui->RectHL(cl,sGC_DRAW,sGC_DRAW);
   cl.Extend(-1);
 
-  sInt xs = cl.SizeX();
+  int xs = cl.SizeX();
   if(xs!=Bar->SizeX)
     Bar->Init(xs,1);
   sU32 *d = Bar->Data;
   sVector4 col;
-  for(sInt i=0;i<xs;i++)
+  for(int i=0;i<xs;i++)
   {
     Gradient->Calc(sF32(i)/(xs-1),col);
     *d++ = col.GetColor();
@@ -441,7 +441,7 @@ void sColorPickerWindow::ChangeRGB()
 
 void sColorPickerWindow::ChangeHSV()
 {
-	sInt i;
+	int i;
 	sF32 f, p, q, t;
   sF32 *r = &Red;
   sF32 *g = &Green;
@@ -454,7 +454,7 @@ void sColorPickerWindow::ChangeHSV()
   else
   {
 	  sF32 h = Mod1(Hue/360.0f)*6;
-	  i = sInt(sFFloor(h));
+	  i = int(sFFloor(h));
 	  f = h - i;
 	  p = Value * (1 - Sat);
 	  q = Value * (1 - Sat * f );
@@ -502,10 +502,10 @@ void sColorPickerWindow::ChangeHSV()
   UpdateOutput();
 }
 
-void IntHSV(sU8 *dest,sInt h,sInt s,sInt v)
+void IntHSV(sU8 *dest,int h,int s,int v)
 {
-	sInt i;
-	sInt f, p, q, t;
+	int i;
+	int f, p, q, t;
   sU8 *r = dest+2;
   sU8 *g = dest+1;
   sU8 *b = dest+0;
@@ -573,11 +573,11 @@ void sColorPickerWindow::UpdateOutput()
   if(UPtr)
   {
     sGui->Notify(UPtr,sizeof(sU8)*(3+AlphaEnable));
-    UPtr[2] = sClamp(sInt(Red  *255),0,255);
-    UPtr[1] = sClamp(sInt(Green*255),0,255);
-    UPtr[0] = sClamp(sInt(Blue *255),0,255);
+    UPtr[2] = sClamp(int(Red  *255),0,255);
+    UPtr[1] = sClamp(int(Green*255),0,255);
+    UPtr[0] = sClamp(int(Blue *255),0,255);
     if(AlphaEnable)
-      UPtr[3] = sClamp(sInt(Alpha*255),0,255);
+      UPtr[3] = sClamp(int(Alpha*255),0,255);
   }
   Update();
 }
@@ -597,10 +597,10 @@ void sColorPickerWindow::OnPaint2D()
   if(PickSat!=Sat || PickHue!=Hue)
   {
     sU8 *d=(sU8 *)PickImage->Data;
-    sInt v=sClamp(sInt(Value*255),0,255);
-    for(sInt s=0;s<PickImage->SizeY;s++)
+    int v=sClamp(int(Value*255),0,255);
+    for(int s=0;s<PickImage->SizeY;s++)
     {
-      for(sInt h=0;h<PickImage->SizeX;h++)
+      for(int h=0;h<PickImage->SizeX;h++)
       {
         IntHSV(d,h*6*256/PickImage->SizeX,s*256/PickImage->SizeY,v);
         d[3]=255;
@@ -626,7 +626,7 @@ void sColorPickerWindow::OnPaint2D()
     sVector4 col;
     sU32 *d=GradientImage->Data;
     sU32 *w=WarpImage->Data;
-    for(sInt x=0;x<GradientImage->SizeX;x++)
+    for(int x=0;x<GradientImage->SizeX;x++)
     {
       Gradient->CalcUnwarped(sF32(x)/(GradientImage->SizeX-1),col);
       *d++ =col.GetColor();
@@ -637,9 +637,9 @@ void sColorPickerWindow::OnPaint2D()
 
   // paint rects
 
-  sInt cr = sClamp(sInt(Red  *255),0,255);
-  sInt cg = sClamp(sInt(Green*255),0,255);
-  sInt cb = sClamp(sInt(Blue *255),0,255);
+  int cr = sClamp(int(Red  *255),0,255);
+  int cg = sClamp(int(Green*255),0,255);
+  int cb = sClamp(int(Blue *255),0,255);
 
   sRect2D(Client.x0,BarRect.y1,Client.x1,BarRect.y1+1,sGC_DRAW);
   sRect2D(PickRect.x0-1,PickRect.y0,PickRect.x0,PickRect.y1,sGC_DRAW);
@@ -650,19 +650,19 @@ void sColorPickerWindow::OnPaint2D()
     sRect2D(BarRect,0);
 
     sRect r(PaletteRect);
-    sInt h = 20;
-    sInt w = r.SizeX()+1;
+    int h = 20;
+    int w = r.SizeX()+1;
     sRect2D(PaletteRect,sGC_RED);
-    for(sInt i=0;i<4;i++)
+    for(int i=0;i<4;i++)
       sRect2D(r.x0,r.y0+i*h,r.x1,r.y0+i*h+1,sGC_DRAW);
-    for(sInt i=1;i<8;i++)
+    for(int i=1;i<8;i++)
       sRect2D(r.x0+w*i/8-1,r.y0,r.x0+w*i/8,r.y1,sGC_DRAW);
 
-    for(sInt y=0;y<4;y++)
+    for(int y=0;y<4;y++)
     {
-      for(sInt x=0;x<8;x++)
+      for(int x=0;x<8;x++)
       {
-        sInt i = y*8+x;
+        int i = y*8+x;
         sVector4 v(PaletteColors[i][0],PaletteColors[i][1],PaletteColors[i][2],0);
         sU32 col = v.GetColor();
         sSetColor2D(sGC_MAX,col);
@@ -690,9 +690,9 @@ void sColorPickerWindow::OnPaint2D()
     sClipRect(BarRect);
     sFORALL(Gradient->Keys,key)
     {
-      sInt x = r.x0 + sInt(sClamp(key->Time,0.0f,1.0f)*(r.SizeX()-1));
-      sInt y = r.y0;
-      sInt col = (_i==DragKey) ? sGC_SELECT : sGC_DRAW;
+      int x = r.x0 + int(sClamp(key->Time,0.0f,1.0f)*(r.SizeX()-1));
+      int y = r.y0;
+      int col = (_i==DragKey) ? sGC_SELECT : sGC_DRAW;
 
       sRect2D(x,BarRect.y0,x+1,y,col);
       sLine2D(x  ,y  ,x-4,y+4,col);
@@ -704,10 +704,10 @@ void sColorPickerWindow::OnPaint2D()
 
   // paint colour picker handle
 
-  sInt x = sInt(Mod1(Hue/360)*PickRect.SizeX())+PickRect.x0;
-  sInt y = sInt(Sat*PickRect.SizeY())+PickRect.y0;
-  sInt n = 3;
-  sInt color = Value>0.5 ? sGC_BLACK : sGC_WHITE;
+  int x = int(Mod1(Hue/360)*PickRect.SizeX())+PickRect.x0;
+  int y = int(Sat*PickRect.SizeY())+PickRect.y0;
+  int n = 3;
+  int color = Value>0.5 ? sGC_BLACK : sGC_WHITE;
 
   sClipPush();
   sClipRect(PickRect);
@@ -733,8 +733,8 @@ void sColorPickerWindow::OnCalcSize()
 
 void sColorPickerWindow::OnLayout()
 {
-  sInt x = Client.x0+150;
-  sInt y = Client.y0+20;//sMax(Client.y0,Client.y1 - Grid->DecoratedSizeY);
+  int x = Client.x0+150;
+  int y = Client.y0+20;//sMax(Client.y0,Client.y1 - Grid->DecoratedSizeY);
   if(Gradient)
     y += 20;
 
@@ -763,7 +763,7 @@ void sColorPickerWindow::OnLayout()
   }
 }
 
-void sColorPickerWindow::SelectKey(sInt nr)
+void sColorPickerWindow::SelectKey(int nr)
 {
   sColorGradientKey *key;
   DragKey = nr;
@@ -792,12 +792,12 @@ void sColorPickerWindow::OnDrag(const sWindowDrag &dd)
       if(dd.Buttons == 1)
       {
         sColorGradientKey *key;
-        sInt best = 5;
-        sInt bestindex = -1;
+        int best = 5;
+        int bestindex = -1;
 
         sFORALL(Gradient->Keys,key)
         {
-          sInt dist = sAbs(Client.x0 + sInt((key->Time*(Client.SizeX()-1))) - dd.MouseX);
+          int dist = sAbs(Client.x0 + int((key->Time*(Client.SizeX()-1))) - dd.MouseX);
           if(dist<best)
           {
             bestindex = _i;
@@ -834,7 +834,7 @@ void sColorPickerWindow::OnDrag(const sWindowDrag &dd)
     }
     if(PaletteRect.Hit(dd.MouseX,dd.MouseY))
     {
-      for(sInt i=0;i<32;i++)
+      for(int i=0;i<32;i++)
       {
         if(PaletteBoxes[i].Hit(dd.MouseX,dd.MouseY))
         {

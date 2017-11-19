@@ -19,28 +19,28 @@
 class sTextWindow : public sWindow
 {
   sPrintInfo PrintInfo;
-  sInt MarkMode;
-  sInt MarkBegin;
-  sInt MarkEnd;
-  sInt WindowHeight;
-  sInt DragCursorStart;
-  sInt DisableDrag;
-  sInt GoodCursorX;
+  int MarkMode;
+  int MarkBegin;
+  int MarkEnd;
+  int WindowHeight;
+  int DragCursorStart;
+  int DisableDrag;
+  int GoodCursorX;
   class sFont2D *Font;
   sRect TextRect;
 
   sTextBuffer *Text;              // textbuffer to edit
 
-  void GetCursorPos(sInt &x,sInt &y);
-  sInt FindCursorPos(sInt x,sInt y);
+  void GetCursorPos(int &x,int &y);
+  int FindCursorPos(int x,int y);
   sBool BeginMoveCursor(sBool selmode);
   void EndMoveCursor(sBool selmode);
-  void Delete(sInt pos,sInt len);
-  void Insert(sInt pos,const sChar *s,sInt len=-1);
-  void Mark(sInt start,sInt end);
+  void Delete(int pos,int len);
+  void Insert(int pos,const sChar *s,int len=-1);
+  void Mark(int start,int end);
   void MarkOff();
 
-  sInt CursorTimer;
+  int CursorTimer;
   void CmdCursorToggle();
 
   sMessageTimer *Timer;
@@ -48,23 +48,23 @@ class sTextWindow : public sWindow
   struct UndoStep
   {
     sBool Delete;
-    sInt Pos;
-    sInt Count;
+    int Pos;
+    int Count;
     sChar *Text;
   };
   UndoStep *UndoBuffer;
-  sInt UndoAlloc;
-  sInt UndoValid;
-  sInt UndoIndex;
+  int UndoAlloc;
+  int UndoValid;
+  int UndoIndex;
   sString<256> UndoCollector;
-  sInt UndoCollectorIndex;
-  sInt UndoCollectorValid;
-  sInt UndoCollectorStart;
+  int UndoCollectorIndex;
+  int UndoCollectorValid;
+  int UndoCollectorStart;
 
   UndoStep *UndoGetStep();
   void UndoFlushCollector();
-  void UndoInsert(sInt pos,const sChar *string,sInt len);
-  void UndoDelete(sInt pos,sInt size);
+  void UndoInsert(int pos,const sChar *string,int len);
+  void UndoDelete(int pos,int size);
   void Undo();
   void Redo();
 
@@ -88,13 +88,13 @@ public:
 
   sObject *TextTag;               // this tag will be hold should be object in which the textbuffer is embedded
 
-  sInt TextFlags;                 // sF2P_???
-  sInt EditFlags;                 // sTEF_???
-  sInt EnterCmd;                  // post this when enter is pressed
-  sInt BackColor;                 // sGC_???
-  sInt HintLine;                  // fine vertical line that hints the right border of the page
+  int TextFlags;                 // sF2P_???
+  int EditFlags;                 // sTEF_???
+  int EnterCmd;                  // post this when enter is pressed
+  int BackColor;                 // sGC_???
+  int HintLine;                  // fine vertical line that hints the right border of the page
   sU32 HintLineColor;             // sGC_???
-  sInt TabSize;                   // default 8. currently, TAB insert spaces
+  int TabSize;                   // default 8. currently, TAB insert spaces
   sMessage EnterMsg;
   sMessage ChangeMsg;
   sMessage CursorMsg;             // when cursor changes
@@ -103,23 +103,23 @@ public:
 
   void DeleteChar();
   void DeleteBlock();
-  void InsertChar(sInt c);
+  void InsertChar(int c);
   void InsertString(const sChar *s);
-  void IndentBlock(sInt indent);
-  void OverwriteChar(sInt c);
+  void IndentBlock(int indent);
+  void OverwriteChar(int c);
   void TextChanged();             // react to the fact that the text changed.
-  void SetCursor(sInt p);
+  void SetCursor(int p);
   void SetCursor(const sChar *p);
   void SetFont(sFont2D *newFont);
   void ScrollToCursor();
   sFont2D *GetFont();
-  sInt GetCursorPos() { return PrintInfo.CursorPos; }
-  sInt GetCursorColumn() const;
+  int GetCursorPos() { return PrintInfo.CursorPos; }
+  int GetCursorColumn() const;
   void Find(const sChar *string,sBool dir,sBool next);
-  void GetMark(sInt &start,sInt &end);
+  void GetMark(int &start,int &end);
 
   void UndoClear();
-  void UndoGetStats(sInt &undos,sInt &redos);
+  void UndoGetStats(int &undos,int &redos);
 
 };
 

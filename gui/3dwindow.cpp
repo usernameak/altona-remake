@@ -10,7 +10,7 @@
 
 /****************************************************************************/
 
-extern void sGetMouseHard(sInt &x, sInt &y);
+extern void sGetMouseHard(int &x, int &y);
 
 s3DWindow::s3DWindow()
 {
@@ -136,7 +136,7 @@ void s3DWindow::OnDrag(const sWindowDrag &dd)
 {
   if(QuakeMode)
   {
-    sInt mx,my;
+    int mx,my;
     sGetMouseHard(mx,my);
     RotY += (mx-OldMouseHardX)*0.002f; OldMouseHardX = mx;
     RotX += (my-OldMouseHardY)*0.002f; OldMouseHardY = my;
@@ -149,7 +149,7 @@ void s3DWindow::OnDrag(const sWindowDrag &dd)
   }
 }
 
-sRay s3DWindow::MakeRay(sInt x, sInt y)
+sRay s3DWindow::MakeRay(int x, int y)
 {
   sRay ray;
   sF32 mx=2*sF32(x)/sF32(Client.SizeX())-1;
@@ -203,7 +203,7 @@ void s3DWindow::PrepareView()
 
 void s3DWindow::QuakeCam()
 {
-  sInt time = sGetTime();
+  int time = sGetTime();
   
   {
     GearSpeed = sPow(2,GearShift*0.5f);
@@ -249,7 +249,7 @@ void s3DWindow::QuakeCam()
     if(SpeedDamping>0)
     {
       speed = QuakeSpeed;
-      for(sInt i=QuakeTime;i<time;i++)
+      for(int i=QuakeTime;i<time;i++)
       {
         speed += force;
 //        speed = force*500.0f;
@@ -259,7 +259,7 @@ void s3DWindow::QuakeCam()
       QuakeSpeed = speed;
     } else
     { 
-      for(sInt i=QuakeTime;i<time;i++)
+      for(int i=QuakeTime;i<time;i++)
       {
         QuakeSpeed += force;
 //        QuakeSpeed = force*500.0f;
@@ -278,7 +278,7 @@ void s3DWindow::QuakeCam()
   QuakeTime = time;
 }
 
-void s3DWindow::PrintGear(sPainter *p,sInt x,sInt &y)
+void s3DWindow::PrintGear(sPainter *p,int x,int &y)
 {
   if(sGetTime()<GearShiftDisplay)
   {
@@ -333,7 +333,7 @@ void s3DWindow::CmdQuakeDownToggle(sDInt n)
 
 void s3DWindow::CmdGearShift(sDInt n)
 {
-  GearShift = sClamp(GearShift+sInt(n),-40,40);
+  GearShift = sClamp(GearShift+int(n),-40,40);
   GearShiftDisplay = sGetTime()+500;
 }
 
@@ -359,8 +359,8 @@ void s3DWindow::OnPaint3D()
 
     sTargetSpec spec;
 #if sRENDERER==sRENDER_DX11       // blit back
-    sInt xs = Client.SizeX();
-    sInt ys = Client.SizeY();
+    int xs = Client.SizeX();
+    int ys = Client.SizeY();
     if(ColorRT==0 || xs!=ColorRT->SizeX || ys!=ColorRT->SizeY || sm.MultiLevel!=RTMultiLevel)
     {
       sDelete(ColorRT);
@@ -415,7 +415,7 @@ void s3DWindow::OnPaint3D()
       {
         data += r.x0*4 + r.y0*pitch;
         sU32 *dest = img.Data;
-        for(sInt y=r.y0;y<r.y1;y++)
+        for(int y=r.y0;y<r.y1;y++)
         {
           sCopyMem(dest,data,r.SizeX()*4);
           dest += img.SizeX;
@@ -426,17 +426,17 @@ void s3DWindow::OnPaint3D()
 
       if(flags==sTEX_ARGB8888)
       {
-        sInt nr = 0;
+        int nr = 0;
         sArray<sDirEntry> dir;
         sDirEntry *ent;
-        sInt len = sGetStringLen(SCREENSHOTNAME);
+        int len = sGetStringLen(SCREENSHOTNAME);
         if(sLoadDir(dir,SCREENSHOTDIR))
         {
           sFORALL(dir,ent)
           {
             if(sCmpStringILen(ent->Name,SCREENSHOTNAME,len)==0)
             {
-              sInt newnr;
+              int newnr;
               const sChar *scan = ent->Name+len;
               if(sScanInt(scan,newnr))
                 nr = sMax(nr,newnr);
@@ -488,7 +488,7 @@ void s3DWindow::OnPaint3D()
 }
 
 
-void s3DWindow::Lines(sVertexBasic *src,sInt linecount, sBool zon)
+void s3DWindow::Lines(sVertexBasic *src,int linecount, sBool zon)
 {
   sVertexBasic *vp;
 
@@ -509,7 +509,7 @@ void s3DWindow::Lines(sVertexBasic *src,sInt linecount, sBool zon)
 }
 
 
-void s3DWindow::Circle(const sVector31 &center, const sVector30 &normal, sF32 radius, sU32 color, sBool zon, sInt segs)
+void s3DWindow::Circle(const sVector31 &center, const sVector30 &normal, sF32 radius, sU32 color, sBool zon, int segs)
 {
   sVertexBasic *vp;
 
@@ -535,7 +535,7 @@ void s3DWindow::Circle(const sVector31 &center, const sVector30 &normal, sF32 ra
   WireGeo->BeginLoadVB(segs*2,sGD_STREAM,(void **)&vp);
 
   sF32 s=0,c=1;
-  for (sInt i=1; i<=segs; i++)
+  for (int i=1; i<=segs; i++)
   {
     (vp++)->Init(center+s*v1+c*v2,color);
     sFSinCos(sPI2F*sF32(i)/sF32(segs),s,c);
@@ -550,7 +550,7 @@ void s3DWindow::Circle(const sVector31 &center, const sVector30 &normal, sF32 ra
 void s3DWindow::PaintGrid()
 {
   sVertexBasic *vp;
-  const sInt count=21;
+  const int count=21;
   sF32 dist;
   sF32 size;
   sU32 col,col1,col0;
@@ -568,7 +568,7 @@ void s3DWindow::PaintGrid()
   sCBuffer<sSimpleMaterialPara> cb; cb.Data->Set(View);
   WireMtrl->Set(&cb);
   WireGeo->BeginLoadVB(count*4,sGD_STREAM,(void **)&vp);
-  for(sInt i=0;i<count;i++)
+  for(int i=0;i<count;i++)
   {
     col = (i==count/2) ? col1 : col0;
     vp->px = i*size/(count-1)-size*0.5f;
@@ -582,7 +582,7 @@ void s3DWindow::PaintGrid()
     vp->c0 = col;
     vp++;
   }
-  for(sInt i=0;i<count;i++)
+  for(int i=0;i<count;i++)
   {
     col = (i==count/2) ? col1 : col0;
     vp->px = -size*0.5f;
@@ -613,7 +613,7 @@ void s3DWindow::SetFocus(const sAABBox &bounds,const sVector31 &center)
 
   largest = 0;
   bounds.MakePoints(v);
-  for(sInt i=0;i<8;i++)
+  for(int i=0;i<8;i++)
   {
     delta = v[i]-center;
     dist = delta.Length();

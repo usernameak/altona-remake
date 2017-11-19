@@ -25,10 +25,10 @@ static const sChar *fullshadername[] = { L"VertexShader",L"HullShader",L"DomainS
 void PrintTextShader(class sTextBuffer& tb, const sChar *shader,sBool skipcomment=1)
 {
   tb.Print(L"  \"");
-  sInt whitespace = 0;
-  sInt newline = 0;
-  sInt empty = 1;
-  sInt c;
+  int whitespace = 0;
+  int newline = 0;
+  int empty = 1;
+  int c;
   while((c = *shader++) != 0)
   {
     switch(c)
@@ -83,10 +83,10 @@ void PrintTextShader(class sTextBuffer& tb, const sChar *shader,sBool skipcommen
 void PrintTextShader(class sTextBuffer& tb, const sChar8 *shader,sBool skipcomment=1)
 {
   tb.Print(L"  \"");
-  sInt whitespace = 0;
-  sInt newline = 0;
-  sInt empty = 1;
-  sInt c;
+  int whitespace = 0;
+  int newline = 0;
+  int empty = 1;
+  int c;
   while((c = *shader++) != 0)
   {
     switch(c)
@@ -140,9 +140,9 @@ void PrintTextShader(class sTextBuffer& tb, const sChar8 *shader,sBool skipcomme
 
 /****************************************************************************/
 
-void PrintShaderU8(class sTextBuffer& tb, const sU8 *shader,sInt size)
+void PrintShaderU8(class sTextBuffer& tb, const sU8 *shader,int size)
 {
-  for (sInt i=0; i<size; i++)
+  for (int i=0; i<size; i++)
   {
     if (i && (i&0x0f)==0x00) tb.Print(L"\n");
     if ((i&0x0f)==0x00) tb.Print(L"    ");
@@ -151,9 +151,9 @@ void PrintShaderU8(class sTextBuffer& tb, const sU8 *shader,sInt size)
   tb.Print(L"\n");
 }
 
-void PrintShaderU32(class sTextBuffer& tb, const sU32 *shader,sInt size)
+void PrintShaderU32(class sTextBuffer& tb, const sU32 *shader,int size)
 {
-  for (sInt i=0; i<(size+3)/4; i++)
+  for (int i=0; i<(size+3)/4; i++)
   {
     if (i && (i&0x07)==0x00) tb.Print(L"\n");
     if ((i&0x07)==0x00) tb.Print(L"    ");
@@ -164,7 +164,7 @@ void PrintShaderU32(class sTextBuffer& tb, const sU32 *shader,sInt size)
 
 /****************************************************************************/
 
-void PrintCreateShader(sTextBuffer &CPP,sInt type,const sChar *name,const sChar *result)
+void PrintCreateShader(sTextBuffer &CPP,int type,const sChar *name,const sChar *result)
 {
   const sChar *types=0;
   switch(type&sSTF_KIND)
@@ -260,7 +260,7 @@ static void sPrintNewShaderData(sTextBuffer &CPP,const sChar *name,NewCode *code
 
 void sPrintNewShaderCode(sTextBuffer &CPP,const sChar *name,const sChar *size,NewShader *ns)
 {
-  sInt shadertype=ns->ShaderType;
+  int shadertype=ns->ShaderType;
 
   const sChar *st=L"???";
   switch(shadertype&sSTF_KIND)
@@ -320,7 +320,7 @@ void Compiler::OutputHPP()
   {
     sString<sMAXPATH> path;
     sGetCurrentDir(path);
-    sInt n = sFindLastChar(path,'/');
+    int n = sFindLastChar(path,'/');
     if(n<0)
       n = sFindLastChar(path,'\\');
     if(n>=0)
@@ -364,8 +364,8 @@ void Compiler::OutputHPP()
     HPP.Print(L"{\n");
     sFORALL(perm->Members,pmem)
     {
-      //sInt val = pmem->Group ? pmem->Mask : pmem->Value;
-      sInt spaces = 40 - sGetStringLen(perm->Name) - sGetStringLen(pmem->Name);
+      //int val = pmem->Group ? pmem->Mask : pmem->Value;
+      int spaces = 40 - sGetStringLen(perm->Name) - sGetStringLen(pmem->Name);
       if(pmem->Group)
         HPP.PrintF(L"  %sMask_%s%_ = 0x%04x,\n",perm->Name,pmem->Name,spaces-4,pmem->Mask<<pmem->Shift);
       else
@@ -390,8 +390,8 @@ void Compiler::OutputHPP()
       sFORALL(type->Members,member)
       {
         ACType *mbt = member->Type;
-        sInt ac = 1;
-        sInt r,c;
+        int ac = 1;
+        int r,c;
         mbt->SizeOf(c,r);
         if(member->Type->Type==ACT_ARRAY)
         {
@@ -420,9 +420,9 @@ void Compiler::OutputHPP()
         HPP.PrintF(L";\n"); 
       }
       static const sChar *shaderconst[] = { L"sCBUFFER_VS",L"sCBUFFER_PS",L"sCBUFFER_GS",L"sCBUFFER_HS",L"sCBUFFER_DS",L"sCBUFFER_CS" };
-      HPP.PrintF(L"  static const sInt RegStart = %d;\n",type->CRegStart);
-      HPP.PrintF(L"  static const sInt RegCount = %d;\n",type->CRegCount);
-      HPP.PrintF(L"  static const sInt Slot = %s|%d;\n",shaderconst[(type->CSlot & sCBUFFER_SHADERMASK)/sCBUFFER_MAXSLOT],type->CSlot%sCBUFFER_MAXSLOT);
+      HPP.PrintF(L"  static const int RegStart = %d;\n",type->CRegStart);
+      HPP.PrintF(L"  static const int RegCount = %d;\n",type->CRegCount);
+      HPP.PrintF(L"  static const int Slot = %s|%d;\n",shaderconst[(type->CSlot & sCBUFFER_SHADERMASK)/sCBUFFER_MAXSLOT],type->CSlot%sCBUFFER_MAXSLOT);
       sFORALL(type->Externs,ext)
       {
         HPP.PrintF(L"#line %d \"%p\"\n",ext->ParaLine,ext->File);
@@ -446,7 +446,7 @@ void Compiler::OutputHPP()
   sFORALL(NewShaders,ns)
   {
     if(ns->PermuteCount)
-      HPP.PrintF(L"sShader *%s(sInt perm);\n",ns->Name);
+      HPP.PrintF(L"sShader *%s(int perm);\n",ns->Name);
     else
       HPP.PrintF(L"sShader *%s();\n",ns->Name);
   }
@@ -459,12 +459,12 @@ void Compiler::OutputHPP()
       HPP.PrintF(L"class %s\n",nm->Name);
 
     HPP.PrintF(L"{\n");
-    for(sInt i=0;i<MAXSHADER;i++)
+    for(int i=0;i<MAXSHADER;i++)
     {
       if(nm->Shaders[i])
       {
         if(nm->Shaders[i]->PermuteCount)
-          HPP.PrintF(L"  static sShader *%s(sInt);\n",shadername[i]);
+          HPP.PrintF(L"  static sShader *%s(int);\n",shadername[i]);
         else
           HPP.PrintF(L"  static sShader *%s();\n",shadername[i]);
       }
@@ -487,7 +487,7 @@ void Compiler::OutputHPP()
     if(nm->Shaders[_CS_])
     {
       if(nm->Shaders[_CS_]->PermuteCount)
-        HPP.PrintF(L"sShader *%s(sInt);\n",nm->Name);
+        HPP.PrintF(L"sShader *%s(int);\n",nm->Name);
       else 
         HPP.PrintF(L"sShader *%s();\n",nm->Name);
     }
@@ -510,9 +510,9 @@ void Compiler::OutputShader(NewShader *ns)
 
   if(ns->PermuteCount)
   {
-    CPP.PrintF(L"sShader *%s(sInt i)\n",ns->Name);
+    CPP.PrintF(L"sShader *%s(int i)\n",ns->Name);
     CPP.Print(L"{\n");
-    for(sInt i=0;i<ns->PermuteCount;i++)
+    for(int i=0;i<ns->PermuteCount;i++)
     {
       if(ns->Permutes[i])
       {
@@ -526,7 +526,7 @@ void Compiler::OutputShader(NewShader *ns)
     CPP.PrintF(L"#if%s\n",ifdef);
     CPP.PrintF(L"  static const sU8 *codes[] =\n");
     CPP.Print(L"  {\n");
-    for(sInt i=0;i<ns->PermuteCount;i++)
+    for(int i=0;i<ns->PermuteCount;i++)
     {
       if(ns->Permutes[i])
       {
@@ -541,7 +541,7 @@ void Compiler::OutputShader(NewShader *ns)
     CPP.Print(L"  };\n");
     CPP.PrintF(L"  static sDInt sizes[] =\n");
     CPP.Print(L"  {\n");
-    for(sInt i=0;i<ns->PermuteCount;i++)
+    for(int i=0;i<ns->PermuteCount;i++)
     {
       if(ns->Permutes[i])
       {
@@ -561,7 +561,7 @@ void Compiler::OutputShader(NewShader *ns)
     sPrintNewShaderCode(CPP,L"codes[i]",L"sizes[i]",ns);
     CPP.Print(L"}\n");
     CPP.Print(L"\n");
-    //CPP.PrintF(L"sShader *%s(sInt perm);\n",ns->Name);
+    //CPP.PrintF(L"sShader *%s(int perm);\n",ns->Name);
   }
   else if(ns->ByteCode)
   {
@@ -632,7 +632,7 @@ void Compiler::OutputCPP()
 
   sFORALL(NewMtrls,nm)
   {
-    for(sInt i=0;i<MAXSHADER;i++)
+    for(int i=0;i<MAXSHADER;i++)
     {
       if(nm->Shaders[i])
       {
@@ -667,7 +667,7 @@ void Compiler::OutputCPP()
     }
     else
     {
-      for(sInt i=0;i<MAXSHADER;i++)
+      for(int i=0;i<MAXSHADER;i++)
         if(nm->Shaders[i])
           CPP.PrintF(L"  %s = %s();\n",fullshadername[i],nm->Shaders[i]->Name);
     }

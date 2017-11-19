@@ -175,7 +175,7 @@ void ACDoc::_Global()
 void ACDoc::_Line()
 {
   sPoolString name;
-  sInt line;
+  int line;
 
   line = Scan.ScanInt();
   Scan.ScanString(name);
@@ -188,15 +188,15 @@ void ACDoc::_Line()
   }
 }
 
-ACType *ACDoc::_Struct(sInt typekind)      // 'struct' already scanned
+ACType *ACDoc::_Struct(int typekind)      // 'struct' already scanned
 {
   ACType *type = new ACType;
   type->Type = typekind;
   if(Scan.Token==sTOK_NAME)
     Scan.ScanName(type->Name);
 
-  sInt constreg = -1;
-  sInt constname = 0;
+  int constreg = -1;
+  int constname = 0;
 
   while(Scan.IfToken(':'))                     // EXTENSION: auto constant registers
   {
@@ -215,7 +215,7 @@ ACType *ACDoc::_Struct(sInt typekind)      // 'struct' already scanned
 
       type->CSlot = Scan.ScanInt();
       if(type->CSlot<0 || type->CSlot>=sCBUFFER_MAXSLOT)
-        Scan.Error(L"cbuffer slot out of range (max is %d)",(sInt)sCBUFFER_MAXSLOT);
+        Scan.Error(L"cbuffer slot out of range (max is %d)",(int)sCBUFFER_MAXSLOT);
       if(shadertype==L"vs")
         type->CSlot |= sCBUFFER_VS;
       else if(shadertype==L"hs")
@@ -268,7 +268,7 @@ ACType *ACDoc::_Struct(sInt typekind)      // 'struct' already scanned
       {
         var->RegisterType = 'c';
         var->RegisterNum = constreg;
-        sInt c,r;
+        int c,r;
         var->Type->SizeOf(c,r);
         if((var->Usages & ACF_ROWMAJOR) && c>1 && r>1)
         {
@@ -332,9 +332,9 @@ void ACDoc::_Permute()
   ACPermuteMember *mem;
   Scan.Match(AC_TOK_PERMUTE);
   sPoolString groupname;
-  sInt shift;
-  sInt num;
-  sInt power;
+  int shift;
+  int num;
+  int power;
   ACPermute *OldUse = UsePermute;
 
   perm = new ACPermute;
@@ -425,7 +425,7 @@ ACVar *ACDoc::_Decl()
 {
   sPoolString test;
   ACType *type = 0;
-  sInt usages = 0;
+  int usages = 0;
 
 // usages and flags
 
@@ -491,7 +491,7 @@ usages_:
   return _DeclPost(type,usages);
 }
 
-ACVar *ACDoc::_DeclPost(ACType *type,sInt usages)
+ACVar *ACDoc::_DeclPost(ACType *type,int usages)
 {
   ACVar *var;
   sPoolString test;
@@ -580,7 +580,7 @@ ACVar *ACDoc::_DeclPost(ACType *type,sInt usages)
   return var;
 }
 
-void ACDoc::_Register(sInt &regtype,sInt &regnum)
+void ACDoc::_Register(int &regtype,int &regnum)
 {
   sPoolString test;
     
@@ -618,7 +618,7 @@ void ACDoc::_Register(sInt &regtype,sInt &regnum)
 ACStatement *ACDoc::_Block()
 {
   ACStatement *first;
-  sInt oldscope = Scope;
+  int oldscope = Scope;
 
   if(Scope<SCOPE_MAX)
     Scope++;
@@ -821,7 +821,7 @@ ACStatement *ACDoc::_Statement()
 
 /****************************************************************************/
 
-sInt BinaryOp(sInt token,sInt &pri)
+int BinaryOp(int token,int &pri)
 {
   switch(token)
   {
@@ -862,7 +862,7 @@ ACExpression *ACDoc::_Expression()
   ACExpression *e;
   
   e = _Expression1(12);
-  sInt op = 0;
+  int op = 0;
   switch(Scan.Token)
   {
     case '=':               op = ACE_ASSIGN; break;
@@ -879,9 +879,9 @@ ACExpression *ACDoc::_Expression()
   return e;
 }
 
-ACExpression *ACDoc::_Expression1(sInt level)
+ACExpression *ACDoc::_Expression1(int level)
 {
-  sInt op,pri;
+  int op,pri;
   ACExpression *a,*b,*c;
 
   if(level==0)

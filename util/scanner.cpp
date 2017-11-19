@@ -105,24 +105,24 @@ sBool sScannerSourceFile::Load(const sChar *filename)
 
 sBool sScannerSourceFile::Refill()
 {
-  sInt left = ScanBuffer+sScanner::BufferSize-ScanPtr;
+  int left = ScanBuffer+sScanner::BufferSize-ScanPtr;
   if(left<sScanner::LineSize)
   {
     //  calculate copy
 
-    sInt pos = ScanPtr-ScanBuffer;
+    int pos = ScanPtr-ScanBuffer;
     pos = pos&~(sScanner::Alignment-1);
-    sInt count = sScanner::BufferSize-pos;
+    int count = sScanner::BufferSize-pos;
 
     // perform copy
 
-    for(sInt i=0;i<count;i++)
+    for(int i=0;i<count;i++)
       ScanBuffer[i] = ScanBuffer[i+pos];
     ScanPtr -= pos;
 
     // calculate load
 
-    sInt loadchars = pos;
+    int loadchars = pos;
     sChar *dest = ScanBuffer+count;
     if(loadchars>CharsLeftInFile)
       loadchars = CharsLeftInFile;
@@ -143,13 +143,13 @@ sBool sScannerSourceFile::Refill()
           sChar8 *ascii = (sChar8 *) dest;
           ascii+=loadchars * (sizeof(sChar)-1);
           ok = File->Read(ascii,loadchars);
-          for(sInt i=0;i<loadchars;i++)
+          for(int i=0;i<loadchars;i++)
             *dest++ = (*ascii++)&0xff;
         }
         break;
       case 2:   // swap endian
         ok = File->Read(dest,loadchars*sizeof(sChar));
-        for(sInt i=0;i<loadchars;i++)
+        for(int i=0;i<loadchars;i++)
           dest[i] = ((dest[i]>>8) | (dest[i]<<8))&0xffff;
         dest += loadchars;
         break;
@@ -261,7 +261,7 @@ sBool sScanner::IncludeFile(const sChar *filename)
   }
 }
 
-void sScanner::AddToken(const sChar *name,sInt token)
+void sScanner::AddToken(const sChar *name,int token)
 {
   ScannerToken tok;
   tok.Name = name;
@@ -308,7 +308,7 @@ void sScanner::RemoveToken(const sChar *name)
 void sScanner::AddTokens(const sChar *SingleCharacterTokens)
 {
   sChar buffer[2];
-  for(sInt i=0;SingleCharacterTokens[i];i++)
+  for(int i=0;SingleCharacterTokens[i];i++)
   {
     buffer[0] = SingleCharacterTokens[i];
     buffer[1] = 0;
@@ -330,7 +330,7 @@ void sScanner::DefaultTokens()
   AddTokens(L"+-*/%^~,.;:!?=<>()[]{}&|");
 }
 
-sInt sScanner::Error0(const sChar *name)
+int sScanner::Error0(const sChar *name)
 {
   if(ErrorCallback)
   {
@@ -362,7 +362,7 @@ sInt sScanner::Error0(const sChar *name)
   return 0;
 }
 
-sInt sScanner::Warn0(const sChar *name)
+int sScanner::Warn0(const sChar *name)
 {
   if(Stream->Filename)
     ErrorMsg.PrintF(L"%s(%d): %s\n",Stream->Filename,Stream->Line,name);
@@ -427,14 +427,14 @@ morespace:
   return *s;
 }
 
-sInt sScanner::Scan()
+int sScanner::Scan()
 {
-  static const sInt MaxValLen = sCOUNTOF(ValueString);
+  static const int MaxValLen = sCOUNTOF(ValueString);
 
-  sInt newline;
+  int newline;
   ScannerToken *st;
   sString<256> &bp = ValueString;
-  sInt bi=0;
+  int bi=0;
 
   Token = sTOK_ERROR;
   ValI = 0;
@@ -524,7 +524,7 @@ morespace:
     {
       s += 6;
       while(*s==' ') s++;
-      sInt line;
+      int line;
 
       if(sScanInt((const sChar *&) s,line))
       {
@@ -534,7 +534,7 @@ morespace:
         {
           s++;
           sChar buffer[sMAXPATH];
-          sInt i=0;
+          int i=0;
           while(s[i]!='"' && s[i]!=0 && i<255)
           {
             buffer[i] = s[i];
@@ -609,12 +609,12 @@ morespace:
   if(*s=='"')
   {
     s++;
-    sInt i=0;
+    int i=0;
     while(*s!='"' && *s)
     {
       if(*s=='\n')
         Stream->Line++;
-      sInt c = *s;
+      int c = *s;
       if(c=='\\' && (Flags&sSF_ESCAPECODES))
       {
         s++;
@@ -729,7 +729,7 @@ morespace:
      (*s>=0xa0 && *s<=0xff && (Flags&sSF_UMLAUTS)) ||
      *s=='_')
   {
-    sInt i = 0;
+    int i = 0;
     while((*s>='a' && *s<='z') || 
           (*s>='A' && *s<='Z') ||
           (*s>='0' && *s<='9') || 
@@ -847,8 +847,8 @@ morespace:
       Token = sTOK_FLOAT;
       if(bi<MaxValLen-2) bp[bi++]=*s;
       s++;
-      sInt exp = 0;
-      sInt sign = 1;
+      int exp = 0;
+      int sign = 1;
       // sign
       if (*s=='-')
       {
@@ -932,10 +932,10 @@ void sScanner::Print(sTextBuffer &tb)
 
 /****************************************************************************/
 
-sInt sScanner::ScanInt()
+int sScanner::ScanInt()
 {
-  sInt r;
-  sInt sign = 1;
+  int r;
+  int sign = 1;
   if(IfToken('-'))
     sign = -1;
   if(Token==sTOK_INT || Token==sTOK_CHAR)
@@ -975,9 +975,9 @@ sF32 sScanner::ScanFloat()
   return r*sign;
 }
 
-sInt sScanner::ScanChar()
+int sScanner::ScanChar()
 {
-  sInt r;
+  int r;
   if(Token==sTOK_CHAR)
   {
     r = ValI;
@@ -991,7 +991,7 @@ sInt sScanner::ScanChar()
   return r;
 }
 
-sBool sScanner::ScanRaw(sPoolString &ps, sInt opentoken, sInt closetoken)
+sBool sScanner::ScanRaw(sPoolString &ps, int opentoken, int closetoken)
 {
   sTextBuffer tb;
   sBool result = ScanRaw(tb, opentoken, closetoken);
@@ -999,10 +999,10 @@ sBool sScanner::ScanRaw(sPoolString &ps, sInt opentoken, sInt closetoken)
   return result;
 }
 
-sBool sScanner::ScanRaw(sTextBuffer &tb, sInt opentoken, sInt closetoken)
+sBool sScanner::ScanRaw(sTextBuffer &tb, int opentoken, int closetoken)
 {
-  sInt count;
-  sInt startLine = Stream->Line;
+  int count;
+  int startLine = Stream->Line;
 
   if(Token!=opentoken)
   {
@@ -1204,7 +1204,7 @@ sBool sScanner::ScanNameOrString(sPoolString &ps)
 }
 
 
-void sScanner::Match(sInt token)
+void sScanner::Match(int token)
 {
   if(token==Token) 
     Scan();
@@ -1250,7 +1250,7 @@ void sScanner::MatchString(const sChar *name)
     Error(L"string %q expected",name);
 }
 
-void sScanner::MatchInt(sInt n)
+void sScanner::MatchInt(int n)
 {
   if(Token==sTOK_INT && ValI==n)
     Scan();
@@ -1260,7 +1260,7 @@ void sScanner::MatchInt(sInt n)
 
 /****************************************************************************/
 
-sBool sScanner::IfToken(sInt tok)
+sBool sScanner::IfToken(int tok)
 {
   if(Token==tok)
   {
@@ -1344,7 +1344,7 @@ namespace sScannerUtil
       return sFALSE;
   }
 
-  sBool IntProp(sScanner *scan,const sChar *name,sInt &tgt)
+  sBool IntProp(sScanner *scan,const sChar *name,int &tgt)
   {
     if(scan->IfName(name))
     {
@@ -1398,7 +1398,7 @@ namespace sScannerUtil
     return sFALSE;
   }
 
-  sBool EnumProp(sScanner *scan,const sChar *name,const sChar *choices,sInt &tgt)
+  sBool EnumProp(sScanner *scan,const sChar *name,const sChar *choices,int &tgt)
   {
     if(scan->IfName(name))
     {
@@ -1419,7 +1419,7 @@ namespace sScannerUtil
     return sFALSE;
   }
 
-  sBool FlagsProp(sScanner *scan,const sChar *name,const sChar *pattern,sInt &tgt)
+  sBool FlagsProp(sScanner *scan,const sChar *name,const sChar *pattern,int &tgt)
   {
     if(scan->IfName(name))
     {
@@ -1431,7 +1431,7 @@ namespace sScannerUtil
         sPoolString flag;
         if(scan->ScanName(flag))
         {
-          sInt mask,value;
+          int mask,value;
           if(sFindFlag(flag,pattern,mask,value))
             tgt = (tgt & ~mask) | value;
           else
@@ -1463,7 +1463,7 @@ namespace sScannerUtil
 struct sRegexState                 // state in regular expression
 {
   sRegexState();
-  sInt Temp;
+  int Temp;
   sArray<sRegexTrans *> Output;   // outgoing transitions
   sArray<sRegexTrans *> Input;    // incomming transitions
 };
@@ -1556,7 +1556,7 @@ void sRegexTrans::SetGroup(const sChar *c)
     Invert = 1;
     c++;
   }
-  sInt h0=0,h1=0;
+  int h0=0,h1=0;
   const sChar *e = c;
   sChar *h = 0;
   while(*e!=0 && *e!=']')
@@ -1602,13 +1602,13 @@ void sRegexTrans::SetGroup(const sChar *c)
           SetBit('\t');
           break;
         case 'd':
-          for(sInt i='0';i<='9';i++)
+          for(int i='0';i<='9';i++)
             SetBit(i);
           break;
         case 'w':
-          for(sInt i='a';i<='z';i++)
+          for(int i='a';i<='z';i++)
             SetBit(i);
-          for(sInt i='A';i<='Z';i++)
+          for(int i='A';i<='Z';i++)
             SetBit(i);
           break;
         }
@@ -1616,10 +1616,10 @@ void sRegexTrans::SetGroup(const sChar *c)
       else if(c[1]=='-' && c[2]!=0 && c[2]!=']' && c[2]!='\\' && c[0]!='\\' &&
         c[0]>=32 && c[0]<=0xff && c[2]>=32 && c[2]<=0xff )
       {
-        sInt c0 = c[0];
-        sInt c1 = c[2];
+        int c0 = c[0];
+        int c1 = c[2];
         c+=2;
-        for(sInt i=c0;i<=c1;i++)
+        for(int i=c0;i<=c1;i++)
           SetBit(i);
       }
       else
@@ -1631,7 +1631,7 @@ void sRegexTrans::SetGroup(const sChar *c)
     {
       sBool found = 0;
       sVERIFY(h);
-      for(sInt i=0;i<h1 && !found;i++)
+      for(int i=0;i<h1 && !found;i++)
         if(h[i]==*c)
           found = 1;
       if(!found)
@@ -1670,7 +1670,7 @@ sRegexMarker::sRegexMarker()
 void sRegexMarker::CopyFrom(const sRegexMarker *src)
 {
   State = src->State;
-  for(sInt i=0;i<sCOUNTOF(CaptureStart);i++)
+  for(int i=0;i<sCOUNTOF(CaptureStart);i++)
   {
     CaptureStart[i] = src->CaptureStart[i];
     CaptureEnd[i] = src->CaptureEnd[i];
@@ -1682,7 +1682,7 @@ void sRegexMarker::Goto(sRegexTrans *t,const sChar *str)
   State = t->To;
   if(t->StartCaptureBits)
   {
-    for(sInt i=0;i<sREGEX_MAXGROUP;i++)
+    for(int i=0;i<sREGEX_MAXGROUP;i++)
     {
       if((t->StartCaptureBits & (1<<i)) && CaptureStart[i]==0)
         CaptureStart[i] = str;
@@ -1690,7 +1690,7 @@ void sRegexMarker::Goto(sRegexTrans *t,const sChar *str)
   }
   if(t->StopCaptureBits)
   {
-    for(sInt i=0;i<sREGEX_MAXGROUP;i++)
+    for(int i=0;i<sREGEX_MAXGROUP;i++)
     {
       if((t->StopCaptureBits & (1<<i)) && CaptureEnd[i]==0)
         CaptureEnd[i] = str;
@@ -1748,7 +1748,7 @@ sRegexTrans *sRegex::MakeTransCopy(sRegexTrans *src,sRegexState *from,sRegexStat
 {
   sRegexTrans *t = MakeTrans(from,to);
 
-  for(sInt i=0;i<sCOUNTOF(t->BitGroup);i++)
+  for(int i=0;i<sCOUNTOF(t->BitGroup);i++)
     t->BitGroup[i] = src->BitGroup[i];
   t->Invert = src->Invert;
   t->Empty = src->Empty;
@@ -1757,7 +1757,7 @@ sRegexTrans *sRegex::MakeTransCopy(sRegexTrans *src,sRegexState *from,sRegexStat
 
   if(src->HighGroup)
   {
-    sInt len = sGetStringLen(src->HighGroup);
+    int len = sGetStringLen(src->HighGroup);
     sChar *d = new sChar[len+1];
     t->HighGroup = d;
     sCopyString(d,src->HighGroup,len+1);
@@ -1781,7 +1781,7 @@ sRegexState *sRegex::_Value(sRegexState *o)
 {
   sRegexState *n;
   sRegexTrans *t;
-  sInt id,mask;
+  int id,mask;
   const sChar *e0 = 0;
 
   n=0;
@@ -1880,9 +1880,9 @@ sRegexState *sRegex::_Value(sRegexState *o)
     case 'W':
       t->Invert = 1;
     case 'w':
-      for(sInt i='a';i<='z';i++)
+      for(int i='a';i<='z';i++)
         t->SetBit(i);
-      for(sInt i='A';i<='Z';i++)
+      for(int i='A';i<='Z';i++)
         t->SetBit(i);
       break;
 
@@ -1898,7 +1898,7 @@ sRegexState *sRegex::_Value(sRegexState *o)
     case 'D':
       t->Invert = 1;
     case 'd':
-      for(sInt i='0';i<='9';i++)
+      for(int i='0';i<='9';i++)
         t->SetBit(i);
       break;
       //return 0;//warning 112: statement is unreachable
@@ -2023,7 +2023,7 @@ sBool sRegex::PrepareAll(const sChar *expr)
 sBool sRegex::SetPattern(const sChar *expr)
 {
   const sChar *s = expr;
-  sInt len = sGetStringLen(s);
+  int len = sGetStringLen(s);
   sChar *buffer = new sChar[len+5];
   sChar *d = buffer;
 
@@ -2091,7 +2091,7 @@ void sRegex::Validate()           // check if everythins is sane
 void sRegex::RemoveEmptyTrans()
 {
   sRegexTrans *t,*t0,*t1;
-  for(sInt i=0;i<Trans.GetCount();)
+  for(int i=0;i<Trans.GetCount();)
   {
     t = Trans[i];
     if(t->Empty)
@@ -2134,7 +2134,7 @@ void sRegex::RemoveEmptyState()
     s->Temp = 0;
   MarkR(End);
 
-  for(sInt i=0;i<Trans.GetCount();) // remove transitions to unmarked states
+  for(int i=0;i<Trans.GetCount();) // remove transitions to unmarked states
   {
     t = Trans[i];
     if(t->To->Temp==0)
@@ -2207,7 +2207,7 @@ sBool sRegex::MatchPattern(const sChar *string)
       {
         if(newstates.GetCount()>1)
         {
-          for(sInt i=1;i<newstates.GetCount();i++)
+          for(int i=1;i<newstates.GetCount();i++)
           {
             m1 = MakeMarker();
             m1->CopyFrom(m);
@@ -2231,7 +2231,7 @@ sBool sRegex::MatchPattern(const sChar *string)
   return Success.GetCount()>0;
 }
 
-sBool sRegex::GetGroup(sInt n,const sStringDesc &desc,sInt match)
+sBool sRegex::GetGroup(int n,const sStringDesc &desc,int match)
 {
   if(match<0 || match>=Success.GetCount() || n<0 || n>=sREGEX_MAXGROUP)
   {
@@ -2250,7 +2250,7 @@ sBool sRegex::GetGroup(sInt n,const sStringDesc &desc,sInt match)
     }
     else
     {
-      sInt len = sMin((sInt)(c1-c0),desc.Size-1);
+      int len = sMin((int)(c1-c0),desc.Size-1);
       sVERIFY(len>=0);
       sCopyMem(desc.Buffer,c0,len*sizeof(sChar));
       desc.Buffer[len] = 0;
@@ -2270,12 +2270,12 @@ void sRegex::DebugDump()
     s->Temp = _i;
   sFORALL(Trans,t)
   {
-    sInt n = 0;
-    for(sInt i=0;i<sCOUNTOF(t->BitGroup);i++)
+    int n = 0;
+    for(int i=0;i<sCOUNTOF(t->BitGroup);i++)
     {
       if(t->BitGroup[i])
       {
-        for(sInt j=0;j<32;j++)
+        for(int j=0;j<32;j++)
         {
           if(t->BitGroup[i] & (1<<j))
           {

@@ -88,10 +88,10 @@ private:
 
   sRect ToolTipRect;
 
-  sInt HardMouseX;
-  sInt HardMouseY;
-  sInt HardStartX;
-  sInt HardStartY;
+  int HardMouseX;
+  int HardMouseY;
+  int HardStartX;
+  int HardStartY;
   
   sImage2D *BackBuffer;
   sBool BackBufferUsed;
@@ -108,17 +108,17 @@ private:
   struct PostQueueEntry
   {
     sWindow *Window;
-    sInt Command;
+    int Command;
   };
   struct Event
   {
     sU8 Mode;
     sS8 MouseButton;
     sU32 Key;
-    sInt MouseX;
-    sInt MouseY;
-    sInt HardX;
-    sInt HardY;
+    int MouseX;
+    int MouseY;
+    int HardX;
+    int HardY;
   };
   sArray<PostQueueEntry> PostQueue;
   PostQueueEntry AsyncEntry;
@@ -134,19 +134,19 @@ private:
   void RecPaint(sWindow *,const sRect &update);
   void RecPaint3d(sWindow *,const sRect &wr);
   sBool RecShortcut(sWindow *w,sU32 key);
-  sWindow *RecHitWindow(sWindow *,sInt x,sInt y,sBool border) const;
+  sWindow *RecHitWindow(sWindow *,int x,int y,sBool border) const;
   void SendMouse(const Event &ie);
   void OnPrepareFrame();
   void OnPaint(const sRect &client,const sRect &update);
   void OnPaint3d();
   void SendKey(sU32 key);
-  void OnEvent(sInt event);
+  void OnEvent(int event);
   void OnInput(const sInput2Event &ie);
   void DoInput(const Event &ie);
-  void PositionWindow(sWindow *w,sInt x,sInt y);
+  void PositionWindow(sWindow *w,int x,int y);
   void CheckToolTip();
  
-  void RecCommand(sWindow *,sInt cmd);
+  void RecCommand(sWindow *,int cmd);
   void ProcessPost();
   void RecNotifyMake(sWindow *p);
   void RecNotify(sWindow *p,const void *start,const void *end);
@@ -164,12 +164,12 @@ public:
 
   sFont2D *PropFont;
   sFont2D *FixedFont;
-  void RectHL(const sRect &r,sInt colh,sInt coll) const;
+  void RectHL(const sRect &r,int colh,int coll) const;
   void RectHL(const sRect &r, sBool invert=sFALSE) const; // use default colors for thin 3d border
-  void PaintHandle(sInt x,sInt y,sBool select) const;
-  sBool HitHandle(sInt x,sInt y,sInt mx,sInt my) const;
+  void PaintHandle(int x,int y,sBool select) const;
+  sBool HitHandle(int x,int y,int mx,int my) const;
   void PaintButtonBorder(sRect &r,sBool pressed) const;
-  void PaintButton(const sRect &rect,const sChar *text,sInt flags,sInt len=-1,sU32 backcolor=0) const;
+  void PaintButton(const sRect &rect,const sChar *text,int flags,int len=-1,sU32 backcolor=0) const;
   void BeginBackBuffer(const sRect &rect);
   void EndBackBuffer();
 
@@ -181,16 +181,16 @@ public:
   void Layout();                  // force new layout and repaint all
   void Layout(const sRect &r);    // force new layout and repaint only a portion 
   void CalcSize(sWindow *w) {RecCalcSize(w);} // calculate required size of a window subtree, even before it gets connected to the whole thing
-  sWindow *HitWindow(sInt x,sInt y);  // see what window you woudl hit
-  void Post(sWindow *win,sInt cmd); // post a message in the message-queue. it will be handled at the end of the frame
-  void Send(sWindow *win,sInt cmd); // send a message immediatly.
+  sWindow *HitWindow(int x,int y);  // see what window you woudl hit
+  void Post(sWindow *win,int cmd); // post a message in the message-queue. it will be handled at the end of the frame
+  void Send(sWindow *win,int cmd); // send a message immediatly.
   void Update(const sRect &r);    // repaint windows in this rectangle. do not call sUpdateWindow(...) directly!
   void Update();
-  void PostAsync(sWindow *win,sInt cmd); // post a message in the message-queue. it will be handled at the end of the frame
+  void PostAsync(sWindow *win,int cmd); // post a message in the message-queue. it will be handled at the end of the frame
   void Notify(const void *ptr,sDInt n);
   template<typename Type> void Notify(const Type &Val) { Notify(&Val,sizeof(Val)); }
-  void CommandToAll(sInt cmd,sWindow *w=0);
-  void GetMousePos(sInt &x,sInt &y) { x=DragData.MouseX; y=DragData.MouseY; }
+  void CommandToAll(int cmd,sWindow *w=0);
+  void GetMousePos(int &x,int &y) { x=DragData.MouseX; y=DragData.MouseY; }
 
   // adding windows to the main window
 
@@ -198,7 +198,7 @@ public:
   void AddBackWindow(sWindow *);  // add a window that fills the whole screen
   void AddFloatingWindow(sWindow *,const sChar *title, sBool closeable=sFALSE); // add a floating window with a size border and title
   void AddPopupWindow(sWindow *); // add a popup window where the mouse is.
-  void AddWindow(sWindow *,sInt x,sInt y); // add a popup window where the mouse is.
+  void AddWindow(sWindow *,int x,int y); // add a popup window where the mouse is.
   void AddCenterWindow(sWindow *w);   // add window in center of screen
   void AddPulldownWindow(sWindow *);  // add a pulldown window under the focus window
   void AddPulldownWindow(sWindow *,const sRect &client);  // add a pulldown window, specify client of parent manually
@@ -219,7 +219,7 @@ public:
   void OnPaint2D(const sRect &client,const sRect &update);
   void OnPaint3D();
   void OnInput(const sInput2Event &ie);
-  void OnEvent(sInt id);
+  void OnEvent(int id);
 };
 
 /****************************************************************************/

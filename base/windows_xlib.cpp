@@ -23,7 +23,7 @@ extern Window sXWndFrontBuffer;
 extern Visual *sXVisual;
 extern GC sXGC;
 extern GC sXFrontGC;
-extern sInt sXScreen;
+extern int sXScreen;
 
 /****************************************************************************/
 
@@ -41,11 +41,11 @@ static XftColor ColorXFT[MAX_COLORS];
 static Region EmptyRegion,UpdateRegion;
 static sBool UpdateRegionGC,UpdateRegionXft,UpdateRegionXR;
 static Region ClipStack[MAX_CLIPS];
-static sInt ClipIndex;
+static int ClipIndex;
 static sRect ClipBounds;
 static sString<256> WindowName;
 
-static sInt ForegroundCol;
+static int ForegroundCol;
 static XRenderPictFormat *XFmtARGB;
 static Picture XPict;
 static XftDraw *XDraw;
@@ -58,7 +58,7 @@ static const FcEndian Endianess = FcEndianBig;
 
 static void InitXLib()
 {
-  for(sInt i=0;i<MAX_CLIPS;i++)
+  for(int i=0;i<MAX_CLIPS;i++)
     ClipStack[i] = XCreateRegion();
   
   EmptyRegion = XCreateRegion();
@@ -80,7 +80,7 @@ static void InitXLib()
     XC_bottom_left_corner, // poor match!
   };
   Cursors[0] = 0;
-  for(sInt i=1;i<sMP_MAX;i++)
+  for(int i=1;i<sMP_MAX;i++)
     Cursors[i] = XCreateFontCursor(sXDisplay(),shapeInd[i]);
   
   if(sGetSystemFlags() & sISF_2D)
@@ -91,7 +91,7 @@ static void InitXLib()
     rc.alpha = 0xffff;
     XftColorAllocValue(sXDisplay(),sXVisual,sXColMap,&rc,&blackColor);
     
-    for(sInt i=0;i<MAX_COLORS;i++)
+    for(int i=0;i<MAX_COLORS;i++)
     {
       Color[i][0] = Color[i][1] = 0;
       ColorXFT[i] = blackColor;
@@ -131,15 +131,15 @@ static void ExitXLib()
     XRenderFreePicture(sXDisplay(),XPict);
     XftDrawDestroy(XDraw);
     
-    for(sInt i=0;i<MAX_COLORS;i++)
+    for(int i=0;i<MAX_COLORS;i++)
       XftColorFree(sXDisplay(),sXVisual,sXColMap,&ColorXFT[i]);
     
-    for(sInt i=0;i<MAX_CLIPS;i++)
+    for(int i=0;i<MAX_CLIPS;i++)
       XDestroyRegion(ClipStack[i]);
     
     XDestroyRegion(EmptyRegion);
     
-    for(sInt i=0;i<sMP_MAX;i++)
+    for(int i=0;i<sMP_MAX;i++)
       XFreeCursor(sXDisplay(),Cursors[i]);
   }
 }
@@ -216,9 +216,9 @@ void sUpdateWindow(const sRect &r)
   }
 }
 
-void sSetMousePointer(sInt code)
+void sSetMousePointer(int code)
 {
-  static sInt oldcursor = -1;
+  static int oldcursor = -1;
   sVERIFY(code>=0 && code<sMP_MAX);
   if(code != oldcursor)
   {
@@ -242,12 +242,12 @@ void sSetWindowName(const sChar *name)
     XStoreName(sXDisplay(), sXWndFrontBuffer, sLinuxFromWide(name));
 }
 
-void sSetWindowMode(sInt mode)
+void sSetWindowMode(int mode)
 {
   sLogF(L"xlib",L"sSetWindowMode\n");
 }
 
-void sSetWindowSize(sInt xs,sInt ys)
+void sSetWindowSize(int xs,int ys)
 {
   XWindowChanges changes;
   changes.width = xs;
@@ -255,7 +255,7 @@ void sSetWindowSize(sInt xs,sInt ys)
   XConfigureWindow(sXDisplay(), sXWndFrontBuffer, CWWidth | CWHeight, &changes);
 }
 
-void sSetWindowPos(sInt x,sInt y)
+void sSetWindowPos(int x,int y)
 {
   XWindowChanges changes;
   changes.x = x;
@@ -263,7 +263,7 @@ void sSetWindowPos(sInt x,sInt y)
   XConfigureWindow(sXDisplay(), sXWndFrontBuffer, CWX | CWY, &changes);
 }
 
-void sGetWindowPos(sInt &x,sInt &y)
+void sGetWindowPos(int &x,int &y)
 {
   XWindowAttributes xwa;
   XGetWindowAttributes(sXDisplay(), sXWndFrontBuffer, &xwa);
@@ -271,7 +271,7 @@ void sGetWindowPos(sInt &x,sInt &y)
   y = xwa.y;
 }
 
-void sGetWindowSize(sInt &sx,sInt &sy)
+void sGetWindowSize(int &sx,int &sy)
 {
   XWindowAttributes xwa;
   XGetWindowAttributes(sXDisplay(), sXWndFrontBuffer, &xwa);
@@ -279,13 +279,13 @@ void sGetWindowSize(sInt &sx,sInt &sy)
   sy = xwa.height;
 }
 
-sInt sGetWindowMode()
+int sGetWindowMode()
 {
   //XWMHints hints = XGetWMHints(sXDisplay, sXWnd);
   sWindowModeCodes mode = sWM_NORMAL;
-  sInt maxmode = 0;
+  int maxmode = 0;
   Atom *data, type;
-  sInt  format;
+  int  format;
   long unsigned int size, ba;
   XGetWindowProperty(sXDisplay(), sXWndFrontBuffer, XInternAtom(sXDisplay(), "_NET_WM_STATE", sFALSE)
     , 0, sMAX_U64, sFALSE, XA_ATOM, &type, &format, &size, &ba, (unsigned char **) &data);
@@ -295,7 +295,7 @@ sInt sGetWindowMode()
     Atom hidden_atom = XInternAtom(sXDisplay(), "_NET_WM_STATE_HIDDEN", sFALSE);
     Atom vmaximized_atom = XInternAtom(sXDisplay(), "_NET_WM_STATE_MAXIMIZED_VERT", sFALSE);
     Atom hmaximized_atom = XInternAtom(sXDisplay(), "_NET_WM_STATE_MAXIMIZED_HORZ", sFALSE);
-    for (sInt i = 0; i < size; i++) {
+    for (int i = 0; i < size; i++) {
       if(data[i] == hidden_atom) {
         mode = sWM_MINIMIZED;
       } else if(data[i] == vmaximized_atom) {
@@ -321,13 +321,13 @@ sBool sHasWindowFocus()
   return focusWin == sXWndFrontBuffer;
 }
 
-void sSetClipboard(const sChar *text,sInt len)
+void sSetClipboard(const sChar *text,int len)
 {
   if(len==-1) len=sGetStringLen(text);
 
   char *dest = new char[(len*4)+1];
   sU32 *convBuffer = new sU32[len+1];
-  for(sInt i=0;i<len;i++) // fake-wchar16-to-wchar32 (argh!)
+  for(int i=0;i<len;i++) // fake-wchar16-to-wchar32 (argh!)
     convBuffer[i] = text[i];
   
   convBuffer[len] = 0;
@@ -371,7 +371,7 @@ const sChar *sGetDragDropFile()
 
 /****************************************************************************/
 
-sBool sSystemOpenFileDialog(const sChar *label,const sChar *extensions,sInt flags,const sStringDesc &buffer)
+sBool sSystemOpenFileDialog(const sChar *label,const sChar *extensions,int flags,const sStringDesc &buffer)
 {
   sLogF(L"xlib",L"sSystemOpenFileDialog\n");
   return sFALSE;
@@ -379,7 +379,7 @@ sBool sSystemOpenFileDialog(const sChar *label,const sChar *extensions,sInt flag
 
 /****************************************************************************/
 
-sBool sSystemMessageDialog(const sChar *label,sInt flags)
+sBool sSystemMessageDialog(const sChar *label,int flags)
 {
   sLogF(L"xlib",L"sSystemMessageDialog\n");
   return sFALSE;
@@ -489,7 +489,7 @@ void sClipRect(const sRect &r)
 /***                                                                      ***/
 /****************************************************************************/
 
-static void sForeground(sInt colid)
+static void sForeground(int colid)
 {
   sVERIFY(colid>=0 && colid<MAX_COLORS);
   if(ForegroundCol != colid)
@@ -499,7 +499,7 @@ static void sForeground(sInt colid)
   }
 }
 
-void sSetColor2D(sInt colid,sU32 color)
+void sSetColor2D(int colid,sU32 color)
 {
   sVERIFY(colid>=0 && colid<MAX_COLORS);
   
@@ -527,20 +527,20 @@ void sSetColor2D(sInt colid,sU32 color)
   }
 }
 
-sU32 sGetColor2D(sInt colid)
+sU32 sGetColor2D(int colid)
 {
   sVERIFY(colid>=0 && colid<MAX_COLORS);
   return Color[colid][1];
 }
 
-void sRect2D(sInt x0,sInt y0,sInt x1,sInt y1,sInt colid)
+void sRect2D(int x0,int y0,int x1,int y1,int colid)
 {
   sRect r;
   r.Init(x0,y0,x1,y1);
   sRect2D(r,colid);
 }
 
-void sRect2D(const sRect &r,sInt colid)
+void sRect2D(const sRect &r,int colid)
 {
   if(sRectsIntersect(ClipBounds,r))
   {
@@ -550,7 +550,7 @@ void sRect2D(const sRect &r,sInt colid)
   }
 }
 
-void sRectHole2D(const sRect &out,const sRect &hole,sInt colid)
+void sRectHole2D(const sRect &out,const sRect &hole,int colid)
 {
   sRect2D(out .x0,out .y0,out .x1,hole.y0,colid);
   sRect2D(out .x0,hole.y0,hole.x0,hole.y1,colid);
@@ -558,7 +558,7 @@ void sRectHole2D(const sRect &out,const sRect &hole,sInt colid)
   sRect2D(out .x0,hole.y1,out .x1,out .y1,colid);
 }
 
-void sRectInvert2D(sInt x0,sInt y0,sInt x1,sInt y1)
+void sRectInvert2D(int x0,int y0,int x1,int y1)
 {
   sRect r;
   r.Init(x0,y0,x1,y1);
@@ -575,12 +575,12 @@ void sRectInvert2D(const sRect &r)
   }
 }
 
-void sRectFrame2D(const sRect &r,sInt colid)
+void sRectFrame2D(const sRect &r,int colid)
 {
   sRectFrame2D(r.x0,r.y0,r.x1,r.y1,colid);
 }
 
-void sRectFrame2D(sInt x0,sInt y0,sInt x1,sInt y1,sInt colid)
+void sRectFrame2D(int x0,int y0,int x1,int y1,int colid)
 {
   sRect2D(x0  ,y0  ,x1  ,y0+1,colid);
   sRect2D(x0  ,y1-1,x1  ,y1  ,colid);
@@ -588,30 +588,30 @@ void sRectFrame2D(sInt x0,sInt y0,sInt x1,sInt y1,sInt colid)
   sRect2D(x1-1,y0+1,x1  ,y1-1,colid);
 }
 
-void sLine2D(sInt x0,sInt y0,sInt x1,sInt y1,sInt colid)
+void sLine2D(int x0,int y0,int x1,int y1,int colid)
 {
   sSetGCRegion();
   sForeground(colid);
   XDrawLine(sXDisplay(),sXWnd,sXGC,x0,y0,x1,y1);
 }
 
-void sLine2D(sInt *list,sInt count,sInt colid)
+void sLine2D(int *list,int count,int colid)
 {
   sSetGCRegion();
   sForeground(colid);
-  for(sInt i=1;i<count;i++)
+  for(int i=1;i<count;i++)
     XDrawLine(sXDisplay(),sXWnd,sXGC,list[i*2-2],list[i*2-1],list[i*2+0],list[i*2+1]);
 }
 
-void sLineList2D(sInt *list,sInt count,sInt colid)
+void sLineList2D(int *list,int count,int colid)
 {
   sSetGCRegion();
   sForeground(colid);
-  for(sInt i=0;i<count;i++)
+  for(int i=0;i<count;i++)
     XDrawLine(sXDisplay(),sXWnd,sXGC,list[i*4+0],list[i*4+1],list[i*4+2],list[i*4+3]);
 }
 
-static void sPicturePixmapFromRawData(Picture &pic,Pixmap &pixmap,const sU32 *data,sInt w,sInt h,sInt stride)
+static void sPicturePixmapFromRawData(Picture &pic,Pixmap &pixmap,const sU32 *data,int w,int h,int stride)
 {
   XRenderPictureAttributes attr;
 
@@ -636,11 +636,11 @@ static void sPicturePixmapFromRawData(Picture &pic,Pixmap &pixmap,const sU32 *da
   }
 }
 
-void sBlit2D(const sU32 *data,sInt width,const sRect &dest)
+void sBlit2D(const sU32 *data,int width,const sRect &dest)
 {
   Pixmap pixmap;
   Picture pict;
-  sInt w = dest.SizeX(), h = dest.SizeY();
+  int w = dest.SizeX(), h = dest.SizeY();
 
   if(sRectsIntersect(ClipBounds,dest))
   {
@@ -654,11 +654,11 @@ void sBlit2D(const sU32 *data,sInt width,const sRect &dest)
   }
 }
 
-void sStretch2D(const sU32 *data,sInt width,const sRect &source,const sRect &dest)
+void sStretch2D(const sU32 *data,int width,const sRect &source,const sRect &dest)
 {
   Pixmap pixmap;
   Picture pict;
-  sInt w = source.SizeX(), h = source.SizeY();
+  int w = source.SizeX(), h = source.SizeY();
 
   if(sRectsIntersect(ClipBounds,dest))
   {
@@ -687,15 +687,15 @@ void sStretch2D(const sU32 *data,sInt width,const sRect &source,const sRect &des
 
 struct sImage2DPrivate
 {
-  sInt xs, ys;
+  int xs, ys;
   Pixmap pixmap;
   Picture pict;
 };
 
-static sInt Render2DMode = 0;
+static int Render2DMode = 0;
 static sImage2D *Render2DBuffer = 0;
 
-void sRender2DBegin(sInt xs,sInt ys)
+void sRender2DBegin(int xs,int ys)
 {
   sVERIFY(Render2DMode == 0);
   sVERIFY(Render2DBuffer == 0);
@@ -747,7 +747,7 @@ void sRender2DGet(sU32 *data)
 /***                                                                      ***/
 /****************************************************************************/
 
-sImage2D::sImage2D(sInt xs,sInt ys,sU32 *data)
+sImage2D::sImage2D(int xs,int ys,sU32 *data)
 {
   prv = new sImage2DPrivate;
   prv->xs = xs;
@@ -764,12 +764,12 @@ sImage2D::~sImage2D()
   delete prv;
 }
 
-sInt sImage2D::GetSizeX()
+int sImage2D::GetSizeX()
 {
   return prv->xs;
 }
 
-sInt sImage2D::GetSizeY()
+int sImage2D::GetSizeY()
 {
   return prv->ys;
 }
@@ -779,7 +779,7 @@ void sImage2D::Update(sU32 *data)
   sLogF(L"xlib",L"sImage2D::Update\n");
 }
 
-void sImage2D::Paint(sInt x,sInt y)
+void sImage2D::Paint(int x,int y)
 {
   sRect r;
   r.Init(x,y,x+prv->xs,y+prv->ys);
@@ -791,7 +791,7 @@ void sImage2D::Paint(sInt x,sInt y)
   }
 }
 
-void sImage2D::Paint(const sRect &source,sInt x,sInt y)
+void sImage2D::Paint(const sRect &source,int x,int y)
 {
   sRect r;
   r.Init(x,y,x+source.SizeX(),y+source.SizeY());
@@ -833,10 +833,10 @@ struct sFont2DPrivate
 {
   XftFont *Font;
   sBool Underline,Strikeout;
-  sInt TextColor,BackColor;
+  int TextColor,BackColor;
 };
 
-sFont2D::sFont2D(const sChar *name,sInt size,sInt flags,sInt width)
+sFont2D::sFont2D(const sChar *name,int size,int flags,int width)
 {
   prv = new sFont2DPrivate;
   prv->Font = 0;
@@ -853,7 +853,7 @@ void sFont2D::AddResource(const sChar *filename)
 {
 }
 
-void sFont2D::Init(const sChar *name,sInt size,sInt flags,sInt width)
+void sFont2D::Init(const sChar *name,int size,int flags,int width)
 {
   if(prv->Font) XftFontClose(sXDisplay(),prv->Font);
 
@@ -875,22 +875,22 @@ void sFont2D::Init(const sChar *name,sInt size,sInt flags,sInt width)
   prv->TextColor = 0;
 }
 
-sInt sFont2D::GetHeight()
+int sFont2D::GetHeight()
 {
   return prv->Font->height;
 }
 
-sInt sFont2D::GetBaseline()
+int sFont2D::GetBaseline()
 {
   return prv->Font->ascent;
 }
 
-sInt sFont2D::GetCharHeight()
+int sFont2D::GetCharHeight()
 {
   return prv->Font->height;
 }
 
-sInt sFont2D::GetWidth(const sChar *text,sInt len)
+int sFont2D::GetWidth(const sChar *text,int len)
 {
   if(len==-1) len=sGetStringLen(text);
   XGlyphInfo extents;
@@ -898,7 +898,7 @@ sInt sFont2D::GetWidth(const sChar *text,sInt len)
   return extents.xOff;
 }
 
-sInt sFont2D::GetAdvance(const sChar *text,sInt len)
+int sFont2D::GetAdvance(const sChar *text,int len)
 {
   if(len==-1) len=sGetStringLen(text);
   XGlyphInfo extents;
@@ -906,16 +906,16 @@ sInt sFont2D::GetAdvance(const sChar *text,sInt len)
   return extents.width;
 }
 
-sInt sFont2D::GetCharCountFromWidth(sInt width,const sChar *text,sInt len)
+int sFont2D::GetCharCountFromWidth(int width,const sChar *text,int len)
 {
   if(len==-1) len = sGetStringLen(text);
   
   // binary search (yeah, not terribly efficient)
-  sInt l=0,r=len;
+  int l=0,r=len;
   while(l<r)
   {
-    sInt x = (l+r)/2;
-    sInt w = GetWidth(text,x);
+    int x = (l+r)/2;
+    int w = GetWidth(text,x);
     
     if(width < w)
       r = x;
@@ -925,8 +925,8 @@ sInt sFont2D::GetCharCountFromWidth(sInt width,const sChar *text,sInt len)
   
   if(l>0)
   {
-    sInt w = GetWidth(text,l-1);
-    sInt wCh = GetAdvance(&text[l],1);
+    int w = GetWidth(text,l-1);
+    int wCh = GetAdvance(&text[l],1);
     if(width - w <= wCh/2)
       l--;
   }
@@ -941,8 +941,8 @@ sFont2D::sLetterDimensions sFont2D::sGetLetterDimensions(const sChar letter)
   FT_Load_Char(face, letter, 0);
   FT_Glyph_Metrics_ metrics = face->glyph->metrics;
 
-  result.Pre = ((sInt)(metrics.horiBearingX) & -64) >> 6;
-  result.Cell = ((sInt)(metrics.width) & -64) >> 6; //abc.abcB;
+  result.Pre = ((int)(metrics.horiBearingX) & -64) >> 6;
+  result.Cell = ((int)(metrics.width) & -64) >> 6; //abc.abcB;
   result.Advance = GetAdvance(&letter, 1);//abc.abcC;
   result.Post = result.Advance - result.Cell - result.Pre;
   result.Height = GetCharHeight();
@@ -962,7 +962,7 @@ sBool sFont2D::LetterExists(sChar letter)
   return ret;
 }
 
-void sFont2D::SetColor(sInt text,sInt back)
+void sFont2D::SetColor(int text,int back)
 {
   sVERIFY(text>=0 && text<MAX_COLORS);
   sVERIFY(back>=0 && back<MAX_COLORS);
@@ -970,22 +970,22 @@ void sFont2D::SetColor(sInt text,sInt back)
   prv->TextColor = text;
 }
 
-void sFont2D::PrintMarked(sInt flags,const sRect *rc,sInt x,sInt y,const sChar *text,sInt len,sPrintInfo *pi)
+void sFont2D::PrintMarked(int flags,const sRect *rc,int x,int y,const sChar *text,int len,sPrintInfo *pi)
 {
   if(len==-1) len=sGetStringLen(text);
   sVERIFY(rc);
   sVERIFY(pi);
   sRect r(*rc);
   const sChar *ot = text;
-  sInt ol = len;
-  sInt ox = x;
+  int ol = len;
+  int ox = x;
 
   switch(pi->Mode)
   {
   case sPIM_PRINT:
     if(pi->SelectStart<len && pi->SelectEnd>0 && pi->SelectEnd>pi->SelectStart)
     {
-      sInt i = pi->SelectStart;
+      int i = pi->SelectStart;
       if(i>0)
       {
         r.x1 = x + GetWidth(text,i);
@@ -1040,8 +1040,8 @@ void sFont2D::PrintMarked(sInt flags,const sRect *rc,sInt x,sInt y,const sChar *
 
     if(pi->CursorPos>=0 && pi->CursorPos<=ol && pi->Mode==sPIM_PRINT)
     {
-      sInt t = GetWidth(ot,pi->CursorPos);
-      sInt w = 2;
+      int t = GetWidth(ot,pi->CursorPos);
+      int w = 2;
       if(pi->Overwrite)
       {
         if(pi->CursorPos<ol)
@@ -1057,7 +1057,7 @@ void sFont2D::PrintMarked(sInt flags,const sRect *rc,sInt x,sInt y,const sChar *
     if(pi->QueryY>=rc->y0 && pi->QueryY<rc->y1)
     {
       x = ox;
-	  sInt i;
+	  int i;
       for(i=0;i<len;i++)
       {
         x += GetWidth(ot+i,1);
@@ -1073,13 +1073,13 @@ void sFont2D::PrintMarked(sInt flags,const sRect *rc,sInt x,sInt y,const sChar *
     if(pi->QueryPos>=ot && pi->QueryPos<=ot+len)
     {
       pi->QueryY = rc->y0;
-      pi->QueryX = ox+GetWidth(ot,sInt(pi->QueryPos-ot));
+      pi->QueryX = ox+GetWidth(ot,int(pi->QueryPos-ot));
     }
     break;
   }
 }
 
-void sFont2D::PrintBasic(sInt flags,const sRect *r,sInt x,sInt y,const sChar *text,sInt len)
+void sFont2D::PrintBasic(int flags,const sRect *r,int x,int y,const sChar *text,int len)
 {
   if(len==-1) len = sGetStringLen(text);
   
@@ -1109,13 +1109,13 @@ void sFont2D::PrintBasic(sInt flags,const sRect *r,sInt x,sInt y,const sChar *te
     sClipPop();
 }
 
-sInt sFont2D::Print(sInt flags,const sRect &r,const sChar *text,sInt len,sInt margin,sInt xo,sInt yo,sPrintInfo *pi)
+int sFont2D::Print(int flags,const sRect &r,const sChar *text,int len,int margin,int xo,int yo,sPrintInfo *pi)
 {
   if(len==-1) len=sGetStringLen(text);
-  sInt x,y;
+  int x,y;
   sPrintInfo pil;
   const sChar *textstart=text;
-  sInt result;
+  int result;
 
   sRect r2(r);
 
@@ -1132,8 +1132,8 @@ sInt sFont2D::Print(sInt flags,const sRect &r,const sChar *text,sInt len,sInt ma
   r2.Extend(-margin);
   x = r2.x0 + xo;
   y = r2.y0 + yo;
-  sInt xs = r2.SizeX();
-  sInt h = GetHeight();
+  int xs = r2.SizeX();
+  int h = GetHeight();
   sRect rs(r);
   result = rs.y0;
 
@@ -1149,14 +1149,14 @@ sInt sFont2D::Print(sInt flags,const sRect &r,const sChar *text,sInt len,sInt ma
     const sChar *textend = text+len;
     for(;;)
     {
-      sInt i=0;
-      sInt best = 0;
+      int i=0;
+      int best = 0;
       if(pi)
       {
-        pil.CursorPos   = pi->CursorPos   - sInt(text-textstart);
+        pil.CursorPos   = pi->CursorPos   - int(text-textstart);
         pil.Overwrite   = pi->Overwrite;
-        pil.SelectStart = pi->SelectStart - sInt(text-textstart);
-        pil.SelectEnd   = pi->SelectEnd   - sInt(text-textstart);
+        pil.SelectStart = pi->SelectStart - int(text-textstart);
+        pil.SelectEnd   = pi->SelectEnd   - int(text-textstart);
       }
       for(;;)
       {
@@ -1223,7 +1223,7 @@ sInt sFont2D::Print(sInt flags,const sRect &r,const sChar *text,sInt len,sInt ma
   }
   else
   {
-    sInt space=0;
+    int space=0;
     if(flags & sF2P_SPACE)
       space = GetWidth(L" ");
     if(flags & sF2P_LEFT)

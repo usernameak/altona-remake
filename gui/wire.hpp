@@ -62,10 +62,10 @@ private:
   sWireNamespace::Form *FindClass(sPoolString name);
   sWireNamespace::Form *MakeClass(sPoolString name);
   sWireNamespace::FormInstance *FindInstance(sObject *obj);
-  sWindow *FindWindow(sPoolString name,sInt index=0);
+  sWindow *FindWindow(sPoolString name,int index=0);
 
   sBool ProcessEndWasCalled;
-  sInt CurrentScreen;
+  int CurrentScreen;
   sWindow *FullscreenWindow;
   const sChar *CurrentToolName;
 
@@ -76,7 +76,7 @@ private:
 
 //  void Error(const sChar *str);
   sWireNamespace::FormInstance *_FormName(sBool window);
-  void _Key(sU32 &key,sInt &qual,sInt &hit);
+  void _Key(sU32 &key,int &qual,int &hit);
 
   void _ScreenAlign(sLayoutFrameWindow *lfw);
   void _ScreenLevel(sLayoutFrameWindow *parent);
@@ -87,11 +87,11 @@ private:
 
   void _Add0(sWireNamespace::RawShortcut &sc);
   void _Add(sWireNamespace::RawShortcut &sc);
-  sWireNamespace::Shortcut *MakeShortcut(sWireNamespace::Form *wc,sInt type,sWireNamespace::RawShortcut &raw);
+  sWireNamespace::Shortcut *MakeShortcut(sWireNamespace::Form *wc,int type,sWireNamespace::RawShortcut &raw);
 
   sWireNamespace::CommandMenu *_Menu(sWireNamespace::Form *);
   void _Sets(sArray<struct sWireNamespace::Form *> &windows);
-  void _WindowCmd(sArray<struct sWireNamespace::Form *> &windows,sInt sets);
+  void _WindowCmd(sArray<struct sWireNamespace::Form *> &windows,int sets);
   void _Window();
   void _Global();
 
@@ -101,7 +101,7 @@ private:
   void DoLayout();
   sMessage DragMessage;
   sWindow *DragModeFocus;
-  sInt DragModeQual;
+  int DragModeQual;
   sWindow *MainWindow;
   sU32 QualScope;
 
@@ -137,9 +137,9 @@ public:
   // windows handling
 
   sBool HandleKey(sWindow *win,sU32 key);
-  sBool HandleCommand(sWindow *win,sInt cmd);
+  sBool HandleCommand(sWindow *win,int cmd);
   sBool HandleShortcut(sWindow *win,sU32 key) { return 0; }
-  sBool HandleDrag(sWindow *win,const sWindowDrag &dd,sInt hit);
+  sBool HandleDrag(sWindow *win,const sWindowDrag &dd,int hit);
   sBool OnShortcut(sU32 key);
 
   // registration
@@ -151,16 +151,16 @@ public:
   void AddTool(const sChar *classname,const sChar *commandname,const sMessage &msg);
   void AddDrag(const sChar *classname,const sChar *commandname,const sMessage &msg);
   void AddCallback(const sChar *classname,const sChar *commandname,const sMessage &msg);
-  void AddPara1(const sChar *classname,const sChar *commandname,const sMessage &msg,sInt type,sDInt offset,const sChar *choices,sF32 min,sF32 max,sF32 step);
-  void AddChoice(const sChar *classname,const sChar *commandname,const sMessage &msg,sInt *ptr,const sChar *choices);
+  void AddPara1(const sChar *classname,const sChar *commandname,const sMessage &msg,int type,sDInt offset,const sChar *choices,sF32 min,sF32 max,sF32 step);
+  void AddChoice(const sChar *classname,const sChar *commandname,const sMessage &msg,int *ptr,const sChar *choices);
 
   void OverrideCmd(const sChar *classname, const sChar *commandname,const sMessage &msg);
  
-  template<class T> void AddParaInt   (const sChar *classname,const sChar *commandname,const sMessage &msg,sInt T::*ptr,sF32 min,sF32 max,sF32 step) { AddPara1(classname,commandname,msg,sWPT_INT   ,(sDInt)(&(((T*)0)->*ptr)),0,min,max,step); }
+  template<class T> void AddParaInt   (const sChar *classname,const sChar *commandname,const sMessage &msg,int T::*ptr,sF32 min,sF32 max,sF32 step) { AddPara1(classname,commandname,msg,sWPT_INT   ,(sDInt)(&(((T*)0)->*ptr)),0,min,max,step); }
   template<class T> void AddParaFloat (const sChar *classname,const sChar *commandname,const sMessage &msg,sF32 T::*ptr,sF32 min,sF32 max,sF32 step) { AddPara1(classname,commandname,msg,sWPT_FLOAT ,(sDInt)(&(((T*)0)->*ptr)),0,min,max,step); }
-  template<class T> void AddParaChoice(const sChar *classname,const sChar *commandname,const sMessage &msg,sInt T::*ptr,const sChar *choices)        { AddPara1(classname,commandname,msg,sWPT_CHOICE,(sDInt)(&(((T*)0)->*ptr)),choices,0,0,0); }
-  template<class T> void AddParaBool  (const sChar *classname,const sChar *commandname,const sMessage &msg,sInt T::*ptr)                             { AddPara1(classname,commandname,msg,sWPT_CHOICE,(sDInt)(&(((T*)0)->*ptr)),L"off|on",0,0,0); }
-//  template<class T> void AddParaColor (const sChar *classname,const sChar *commandname,const sMessage &msg,sU32 T::*ptr,sBool alpha)                 { AddPara1(classname,commandname,msg,sInt(alpha?sWPT_ARGB:sWPT_RGB),(sDInt)(&(((T*)0)->*ptr))); }
+  template<class T> void AddParaChoice(const sChar *classname,const sChar *commandname,const sMessage &msg,int T::*ptr,const sChar *choices)        { AddPara1(classname,commandname,msg,sWPT_CHOICE,(sDInt)(&(((T*)0)->*ptr)),choices,0,0,0); }
+  template<class T> void AddParaBool  (const sChar *classname,const sChar *commandname,const sMessage &msg,int T::*ptr)                             { AddPara1(classname,commandname,msg,sWPT_CHOICE,(sDInt)(&(((T*)0)->*ptr)),L"off|on",0,0,0); }
+//  template<class T> void AddParaColor (const sChar *classname,const sChar *commandname,const sMessage &msg,sU32 T::*ptr,sBool alpha)                 { AddPara1(classname,commandname,msg,int(alpha?sWPT_ARGB:sWPT_RGB),(sDInt)(&(((T*)0)->*ptr))); }
   void ProcessFile(const sChar *name);
   void ProcessText(const sChar *text,const sChar *reffilename=0);   // filename is for error messages
   void ProcessText(const sChar8 *text,const sChar *reffilename=0);
@@ -168,11 +168,11 @@ public:
 
   // control
 
-  void SwitchScreen(sInt scr) { CmdSwitchScreen(scr); }
-  void SwitchScope(sInt scope);
-  void SetSubSwitch(sPoolString name,sInt nr);
-  sInt GetSubSwitch(sPoolString name);
-  sInt GetScreen() { return LayoutFrame->GetSwitch(); }
+  void SwitchScreen(int scr) { CmdSwitchScreen(scr); }
+  void SwitchScope(int scope);
+  void SetSubSwitch(sPoolString name,int nr);
+  int GetSubSwitch(sPoolString name);
+  int GetScreen() { return LayoutFrame->GetSwitch(); }
   void SetFullscreen(sWindow *,sBool toggle=1);
   void Popup(const sChar *name);
   void CmdClosePopup();
@@ -206,7 +206,7 @@ public:
 
   virtual sBool OnCheckHit(const sWindowDrag &dd) { return 0; }
   sBool OnKey(sU32 key) { return sWire->HandleKey(this,key); }
-  sBool OnCommand(sInt cmd) { return sWire->HandleCommand(this,cmd); }
+  sBool OnCommand(int cmd) { return sWire->HandleCommand(this,cmd); }
   sBool OnShortcut(sU32 key) { return sWire->HandleShortcut(this,key); }
   void OnDrag(const sWindowDrag &dd) { sWire->HandleDrag(this,dd,OnCheckHit(dd)); }
 
@@ -231,7 +231,7 @@ class sWireGridFrame : public sGridFrame
 {
 public:
   sBool OnKey(sU32 key) { if(sGridFrame::OnKey(key)) return 1; return sWire->HandleKey(this,key); }
-  sBool OnCommand(sInt cmd) { return sWire->HandleCommand(this,cmd); }
+  sBool OnCommand(int cmd) { return sWire->HandleCommand(this,cmd); }
   sBool OnShortcut(sU32 key) { return sWire->HandleShortcut(this,key); }
   void OnDrag(const sWindowDrag &dd) { sWire->HandleDrag(this,dd,0); }
 

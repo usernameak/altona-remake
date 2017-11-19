@@ -34,7 +34,7 @@ struct def
 {
   const sChar *Symbol;
   defusage Usage;
-  sInt Value;
+  int Value;
 };
 
 static def defs[] =
@@ -58,9 +58,9 @@ static def defs[] =
   { 0 }
 };
 
-sInt sParseSDK(const sChar *name)
+int sParseSDK(const sChar *name)
 {
-  for(sInt i=0;defs[i].Symbol;i++)
+  for(int i=0;defs[i].Symbol;i++)
   {
     if(defs[i].Usage==DU_SDK && sCmpStringI(defs[i].Symbol+12,name)==0)
       return defs[i].Value;
@@ -85,7 +85,7 @@ void sScanConfig::Scan(const sChar *coderoot)
     {
       sPoolString symbol;
       sPoolString name;
-      sInt value = -1;
+      int value = -1;
       sBool used = 0;
 
       Scan.ScanName(symbol);
@@ -93,7 +93,7 @@ void sScanConfig::Scan(const sChar *coderoot)
       {
         value = Scan.ScanInt();
         
-        for(sInt i=0;defs[i].Symbol;i++)
+        for(int i=0;defs[i].Symbol;i++)
         {
           if(symbol == defs[i].Symbol)
           {

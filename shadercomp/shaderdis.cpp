@@ -179,7 +179,7 @@ static const sChar *sourcepost[16] =
 
 static void PrintReg(sU32 reg,sU32 version,sTextBuffer &tb)
 {
-  sInt type,num;
+  int type,num;
   const sChar *name;
 
   type = ((reg>>28)&7) + ((reg>>11)&3)*8;
@@ -211,8 +211,8 @@ static void PrintReg(sU32 reg,sU32 version,sTextBuffer &tb)
 
 static void printswizzle(sU32 value,sTextBuffer &tb)
 {
-  sInt j;
-  sInt m[4];
+  int j;
+  int m[4];
   j = (value&0x00ff0000)>>16;
   if(j!=0xe4)
   {
@@ -233,21 +233,21 @@ static void printswizzle(sU32 value,sTextBuffer &tb)
 
 /****************************************************************************/
 
-void sPrintShader(const sU32 *data,sInt flags)
+void sPrintShader(const sU32 *data,int flags)
 {
   sTextBuffer tb;
   sPrintShader(tb,data,flags);
   sDPrint(tb.Get());
 }
 
-void sPrintShader(sTextBuffer& tb, const sU32 *data,sInt flags)
+void sPrintShader(sTextBuffer& tb, const sU32 *data,int flags)
 {
-  sInt code,in,out,def,dcl,label;
-  sInt i,len,j;
+  int code,in,out,def,dcl,label;
+  int i,len,j;
   sU32 version=0;
   sU32 val;
-  sInt komma;
-  sInt line;
+  int komma;
+  int line;
   sBool end = sFALSE;
   const sU32 *datastart;
 
@@ -267,8 +267,8 @@ void sPrintShader(sTextBuffer& tb, const sU32 *data,sInt flags)
 
           tb.Print(L"  ");
           bp = buffer;
-          sInt clen = ((val&0xffff0000)>>16)+1;
-          for(sInt i=0;i<clen;i++)
+          int clen = ((val&0xffff0000)>>16)+1;
+          for(int i=0;i<clen;i++)
           {
             if((i%6)==0 && i!=0)
             {
@@ -277,7 +277,7 @@ void sPrintShader(sTextBuffer& tb, const sU32 *data,sInt flags)
               bp = buffer;
             }
             tb.PrintF(L"0x%08x,",data[i]);
-            for(sInt j=0;j<4;j++)
+            for(int j=0;j<4;j++)
             {
               sChar c = (data[i]>>(j*8))&0xff;
               *bp++ = (c>=0x20 && c<=0x7f) ? c : '.';
@@ -397,7 +397,7 @@ void sPrintShader(sTextBuffer& tb, const sU32 *data,sInt flags)
       val = *data++;
       if(version<0xffff0000) 
       {
-        sInt num = (val&0xf0000)>>16;
+        int num = (val&0xf0000)>>16;
         if(num!=0 || (val&0x0f)==5 || (val&0x0f)==10)
           sSPrintF(opcode,L"%s_%s%d",opcodes[code],usage[val&0x0f],num);
         else
@@ -492,7 +492,7 @@ void sPrintShader(sTextBuffer& tb, const sU32 *data,sInt flags)
 /****************************************************************************/
 
 
-void sPrintShader(class sTextBuffer& tb, sShaderBlob *blob, sInt flags)
+void sPrintShader(class sTextBuffer& tb, sShaderBlob *blob, int flags)
 {
   while(blob && (blob->Type&sSTF_PLATFORM)!=sSTF_HLSL23)
     blob = blob->Next();

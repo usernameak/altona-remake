@@ -41,7 +41,7 @@ sADDSUBSYSTEM(Math,0x18,sInitMath,0);
 /****************************************************************************/
 
 // Find real roots (=Nullstellen) of at� + bt + c.
-sInt sSolveQuadratic(sF32 t[],sF32 a,sF32 b,sF32 c)
+int sSolveQuadratic(sF32 t[],sF32 a,sF32 b,sF32 c)
 {
   if(a == 0.0f) // yes, exact compares everywhere!
   {
@@ -87,12 +87,12 @@ sF64 sRombergIntegral(sIntegrand f_,void *user,sF64 a,sF64 b,int maxOrder,sF64 m
   t[0] = result = 0.5 * h * (f_(a,user) + f_(b,user));
   
   // successively higher orders
-  sInt i = 1;
-  for(sInt n=1; i<maxOrder; i++, n *= 2, h *= 0.5)
+  int i = 1;
+  for(int n=1; i<maxOrder; i++, n *= 2, h *= 0.5)
   {
     // trapezoid rule for next-higher order
     sF64 sum = 0.0;
-    for(sInt j=0; j<n; j++)
+    for(int j=0; j<n; j++)
       sum += f_(a + h*(j + 0.5),user);
     
     sum = 0.5 * (t[0] + h * sum);
@@ -103,7 +103,7 @@ sF64 sRombergIntegral(sIntegrand f_,void *user,sF64 a,sF64 b,int maxOrder,sF64 m
     sF64 ff = 4.0;
     t[0] = sum;
     
-    for(sInt j=1; j<=i; j++, ff *= 4.0)
+    for(int j=1; j<=i; j++, ff *= 4.0)
     {
       sF64 in = t[j];
       t[j] = lastOut = (ff * lastOut - lastIn) / (ff - 1.0);
@@ -147,9 +147,9 @@ sU32 sVector30::GetColor() const
 {
   sU32 col;
 
-  col = (sClamp<sInt>(sInt(x*255+0.5f),0,255)<<16)
-      | (sClamp<sInt>(sInt(y*255+0.5f),0,255)<< 8)
-      | (sClamp<sInt>(sInt(z*255+0.5f),0,255)    )
+  col = (sClamp<int>(int(x*255+0.5f),0,255)<<16)
+      | (sClamp<int>(int(y*255+0.5f),0,255)<< 8)
+      | (sClamp<int>(int(z*255+0.5f),0,255)    )
       | 0x00000000;
 
   return col;
@@ -267,9 +267,9 @@ sU32 sVector31::GetColor() const
 {
   sU32 col;
 
-  col = (sClamp<sInt>(sInt(x*255+0.5f),0,255)<<16)
-      | (sClamp<sInt>(sInt(y*255+0.5f),0,255)<< 8)
-      | (sClamp<sInt>(sInt(z*255+0.5f),0,255)    )
+  col = (sClamp<int>(int(x*255+0.5f),0,255)<<16)
+      | (sClamp<int>(int(y*255+0.5f),0,255)<< 8)
+      | (sClamp<int>(int(z*255+0.5f),0,255)    )
       | 0xff000000;
 
   return col;
@@ -298,10 +298,10 @@ sU32 sVector4::GetColor() const
 {
   sU32 col;
 
-  col = (sClamp<sInt>(sInt(x*255+0.5f),0,255)<<16)
-      | (sClamp<sInt>(sInt(y*255+0.5f),0,255)<< 8)
-      | (sClamp<sInt>(sInt(z*255+0.5f),0,255)    )
-      | (sClamp<sInt>(sInt(w*255+0.5f),0,255)<<24);
+  col = (sClamp<int>(int(x*255+0.5f),0,255)<<16)
+      | (sClamp<int>(int(y*255+0.5f),0,255)<< 8)
+      | (sClamp<int>(int(z*255+0.5f),0,255)    )
+      | (sClamp<int>(int(w*255+0.5f),0,255)<<24);
 
   return col;
 }
@@ -319,10 +319,10 @@ sU32 sVector4::GetMRGB8() const
 {
   sF32 max = sFFloor(sMax(sMax(x,y),z))+1.0f;
 
-  sU32 col =  (sClamp<sInt>(sInt(x/max*255),0,255)<<16)
-            | (sClamp<sInt>(sInt(y/max*255),0,255)<< 8)
-            | (sClamp<sInt>(sInt(z/max*255),0,255)    )
-            | (sClamp<sInt>(sInt(max-1.0f),0,255)<<24);
+  sU32 col =  (sClamp<int>(int(x/max*255),0,255)<<16)
+            | (sClamp<int>(int(y/max*255),0,255)<< 8)
+            | (sClamp<int>(int(z/max*255),0,255)    )
+            | (sClamp<int>(int(max-1.0f),0,255)<<24);
   return col;
 }
 
@@ -534,7 +534,7 @@ void sMatrix34::FindEulerXYZ2(sF32 &x,sF32 &y,sF32 &z) const
 }
 
 
-void sMatrix34::CubeFace(sInt n)
+void sMatrix34::CubeFace(int n)
 {
   static const sF32 dir[6][3] =
   {
@@ -2097,7 +2097,7 @@ void sAABBox::Add(const sAABBox &box,const sMatrix34 &mat)
 {
   sVector31 v[8];
   box.MakePoints(v);
-  for(sInt i=0;i<8;i++)
+  for(int i=0;i<8;i++)
     Add(v[i]*mat);
 }
 
@@ -2125,7 +2125,7 @@ sBool sAABBox::HitRay(sF32 &dist,const sRay &ray) const
 {
   sF32 min = 0.0f, max = 1e+20f;
 
-  for(sInt i=0;i<3;i++)
+  for(int i=0;i<3;i++)
   {
     if(ray.Dir[i])
     {
@@ -2194,7 +2194,7 @@ sBool sAABBox::HitInvRay(sF32 &dist,sVector31Arg origin,sVector30Arg invDir) con
   dist = min;
   return sTRUE;
 
-  //for(sInt i=0;i<3;i++)
+  //for(int i=0;i<3;i++)
   //{
   //  if(invDir[i])
   //  {
@@ -2264,7 +2264,7 @@ sBool sAABBox::IntersectsMovingBoxInv(const sAABBox &box,sVector30Arg invV,sF32 
   if(tMin > tMax)
     return sFALSE;
 
-  for(sInt i=0;i<3;i++)
+  for(int i=0;i<3;i++)
   {
     sF32 iv = invV[i];
 
@@ -2310,16 +2310,16 @@ sAABBox &sAABBox::operator*=(const sMatrix34 &m)
   sVector31 v[8];
   MakePoints(v);
 
-  for(sInt i=0;i<8;i++)
+  for(int i=0;i<8;i++)
     v[i] = v[i]*m;
   Clear();
-  for(sInt i=0;i<8;i++)
+  for(int i=0;i<8;i++)
     Add(v[i]);
 
   return *this;
 }
 
-sInt sAABBox::Classify(sVector30Arg n, sF32 d)
+int sAABBox::Classify(sVector30Arg n, sF32 d)
 {
   sVector31 c = Center();
   sF32 radius = Size().Length() * 0.5f;
@@ -2563,7 +2563,7 @@ sBool sRay::HitAABB(sF32 &min, sF32 &max, const sVector31& bbmin,const sVector31
 
   return sIntersectRayAABB(min,max,Start,ird,bbmin,bbmax);
   
-  //for(sInt i=0;i<3;i++)
+  //for(int i=0;i<3;i++)
   //{
   //  sF32 idir = 1.0f / Dir[i];
   //  sF32 near = (bbmin[i]-Start[i])*idir;
@@ -2576,7 +2576,7 @@ sBool sRay::HitAABB(sF32 &min, sF32 &max, const sVector31& bbmin,const sVector31
   //return sTRUE;
 }
 
-sInt sRay::IntersectPlane(sF32 &t, sVector4Arg plane)const
+int sRay::IntersectPlane(sF32 &t, sVector4Arg plane)const
 {
   sF32 nd = plane.x*Dir.x+plane.y*Dir.y+plane.z*Dir.z;
   sF32 dist=plane.w-plane.x*Start.x-plane.y*Start.y-plane.z*Start.z;;
@@ -2629,11 +2629,11 @@ sBool sRay::HitBilinearPatch(sF32 &dist,const sVector31 &p00,const sVector31 &p0
   sF32 D1 = d.x*q.z - d.z*q.x, D2 = d.y*q.z - d.z*q.y;
   
   sF32 v[2];
-  sInt nSolutions = sSolveQuadratic(v, A2*C1 - A1*C2, A2*D1 - A1*D2 + B2*C1 - B1*C2, B2*D1 - B1*D2);
+  int nSolutions = sSolveQuadratic(v, A2*C1 - A1*C2, A2*D1 - A1*D2 + B2*C1 - B1*C2, B2*D1 - B1*D2);
   sF32 currentMinT = 1e+20f;
   sBool gotOne = sFALSE;
 
-  for(sInt i=0;i<nSolutions;i++)
+  for(int i=0;i<nSolutions;i++)
   {
     if(v[i] < -sISECT_EPSILON || v[i] > 1.0f + sISECT_EPSILON)
       continue;
@@ -2858,7 +2858,7 @@ void sFrustum::Init(const sMatrix44 &mat,sF32 xMin,sF32 xMax,sF32 yMin,sF32 yMax
   Planes[4] = colZ - zMin*colW;     // sFP_Near
   Planes[5] = zMax*colW - colZ;     // sFP_Far
 
-  for(sInt i=0;i<6;i++)
+  for(int i=0;i<6;i++)
   {
     AbsPlanes[i].x = sAbs(Planes[i].x);
     AbsPlanes[i].y = sAbs(Planes[i].y);
@@ -2867,10 +2867,10 @@ void sFrustum::Init(const sMatrix44 &mat,sF32 xMin,sF32 xMax,sF32 yMin,sF32 yMax
   }
 }
 
-sInt sFrustum::IsInside(const sAABBoxC &b) const
+int sFrustum::IsInside(const sAABBoxC &b) const
 {
-  sInt result = sTEST_IN;
-  for(sInt i=0;i<6;i++)
+  int result = sTEST_IN;
+  for(int i=0;i<6;i++)
   {
     sF32 m = b.Center ^ Planes[i];
     sF32 n = b.Radius ^ AbsPlanes[i];
@@ -2880,13 +2880,13 @@ sInt sFrustum::IsInside(const sAABBoxC &b) const
   return result;
 }
 
-sInt sFrustum::IsInside(const sOBBox &b) const
+int sFrustum::IsInside(const sOBBox &b) const
 {
   sMatrix34 mat(sDontInitialize);
   mat.Init(b.BoxToWorld);
 
-  sInt result = sTEST_IN;
-  for(sInt i=0;i<6;i++)
+  int result = sTEST_IN;
+  for(int i=0;i<6;i++)
   {
     sF32 m = b.Center ^ Planes[i];
     sF32 n = b.HalfExtents.x * sFAbs(mat.i ^ Planes[i])
@@ -2902,7 +2902,7 @@ sBool sFrustum::IsOutside(const sOBBox &b) const
 {
   sMatrix34 mat(sDontInitialize);
   mat.Init(b.BoxToWorld);
-  for(sInt i=0;i<6;i++)
+  for(int i=0;i<6;i++)
   {
     sF32 m = b.Center ^ Planes[i];
     sF32 n = b.HalfExtents.x * sFAbs(mat.i ^ Planes[i])
@@ -2918,7 +2918,7 @@ void sFrustum::Transform(const sFrustum &src,const sMatrix34 &matx)
 {
   sMatrix44 mat(matx);
   mat.Trans4();
-  for(sInt i=0;i<6;i++)
+  for(int i=0;i<6;i++)
   {
     Planes[i] = src.Planes[i]*mat;
     AbsPlanes[i].x = sAbs(Planes[i].x);
@@ -2932,7 +2932,7 @@ void sFrustum::Transform(const sFrustum &src,const sMatrix34CM &matcm)
 {
   sMatrix44 mat(matcm);
   mat.Trans4();
-  for(sInt i=0;i<6;i++)
+  for(int i=0;i<6;i++)
   {
     Planes[i] = src.Planes[i]*mat;
     AbsPlanes[i].x = sAbs(Planes[i].x);
@@ -3126,9 +3126,9 @@ sBool sSRT::FromString(const sChar *str)
     return sFALSE;
   
   p += 5;
-  for(sInt i=0;i<9;i++)
+  for(int i=0;i<9;i++)
   {
-    if(!sScanHex(p,(sInt&) fields[i],8))
+    if(!sScanHex(p,(int&) fields[i],8))
       return sFALSE;
 
     if(*p++ != ((i == 8) ? ']' : ','))
@@ -3281,13 +3281,13 @@ sF32 sSmooth(sF32 x,sF32 s)
 /***                                                                      ***/
 /****************************************************************************/
 
-void sMakeDamp(sInt timeslice,sF32 damp,sF32 &d_,sF32 &f_)
+void sMakeDamp(int timeslice,sF32 damp,sF32 &d_,sF32 &f_)
 {
   sF32 f,d;
 
   f = 1;
   d = damp;
-  for(sInt i=1;i<timeslice;i++)
+  for(int i=1;i<timeslice;i++)
   {
     f += d;
     d *= damp;
@@ -3371,11 +3371,11 @@ sF32 sFilter2Pole::Filter(sFilter2PoleTemp &t,sF32 sample)
   return sF32(y0);
 }
 
-void sFilter2Pole::Filter(sFilter2PoleTemp &t,sF32 *in,sF32 *out,sInt count)
+void sFilter2Pole::Filter(sFilter2PoleTemp &t,sF32 *in,sF32 *out,int count)
 {
   sF64 x0,y0;
 
-  for(sInt i=0;i<count;i++)
+  for(int i=0;i<count;i++)
   {
     x0 = in[i];
     y0 = x0*a0 + t.x1*a1 + t.x2*a2 + t.y1*b1 + t.y2*b2;
@@ -3388,11 +3388,11 @@ void sFilter2Pole::Filter(sFilter2PoleTemp &t,sF32 *in,sF32 *out,sInt count)
   }
 }
 
-void sFilter2Pole::FilterStereo(sFilter2PoleTemp *t,sF32 *in,sF32 *out,sInt count)
+void sFilter2Pole::FilterStereo(sFilter2PoleTemp *t,sF32 *in,sF32 *out,int count)
 {
   sF64 x0,y0;
 
-  for(sInt i=0;i<count;i++)
+  for(int i=0;i<count;i++)
   {
     x0 = in[i*2+0];
     y0 = x0*a0 + t[0].x1*a1 + t[0].x2*a2 + t[0].y1*b1 + t[0].y2*b2;
@@ -3403,7 +3403,7 @@ void sFilter2Pole::FilterStereo(sFilter2PoleTemp *t,sF32 *in,sF32 *out,sInt coun
     t[0].y2 = t[0].y1;
     t[0].y1 =      y0;
   }
-  for(sInt i=0;i<count;i++)
+  for(int i=0;i<count;i++)
   {
     x0 = in[i*2+1];
     y0 = x0*a0 + t[1].x1*a1 + t[1].x2*a2 + t[1].y1*b1 + t[1].y2*b2;
@@ -3424,13 +3424,13 @@ void sFilter2Pole::FilterStereo(sFilter2PoleTemp *t,sF32 *in,sF32 *out,sInt coun
 
 sF32 sPerlinRandom2D[256][2];
 sF32 sPerlinRandom3D[256][3];
-sInt sPerlinPermute[512];
+int sPerlinPermute[512];
 
 static void sInitPerlin()
 {
-  sInt i,j;
+  int i,j;
   sRandom rnd;
-  sInt order[256];
+  int order[256];
 
   rnd.Seed(0);
   // permutation
@@ -3451,7 +3451,7 @@ static void sInitPerlin()
 		  }
     }
 	}
-  for(sInt k=0;k<256;k++)
+  for(int k=0;k<256;k++)
     sPerlinPermute[k+256] = sPerlinPermute[k];
 
   // random 2d
@@ -3486,10 +3486,10 @@ static void sInitPerlin()
 
 }
 
-sF32 sPerlin2D(sInt x,sInt y,sInt mask,sInt seed)
+sF32 sPerlin2D(int x,int y,int mask,int seed)
 {
-  sInt vx0,vy0,vx1,vy1;
-  sInt v00,v01,v10,v11;
+  int vx0,vy0,vx1,vy1;
+  int v00,v01,v10,v11;
   sF32 f00,f01,f10,f11;
   sF32 f0,f1,f;
   sF32 tx,ty;
@@ -3515,11 +3515,11 @@ sF32 sPerlin2D(sInt x,sInt y,sInt mask,sInt seed)
   return f;
 }
 
-sF32 sPerlin3D(sInt x,sInt y,sInt z,sInt mask,sInt seed)
+sF32 sPerlin3D(int x,int y,int z,int mask,int seed)
 {
-  sInt vx0,vy0,vz0,vx1,vy1,vz1;
-  sInt v000,v001,v010,v011;
-  sInt v100,v101,v110,v111;
+  int vx0,vy0,vz0,vx1,vy1,vz1;
+  int v000,v001,v010,v011;
+  int v100,v101,v110,v111;
   sF32 f000,f001,f010,f011;
   sF32 f100,f101,f110,f111;
   sF32 f00,f01,f10,f11;
@@ -3565,11 +3565,11 @@ sF32 sPerlin3D(sInt x,sInt y,sInt z,sInt mask,sInt seed)
 }
 
 
-void sPerlinDerive3D(sInt x,sInt y,sInt z,sInt mask,sInt seed,sF32 &value,sVector30 &dir)
+void sPerlinDerive3D(int x,int y,int z,int mask,int seed,sF32 &value,sVector30 &dir)
 {
-  sInt vx0,vy0,vz0,vx1,vy1,vz1;
-  sInt v000,v001,v010,v011;
-  sInt v100,v101,v110,v111;
+  int vx0,vy0,vz0,vx1,vy1,vz1;
+  int v000,v001,v010,v011;
+  int v100,v101,v110,v111;
   sF32 tx,ty,tz;
   sF32 px000,px001,px010,px011,px100,px101,px110,px111;
   sF32 py000,py001,py010,py011,py100,py101,py110,py111;
@@ -3714,17 +3714,17 @@ void sPerlinDerive3D(sInt x,sInt y,sInt z,sInt mask,sInt seed,sF32 &value,sVecto
   dir.z = ra0 + 6*tz*(rb1-rb0-ra1) + 3*tz*tz*(5*ra1-3*ra0-2*rb1+2*rb0) - 8*tz*tz*tz*(ra1-ra0); 
 }
 
-sF32 sPerlin2D(sF32 x,sF32 y,sInt octaves,sF32 falloff,sInt mode,sInt seed)
+sF32 sPerlin2D(sF32 x,sF32 y,int octaves,sF32 falloff,int mode,int seed)
 {
-  sInt xi = sInt(x*0x10000);
-  sInt yi = sInt(y*0x10000);
-  sInt mask = 0xff;
+  int xi = int(x*0x10000);
+  int yi = int(y*0x10000);
+  int mask = 0xff;
   sF32 sum,amp;
 
   sum = 0;
   amp = 1.0f;
 
-  for(sInt i=0;i<octaves && i<8;i++)
+  for(int i=0;i<octaves && i<8;i++)
   {
     sF32 val = sPerlin2D(xi,yi,mask,seed);
     if(mode&1)
@@ -3785,7 +3785,7 @@ sBool sGetIntersection(sVector2Arg u1, sVector2Arg u2, const sFRect &rect, sF32 
   return sFALSE;
 }
 
-sInt sGetLineSegmentIntersection(sF32 &dist0, sF32 &dist1, sVector2Arg ls0, sVector2Arg ld0, sVector2Arg ls1, sVector2Arg ld1)
+int sGetLineSegmentIntersection(sF32 &dist0, sF32 &dist1, sVector2Arg ls0, sVector2Arg ld0, sVector2Arg ls1, sVector2Arg ld1)
 {
   sF32 denom = ld1.y*ld0.x-ld1.x*ld0.y;
   sF32 nume_a = ld1.x*(ls0.y-ls1.y)-ld1.y*(ls0.x-ls1.x);

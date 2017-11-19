@@ -25,16 +25,16 @@ public:
   enum FadeType { LINEAR, SMOOTH, SMOOTH_IN, SMOOTH_OUT, SWITCH };
   enum { IMMEDIATE = 9999999 };
   
-  void Init (sInt length) {Length=length; Time=0; Dir=NONE;}
-  void Fade (sInt delta, FadeDirection fade=NONE);
-  void FadeIn (sInt delta=0) {Time = sMin(Length, Time+delta); Dir=IN;}
-  void FadeOut (sInt delta=0) {Time = sMax(0, Time-delta); Dir=OUT;}
-  sInt GetDirection() { return (Dir==IN ? 1 : (Dir==OUT ? -1 : 0)); }
+  void Init (int length) {Length=length; Time=0; Dir=NONE;}
+  void Fade (int delta, FadeDirection fade=NONE);
+  void FadeIn (int delta=0) {Time = sMin(Length, Time+delta); Dir=IN;}
+  void FadeOut (int delta=0) {Time = sMax(0, Time-delta); Dir=OUT;}
+  int GetDirection() { return (Dir==IN ? 1 : (Dir==OUT ? -1 : 0)); }
   sF32 GetFactor(sU32 type=SMOOTH);
-  sInt GetTime() { return Time; }
-  sInt GetLength() { return Length; }
+  int GetTime() { return Time; }
+  int GetLength() { return Length; }
   
-  sInt Time, Length;
+  int Time, Length;
   FadeDirection Dir;
 };
 

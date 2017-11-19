@@ -99,13 +99,13 @@ void sTextWindow::OnPaint2D()
     {
       TextRect.x0 = lnr.x1 = lnr.x0+40;
     }
-    sInt h=Font->Print(TextFlags|sF2P_OPAQUE,TextRect,Text->Get(),-1,0,0,0,&pi);
+    int h=Font->Print(TextFlags|sF2P_OPAQUE,TextRect,Text->Get(),-1,0,0,0,&pi);
     if(EditFlags & sTEF_LINENUMBER)
     {
       sString<16> str;
-      sInt y=lnr.y0;
-      sInt fh = Font->GetHeight();
-      sInt n=1;
+      int y=lnr.y0;
+      int fh = Font->GetHeight();
+      int n=1;
       Font->SetColor(sGC_TEXT,sGC_SELECT);
       while(y<lnr.y1)
       {
@@ -160,7 +160,7 @@ void sTextWindow::CmdCursorToggle()
 
 /****************************************************************************/
 
-void sTextWindow::GetCursorPos(sInt &x,sInt &y)
+void sTextWindow::GetCursorPos(int &x,int &y)
 {
   sPrintInfo pil;
   pil = PrintInfo;
@@ -169,7 +169,7 @@ void sTextWindow::GetCursorPos(sInt &x,sInt &y)
   pil.QueryY = 0;
   pil.Mode = sPIM_POS2POINT;
 
-  sInt h = Font->Print(TextFlags|sF2P_OPAQUE,TextRect,Text->Get(),-1,0,0,0,&pil);
+  int h = Font->Print(TextFlags|sF2P_OPAQUE,TextRect,Text->Get(),-1,0,0,0,&pil);
 
   x = pil.QueryX;
   y = pil.QueryY;
@@ -182,7 +182,7 @@ void sTextWindow::GetCursorPos(sInt &x,sInt &y)
   }
 }
 
-sInt sTextWindow::FindCursorPos(sInt x,sInt y)
+int sTextWindow::FindCursorPos(int x,int y)
 {
   if(Text==0)
     return 0;
@@ -196,7 +196,7 @@ sInt sTextWindow::FindCursorPos(sInt x,sInt y)
   Font->Print(TextFlags|sF2P_OPAQUE,TextRect,Text->Get(),-1,0,0,0,&pil);
 
   if(pil.QueryPos)
-    return sInt(pil.QueryPos - Text->Get());
+    return int(pil.QueryPos - Text->Get());
   else
     return Text->GetCount();
 }
@@ -211,14 +211,14 @@ void sTextWindow::OnCalcSize()
 
 void sTextWindow::OnDrag(const sWindowDrag &dd)
 {
-  sInt de;
-  sInt ss = PrintInfo.SelectStart;
-  sInt se = PrintInfo.SelectEnd;
-  sInt dummy;
+  int de;
+  int ss = PrintInfo.SelectStart;
+  int se = PrintInfo.SelectEnd;
+  int dummy;
 
   if(MMBScroll(dd)) return;
 
-  sInt oldpos = PrintInfo.CursorPos;
+  int oldpos = PrintInfo.CursorPos;
 
   switch(dd.Mode)
   {
@@ -242,7 +242,7 @@ void sTextWindow::OnDrag(const sWindowDrag &dd)
     if(((dd.Flags &sDDF_DOUBLECLICK) || (sGetKeyQualifier()&sKEYQ_CTRL))
       && PrintInfo.CursorPos>=0 && Text)
     {
-      sInt i;
+      int i;
       const sChar *s = Text->Get();
       MarkMode = 1;
 
@@ -318,7 +318,7 @@ sBool sTextWindow::BeginMoveCursor(sBool selmode)
     if(!MarkMode)
     {
       MarkBegin = PrintInfo.CursorPos;
-      sInt dummy;
+      int dummy;
       GetCursorPos(GoodCursorX,dummy);      // when starting to mark text, use the real cursor pos!
     }
     MarkMode = 1;
@@ -349,10 +349,10 @@ sBool sTextWindow::OnKey(sU32 key)
   if(key&sKEYQ_SHIFT) key|=sKEYQ_SHIFT;
   if(key&sKEYQ_CTRL) key|=sKEYQ_CTRL;
 
-  sInt h = Font->GetHeight();
+  int h = Font->GetHeight();
   sBool selmode = (key & sKEYQ_SHIFT) ? 1 : 0;
-  sInt oldpos = PrintInfo.CursorPos;
-  sInt dummy;
+  int oldpos = PrintInfo.CursorPos;
+  int dummy;
 
   sBool scrolltocursor = 1;
   switch(key&(0x8000ffff|sKEYQ_SHIFT|sKEYQ_CTRL))
@@ -383,7 +383,7 @@ sBool sTextWindow::OnKey(sU32 key)
     {
       if(PrintInfo.CursorPos<Text->GetCount())
         PrintInfo.CursorPos++;
-      sInt dummy;
+      int dummy;
       GetCursorPos(GoodCursorX,dummy);
     }
     EndMoveCursor(selmode);
@@ -392,7 +392,7 @@ sBool sTextWindow::OnKey(sU32 key)
   case sKEY_UP|sKEYQ_SHIFT:
     if(BeginMoveCursor(selmode))
     {
-      sInt x,y;
+      int x,y;
       GetCursorPos(x,y);
       y-=h;
       PrintInfo.CursorPos = FindCursorPos(GoodCursorX,y);
@@ -403,7 +403,7 @@ sBool sTextWindow::OnKey(sU32 key)
   case sKEY_DOWN|sKEYQ_SHIFT:
     if(BeginMoveCursor(selmode))
     {
-      sInt x,y;
+      int x,y;
       GetCursorPos(x,y);
       y+=h;
       PrintInfo.CursorPos = FindCursorPos(GoodCursorX,y);
@@ -446,7 +446,7 @@ sBool sTextWindow::OnKey(sU32 key)
   case sKEY_HOME|sKEYQ_SHIFT:
     BeginMoveCursor(selmode);
     {
-      sInt x,y;
+      int x,y;
       GetCursorPos(x,y);
       PrintInfo.CursorPos = FindCursorPos(Inner.x0,y);
       GetCursorPos(GoodCursorX,dummy);
@@ -458,7 +458,7 @@ sBool sTextWindow::OnKey(sU32 key)
   case sKEY_END|sKEYQ_SHIFT:
     BeginMoveCursor(selmode);
     {
-      sInt x,y;
+      int x,y;
       GetCursorPos(x,y);
       PrintInfo.CursorPos = FindCursorPos(Inner.x1,y);
       GetCursorPos(GoodCursorX,dummy);
@@ -490,7 +490,7 @@ sBool sTextWindow::OnKey(sU32 key)
   case sKEY_PAGEUP|sKEYQ_SHIFT:
     BeginMoveCursor(selmode);
     {
-      sInt x,y,s;
+      int x,y,s;
       s = Inner.SizeY()-h;
       if(s>h)
       {
@@ -506,7 +506,7 @@ sBool sTextWindow::OnKey(sU32 key)
   case sKEY_PAGEDOWN|sKEYQ_SHIFT:
     BeginMoveCursor(selmode);
     {
-      sInt x,y,s;
+      int x,y,s;
       s = Inner.SizeY()-h;
       if(s>h)
       {
@@ -571,7 +571,7 @@ sBool sTextWindow::OnKey(sU32 key)
     }
     else
     {
-      sInt x = GetCursorColumn();
+      int x = GetCursorColumn();
       do
       {
         InsertChar(' ');
@@ -621,7 +621,7 @@ sBool sTextWindow::OnKey(sU32 key)
 
   default:
     {
-      sInt k = (key & 0x8000ffff);
+      int k = (key & 0x8000ffff);
       if(key==sKEY_ENTER)
       {
         Post(EnterCmd);
@@ -664,15 +664,15 @@ sTextWindow::UndoStep *sTextWindow::UndoGetStep()
 {
   if(UndoValid>UndoIndex)
   {
-    for(sInt i=UndoIndex;i<UndoValid;i++)
+    for(int i=UndoIndex;i<UndoValid;i++)
       delete[] UndoBuffer[i].Text;
     UndoValid = UndoIndex;
   }
   if(UndoIndex==UndoAlloc)
   {
-    sInt newsize = UndoAlloc*2;
+    int newsize = UndoAlloc*2;
     UndoStep *newbuffer = new UndoStep[newsize];
-    for(sInt i=0;i<UndoIndex;i++)
+    for(int i=0;i<UndoIndex;i++)
       newbuffer[i] = UndoBuffer[i];
     delete[] UndoBuffer;
     UndoBuffer = newbuffer;
@@ -693,14 +693,14 @@ void sTextWindow::UndoFlushCollector()
     step->Pos = UndoCollectorStart;
     step->Text = new sChar[UndoCollectorIndex];
     step->Delete = 0;
-    for(sInt i=0;i<UndoCollectorIndex;i++)
+    for(int i=0;i<UndoCollectorIndex;i++)
       step->Text[i] = UndoCollector[i];
     UndoCollectorIndex = 0;
     UndoCollectorValid = 0;
   }
 }
 
-void sTextWindow::UndoInsert(sInt pos,const sChar *string,sInt len)
+void sTextWindow::UndoInsert(int pos,const sChar *string,int len)
 {
   if(len==1 && UndoCollectorIndex>0 && (sIsSpace(UndoCollector[UndoCollectorIndex-1]) != sIsSpace(string[0])))
     UndoFlushCollector();
@@ -721,12 +721,12 @@ void sTextWindow::UndoInsert(sInt pos,const sChar *string,sInt len)
     step->Pos = pos;
     step->Text = new sChar[len];
     step->Delete = 0;
-    for(sInt i=0;i<len;i++)
+    for(int i=0;i<len;i++)
       step->Text[i] = string[i];
   }
 }
 
-void sTextWindow::UndoDelete(sInt pos,sInt size)
+void sTextWindow::UndoDelete(int pos,int size)
 {
   UndoFlushCollector();
   UndoStep *step = UndoGetStep();
@@ -735,7 +735,7 @@ void sTextWindow::UndoDelete(sInt pos,sInt size)
   step->Text = new sChar[size];
   step->Delete = 1;
   const sChar *s = Text->Get();
-  for(sInt i=0;i<size;i++)
+  for(int i=0;i<size;i++)
     step->Text[i] = s[pos+i];
 }
 
@@ -800,7 +800,7 @@ void sTextWindow::Redo()
 
 void sTextWindow::UndoClear()
 {
-  for(sInt i=0;i<UndoValid;i++)
+  for(int i=0;i<UndoValid;i++)
     delete[] UndoBuffer[i].Text;
   UndoValid = 0;
   UndoIndex = 0;
@@ -808,7 +808,7 @@ void sTextWindow::UndoClear()
   UndoCollectorValid = 0;
 }
 
-void sTextWindow::UndoGetStats(sInt &undos,sInt &redos)
+void sTextWindow::UndoGetStats(int &undos,int &redos)
 {
   undos = UndoIndex;
   redos = UndoValid-UndoIndex;
@@ -820,11 +820,11 @@ void sTextWindow::UndoGetStats(sInt &undos,sInt &redos)
 
 /****************************************************************************/
 
-void sTextWindow::Delete(sInt pos,sInt len)
+void sTextWindow::Delete(int pos,int len)
 {
   if(EditFlags & sTEF_STATIC) return;
   UndoDelete(pos,len);
-  for(sInt i=0;i<len;i++)
+  for(int i=0;i<len;i++)
   {
     if(PrintInfo.SelectStart > pos)
       PrintInfo.SelectStart--;
@@ -837,7 +837,7 @@ void sTextWindow::Delete(sInt pos,sInt len)
 }
 
 
-void sTextWindow::Insert(sInt pos,const sChar *s,sInt len)
+void sTextWindow::Insert(int pos,const sChar *s,int len)
 {
   if(EditFlags & sTEF_STATIC) return;
   if(len==-1)
@@ -853,7 +853,7 @@ void sTextWindow::Insert(sInt pos,const sChar *s,sInt len)
   MarkEnd = PrintInfo.SelectEnd;
 }
 
-void sTextWindow::Mark(sInt start,sInt end)
+void sTextWindow::Mark(int start,int end)
 {
   if(BeginMoveCursor(1))
   {
@@ -902,7 +902,7 @@ void sTextWindow::DeleteChar()
 
 
 
-void sTextWindow::InsertChar(sInt c)
+void sTextWindow::InsertChar(int c)
 {
   if(EditFlags & sTEF_STATIC) return;
   sChar s[2];
@@ -918,7 +918,7 @@ void sTextWindow::InsertChar(sInt c)
 void sTextWindow::InsertString(const sChar *s)
 {
   if(EditFlags & sTEF_STATIC) return;
-  sInt len = sGetStringLen(s);
+  int len = sGetStringLen(s);
   Insert(PrintInfo.CursorPos,s,len);
   sGui->Notify(*Text);
   ChangeMsg.Post();
@@ -926,10 +926,10 @@ void sTextWindow::InsertString(const sChar *s)
   Update();
 }
 
-void sTextWindow::IndentBlock(sInt indent)
+void sTextWindow::IndentBlock(int indent)
 {
   if(EditFlags & sTEF_STATIC) return;
-  sInt n = PrintInfo.SelectStart;
+  int n = PrintInfo.SelectStart;
   {
     const sChar *s = Text->Get();
     while(n>0 && s[n-1]!='\n') n--;
@@ -943,7 +943,7 @@ void sTextWindow::IndentBlock(sInt indent)
     }
     else
     {
-      sInt m=0;
+      int m=0;
       const sChar *s = Text->Get();
       while(m<-indent && s[n+m]==' ') m++;
       if(m>0)
@@ -963,7 +963,7 @@ void sTextWindow::IndentBlock(sInt indent)
   Update();
 }
 
-void sTextWindow::OverwriteChar(sInt c)
+void sTextWindow::OverwriteChar(int c)
 {
   if(EditFlags & sTEF_STATIC) return;
   if(PrintInfo.CursorPos>=Text->GetCount())
@@ -992,9 +992,9 @@ void sTextWindow::TextChanged()
   Update();
 }
 
-void sTextWindow::SetCursor(sInt p)
+void sTextWindow::SetCursor(int p)
 {
-  sInt c = sClamp(p,0,Text->GetCount());
+  int c = sClamp(p,0,Text->GetCount());
   if(c!=DragCursorStart)
   {
     DisableDrag = 0;
@@ -1025,7 +1025,7 @@ void sTextWindow::SetFont(sFont2D *newFont)
 
 void sTextWindow::ScrollToCursor()
 {
-  sInt x,y;
+  int x,y;
   sRect r;
 
   GetCursorPos(x,y);
@@ -1038,12 +1038,12 @@ sFont2D *sTextWindow::GetFont()
   return Font;
 }
 
-sInt sTextWindow::GetCursorColumn() const
+int sTextWindow::GetCursorColumn() const
 {
   const sChar *s0 = Text->Get();
   const sChar *sc = s0 + PrintInfo.CursorPos;
 
-  sInt n = 0;
+  int n = 0;
   while(sc>s0 && sc[-1]!='\n')
   {
     sc--;
@@ -1055,29 +1055,29 @@ sInt sTextWindow::GetCursorColumn() const
 void sTextWindow::Find(const sChar *find,sBool dir,sBool next)
 {
   const sChar *text = Text->Get();
-  sInt textlen = Text->GetCount();
-  sInt findlen = sGetStringLen(find);
-  sInt found = -1;
-  sInt cursor = PrintInfo.CursorPos;
+  int textlen = Text->GetCount();
+  int findlen = sGetStringLen(find);
+  int found = -1;
+  int cursor = PrintInfo.CursorPos;
 
   if(findlen>0)
   {
     if(dir==0)
     {
-      for(sInt i=cursor+next;i<textlen-findlen && found==-1;i++)
+      for(int i=cursor+next;i<textlen-findlen && found==-1;i++)
         if(sCmpStringILen(text+i,find,findlen)==0)
           found = i;
-      for(sInt i=0;i<=cursor && found==-1;i++)
+      for(int i=0;i<=cursor && found==-1;i++)
         if(sCmpStringILen(text+i,find,findlen)==0)
           found = i;
     }
     else
     {
-      sInt tp = sMin(cursor-next,textlen-findlen);
-      for(sInt i=tp;i>=0 && found==-1;i--)
+      int tp = sMin(cursor-next,textlen-findlen);
+      for(int i=tp;i>=0 && found==-1;i--)
         if(sCmpStringILen(text+i,find,findlen)==0)
           found = i;
-      for(sInt i=textlen-findlen;i>=cursor && found==-1;i--)
+      for(int i=textlen-findlen;i>=cursor && found==-1;i--)
         if(sCmpStringILen(text+i,find,findlen)==0)
           found = i;
     }
@@ -1097,7 +1097,7 @@ void sTextWindow::Find(const sChar *find,sBool dir,sBool next)
   }
 }
 
-void sTextWindow::GetMark(sInt &start,sInt &end)
+void sTextWindow::GetMark(int &start,int &end)
 {
   if(MarkMode)
   {

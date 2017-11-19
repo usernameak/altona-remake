@@ -53,7 +53,7 @@ void sOverlappedFrame::OnPaint2D()
 
 /****************************************************************************/
 
-static void MoveWindow(sWindow *parent,const sRect &old,sInt dx,sInt dy,sInt mask)
+static void MoveWindow(sWindow *parent,const sRect &old,int dx,int dy,int mask)
 {
   sRect *outer = &parent->Outer;
 
@@ -138,8 +138,8 @@ void sSizeBorder::OnDrag(const sWindowDrag &dd)
 {
   sVERIFY(Parent);
 
-  const sInt b=15;
-  sInt mask = 0;
+  const int b=15;
+  int mask = 0;
   if(dd.MouseX<Client.x0+b) mask |= 1;
   if(dd.MouseY<Client.y0+b) mask |= 2;
   if(dd.MouseX>Client.x1-b) mask |= 4;
@@ -189,12 +189,12 @@ void sTitleBorder::OnCalcSize()
 
 void sTitleBorder::OnLayout()
 {
-  sInt y0 = Client.y0;
-  sInt y1 = Client.y0+15;
+  int y0 = Client.y0;
+  int y1 = Client.y0+15;
   Parent->Inner.y0 = Client.y1 = y1;
   y1--;
 
-  sInt x=Client.x1;
+  int x=Client.x1;
 
   CloseButton->Outer.y0 = y0;
   CloseButton->Outer.y1 = y1;

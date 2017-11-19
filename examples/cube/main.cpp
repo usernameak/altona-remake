@@ -73,7 +73,7 @@ MyApp::MyApp()
 
   sU16 *ip=0;
   Geo->BeginLoadIB(6*6,sGD_STATIC,&ip);
-  for(sInt i=0;i<6;i++)
+  for(int i=0;i<6;i++)
     sQuad(ip,i*4,0,1,2,3);
   Geo->EndLoadIB();
 
@@ -115,7 +115,7 @@ MyApp::~MyApp()
 /****************************************************************************/
 
 // paint a frame
-sInt sGetFrameTime();
+int sGetFrameTime();
 
 void MyApp::OnPaint3D()
 { 
@@ -126,7 +126,7 @@ void MyApp::OnPaint3D()
   // get timing
 
   Timer.OnFrame(sGetTime());
-  static sInt time;
+  static int time;
   if(sHasWindowFocus())
   {
       time = Timer.GetTime();
@@ -183,7 +183,7 @@ void sMain()
 {
   sSetWindowName(L"Cube");
 
-  sInt flags = sISF_3D|sISF_CONTINUOUS;
+  int flags = sISF_3D|sISF_CONTINUOUS;
   flags |= sISF_FULLSCREENIFRELEASE;
 //  flags |= sISF_FSAA;
 //  flags |= sISF_NOVSYNC;

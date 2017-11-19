@@ -22,7 +22,7 @@ public:
 
 class sSizeBorder : public sWindow
 {
-  sInt DragMask;
+  int DragMask;
   sRect DragStart;
 public:
   sCLASSNAME(sSizeBorder);

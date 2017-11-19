@@ -55,8 +55,8 @@ public:
   virtual ~sScannerSource() {}    // destructor has to be virtual
   virtual sBool Refill() { return 1; }  // call this every linefeed (at least)
   const sChar *ScanPtr;           // *ScanPtr++ to scan forward
-  sInt Line;                      // line reference for error messages
-  sInt BeginOfFile;               // beginning of line, may be plus some whitespace or comments
+  int Line;                      // line reference for error messages
+  int BeginOfFile;               // beginning of line, may be plus some whitespace or comments
   const sChar *Filename;          // file reference for error messages
 };
 
@@ -73,7 +73,7 @@ class sScannerSourceFile : public sScannerSource
 {
   sFile *File;
   sChar *ScanBuffer;                 // buffer for portion of file
-  sInt UnicodeConversion;            // when loading from file: 1=ascii->unicode, 2=unicode byteswap
+  int UnicodeConversion;            // when loading from file: 1=ascii->unicode, 2=unicode byteswap
   sS64 CharsLeftInFile;
 public:
   sScannerSourceFile();
@@ -103,7 +103,7 @@ private:
     sChar *ScanBuffer;                 // buffer for portion of file
     const sChar *ScanPtr;
     sS64 CharsLeftInFile;
-    sInt Line;
+    int Line;
     void Init(const sChar *text);
     sBool InitFile(const sChar *filename);
     void Exit();
@@ -113,10 +113,10 @@ private:
 public:
   struct ScannerToken
   {
-    sInt Token;
-    sInt Length;
+    int Token;
+    int Length;
     sPoolString Name;
-    sInt operator == (const ScannerToken &tok) { return (Token==tok.Token); }
+    int operator == (const ScannerToken &tok) { return (Token==tok.Token); }
   };
   sArray<ScannerToken> TokensSym;                       // symbol tokens: << != && ...
   sArray<ScannerToken> TokensName;                      // name tokens: do for while ...
@@ -127,21 +127,21 @@ public:
   sBool StartFile(const sChar *filename, sBool reporterror=sTRUE);  // start parsing
   void Start(const sChar *text);
   sBool IncludeFile(const sChar *filename);             // include file, no errors generated if file not found
-  void AddToken(const sChar *name,sInt token);          // add a single token
+  void AddToken(const sChar *name,int token);          // add a single token
   void AddTokens(const sChar *SingleCharacterTokens);   // like AddTokens(L"+-*/")
   void RemoveToken(const sChar *name);                  // remove a single token
   void DefaultTokens();                                 // add a useful set of default tokens, see below
   void SetFilename(const sChar *f) { Stream->Filename = f; }
-  void SetLine(sInt n) { Stream->Line = n; }
+  void SetLine(int n) { Stream->Line = n; }
   const sChar *GetFilename() { return Stream->Filename; }
-  sInt GetLine() { return Stream->Line; }
+  int GetLine() { return Stream->Line; }
 
-  sInt Scan();
+  int Scan();
   sChar DirtyPeek();                    // what is the next character, skipping comment and whitespace?
   void Print(sTextBuffer &tb);
-  sInt Error0(const sChar *error);      // always returns 0, so you can do   return Scan.Error("bla");
+  int Error0(const sChar *error);      // always returns 0, so you can do   return Scan.Error("bla");
   sPRINTING0(Error,sFormatStringBuffer buf=sFormatStringBase(TempString,format);buf,Error0(TempString);)
-  sInt Warn0(const sChar *error);      // always returns 0, so you can do   return Scan.Error("bla");
+  int Warn0(const sChar *error);      // always returns 0, so you can do   return Scan.Error("bla");
   sPRINTING0(Warn,sFormatStringBuffer buf=sFormatStringBase(TempString,format);buf,Warn0(TempString);)
 
   // stream status
@@ -151,46 +151,46 @@ public:
 
   // token status
 
-  sInt Token;
-  sInt ValI;
+  int Token;
+  int ValI;
   sF32 ValF;
   sPoolString Name;
   sPoolString String;
   sString<256> ValueString;       // exact character representation of sTOK_INT or sTOK_FLOAT
   sString<256> ValueSuffix;       // optional suffix after number, like in "10u" or "40ull"
-  sInt TokenLine;                 // line of token start
+  int TokenLine;                 // line of token start
   const sChar *TokenFile;         // file of token start
   const sChar *TokenScan;         // scan pointer at token start. for replay after include
   sString<1024> ErrorMsg;
-  void (*ErrorCallback)(void *ptr,const sChar *file,sInt line,const sChar *msg);
+  void (*ErrorCallback)(void *ptr,const sChar *file,int line,const sChar *msg);
   void *ErrorCallbackPtr;
 
   // scanning status
 
-  sInt Errors;
-  sInt Flags;
+  int Errors;
+  int Flags;
 
   // these functions scan a token and issue an error if that was not found
 
-  sInt ScanInt();
+  int ScanInt();
   sF32 ScanFloat();
-  sInt ScanChar();
-  sBool ScanRaw(sPoolString &, sInt opentoken, sInt closetoken);
-  sBool ScanRaw(sTextBuffer &, sInt opentoken, sInt closetoken);
+  int ScanChar();
+  sBool ScanRaw(sPoolString &, int opentoken, int closetoken);
+  sBool ScanRaw(sTextBuffer &, int opentoken, int closetoken);
   sBool ScanName(sPoolString &);
   sBool ScanString(sPoolString &);
   sBool ScanNameOrString(sPoolString &);
   sBool ScanLine(sTextBuffer &);
-  void Match(sInt token);
+  void Match(int token);
   void MatchName(const sChar *);
   void MatchString(const sChar *);
-  void MatchInt(sInt n);
+  void MatchInt(int n);
 
   const sChar * GetScanPosition () { return Stream->ScanPtr; }
 
   // these function check if a token was found, consume it if true, and do nothing if false
 
-  sBool IfToken(sInt tok);
+  sBool IfToken(int tok);
   sBool IfName(const sPoolString name);
   sBool IfString(const sPoolString name);
 };
@@ -262,7 +262,7 @@ namespace sScannerUtil
   sBool StringProp(sScanner *scan,const sChar *name,const sStringDesc &tgt);
 
   // Int property
-  sBool IntProp(sScanner *scan,const sChar *name,sInt &tgt);
+  sBool IntProp(sScanner *scan,const sChar *name,int &tgt);
 
   // Float property
   sBool FloatProp(sScanner *scan,const sChar *name,sF32 &tgt);
@@ -274,10 +274,10 @@ namespace sScannerUtil
   sBool OptionalBoolProp(sScanner *scan,const sChar *name,sBool &tgt);
 
   // Enum property (choices given as a pattern for sFindChoice)
-  sBool EnumProp(sScanner *scan,const sChar *name,const sChar *choices,sInt &tgt);
+  sBool EnumProp(sScanner *scan,const sChar *name,const sChar *choices,int &tgt);
 
   // Flags property (pattern like for sFindFlag)
-  sBool FlagsProp(sScanner *scan,const sChar *name,const sChar *pattern,sInt &tgt);
+  sBool FlagsProp(sScanner *scan,const sChar *name,const sChar *pattern,int &tgt);
 }
 
 /****************************************************************************/
@@ -336,7 +336,7 @@ class sRegex
   sRegexState *Start,*End;
   sBool Valid;
   const sChar *Scan;
-  sInt GroupId;
+  int GroupId;
   const sChar *OriginalPattern;
 
   // create resources
@@ -374,9 +374,9 @@ public:
 
   // querying the captured strings.
 
-  sInt GetMatchCount() { return Valid ? Success.GetCount() : 0; }
-  sInt GetGroupCount() { return GroupId; }
-  sBool GetGroup(sInt n,const sStringDesc &desc,sInt match=0);
+  int GetMatchCount() { return Valid ? Success.GetCount() : 0; }
+  int GetGroupCount() { return GroupId; }
+  sBool GetGroup(int n,const sStringDesc &desc,int match=0);
 };
 
 /****************************************************************************/

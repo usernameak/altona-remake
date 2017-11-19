@@ -18,9 +18,9 @@
 
 /****************************************************************************/
 
-void sSoundHandlerNull(sS16 *data,sInt count)
+void sSoundHandlerNull(sS16 *data,int count)
 {
-  for(sInt i=0;i<count;i++)
+  for(int i=0;i<count;i++)
   {
     data[0] = 0;
     data[1] = 0;
@@ -28,15 +28,15 @@ void sSoundHandlerNull(sS16 *data,sInt count)
   }
 }
 
-static sInt phase0,phase1;
-static sInt mod=0x4000;
+static int phase0,phase1;
+static int mod=0x4000;
 
-void sSoundHandlerTest(sS16 *data,sInt count)
+void sSoundHandlerTest(sS16 *data,int count)
 {
-  for(sInt i=0;i<count;i++)
+  for(int i=0;i<count;i++)
   {
-    data[0] = sInt(sFSin(((phase0)&0xffff)/65536.0f*sPI2F)*12000);
-    data[1] = sInt(sFSin(((phase1)&0xffff)/65536.0f*sPI2F)*12000);
+    data[0] = int(sFSin(((phase0)&0xffff)/65536.0f*sPI2F)*12000);
+    data[1] = int(sFSin(((phase1)&0xffff)/65536.0f*sPI2F)*12000);
 
     phase0 += (mod+(mod/50))/16;
     phase1 += (mod+(mod/50))/16;

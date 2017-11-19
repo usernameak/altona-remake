@@ -59,7 +59,7 @@ static sBool CGCompile(const sChar *source,const sChar *profile,sPoolString &res
   sChar8 *source8=0;
   const sChar8 *out8;
   sChar *out=0;
-  sInt size;
+  int size;
   sChar8 prof8[64];
   sCopyString(prof8,profile,sCOUNTOF(prof8));
 
@@ -93,11 +93,11 @@ error:
   return 0;
 }
 
-sBool sShaderCompileCG(const sChar *source,const sChar *profile,const sChar *main,sU8 *&data_,sInt &size_,sInt flags,sTextBuffer *errors)
+sBool sShaderCompileCG(const sChar *source,const sChar *profile,const sChar *main,sU8 *&data_,int &size_,int flags,sTextBuffer *errors)
 {
   sChar8 *source8=0;
   const sChar8 *out8 = 0;
-  sInt insize;
+  int insize;
   sPoolString errstr;
   sChar8 prof8[64];
   sCopyString(prof8,profile,sCOUNTOF(prof8));
@@ -147,7 +147,7 @@ error:
 
 #else
 
-sBool sShaderCompileCG(const sChar *source,const sChar *profile,const sChar *main,sU8 *&data_,sInt &size_,sInt flags,sTextBuffer *errors)
+sBool sShaderCompileCG(const sChar *source,const sChar *profile,const sChar *main,sU8 *&data_,int &size_,int flags,sTextBuffer *errors)
 {
   return 0;
 }

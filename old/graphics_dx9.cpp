@@ -28,9 +28,9 @@
 #include "base/serialize.hpp"
 #include "util/image.hpp"
 
-extern sInt sSystemFlags;
+extern int sSystemFlags;
 
-sInt sEngineHacks;
+int sEngineHacks;
 
 extern HWND sHWND;
 
@@ -40,7 +40,7 @@ void sInitGfxCommon();
 void sExitGfxCommon();
 void InitGraphicsCaps();
 
-sInt sGFXCurrentFrame = 0;
+int sGFXCurrentFrame = 0;
 
 /****************************************************************************/
 /***                                                                      ***/
@@ -80,7 +80,7 @@ static sScreenMode DXScreenMode;
 /*static */IDirect3DDevice9 *DXDev=0;
 static IDirect3DSurface9 *DXBlockSurface[2]={0,0};
 #define sMAXSCREENS 16
-static sInt DXScreenCount;
+static int DXScreenCount;
 static sTexture2D *DXBackBuffer[sMAXSCREENS];
 static HWND DXDummyWindow[sMAXSCREENS];
 static sTexture2D *DXZBuffer=0;
@@ -90,23 +90,23 @@ static IDirect3DSurface9 *DXTargetSurf;             // current set rendertarget
 static IDirect3DSurface9 *DXTargetZSurf;            // current set rendertarget
 
 static sTextureBase *DXActiveRT=0;                  // 0=screen, 1=xlscreen, >=2 texture ptr
-static sInt DXActiveRTFlags=0;
-static sInt DXActiveMultiRT;                        // multiple render targets used. please diable in next sSetRenderTarget!
+static int DXActiveRTFlags=0;
+static int DXActiveMultiRT;                        // multiple render targets used. please diable in next sSetRenderTarget!
 static sTextureBase *DXActiveZB=0;
 static IDirect3DSurface9 *DXSetScreenSurf;          // buffer for sSetScreen
 static IDirect3DSurface9 *DXRTSave = 0;
 static IDirect3DSurface9 *DXRTSave2 = 0;
-static sInt DXRTSaveXSize,DXRTSaveYSize;  // DXRTSave,DXRTSave2
-static sInt DXSetScreenX,DXSetScreenY;    // DXSetScreenSurf
+static int DXRTSaveXSize,DXRTSaveYSize;  // DXRTSave,DXRTSave2
+static int DXSetScreenX,DXSetScreenY;    // DXSetScreenSurf
 static sTextureBase* DXRenderTargets[MAX_RENDERTARGETS];
-static sInt DXRTCount = 0;
-extern sInt DXMayRestore = 1;
+static int DXRTCount = 0;
+extern int DXMayRestore = 1;
 
-static sInt DXRestore=0;
-static sInt DXActive=0;
-static sInt DXXSIMode=0;       // special flags for D3DCreate when used within XSI
-static sInt DXStreamsUsed = 0;   // number of streams used by last sGeometry::Draw(). used for caching.
-static sInt DXInstanceSet = 0;    // number of streams for which instancing information was set
+static int DXRestore=0;
+static int DXActive=0;
+static int DXXSIMode=0;       // special flags for D3DCreate when used within XSI
+static int DXStreamsUsed = 0;   // number of streams used by last sGeometry::Draw(). used for caching.
+static int DXInstanceSet = 0;    // number of streams for which instancing information was set
 static sBool Render3DInProgress=0;    // flagging started scene with d3d->BeginScene
 static sDInt DXTotalTextureMem = 0;
 
@@ -127,9 +127,9 @@ static sVertexFormatHandle *CurrentMtrlVFormat=0;
 static sBool DontCheckMtrlPrepare=sFALSE;
 
 static D3DCAPS9 DXCaps;
-static sInt DXShaderProfile;
+static int DXShaderProfile;
 
-static sInt RenderClippingFlag;
+static int RenderClippingFlag;
 static sU32 RenderClippingData[4096];
 
 static sBool ConvertsRGB = sTRUE;
@@ -149,7 +149,7 @@ static sArray<sOccQueryNode *> *AllOccQueryNodes;
 
 static sU32 sDXStates[sMS_MAX];
 
-void ConvertFlags(sU32 flags, D3DFORMAT& d3df, D3DPOOL& pool, sInt& usage, sInt& mm, sInt& lflags);
+void ConvertFlags(sU32 flags, D3DFORMAT& d3df, D3DPOOL& pool, int& usage, int& mm, int& lflags);
 
 /****************************************************************************/
 
@@ -166,17 +166,17 @@ struct sGeoBuffer
   void Reset();                   // refresh dynamic buffer after alt-tab
   void Lock();                    // lock whole buffer 
   void Unlock();                  // unlock buffer
-  sInt CheckSize(sInt count,sInt size);  // return element index of next element
+  int CheckSize(int count,int size);  // return element index of next element
 
   sGeometryDuration Duration;     // sGD_???
-  sInt BufferType;                // 0 = VB, 1 = INDEX16, 2 = INDEX32
+  int BufferType;                // 0 = VB, 1 = INDEX16, 2 = INDEX32
   void *LockPtr;                  // ptr to buffer if locked
 
-  sInt Alloc;                     // total available bytes
-  sInt Used;                      // alreaedy used bytes
-  sInt RefCount;                  // number of sGeoBufferPart that use this one.
-  sInt Discard;                   // discard before next use!
-  sInt InUse;                     // softlock 
+  int Alloc;                     // total available bytes
+  int Used;                      // alreaedy used bytes
+  int RefCount;                  // number of sGeoBufferPart that use this one.
+  int Discard;                   // discard before next use!
+  int InUse;                     // softlock 
 };
 
 #define sMAX_GEOBUFFER 512
@@ -184,8 +184,8 @@ struct sGeoBuffer
 
 sGeoBuffer sGeoBuffers[sMAX_GEOBUFFER];
 sGeoBuffer *sGeoBuffersLast[3];    // cache: last used geobuffer for each type
-sInt sGeoBufferCount;
-sInt sGeoBufferLocks;             // total number of locked geobuffers
+int sGeoBufferCount;
+int sGeoBufferLocks;             // total number of locked geobuffers
 
 void sGeoBufferInit();
 void sGeoBufferExit();
@@ -193,7 +193,7 @@ void sGeoBufferFrame();
 void sGeoBufferReset0();
 void sGeoBufferReset1();
 void sGeoBufferUnlockAll();
-void GetScreenFormats(sInt display,sInt &flags,D3DFORMAT &color,D3DFORMAT &depth,D3DFORMAT &disfmt);
+void GetScreenFormats(int display,int &flags,D3DFORMAT &color,D3DFORMAT &depth,D3DFORMAT &disfmt);
 
 /****************************************************************************/
 
@@ -201,14 +201,14 @@ struct sGeoPrim
 {
   sGeoPrim *Next;
   sGeoBufferPart VB;
-  sInt Mode;
-  sInt TessX;
-  sInt TessY;
-  sInt Vertex;
+  int Mode;
+  int TessX;
+  int TessY;
+  int Vertex;
 };
 
 sGeoPrim sGeoPrims[sMAX_GEOPRIMS];
-sInt sGeoPrimCount;
+int sGeoPrimCount;
 
 /****************************************************************************/
 /***                                                                      ***/
@@ -221,7 +221,7 @@ void DXError(sU32 err);
 
 #define DXErr(hr) { sU32 err=hr; if(FAILED(err)) DXError(err); }
 #else
-void DXError(sU32 err,const sChar *file,sInt line,const sChar *system);
+void DXError(sU32 err,const sChar *file,int line,const sChar *system);
 
 #define DXErr(hr) { sU32 err=hr; if(FAILED(err)) DXError(err,sTXT(__FILE__),__LINE__,L"d3d"); }
 #endif
@@ -232,7 +232,7 @@ void DXError(sU32 err,const sChar *file,sInt line,const sChar *system);
 /***                                                                      ***/
 /****************************************************************************/
 
-void PreInitGFX(sInt &flags,sInt &xs,sInt &ys)
+void PreInitGFX(int &flags,int &xs,int &ys)
 {
   DXTotalTextureMem = 0;
 
@@ -269,11 +269,11 @@ static void MakeDX9()
   }
 }
 
-void InitGFX(sInt flags_,sInt xs_,sInt ys_)
+void InitGFX(int flags_,int xs_,int ys_)
 {
   DontCheckMtrlPrepare = !sGetShellSwitch(L"checkmtrlprepare");
 
-  sInt restart;
+  int restart;
 
   DevType = (flags_ & sISF_REFRAST) ? D3DDEVTYPE_REF : D3DDEVTYPE_HAL;
 
@@ -283,7 +283,7 @@ void InitGFX(sInt flags_,sInt xs_,sInt ys_)
 
   D3DFORMAT colormode,depthmode,displaymode;
   GetScreenFormats(DXScreenMode.Display,DXScreenMode.Flags,colormode,depthmode,displaymode);
-  sInt flags2 = DXScreenMode.Flags;
+  int flags2 = DXScreenMode.Flags;
   UINT adapter = DXScreenMode.Display>=0 ? DXScreenMode.Display : D3DADAPTER_DEFAULT;
   DWORD maxmultilevel;
   HRESULT hr = DX9->CheckDeviceMultiSampleType(adapter,DevType,colormode,!(flags2&sSM_FULLSCREEN),D3DMULTISAMPLE_NONMASKABLE,&maxmultilevel);
@@ -355,7 +355,7 @@ void InitGFX(sInt flags_,sInt xs_,sInt ys_)
     d3dpp[0].PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
   }
 
-  for(sInt i=1;i<DXScreenCount;i++)
+  for(int i=1;i<DXScreenCount;i++)
   {
     d3dpp[i] = d3dpp[0];
     if(DXDummyWindow[i]==0)
@@ -426,7 +426,7 @@ void InitGFX(sInt flags_,sInt xs_,sInt ys_)
 
     restart = 1;
 
-    for(sInt i=0;i<sMAXSCREENS;i++)
+    for(int i=0;i<sMAXSCREENS;i++)
       sDelete(DXBackBuffer[i]);
     sDelete(DXZBuffer);
     sDelete(DXZBufferRT);
@@ -445,7 +445,7 @@ void InitGFX(sInt flags_,sInt xs_,sInt ys_)
     }
 
     sLogF(L"gfx",L"restoring device\n");
-    for (sInt i=0; i<DXRTCount; i++)
+    for (int i=0; i<DXRTCount; i++)
       DXRenderTargets[i]->OnLostDevice();
 
     HRESULT hr = DXDev->Reset(d3dpp);
@@ -454,9 +454,9 @@ void InitGFX(sInt flags_,sInt xs_,sInt ys_)
     else
       DXErr(hr);
 
-    sInt max = DXRTCount;                         // this is tricky: create new DXRenderTargets[] 
+    int max = DXRTCount;                         // this is tricky: create new DXRenderTargets[] 
     DXRTCount = 0;                                // directly over old DXRenderTargets[].
-    for (sInt i=0; i<max; i++)
+    for (int i=0; i<max; i++)
       DXRenderTargets[i]->OnLostDevice(sTRUE);
     sVERIFY(max==DXRTCount);                      // check if the trick really worked...
     sGeoBufferReset1();
@@ -522,11 +522,11 @@ void InitGFX(sInt flags_,sInt xs_,sInt ys_)
     DXScreenMode.Flags &= ~sSM_READZ;
   }
 
-  sInt xs = DXScreenMode.ScreenX;
-  sInt ys = DXScreenMode.ScreenY;
+  int xs = DXScreenMode.ScreenX;
+  int ys = DXScreenMode.ScreenY;
 
-  sInt tmode = sTEX_2D|sTEX_NOMIPMAPS|sTEX_RENDERTARGET;
-  sInt zmode = 0;
+  int tmode = sTEX_2D|sTEX_NOMIPMAPS|sTEX_RENDERTARGET;
+  int zmode = 0;
   if(DXScreenMode.MultiLevel>=0)
     tmode |= sTEX_MSAA;
   if((flags2 & sSM_READZ) && (GraphicsCapsMaster.Flags & sGCF_DEPTHTEX_MASK)) // check, if depth textures are supported
@@ -535,7 +535,7 @@ void InitGFX(sInt flags_,sInt xs_,sInt ys_)
     zmode = sTEX_DEPTH24NOREAD;
 
   DXZBuffer = new sTexture2D(xs,ys,tmode|zmode|sTEX_NORESOLVE,1);
-  for(sInt i=0;i<DXScreenCount;i++)
+  for(int i=0;i<DXScreenCount;i++)
   {
     DXBackBuffer[i] = new sTexture2D(xs,ys,tmode|sTEX_ARGB8888|sTEX_INTERNAL,1);
     DXErr(DXDev->GetBackBuffer(i,0,D3DBACKBUFFER_TYPE_MONO,&DXBackBuffer[i]->Surf2D));
@@ -562,15 +562,15 @@ void InitGFX(sInt flags_,sInt xs_,sInt ys_)
     sU16 *ip;
     sGeoBufferInit();
     ip = (sU16 *)DXQuadIndex.Init(sMAX_QUADCOUNT*6,2,sGD_STATIC,1);
-    for(sInt i=0;i<sMAX_QUADCOUNT;i++)
+    for(int i=0;i<sMAX_QUADCOUNT;i++)
       sQuad(ip,i*4,0,1,2,3);
     DXQuadIndex.Advance(-1,2);
   }
 
   // rt-zbuffer
 
-  sInt rtx = sMax(DXScreenMode.RTZBufferX,DXScreenMode.ScreenX);
-  sInt rty = sMax(DXScreenMode.RTZBufferY,DXScreenMode.ScreenY);
+  int rtx = sMax(DXScreenMode.RTZBufferX,DXScreenMode.ScreenX);
+  int rty = sMax(DXScreenMode.RTZBufferY,DXScreenMode.ScreenY);
   if(rtx && rty)
     DXZBufferRT = new sTexture2D(rtx,rty,sTEX_2D|sTEX_DEPTH24NOREAD|sTEX_NOMIPMAPS|sTEX_RENDERTARGET,1);
 
@@ -603,7 +603,7 @@ void ExitGFX()
   DXActiveRTFlags = 0;
   DXActiveZB = 0;
   DXActiveMultiRT = 0;
-  for(sInt i=0;i<sMAXSCREENS;i++)
+  for(int i=0;i<sMAXSCREENS;i++)
     sDelete(DXBackBuffer[i]);
   sDelete(DXZBuffer);
   sDelete(DXZBufferRT);
@@ -617,7 +617,7 @@ void ExitGFX()
 
   timeEndPeriod(1);
 
-  for(sInt i=0;i<sMAXSCREENS;i++)
+  for(int i=0;i<sMAXSCREENS;i++)
   {
     if(DXDummyWindow[i])
     {
@@ -629,7 +629,7 @@ void ExitGFX()
 //  sVERIFY(DXTotalTextureMem==0);
 }
 
-void ResizeGFX(sInt x,sInt y)  // this is called when the windows size changes
+void ResizeGFX(int x,int y)  // this is called when the windows size changes
 {
   if(x && y && (x!=DXScreenMode.ScreenX || y!=DXScreenMode.ScreenY)) 
   {
@@ -646,12 +646,12 @@ void SetXSIModeD3D(sBool enable)
   DXXSIMode = enable;
 }
 
-void sCreateZBufferRT(sInt xs,sInt ys)
+void sCreateZBufferRT(int xs,int ys)
 {
   if(DXDev)
   {
-    sInt rtx = sMax(sMax(xs,DXScreenMode.RTZBufferX),DXScreenMode.ScreenX);
-    sInt rty = sMax(sMax(ys,DXScreenMode.RTZBufferY),DXScreenMode.ScreenY);
+    int rtx = sMax(sMax(xs,DXScreenMode.RTZBufferX),DXScreenMode.ScreenX);
+    int rty = sMax(sMax(ys,DXScreenMode.RTZBufferY),DXScreenMode.ScreenY);
     if(rtx!=DXScreenMode.RTZBufferX || rty!=DXScreenMode.RTZBufferY)
     {
       sDelete(DXZBufferRT);
@@ -673,7 +673,7 @@ void sCreateZBufferRT(sInt xs,sInt ys)
 /***                                                                      ***/
 /****************************************************************************/
 
-sBool sSetOversizeScreen(sInt xs,sInt ys,sInt fsaa,sBool mayfail)
+sBool sSetOversizeScreen(int xs,int ys,int fsaa,sBool mayfail)
 {
   sScreenMode sm;
   sGetScreenMode(sm);
@@ -708,7 +708,7 @@ void sGetScreenSafeArea(sF32 &xs, sF32 &ys)
 /***                                                                      ***/
 /****************************************************************************/
 
-void GetScreenFormats(sInt display,sInt &flags,D3DFORMAT &color,D3DFORMAT &depth,D3DFORMAT &displayfmt)
+void GetScreenFormats(int display,int &flags,D3DFORMAT &color,D3DFORMAT &depth,D3DFORMAT &displayfmt)
 {
   static const D3DFORMAT dt[8][4] =      // 16bit is just a hint!
   {
@@ -747,9 +747,9 @@ void GetScreenFormats(sInt display,sInt &flags,D3DFORMAT &color,D3DFORMAT &depth
 
   // check for stencil buffer. only one stencil format is supported: D24S8
 
-  for(sInt check=0;check<5;check++)
+  for(int check=0;check<5;check++)
   {
-    sInt id = 0;
+    int id = 0;
 
     switch(check)
     {
@@ -761,7 +761,7 @@ void GetScreenFormats(sInt display,sInt &flags,D3DFORMAT &color,D3DFORMAT &depth
     if(flags&sSM_DEPTH16BIT) id |= 1;
     if(flags&sSM_DEPTHREAD)  id |= 2;
     if(flags&sSM_STENCIL)    id |= 4;
-    for(sInt i=0;i<4;i++)
+    for(int i=0;i<4;i++)
     {
       depth = dt[id][i];
       if(depth)
@@ -774,31 +774,31 @@ void GetScreenFormats(sInt display,sInt &flags,D3DFORMAT &color,D3DFORMAT &depth
 found:;
 }
 
-sInt sGetDisplayCount()
+int sGetDisplayCount()
 {
   MakeDX9();
   return DX9->GetAdapterCount();
 }
 
-sInt ggt(sInt a,sInt b)
+int ggt(int a,int b)
 {
   while(b!=0)
   {
-    sInt h = a % b;
+    int h = a % b;
     a = b;
     b = h;
   }
   return a;
 }
 
-void sGetScreenInfo(sScreenInfo &si,sInt flags,sInt display)
+void sGetScreenInfo(sScreenInfo &si,int flags,int display)
 {
   MakeDX9();
   sScreenInfoXY *xy;
-  sInt *ip;
-  sInt x,y,max;
+  int *ip;
+  int x,y,max;
   sArray<sScreenInfoXY> Resolutions;
-  sArray<sInt> RefreshRates;
+  sArray<int> RefreshRates;
   sArray<sScreenInfoXY> AspectRatios;
 
   // prepare
@@ -811,7 +811,7 @@ void sGetScreenInfo(sScreenInfo &si,sInt flags,sInt display)
   if(display>=0 && DXActive && DXScreenCount>1)
   {
     // multiscreen? enumerate correctly
-    for (sInt i=0;;i++)
+    for (int i=0;;i++)
     {
       D3DCAPS9 caps;
       if (FAILED(DX9->GetDeviceCaps(i,DevType,&caps)))
@@ -839,11 +839,11 @@ void sGetScreenInfo(sScreenInfo &si,sInt flags,sInt display)
 
   D3DDISPLAYMODE mode;
   max = DX9->GetAdapterModeCount(display,disfmt);
-  for(sInt n=0;n<max;n++)
+  for(int n=0;n<max;n++)
   {
     DXErr(DX9->EnumAdapterModes(display,disfmt,n,&mode));
     sFORALL(Resolutions,xy)
-      if(xy->x==sInt(mode.Width) && xy->y==sInt(mode.Height))
+      if(xy->x==int(mode.Width) && xy->y==int(mode.Height))
         goto found1;
     xy = Resolutions.AddMany(1);
     xy->x = mode.Width;
@@ -851,7 +851,7 @@ void sGetScreenInfo(sScreenInfo &si,sInt flags,sInt display)
 found1:
 
     sFORALL(RefreshRates,ip)
-      if(*ip == sInt(mode.RefreshRate))
+      if(*ip == int(mode.RefreshRate))
         goto found2;
     ip = RefreshRates.AddMany(1);
     *ip = mode.RefreshRate;
@@ -862,7 +862,7 @@ found2:
       y = mode.Height;
       for(;;)
       {
-        sInt h = ggt(x,y);
+        int h = ggt(x,y);
         if(h==1)
           break;
         x /= h;
@@ -889,20 +889,20 @@ found2:
   // sort modes
 
   max = Resolutions.GetCount();
-  for(sInt i=0;i<max-1;i++)
-    for(sInt j=i+1;j<max;j++)
+  for(int i=0;i<max-1;i++)
+    for(int j=i+1;j<max;j++)
       if(Resolutions[i].x*Resolutions[i].y > Resolutions[j].x*Resolutions[j].y)
         Resolutions.Swap(i,j);
 
   max = RefreshRates.GetCount();
-  for(sInt i=0;i<max-1;i++)
-    for(sInt j=i+1;j<max;j++)
+  for(int i=0;i<max-1;i++)
+    for(int j=i+1;j<max;j++)
       if(RefreshRates[i] > RefreshRates[j])
         RefreshRates.Swap(i,j);
   
   max = AspectRatios.GetCount();
-  for(sInt i=0;i<max-1;i++)
-    for(sInt j=i+1;j<max;j++)
+  for(int i=0;i<max-1;i++)
+    for(int j=i+1;j<max;j++)
       if(sF32(AspectRatios[i].x)/AspectRatios[i].y > sF32(AspectRatios[j].x)/AspectRatios[j].y)
         AspectRatios.Swap(i,j);
 
@@ -957,7 +957,7 @@ sBool sSetScreenMode(const sScreenMode &smorg)
 
   if(sCmpMem(&DXScreenMode,&sm,sizeof(sScreenMode))!=0)
   {
-    sInt flags = 0;
+    int flags = 0;
     if(sm.Flags & sSM_FULLSCREEN) flags |= sISF_FULLSCREEN;
     if(sm.Flags & sSM_REFRAST)    flags |= sISF_REFRAST;
     if(sm.Flags & sSM_NOVSYNC)    flags |= sISF_NOVSYNC;
@@ -999,7 +999,7 @@ sBool sConvertsRGBTex()
 
 #if 0
 
-void sClearRendertargetPrivate(sInt flags,sU32 color)
+void sClearRendertargetPrivate(int flags,sU32 color)
 {
   // clear with scissor?
   sBool noscissor=(flags&sCLEAR_NOSCISSOR);
@@ -1014,7 +1014,7 @@ void sClearRendertargetPrivate(sInt flags,sU32 color)
 #endif
     flags &= ~2;
   }
-  static sInt f[4] = 
+  static int f[4] = 
   {
     0,
     D3DCLEAR_TARGET,
@@ -1093,7 +1093,7 @@ void sResolveTargetPrivate()
   }
 }
 
-void sSetRendertargetPrivate(sTextureBase *tex,sInt xs,sInt ys,const sRect *vrp,sInt flags,IDirect3DSurface9 *cubesurface=0)
+void sSetRendertargetPrivate(sTextureBase *tex,int xs,int ys,const sRect *vrp,int flags,IDirect3DSurface9 *cubesurface=0)
 {
   // figure out zbuffer, new version
   // never use main zbuffer for rendertargets because of fsaa
@@ -1111,8 +1111,8 @@ void sSetRendertargetPrivate(sTextureBase *tex,sInt xs,sInt ys,const sRect *vrp,
   }
 
   sBool change = 0;
-  sInt miplevel = (flags&0xff00)>>8;
-  sInt changemsaa = (DXActiveRTFlags ^ flags) & sRTF_NO_MULTISAMPLING;
+  int miplevel = (flags&0xff00)>>8;
+  int changemsaa = (DXActiveRTFlags ^ flags) & sRTF_NO_MULTISAMPLING;
 
   // color buffer
 
@@ -1205,7 +1205,7 @@ void sSetRendertargetPrivate(sTextureBase *tex,sInt xs,sInt ys,const sRect *vrp,
 
   if(DXActiveMultiRT)
   {
-    for(sInt i=1;i<4;i++)
+    for(int i=1;i<4;i++)
       DXErr(DXDev->SetRenderTarget(i,0));
     DXActiveMultiRT = 0;
     change = 1;
@@ -1246,14 +1246,14 @@ void sSetRendertargetPrivate(sTextureBase *tex,sInt xs,sInt ys,const sRect *vrp,
   }
 }
 
-void sSetRendertarget(const sRect *vrp, sInt clearflags, sU32 clearcolor)
+void sSetRendertarget(const sRect *vrp, int clearflags, sU32 clearcolor)
 {
   sSetRendertargetPrivate(DXBackBuffer,DXScreenMode.ScreenX,DXScreenMode.ScreenY,vrp,clearflags | sRTZBUF_FORCEMAIN);
 
   sClearRendertargetPrivate(clearflags,clearcolor);
 }
 
-void sSetRendertarget(const sRect *vrp,sTexture2D *tex,sInt flags, sU32 clearcolor)
+void sSetRendertarget(const sRect *vrp,sTexture2D *tex,int flags, sU32 clearcolor)
 {
   if(tex)
   {
@@ -1268,12 +1268,12 @@ void sSetRendertarget(const sRect *vrp,sTexture2D *tex,sInt flags, sU32 clearcol
   }
 }
 
-void sSetRendertarget(const sRect *vrp,sInt flags,sU32 clearcolor,sTexture2D **tex,sInt count)
+void sSetRendertarget(const sRect *vrp,int flags,sU32 clearcolor,sTexture2D **tex,int count)
 {
   sVERIFY(count>=2);
   sVERIFY(tex);
   sVERIFY(tex[0]);
-  for(sInt i=1;i<count;i++)
+  for(int i=1;i<count;i++)
   {
     sVERIFY(tex[0]->SizeX==tex[i]->SizeX);
     sVERIFY(tex[0]->SizeY==tex[i]->SizeY);
@@ -1282,12 +1282,12 @@ void sSetRendertarget(const sRect *vrp,sInt flags,sU32 clearcolor,sTexture2D **t
 
   IDirect3DSurface9 *dest;
 
-  sInt miplevel = (flags&0xff00)>>8;
+  int miplevel = (flags&0xff00)>>8;
   if((flags & sRTZBUF_MASK)==sRTZBUF_FORCEMAIN)
     flags = (flags & ~sRTZBUF_MASK) | sRTZBUF_DEFAULT;
 
   DXActiveMultiRT = 0;    // setting this to 0 will prevent sSetRenderTargetPrivate() from resetting the mrt's, saving some state changes.
-  for(sInt i=0;i<count;i++)
+  for(int i=0;i<count;i++)
   {
     if(i==0)
     {
@@ -1300,7 +1300,7 @@ void sSetRendertarget(const sRect *vrp,sInt flags,sU32 clearcolor,sTexture2D **t
       sRelease(dest);
     }
   }
-  for(sInt i=count;i<4;i++)
+  for(int i=count;i<4;i++)
     DXErr(DXDev->SetRenderTarget(i,0));
   DXActiveMultiRT = 1;    // setting this to 1 will make the next sSetRendertargetPrivate() reset the mrt's
 
@@ -1308,7 +1308,7 @@ void sSetRendertarget(const sRect *vrp,sInt flags,sU32 clearcolor,sTexture2D **t
 }
 
 
-void sSetRendertargetCube(sTextureCube* tex, sTexCubeFace cf, sInt flags, sU32 clearcolor)
+void sSetRendertargetCube(sTextureCube* tex, sTexCubeFace cf, int flags, sU32 clearcolor)
 {
   IDirect3DSurface9 *dest;
 
@@ -1337,8 +1337,8 @@ void sGrabScreen(class sTexture2D *tex, sGrabFilterFlags filter, const sRect *ds
   if(DXBackBuffer->MultiSurf2D && !(DXActiveRTFlags & sRTF_NO_MULTISAMPLING))
     source = DXBackBuffer->MultiSurf2D;
 
-  const sInt PointMask = (D3DPTFILTERCAPS_MINFPOINT|D3DPTFILTERCAPS_MAGFPOINT);
-  const sInt LinearMask = (D3DPTFILTERCAPS_MINFPOINT|D3DPTFILTERCAPS_MAGFPOINT);
+  const int PointMask = (D3DPTFILTERCAPS_MINFPOINT|D3DPTFILTERCAPS_MAGFPOINT);
+  const int LinearMask = (D3DPTFILTERCAPS_MINFPOINT|D3DPTFILTERCAPS_MAGFPOINT);
 
   sVERIFY((filter==sGFF_NONE) || 
           ((filter==sGFF_POINT)&&(DXCaps.StretchRectFilterCaps&PointMask)==PointMask) ||
@@ -1357,8 +1357,8 @@ void sSetScreen(class sTexture2D *tex, sGrabFilterFlags filter, const sRect *dst
 
   dest = DXBackBuffer->Surf2D;
 
-  const sInt PointMask = (D3DPTFILTERCAPS_MINFPOINT|D3DPTFILTERCAPS_MAGFPOINT);
-  const sInt LinearMask = (D3DPTFILTERCAPS_MINFPOINT|D3DPTFILTERCAPS_MAGFPOINT);
+  const int PointMask = (D3DPTFILTERCAPS_MINFPOINT|D3DPTFILTERCAPS_MAGFPOINT);
+  const int LinearMask = (D3DPTFILTERCAPS_MINFPOINT|D3DPTFILTERCAPS_MAGFPOINT);
 
   sVERIFY((filter==sGFF_NONE) || 
           ((filter==sGFF_POINT)&&(DXCaps.StretchRectFilterCaps&PointMask)==PointMask) ||
@@ -1382,7 +1382,7 @@ void sSetScreen(const sRect &rect,sU32 *data)
   D3DSURFACE_DESC desc;
   RECT sr;
   POINT dp;
-  sInt xs,ys;
+  int xs,ys;
   sU8 *s,*d;
 
   // check and prepare
@@ -1416,7 +1416,7 @@ void sSetScreen(const sRect &rect,sU32 *data)
   DXErr(DXSetScreenSurf->LockRect(&lock,&sr,0));
   s = (sU8 *)data;
   d = (sU8 *)lock.pBits;
-  for(sInt y=0;y<ys;y++)
+  for(int y=0;y<ys;y++)
   {
     sCopyMem(d,s,xs*4);
     s += xs*4;
@@ -1442,7 +1442,7 @@ void sSetTarget(const sTargetPara &para)
 
   // clear flags
 
-  static sInt dxcf[4] = 
+  static int dxcf[4] = 
   {
     0,
     D3DCLEAR_TARGET,
@@ -1450,7 +1450,7 @@ void sSetTarget(const sTargetPara &para)
     D3DCLEAR_TARGET|D3DCLEAR_ZBUFFER|D3DCLEAR_STENCIL,
   };
 
-  sInt cf = 0;
+  int cf = 0;
   if(para.Depth==0)
     cf = dxcf[para.Flags & 1];
   else
@@ -1461,14 +1461,14 @@ void sSetTarget(const sTargetPara &para)
 
   // count rendertargets
 
-  sInt count = 0;
+  int count = 0;
   while(para.Target[count] && count<4) count++;
   sVERIFY(count>0);
 
   // will we overwrite all?
 
-  sInt oac = 1;
-  sInt oad = 1;
+  int oac = 1;
+  int oad = 1;
   if(!(para.Flags & sST_OVERWRITEALL))
   {
     if(!(para.Flags & sST_CLEARCOLOR))
@@ -1479,7 +1479,7 @@ void sSetTarget(const sTargetPara &para)
 
   // multiple rendertarget: check for same size
 
-  for(sInt i=1;i<count;i++)
+  for(int i=1;i<count;i++)
   {
     sVERIFY(para.Target[0]->SizeX==para.Target[i]->SizeX);
     sVERIFY(para.Target[0]->SizeY==para.Target[i]->SizeY);
@@ -1493,7 +1493,7 @@ void sSetTarget(const sTargetPara &para)
     msaa = 0;
   if(para.Flags & sST_READZ)        // can't resolve z buffer, so we have to disable msaa
     msaa = 0;
-  for(sInt i=0;i<count;i++)         // do we have multisampled textures?
+  for(int i=0;i<count;i++)         // do we have multisampled textures?
     if(para.Target[0]->MultiSurf2D==0)
       msaa = 0;
   if(para.Depth && para.Depth->MultiSurf2D==0)
@@ -1511,7 +1511,7 @@ void sSetTarget(const sTargetPara &para)
 
   // set all targets we need
 
-  sInt i=0;
+  int i=0;
   while(i<count)
   {
     tex = para.Target[i];
@@ -1810,7 +1810,7 @@ void sCopyTexture(const sCopyTexturePara &para)
 
 /****************************************************************************/
 
-sGpuToCpu::sGpuToCpu(sInt flags,sInt xs,sInt ys)
+sGpuToCpu::sGpuToCpu(int flags,int xs,int ys)
 {
   sVERIFY(xs>0 && ys>0);
   sVERIFY((flags & sTEX_TYPE_MASK)==sTEX_2D);
@@ -1824,10 +1824,10 @@ sGpuToCpu::sGpuToCpu(sInt flags,sInt xs,sInt ys)
 
   D3DPOOL pool;
   D3DFORMAT fmt;
-  sInt usage,mm,lflags;
+  int usage,mm,lflags;
   ConvertFlags(flags,fmt,pool,usage,mm,lflags);
 
-  DXFormat = (sInt) fmt;
+  DXFormat = (int) fmt;
 
   DXErr(DXDev->CreateOffscreenPlainSurface(SizeX,SizeY,(D3DFORMAT)DXFormat,D3DPOOL_SYSTEMMEM,&Dest,0));
 }
@@ -1838,7 +1838,7 @@ sGpuToCpu::~sGpuToCpu()
   sRelease(Dest);
 }
 
-void sGpuToCpu::CopyFrom(sTexture2D *tex,sInt miplevel)
+void sGpuToCpu::CopyFrom(sTexture2D *tex,int miplevel)
 {
   sVERIFY(!Locked);
   sResolveTargetPrivate(tex);
@@ -1906,18 +1906,18 @@ void sGpuToCpu::EndRead()
 
 /****************************************************************************/
 
-sInt sGetScreenCount()
+int sGetScreenCount()
 {
   return DXScreenCount;
 }
 
-sTexture2D *sGetScreenColorBuffer(sInt screen)
+sTexture2D *sGetScreenColorBuffer(int screen)
 {
   sVERIFY(screen>=0 && screen<DXScreenCount);
   return DXBackBuffer[screen];
 }
 
-sTexture2D *sGetScreenDepthBuffer(sInt screen)
+sTexture2D *sGetScreenDepthBuffer(int screen)
 {
   return DXZBuffer;
 }
@@ -1927,10 +1927,10 @@ sTexture2D *sGetRTDepthBuffer()
   return DXZBufferRT;
 }
 
-void sEnlargeRTDepthBuffer(sInt xs,sInt ys)
+void sEnlargeRTDepthBuffer(int xs,int ys)
 {
-  sInt rtx = sMax(sMax(xs,DXScreenMode.RTZBufferX),DXScreenMode.ScreenX);
-  sInt rty = sMax(sMax(ys,DXScreenMode.RTZBufferY),DXScreenMode.ScreenY);
+  int rtx = sMax(sMax(xs,DXScreenMode.RTZBufferX),DXScreenMode.ScreenX);
+  int rty = sMax(sMax(ys,DXScreenMode.RTZBufferY),DXScreenMode.ScreenY);
   if(DXDev)
   {
     if(rtx!=DXScreenMode.RTZBufferX || rty!=DXScreenMode.RTZBufferY)
@@ -1982,7 +1982,7 @@ void sBeginReadTexture(const sU8*& data, sS32& pitch, enum sTextureFlags& flags,
   }
 
   D3DLOCKED_RECT r;
-  sInt xs,ys;
+  int xs,ys;
 //  D3DSURFACE_DESC desc;
   xs = tex->SizeX;
   ys = tex->SizeY;
@@ -2027,7 +2027,7 @@ void sEndReadTexture()
 void sBeginSaveRTPrivate(const sU8*& data, sS32& pitch, enum sTextureFlags& flags,IDirect3DSurface9* source)
 {
   D3DLOCKED_RECT      r;
-  sInt xs,ys;
+  int xs,ys;
 
   D3DSURFACE_DESC desc;
   DXErr(source->GetDesc(&desc));
@@ -2109,10 +2109,10 @@ void sEnableGraphicsStats(sBool enable)
 }
 
 
-void sSetTexture(sInt binding, class sTextureBase* tex)
+void sSetTexture(int binding, class sTextureBase* tex)
 {
-  sInt stage = binding & sMTB_SAMPLERMASK;
-  sInt cache = stage;
+  int stage = binding & sMTB_SAMPLERMASK;
+  int cache = stage;
   if((binding & sMTB_SHADERMASK)==sMTB_VS)
   {
     stage += D3DVERTEXTEXTURESAMPLER0;
@@ -2141,12 +2141,12 @@ void sDbgPaintWireFrame(sBool enable)
   DXErr(DXDev->SetRenderState(D3DRS_FILLMODE,enable?D3DFILL_WIREFRAME:D3DFILL_SOLID));
 }
 
-void sSetRenderStates(const sU32* data, sInt count)
+void sSetRenderStates(const sU32* data, int count)
 {
-  sInt index;
+  int index;
   sU32 value;
 
-  for(sInt i=0;i<count;i++)
+  for(int i=0;i<count;i++)
   {
     index = *data++;
     value = *data++;
@@ -2168,8 +2168,8 @@ void sSetRenderStates(const sU32* data, sInt count)
       else if(index>=sMS_SAMPLERSTATE && index<sMS_SAMPLEREND)
       {
         index = index-sMS_SAMPLERSTATE;
-        sInt sampler = index>>sMS_SAMPLERSHIFT;
-        sInt state = index & (sMS_SAMPLEROFFSET-1);
+        int sampler = index>>sMS_SAMPLERSHIFT;
+        int state = index & (sMS_SAMPLEROFFSET-1);
         if(sampler>=16)
           sampler = sampler-16+D3DVERTEXTEXTURESAMPLER0;
         DXErr(DXDev->SetSamplerState(sampler,(D3DSAMPLERSTATETYPE)state,value));
@@ -2185,9 +2185,9 @@ void sSetRenderStates(const sU32* data, sInt count)
   }
 }
 
-sInt sRenderStateTexture(sU32* data, sInt texstage, sU32 tflags,sF32 lodbias)
+int sRenderStateTexture(sU32* data, int texstage, sU32 tflags,sF32 lodbias)
 {
-  sInt tex = sMS_SAMPLERSTATE+(texstage<<sMS_SAMPLERSHIFT);
+  int tex = sMS_SAMPLERSTATE+(texstage<<sMS_SAMPLERSHIFT);
   sU32* start = data;
 
   if (tflags & sMTF_SRGB)
@@ -2302,15 +2302,15 @@ void sVertexFormatHandle::Create()
 {
   // create vertex declarator 
   D3DVERTEXELEMENT9 decl[32];
-  sInt i,b[sVF_STREAMMAX];
-  sInt stream;
+  int i,b[sVF_STREAMMAX];
+  int stream;
 
   for(i=0;i<sVF_STREAMMAX;i++)
     b[i] = 0;
 
   sBool dontcreate=sFALSE;
   i = 0;
-  sInt j = 0;
+  int j = 0;
   while(Data[i])
   {
     stream = (Data[i]&sVF_STREAMMASK)>>sVF_STREAMSHIFT;
@@ -2371,7 +2371,7 @@ void sVertexFormatHandle::Create()
   decl[j].Usage = 0;
   decl[j].UsageIndex = 0;
 
-  for(sInt i=0;i<sVF_STREAMMAX;i++)
+  for(int i=0;i<sVF_STREAMMAX;i++)
     VertexSize[i] = b[i];
 
   if(dontcreate)
@@ -2387,12 +2387,12 @@ void sVertexFormatHandle::Destroy()
 }
 
 /*
-sInt sSizeofVertexFormat(sVertexFormatHandle *handle)
+int sSizeofVertexFormat(sVertexFormatHandle *handle)
 {
   return handle->VertexSize;
 }
 
-sInt sVertexFormatHas(sVertexFormatHandle *handle,sInt flags)
+int sVertexFormatHas(sVertexFormatHandle *handle,int flags)
 {
   return (handle->AvailMask & (1<<(flags & sVF_USEMASK))) != 0;
 }
@@ -2453,13 +2453,13 @@ void sDeleteShader2(sShader *shader)
 
 /****************************************************************************/
 
-void sSetVSParam(sInt o, sInt count, const sVector4* vsf)
+void sSetVSParam(int o, int count, const sVector4* vsf)
 {
   DXErr(DXDev->SetVertexShaderConstantF(o,&vsf->x,count));
   sClearCurrentCBuffers();  // cbuffers are not valid anymore
 }
 
-void sSetPSParam(sInt o, sInt count, const sVector4* psf)
+void sSetPSParam(int o, int count, const sVector4* psf)
 {
   DXErr(DXDev->SetPixelShaderConstantF (o,&psf->x,count));
   sClearCurrentCBuffers();  // cbuffers are not valid anymore
@@ -2467,7 +2467,7 @@ void sSetPSParam(sInt o, sInt count, const sVector4* psf)
 
 void sSetVSBool(sU32 bits,sU32 mask)
 {
-  for(sInt i=0;i<sCOUNTOF(CurrentVSBools);i++)
+  for(int i=0;i<sCOUNTOF(CurrentVSBools);i++)
   {
     if(mask&(1<<i))
       CurrentVSBools[i] = (bits&(1<<i)) ? 1 : 0;
@@ -2480,7 +2480,7 @@ void sSetVSBool(sU32 bits,sU32 mask)
 
 void sSetPSBool(sU32 bits,sU32 mask)
 {
-  for(sInt i=0;i<sCOUNTOF(CurrentPSBools);i++)
+  for(int i=0;i<sCOUNTOF(CurrentPSBools);i++)
   {
     if(mask&(1<<i))
       CurrentPSBools[i] = (bits&(1<<i)) ? 1 : 0;
@@ -2496,7 +2496,7 @@ sShaderTypeFlag sGetShaderPlatform()
   return sSTF_HLSL23;
 }
 
-sInt sGetShaderProfile()
+int sGetShaderProfile()
 {
   return DXShaderProfile;
 }
@@ -2593,7 +2593,7 @@ void sGeoBuffer::Lock()
   sVERIFY(LockPtr==0);
   sGeoBufferLocks++;
 
-  sInt lock = (Duration==sGD_STATIC) ? 0 : D3DLOCK_NOOVERWRITE;
+  int lock = (Duration==sGD_STATIC) ? 0 : D3DLOCK_NOOVERWRITE;
   if(Discard)
   {
     lock = D3DLOCK_DISCARD;
@@ -2629,11 +2629,11 @@ void sGeoBuffer::Unlock()
   }
 }
 
-sInt sGeoBuffer::CheckSize(sInt count,sInt size)
+int sGeoBuffer::CheckSize(int count,int size)
 {
-  sInt pos = (Used+size-1)/size;
-  sInt start = pos*size;
-  sInt end = start + count*size;
+  int pos = (Used+size-1)/size;
+  int start = pos*size;
+  int end = start + count*size;
   if(Duration == sGD_STREAM)
   {
     if(count*size<=Alloc)
@@ -2669,7 +2669,7 @@ sInt sGeoBuffer::CheckSize(sInt count,sInt size)
 static void DumpGeoBuffers(sBool all=sFALSE)
 {
   sLogF(L"gfx",L"===> %d <===\n",sGeoBufferCount);
-  for(sInt i=0;i<sGeoBufferCount;i++)
+  for(int i=0;i<sGeoBufferCount;i++)
   {
     if(sGeoBuffers[i].RefCount || all)
     {
@@ -2692,7 +2692,7 @@ void sGeoBufferExit()
 {
   //DumpGeoBuffers();
   static const sChar *s[] = { L"???",L"STATIC",L"FRAME",L"STREAM"};
-  for(sInt i=0;i<sGeoBufferCount;i++)
+  for(int i=0;i<sGeoBufferCount;i++)
   {
     if(sGeoBuffers[i].RefCount!=0/* && sGeoBuffers[i].Duration==sGD_STATIC*/)
       sLogF(L"gfx",L"*** GeoBuffers not freed: alloc %08x dur %d refcount %d !\n",
@@ -2704,7 +2704,7 @@ void sGeoBufferExit()
 
 void sGeoBufferReset0()
 {
-  for(sInt i=0;i<sGeoBufferCount;i++)
+  for(int i=0;i<sGeoBufferCount;i++)
   {
     sGeoBuffer *gb = &sGeoBuffers[i];
     if(gb->LockPtr && gb->Duration!=sGD_DYNAMIC)
@@ -2718,7 +2718,7 @@ void sGeoBufferReset0()
 sGeoBuffer *sFindFreeGeoBuffer()
 {
   sGeoBuffer *gb;
-  for(sInt i=0;i<sGeoBufferCount;i++)
+  for(int i=0;i<sGeoBufferCount;i++)
   {
     gb = &sGeoBuffers[i];
     if(gb->Alloc==0 && gb->RefCount==0)
@@ -2740,7 +2740,7 @@ void sGeoBufferReset1()
 void sGeoBufferFrame()    // called in sRender3DEnd()
 {
   sGeoBufferUnlockAll();
-  for(sInt i=0;i<sGeoBufferCount;i++)
+  for(int i=0;i<sGeoBufferCount;i++)
   {
     sGeoBuffer *gb = &sGeoBuffers[i];
     if(gb->Duration!=sGD_DYNAMIC)
@@ -2759,7 +2759,7 @@ void sGeoBufferFrame()    // called in sRender3DEnd()
     }
   }
 
-  for(sInt i=0;i<sGeoPrimCount;i++)
+  for(int i=0;i<sGeoPrimCount;i++)
     sGeoPrims[i].VB.Clear();
   sGeoPrimCount = 0;
   sGeoBuffersLast[0] = 0;
@@ -2771,7 +2771,7 @@ void sGeoBufferUnlockAll()
 {
   if(sGeoBufferLocks>0)
   {
-    for(sInt i=0;i<sGeoBufferCount;i++)
+    for(int i=0;i<sGeoBufferCount;i++)
     {
       sGeoBuffer *gb = &sGeoBuffers[i];
       if(gb->LockPtr && gb->Duration!=sGD_DYNAMIC)
@@ -2823,14 +2823,14 @@ void sGeoBufferPart::CloneFrom(sGeoBufferPart *src)
     Buffer->RefCount++;
 }
 
-void *sGeoBufferPart::Init(sInt count,sInt size,sGeometryDuration duration,sInt buffertype,sInt advance)
+void *sGeoBufferPart::Init(int count,int size,sGeometryDuration duration,int buffertype,int advance)
 {
   sGeoBuffer *gb;
 
   Clear();
 
   Buffer = 0;
-  sInt pos = 0;
+  int pos = 0;
 
   // shortcut: does the last one fit?
 
@@ -2845,7 +2845,7 @@ void *sGeoBufferPart::Init(sInt count,sInt size,sGeometryDuration duration,sInt 
   // search all buffers
 
   sGeoBuffer *reuse=0;
-  for(sInt i=0;i<sGeoBufferCount && Buffer==0;i++)
+  for(int i=0;i<sGeoBufferCount && Buffer==0;i++)
   {
     gb = &sGeoBuffers[i];
     if(gb->Alloc>0 && gb->Duration==duration && gb->BufferType==buffertype && !gb->InUse)
@@ -2944,7 +2944,7 @@ void *sGeoBufferPart::Init(sInt count,sInt size,sGeometryDuration duration,sInt 
 
 }
 
-void sGeoBufferPart::Advance(sInt count,sInt size)
+void sGeoBufferPart::Advance(int count,int size)
 {
   Buffer->InUse = 0;
   if(count!=-1)
@@ -2962,7 +2962,7 @@ void sGeoBufferPart::Advance(sInt count,sInt size)
 /***                                                                      ***/
 /****************************************************************************/
 
-void sGeometry::Init(sInt flags,sVertexFormatHandle *form)
+void sGeometry::Init(int flags,sVertexFormatHandle *form)
 {
   sVERIFY(!(flags&sGF_CPU_MEM));
   Flags = flags;
@@ -2976,30 +2976,30 @@ void sGeometry::Init(sInt flags,sVertexFormatHandle *form)
   }
 }
 
-void sGeometry::BeginLoadIB(sInt ic,sGeometryDuration duration,void **ip)
+void sGeometry::BeginLoadIB(int ic,sGeometryDuration duration,void **ip)
 {
   sVERIFY(IndexSize>0)
   IndexPart.Clear();
   *ip = IndexPart.Init(ic,IndexSize,duration,(Flags & sGF_INDEX32)?2:1);
 }
 
-void sGeometry::EndLoadIB(sInt ic)
+void sGeometry::EndLoadIB(int ic)
 {
   IndexPart.Advance(ic,IndexSize);
 }
 
-void sGeometry::BeginLoadVB(sInt vc,sGeometryDuration duration,void **vp,sInt stream)
+void sGeometry::BeginLoadVB(int vc,sGeometryDuration duration,void **vp,int stream)
 {
   VertexPart[stream].Clear();
   *vp = VertexPart[stream].Init(vc,Format->GetSize(stream),duration,0);
 }
 
-void sGeometry::EndLoadVB(sInt vc,sInt stream)
+void sGeometry::EndLoadVB(int vc,int stream)
 {
   VertexPart[stream].Advance(vc,Format->GetSize(stream));
 }
 
-void sGeometry::BeginLoad(sVertexFormatHandle *vf,sInt flags,sGeometryDuration duration,sInt vc,sInt ic,void **vp,void **ip)
+void sGeometry::BeginLoad(sVertexFormatHandle *vf,int flags,sGeometryDuration duration,int vc,int ic,void **vp,void **ip)
 {
   Init(flags,vf);
   BeginLoadVB(vc,duration,vp,0);
@@ -3009,7 +3009,7 @@ void sGeometry::BeginLoad(sVertexFormatHandle *vf,sInt flags,sGeometryDuration d
     IndexPart.Clear();
 }
 
-void sGeometry::EndLoad(sInt vc,sInt ic)
+void sGeometry::EndLoad(int vc,int ic)
 {
   VertexPart[0].Advance(vc,Format->GetSize(0));
   if(IndexPart.Buffer)
@@ -3018,7 +3018,7 @@ void sGeometry::EndLoad(sInt vc,sInt ic)
 
 // obsolete
 
-void sGeometry::BeginLoad(sInt vc,sInt ic,sInt flags,sVertexFormatHandle *vf,void **vp,void **ip)
+void sGeometry::BeginLoad(int vc,int ic,int flags,sVertexFormatHandle *vf,void **vp,void **ip)
 {
   if(!(flags & sGF_INDEX32))
     flags |= sGF_INDEX16;
@@ -3038,14 +3038,14 @@ void sGeometry::Merge(sGeometry *geo0,sGeometry *geo1)
   sVERIFY(geo1!=this);
   if(geo0 != this)
   {
-    for(sInt i=0;i<sVF_STREAMMAX;i++)
+    for(int i=0;i<sVF_STREAMMAX;i++)
       VertexPart[i].CloneFrom(&geo0->VertexPart[i]);
     IndexPart.CloneFrom(&geo0->IndexPart);
   }
 
   if(geo1)
   {
-    for(sInt i=0;i<sVF_STREAMMAX;i++)
+    for(int i=0;i<sVF_STREAMMAX;i++)
       if(!geo1->VertexPart[i].IsEmpty())
         VertexPart[i].CloneFrom(&geo1->VertexPart[i]);
     if(!geo1->IndexPart.IsEmpty())
@@ -3053,7 +3053,7 @@ void sGeometry::Merge(sGeometry *geo0,sGeometry *geo1)
   }
 }
 
-void sGeometry::MergeVertexStream(sInt DestStream,sGeometry *src,sInt SrcStream)
+void sGeometry::MergeVertexStream(int DestStream,sGeometry *src,int SrcStream)
 {
   sVERIFY(src!=this);
   VertexPart[DestStream].CloneFrom(&src->VertexPart[SrcStream]);
@@ -3065,7 +3065,7 @@ void sGeometry::MergeVertexStream(sInt DestStream,sGeometry *src,sInt SrcStream)
 /***                                                                      ***/
 /****************************************************************************/
 
-void sGeometry::InitDyn(sInt ic,sInt vc0,sInt vc1,sInt vc2,sInt vc3)
+void sGeometry::InitDyn(int ic,int vc0,int vc1,int vc2,int vc3)
 {
   if(ic) { IndexPart.Init(ic,IndexSize,sGD_DYNAMIC,IndexSize==2 ? 1 : 2,0); IndexPart.Buffer->Unlock(); }
   if(vc0) { VertexPart[0].Init(vc0,Format->GetSize(0),sGD_DYNAMIC,0,0); VertexPart[0].Buffer->Unlock(); }
@@ -3074,7 +3074,7 @@ void sGeometry::InitDyn(sInt ic,sInt vc0,sInt vc1,sInt vc2,sInt vc3)
   if(vc3) { VertexPart[3].Init(vc3,Format->GetSize(3),sGD_DYNAMIC,0,0); VertexPart[0].Buffer->Unlock(); }
 }
 
-void *sGeometry::BeginDynVB(sBool discard,sInt stream)
+void *sGeometry::BeginDynVB(sBool discard,int stream)
 {
   if(discard) VertexPart[stream].Buffer->Discard = 1;
   VertexPart[stream].Buffer->Lock();
@@ -3088,7 +3088,7 @@ void *sGeometry::BeginDynIB(sBool discard)
   return IndexPart.Buffer->LockPtr;
 }
 
-void sGeometry::EndDynVB(sInt stream)
+void sGeometry::EndDynVB(int stream)
 {
   VertexPart[stream].Buffer->Unlock();
 }
@@ -3129,7 +3129,7 @@ void sGeometry::EndQuadrics()
   }
 }
 
-void sGeometry::BeginQuad(void **data,sInt count)
+void sGeometry::BeginQuad(void **data,int count)
 {
   sVERIFY(PrimMode)
   sVERIFY(sGeoPrimCount<sMAX_GEOPRIMS);
@@ -3153,7 +3153,7 @@ void sGeometry::EndQuad()
   CurrentPrim = 0;
 }
 
-void sGeometry::BeginGrid(void **data,sInt xs,sInt ys)
+void sGeometry::BeginGrid(void **data,int xs,int ys)
 {
   sVERIFY(PrimMode)
   sVERIFY(sGeoPrimCount<sMAX_GEOPRIMS);
@@ -3178,7 +3178,7 @@ void sGeometry::EndGrid()
 }
 
 
-void sGeometry::BeginWireGrid(void **data,sInt xs,sInt ys)
+void sGeometry::BeginWireGrid(void **data,int xs,int ys)
 {
   sVERIFY(PrimMode)
   sVERIFY(sGeoPrimCount<sMAX_GEOPRIMS);
@@ -3207,7 +3207,7 @@ void sGeometry::DrawPrim()
 {
   sGeoPrim *p,*first;
   sGeoBuffer *gb;
-  sInt ic,vc;
+  int ic,vc;
  
   p = FirstPrim;
   first = p;
@@ -3252,20 +3252,20 @@ void sGeometry::DrawPrim()
 }
 
 // draw one range of sGeoPrim with same DX-VertexBuffer object
-void sGeometry::DrawPrim(sGeoPrim *start,sGeoPrim *end,sInt ic,sInt vc)
+void sGeometry::DrawPrim(sGeoPrim *start,sGeoPrim *end,int ic,int vc)
 {
   sGeoBufferPart IB;  
   sGeoBuffer *verify;
   sGeoPrim *prim;
   sU32 *ip;
-  sInt vert,xs;
+  int vert,xs;
 
   IB.Clear();
   ip = (sU32 *)IB.Init(ic,4,sGD_FRAME,2,1);
   verify = start->VB.Buffer;
   
   prim = start;
-  sInt linemode = 0;
+  int linemode = 0;
   while(prim!=end)
   {
     sVERIFY(prim->VB.Buffer==verify);
@@ -3274,9 +3274,9 @@ void sGeometry::DrawPrim(sGeoPrim *start,sGeoPrim *end,sInt ic,sInt vc)
     case sGP_GRID:
       vert = prim->Vertex;
       xs = prim->TessX;
-      for(sInt y=0;y<prim->TessY-1;y++)
+      for(int y=0;y<prim->TessY-1;y++)
       {
-        for(sInt x=0;x<prim->TessX-1;x++)
+        for(int x=0;x<prim->TessX-1;x++)
         {
           sQuad(ip,vert+y*xs+x,0,1,1+xs,0+xs);
         }
@@ -3284,7 +3284,7 @@ void sGeometry::DrawPrim(sGeoPrim *start,sGeoPrim *end,sInt ic,sInt vc)
       break;
     case sGP_QUAD:
       vert = prim->Vertex;
-      for(sInt i=0;i<prim->TessX;i++)
+      for(int i=0;i<prim->TessX;i++)
       {
         sQuad(ip,vert,0,1,2,3);
         vert+=4;
@@ -3293,17 +3293,17 @@ void sGeometry::DrawPrim(sGeoPrim *start,sGeoPrim *end,sInt ic,sInt vc)
     case sGP_WIREGRID:
       vert = prim->Vertex;
       xs = prim->TessX;
-      for(sInt y=0;y<prim->TessY;y++)
+      for(int y=0;y<prim->TessY;y++)
       {
-        for(sInt x=0;x<prim->TessX-1;x++)
+        for(int x=0;x<prim->TessX-1;x++)
         {
           *ip++ = vert+y*xs+x;
           *ip++ = vert+y*xs+x+1;
         }
       }
-      for(sInt y=0;y<prim->TessY-1;y++)
+      for(int y=0;y<prim->TessY-1;y++)
       {
-        for(sInt x=0;x<prim->TessX;x++)
+        for(int x=0;x<prim->TessX;x++)
         {
           *ip++ = vert+y*xs+x;
           *ip++ = vert+y*xs+x+xs;
@@ -3324,14 +3324,14 @@ void sGeometry::DrawPrim(sGeoPrim *start,sGeoPrim *end,sInt ic,sInt vc)
 
   if(DXInstanceSet)
   {
-    for(sInt i=0;i<DXInstanceSet;i++)
+    for(int i=0;i<DXInstanceSet;i++)
       DXErr(DXDev->SetStreamSourceFreq(i,D3DSTREAMSOURCE_INDEXEDDATA|1))        
     DXInstanceSet = 0;
   }
 
-  sInt size = Format->GetSize(0);
+  int size = Format->GetSize(0);
   DXErr(DXDev->SetStreamSource(0,start->VB.Buffer->VB,0,size));
-  for(sInt i=1;i<DXStreamsUsed;i++)
+  for(int i=1;i<DXStreamsUsed;i++)
     DXErr(DXDev->SetStreamSource(i,0,0,0));
   DXStreamsUsed = 1;
 
@@ -3374,7 +3374,7 @@ void sGeometry::Draw()
   Draw(sGeometryDrawInfo());
 }
 
-void sGeometry::Draw(sDrawRange *ir,sInt irc,sInt instancecount, sVertexOffset *off)
+void sGeometry::Draw(sDrawRange *ir,int irc,int instancecount, sVertexOffset *off)
 {
   sGeometryDrawInfo di(ir,irc,instancecount,off);
   Draw(di);
@@ -3385,14 +3385,14 @@ void sGeometry::Draw(const sGeometryDrawInfo &di)
   sVERIFY(DontCheckMtrlPrepare || CurrentMtrlVFormat==Format);    // correct prepared material used?
   sDrawRange irdata;
   D3DPRIMITIVETYPE type;
-  sInt primcount,vertcount;
+  int primcount,vertcount;
 #if STATS
-  sInt primtotal=0,verttotal=0;
+  int primtotal=0,verttotal=0;
 #endif
-  sInt start;
-  sInt streamsused;
-  sInt vertexoffset,vertexcount;
-  sInt quads;
+  int start;
+  int streamsused;
+  int vertexoffset,vertexcount;
+  int quads;
 
   if(DebugBreak) sDEBUGBREAK;
   if(!sRELEASE)
@@ -3405,7 +3405,7 @@ void sGeometry::Draw(const sGeometryDrawInfo &di)
     if(!(di.Flags & sGDI_Instances))
       sVERIFY(di.InstanceCount==0);
     if(!(di.Flags & sGDI_VertexOffset))
-      for(sInt i=0;i<sVF_STREAMMAX;i++)
+      for(int i=0;i<sVF_STREAMMAX;i++)
         sVERIFY(di.VertexOffset[0]==0);
   }
 
@@ -3423,7 +3423,7 @@ void sGeometry::Draw(const sGeometryDrawInfo &di)
 
   if(di.Flags & sGDI_BlendFactor)
   {
-    sU32 data[2] = { sMS_RENDERSTATE+sInt(D3DRS_BLENDFACTOR),di.BlendFactor };
+    sU32 data[2] = { sMS_RENDERSTATE+int(D3DRS_BLENDFACTOR),di.BlendFactor };
     sSetRenderStates(data,1);       // this cares about caching!
   }
 
@@ -3462,7 +3462,7 @@ void sGeometry::Draw(const sGeometryDrawInfo &di)
   // preparation for drawrange
 
   const sDrawRange *ir = di.Ranges;
-  sInt irc = di.RangeCount;
+  int irc = di.RangeCount;
 
   if(!quads)                    // no quads, normal processing
   {
@@ -3485,15 +3485,15 @@ void sGeometry::Draw(const sGeometryDrawInfo &di)
   }
   else                          // quads, special case
   {
-    sInt maxquads = DXQuadIndex.Count/6;
+    int maxquads = DXQuadIndex.Count/6;
     if(ir==0)                   // when no drawrange is specified, split VB into sMAX_QUADCOUNT quad parts
     {
-      sInt quadcount = VertexPart[0].Count/4;
+      int quadcount = VertexPart[0].Count/4;
       irc = (quadcount + maxquads-1) / maxquads;
       sDrawRange *ir_ = sALLOCSTACK(sDrawRange,irc);
       ir = ir_;
 
-      for(sInt i=0;i<irc-1;i++)
+      for(int i=0;i<irc-1;i++)
       {
         ir_[i].Start = i*maxquads*4;
         ir_[i].End = (i+1)*maxquads*4;
@@ -3503,21 +3503,21 @@ void sGeometry::Draw(const sGeometryDrawInfo &di)
     }
     else                        // there is an indexrange, split into sMAX_QUADCOUNT quad parts
     {
-      sInt irc_ = 0;
+      int irc_ = 0;
       sVERIFY(sMAX_QUADCOUNT == DXQuadIndex.Count/6);
-      for(sInt i=0;i<irc;i++)
+      for(int i=0;i<irc;i++)
         irc_ += (ir[i].End-ir[i].Start+(sMAX_QUADCOUNT*4-1))/(sMAX_QUADCOUNT*4);
 
       if(irc_>irc)
       {
         sDrawRange *ir_ = sALLOCSTACK(sDrawRange,irc_);
-        sInt index = 0;
-        for(sInt i=0;i<irc;i++)
+        int index = 0;
+        for(int i=0;i<irc;i++)
         {
-          sInt start = ir[i].Start;
-          sInt end = ir[i].End;
-          sInt count = (end-start+(sMAX_QUADCOUNT*4-1))/(sMAX_QUADCOUNT*4);
-          for(sInt j=0;j<count-1;j++)
+          int start = ir[i].Start;
+          int end = ir[i].End;
+          int count = (end-start+(sMAX_QUADCOUNT*4-1))/(sMAX_QUADCOUNT*4);
+          for(int j=0;j<count-1;j++)
           {
             ir_[index].Start = start;
             start += (sMAX_QUADCOUNT*4);
@@ -3541,7 +3541,7 @@ void sGeometry::Draw(const sGeometryDrawInfo &di)
 
   if(DXInstanceSet)
   {
-    for(sInt i=0;i<DXInstanceSet;i++)
+    for(int i=0;i<DXInstanceSet;i++)
       DXErr(DXDev->SetStreamSourceFreq(i,1))    // see the well hidden comment on dxdocu "Efficiently Drawing Multiple Instances of Geometry (Direct3D 9)". use dxddebug to see how important this is!
   }
   DXInstanceSet = di.InstanceCount>0 ? streamsused : 0;
@@ -3557,7 +3557,7 @@ void sGeometry::Draw(const sGeometryDrawInfo &di)
   {
     vertexoffset = 0;
     vertexcount = VertexPart[0].Count;
-    for(sInt i=0;i<streamsused;i++)
+    for(int i=0;i<streamsused;i++)
     {
       sVERIFY(VertexPart[i].Buffer)
       DXErr(DXDev->SetStreamSource(i,VertexPart[i].Buffer->VB,Format->GetSize(i)*(VertexPart[i].Start+di.VertexOffset[i]),Format->GetSize(i)));
@@ -3575,7 +3575,7 @@ void sGeometry::Draw(const sGeometryDrawInfo &di)
 
   // clear unused vertex streams, if they were used last draw-call
 
-  for(sInt i=streamsused;i<DXStreamsUsed;i++)
+  for(int i=streamsused;i<DXStreamsUsed;i++)
     DXErr(DXDev->SetStreamSource(i,0,0,0));
   DXStreamsUsed = streamsused;
 
@@ -3596,7 +3596,7 @@ void sGeometry::Draw(const sGeometryDrawInfo &di)
   primcount = 0;
   vertcount = 0;
 #endif
-  for(sInt i=0;i<irc;i++)
+  for(int i=0;i<irc;i++)
   {
     start = ir[i].Start + IndexPart.Start;
     vertcount = ir[i].End - ir[i].Start;
@@ -3672,7 +3672,7 @@ void sCopyCubeFace(sTexture2D *dest, sTextureCube *src, sTexCubeFace cf)
     // copy rendertarget
     sSetRendertargetCube(src,cf,sCLEAR_NONE);
     const sU8 *data;
-    sInt pitch;
+    int pitch;
     sTextureFlags rtflags;
     sBeginSaveRT(data,pitch,rtflags);
 
@@ -3680,11 +3680,11 @@ void sCopyCubeFace(sTexture2D *dest, sTextureCube *src, sTexCubeFace cf)
     DXErr(dest->Tex2D->LockRect(0, &ldest, 0, 0));
     sVERIFY(ldest.Pitch == pitch);
 
-    for (sInt y=0; y<dest->SizeY; y++)
+    for (int y=0; y<dest->SizeY; y++)
     {
       sU8 *src_ptr = (sU8*)data+y*pitch;
       sU8 *dst_ptr = (sU8*)ldest.pBits+y*ldest.Pitch;
-      for (sInt x=0; x<dest->SizeX*dest->BitsPerPixel/8; x++)
+      for (int x=0; x<dest->SizeX*dest->BitsPerPixel/8; x++)
         *dst_ptr++ = *src_ptr++;
     }
 
@@ -3702,11 +3702,11 @@ void sCopyCubeFace(sTexture2D *dest, sTextureCube *src, sTexCubeFace cf)
 
     sVERIFY(ldest.Pitch == lsrc.Pitch);
 
-    for (sInt y=0; y<dest->SizeY; y++)
+    for (int y=0; y<dest->SizeY; y++)
     {
       sU8 *src_ptr = (sU8*)lsrc.pBits+y*lsrc.Pitch;
       sU8 *dst_ptr = (sU8*)ldest.pBits+y*ldest.Pitch;
-      for (sInt x=0; x<dest->SizeX*dest->BitsPerPixel/8; x++)
+      for (int x=0; x<dest->SizeX*dest->BitsPerPixel/8; x++)
         *dst_ptr++ = *src_ptr++;
     }
 
@@ -3747,7 +3747,7 @@ void sFlushOccQueryNodes()
   while(!FreeOccQueryNodes->IsEmpty())
   {
     sOccQueryNode *qn = FreeOccQueryNodes->RemHead();
-    sInt id = sFindIndex(*AllOccQueryNodes,qn);
+    int id = sFindIndex(*AllOccQueryNodes,qn);
     AllOccQueryNodes->RemAt(id);
     sRelease(qn->Query);
     sDelete(qn);
@@ -3775,7 +3775,7 @@ sOccQuery::~sOccQuery()
   }
 }
 
-void sOccQuery::Begin(sInt pixels)
+void sOccQuery::Begin(int pixels)
 {
   Poll();
   sVERIFY(Current==0);
@@ -3817,9 +3817,9 @@ void sOccQuery::Poll()
 /****************************************************************************/
 
 
-void ConvertFlags(sU32 flags, D3DFORMAT& d3df, D3DPOOL& pool, sInt& usage, sInt& mm, sInt& lflags)
+void ConvertFlags(sU32 flags, D3DFORMAT& d3df, D3DPOOL& pool, int& usage, int& mm, int& lflags)
 {
-  sInt rt = D3DUSAGE_RENDERTARGET;
+  int rt = D3DUSAGE_RENDERTARGET;
 
   switch(flags&sTEX_FORMAT)
   {
@@ -3961,7 +3961,7 @@ void InitGraphicsCaps()
     sCopyString(caps.AdapterName,aid.Description);
     
   sU64 avail = sGetAvailTextureFormats();
-  for(sInt i=0;i<64;i++)
+  for(int i=0;i<64;i++)
   {
     if((1ULL<<i)&avail)
     {
@@ -3969,7 +3969,7 @@ void InitGraphicsCaps()
       D3DFORMAT d3df;
       D3DPOOL pool;
       DX9Format = D3DFMT_X8R8G8B8;
-      sInt usage,mm,lflags;
+      int usage,mm,lflags;
       ConvertFlags(sTEX_2D|i,d3df,pool,usage,mm,lflags);
 
       hr = DX9->CheckDeviceFormat(DX9Adapter,DX9DevType,DX9Format,D3DUSAGE_QUERY_VERTEXTEXTURE,D3DRTYPE_TEXTURE,d3df);
@@ -4005,9 +4005,9 @@ void sGetGraphicsCaps(sGraphicsCaps &caps)
 /****************************************************************************/
 /****************************************************************************/
 
-void sPackDXT(sU8 *d,sU32 *bmp,sInt xs,sInt ys,sInt format,sBool dither)
+void sPackDXT(sU8 *d,sU32 *bmp,int xs,int ys,int format,sBool dither)
 {
-  sInt formatflags = format;
+  int formatflags = format;
   format &= sTEX_FORMAT;
   if((formatflags & sTEX_FASTDXTC) || DXDev==0)
   { 
@@ -4022,7 +4022,7 @@ void sPackDXT(sU8 *d,sU32 *bmp,sInt xs,sInt ys,sInt format,sBool dither)
   D3DLOCKED_RECT lr;
   RECT wr;
   sU8 *s;
-  sInt blocksize;
+  int blocksize;
 
   switch(format&sTEX_FORMAT)
   {
@@ -4038,7 +4038,7 @@ void sPackDXT(sU8 *d,sU32 *bmp,sInt xs,sInt ys,sInt format,sBool dither)
     bmpdel = new sU32[xs*ys];
     sCopyMem(bmpdel,bmp,xs*ys*4);
     bmp = bmpdel;
-    for(sInt i=0;i<xs*ys;i++)
+    for(int i=0;i<xs*ys;i++)
     {
       if(bmp[i]>=0x80000000) 
         bmp[i]|=0xff000000; 
@@ -4062,7 +4062,7 @@ void sPackDXT(sU8 *d,sU32 *bmp,sInt xs,sInt ys,sInt format,sBool dither)
     srcfmt = D3DFMT_A8R8G8B8;
     blocksize = 16;
     bmpdel = new sU32[xs*ys];
-    for(sInt i=0;i<xs*ys;i++)
+    for(int i=0;i<xs*ys;i++)
       bmpdel[i] = (bmp[i]&0x0000ff00) | ((bmp[i]&0x00ff0000)<<8);
     bmp = bmpdel;
     break;
@@ -4072,7 +4072,7 @@ void sPackDXT(sU8 *d,sU32 *bmp,sInt xs,sInt ys,sInt format,sBool dither)
     srcfmt = D3DFMT_A8R8G8B8;
     blocksize = 16;
     bmpdel = new sU32[xs*ys];
-    for(sInt i=0;i<xs*ys;i++)
+    for(int i=0;i<xs*ys;i++)
       bmpdel[i] = sARGBtoAYCoCg(bmp[i]);
     bmp = bmpdel;
     break;
@@ -4097,7 +4097,7 @@ void sPackDXT(sU8 *d,sU32 *bmp,sInt xs,sInt ys,sInt format,sBool dither)
   DXErr(surf->LockRect(&lr,0,D3DLOCK_READONLY));
 
   s = (sU8 *)lr.pBits;
-  for(sInt y=0;y<ys;y+=4)
+  for(int y=0;y<ys;y+=4)
   {
     sCopyMem(d,s,xs/4*blocksize);
     s += lr.Pitch;
@@ -4122,7 +4122,7 @@ sTextureBasePrivate::sTextureBasePrivate()
   DXFormat = 0;
 }
 
-void sTexture2D::Create2(sInt flags)
+void sTexture2D::Create2(int flags)
 {
   // handle stream textures as dynamic textures
   if(Flags&sTEX_STREAM)
@@ -4135,7 +4135,7 @@ void sTexture2D::Create2(sInt flags)
 
   D3DFORMAT format;
   D3DPOOL pool;
-  sInt usage;
+  int usage;
 
   sVERIFY((flags & sTEX_TYPE_MASK)==sTEX_2D);
 
@@ -4184,8 +4184,8 @@ void sTexture2D::Create2(sInt flags)
 
   // memory stats
 
-  sInt mem = SizeX*SizeY*BitsPerPixel/8;
-  for(sInt i=0;i<Mipmaps;i++)
+  int mem = SizeX*SizeY*BitsPerPixel/8;
+  for(int i=0;i<Mipmaps;i++)
   {
     DXTotalTextureMem += mem;
     mem /= 4;
@@ -4204,7 +4204,7 @@ void sTexture2D::Destroy2()
 {
   if ((Flags&sTEX_RENDERTARGET) || (Flags&sTEX_DYNAMIC))
   {
-    for (sInt i=0; i<DXRTCount; i++)
+    for (int i=0; i<DXRTCount; i++)
     {
       if (DXRenderTargets[i] == this)
       {
@@ -4221,8 +4221,8 @@ void sTexture2D::Destroy2()
 
   // memory stats
 
-  sInt mem = SizeX*SizeY*BitsPerPixel/8;
-  for(sInt i=0;i<Mipmaps;i++)
+  int mem = SizeX*SizeY*BitsPerPixel/8;
+  for(int i=0;i<Mipmaps;i++)
   {
     DXTotalTextureMem -= mem;
     mem /= 4;
@@ -4253,12 +4253,12 @@ void sTexture2D::OnLostDevice(sBool reinit/*=sFALSE*/)
   }
 }
 
-void sTexture2D::BeginLoad(sU8 *&data,sInt &pitch,sInt mipmap)
+void sTexture2D::BeginLoad(sU8 *&data,int &pitch,int mipmap)
 {
   D3DLOCKED_RECT lr;
   sVERIFY(Loading==-1);
 
-  sInt lflags = LockFlags;
+  int lflags = LockFlags;
   if(mipmap)                      // D3DLOCK_DISCARD is allowed only on the top level
     lflags &= ~D3DLOCK_DISCARD;
   DXErr(Tex2D->LockRect(mipmap,&lr,0,LockFlags));
@@ -4267,7 +4267,7 @@ void sTexture2D::BeginLoad(sU8 *&data,sInt &pitch,sInt mipmap)
   Loading = mipmap;
 }
 
-void sTexture2D::BeginLoadPartial(const sRect &rect,sU8 *&data,sInt &pitch,sInt mipmap)
+void sTexture2D::BeginLoadPartial(const sRect &rect,sU8 *&data,int &pitch,int mipmap)
 {
   D3DLOCKED_RECT lr;
   sVERIFY(Loading==-1);
@@ -4321,7 +4321,7 @@ void sTexture2D::CalcOneMiplevel(const sRect &rect)
 /***                                                                      ***/
 /****************************************************************************/
 
-void sTextureCube::Create2(sInt flags)
+void sTextureCube::Create2(int flags)
 {
   // handle stream textures as dynamic textures
   if(Flags&sTEX_STREAM)
@@ -4334,7 +4334,7 @@ void sTextureCube::Create2(sInt flags)
 
   D3DFORMAT format;
   D3DPOOL pool;
-  sInt usage;
+  int usage;
 
   // create resource
   ConvertFlags(flags, format, pool, usage, Mipmaps, LockFlags);
@@ -4352,7 +4352,7 @@ void sTextureCube::Destroy2()
 {
   if ((Flags&sTEX_RENDERTARGET) || (Flags&sTEX_DYNAMIC))
   {
-    for (sInt i=0; i<DXRTCount; i++)
+    for (int i=0; i<DXRTCount; i++)
       if (DXRenderTargets[i] == this)
       {
         DXRenderTargets[i] = DXRenderTargets[DXRTCount-1];
@@ -4375,14 +4375,14 @@ void sTextureCube::OnLostDevice(sBool reinit/*sFALSE*/)
   }
 }
 
-void sTextureCube::BeginLoad(sTexCubeFace cf, sU8*& data, sInt& pitch, sInt mipmap/*=0*/)
+void sTextureCube::BeginLoad(sTexCubeFace cf, sU8*& data, int& pitch, int mipmap/*=0*/)
 {
   sVERIFY(cf != sTCF_NONE);
 
   D3DLOCKED_RECT lr;
   sVERIFY(Loading==-1);
 
-  sInt lflags = LockFlags;
+  int lflags = LockFlags;
   if(cf!=sTCF_POSX||mipmap)               // D3DLOCK_DISCARD is allowed only on the top level
     lflags &= ~D3DLOCK_DISCARD;
   DXErr(TexCube->LockRect(static_cast<D3DCUBEMAP_FACES>(cf), mipmap, &lr, 0, lflags));
@@ -4448,11 +4448,11 @@ void sTextureBasePrivate::OnLostDevice(sBool reinit)
 /***                                                                      ***/
 /****************************************************************************/
 
-sTexture3D::sTexture3D(sInt xs, sInt ys, sInt zs, sU32 flags)
+sTexture3D::sTexture3D(int xs, int ys, int zs, sU32 flags)
 {
   D3DFORMAT format;
   D3DPOOL pool;
-  sInt usage;
+  int usage;
 
   SizeX = xs;
   SizeY = ys;
@@ -4489,12 +4489,12 @@ sTexture3D::~sTexture3D()
   sRelease(Tex3D);
 }
 
-void sTexture3D::BeginLoad(sU8*& data, sInt& rpitch, sInt& spitch, sInt mipmap/*=0*/)
+void sTexture3D::BeginLoad(sU8*& data, int& rpitch, int& spitch, int mipmap/*=0*/)
 {
   D3DLOCKED_BOX lr;
   sVERIFY(Loading==-1);
 
-  sInt lflags = LockFlags;
+  int lflags = LockFlags;
   if(mipmap)               // D3DLOCK_DISCARD is allowed only on the top level
     lflags &= ~D3DLOCK_DISCARD;
   DXErr(Tex3D->LockBox(mipmap, &lr, 0, lflags));
@@ -4549,10 +4549,10 @@ void sMaterial::Prepare(sVertexFormatHandle *format)
   oldvs->Release();
   oldps->Release();
 
-  for(sInt i=0;i<sMTRL_MAXTEX;i++)
+  for(int i=0;i<sMTRL_MAXTEX;i++)
   {
-    sInt sampler = TBind[i] & sMTB_SAMPLERMASK;
-    sInt shader  = TBind[i] & sMTB_SHADERMASK;
+    int sampler = TBind[i] & sMTB_SAMPLERMASK;
+    int shader  = TBind[i] & sMTB_SHADERMASK;
     if(shader==sMTB_VS)
     {
       sVERIFY(sampler<sMTRL_MAXVSTEX);
@@ -4570,7 +4570,7 @@ void sMaterial::Prepare(sVertexFormatHandle *format)
 }
 
 
-void sMaterial::Set(sCBufferBase **cbuffers,sInt cbcount,sInt variant)
+void sMaterial::Set(sCBufferBase **cbuffers,int cbcount,int variant)
 {
   CurrentMtrlVFormat = PreparedFormat;
   SetStates(variant);
@@ -4620,7 +4620,7 @@ void sMaterial::Set(sCBufferBase **cbuffers,sInt cbcount,sInt variant)
   sSetCBuffers(cbuffers,cbcount);
 }
 
-void sMaterial::SetStates(sInt variant)
+void sMaterial::SetStates(int variant)
 {
   sVERIFY(variant>=0 && variant<StateVariants);
   sVERIFY(States);
@@ -4632,7 +4632,7 @@ void sMaterial::SetStates(sInt variant)
   sTextureBase *tvs[sMTRL_MAXVSTEX];
   sClear(tps);
   sClear(tvs);
-  for(sInt i=0;i<sMTRL_MAXTEX;i++)
+  for(int i=0;i<sMTRL_MAXTEX;i++)
   {
     if(Texture[i])
     {
@@ -4642,9 +4642,9 @@ void sMaterial::SetStates(sInt variant)
         tps[TBind[i]&sMTB_SAMPLERMASK] = Texture[i];
     }
   }
-  for(sInt i=0;i<sMTRL_MAXPSTEX;i++)
+  for(int i=0;i<sMTRL_MAXPSTEX;i++)
     sSetTexture(i|sMTB_PS, tps[i]);
-  for(sInt i=0;i<sMTRL_MAXVSTEX;i++)
+  for(int i=0;i<sMTRL_MAXVSTEX;i++)
     sSetTexture(i|sMTB_VS, tvs[i]);
 
 #if STATS
@@ -4656,7 +4656,7 @@ void sMaterial::SetStates(sInt variant)
   *(sMaterialRS*)&Flags = VariantFlags[variant];
 }
 /*
-void sMaterial::AllocStates(const sU32 *data,sInt count)
+void sMaterial::AllocStates(const sU32 *data,int count)
 {
   sDeleteArray(States);
   StateCount = count;
@@ -4800,11 +4800,11 @@ void sMaterial::AddMtrlFlags(sU32 *&data)
     *data++ = D3DRS_STENCILWRITEMASK; *data++ = 0;
   }
 
-  for(sInt i=0;i<sMTRL_MAXTEX;i++)
+  for(int i=0;i<sMTRL_MAXTEX;i++)
   {
     if(Texture[i] || (TFlags[i]&sMTF_EXTERN))
     {
-      sInt stage = TBind[i]&sMTB_SAMPLERMASK;
+      int stage = TBind[i]&sMTB_SAMPLERMASK;
       if(TBind[i]&sMTB_SHADERMASK)
         stage+=16;
       data += sRenderStateTexture(data,stage,TFlags[i],LodBias[i]);
@@ -4829,7 +4829,7 @@ void sMaterial::AddMtrlFlags(sU32 *&data)
 /***                                                                      ***/
 /****************************************************************************/
 
-void sSetRenderClipping(sRect *r,sInt count)
+void sSetRenderClipping(sRect *r,int count)
 {
   RGNDATAHEADER *hdr;
   sRect *rd;
@@ -4896,9 +4896,9 @@ sBool sRender3DBegin()
   {
     // anti-lagging
 
-    static sInt dblock;
+    static int dblock;
     D3DLOCKED_RECT lr;
-    volatile sInt dummy;
+    volatile int dummy;
 
     DXDev->ColorFill(DXBlockSurface[dblock],0,0xff002050);
 
@@ -4906,7 +4906,7 @@ sBool sRender3DBegin()
 
     if(!FAILED((DXBlockSurface[dblock]->LockRect(&lr,0,D3DLOCK_READONLY))))
     {
-      dummy = *(volatile sInt *)lr.pBits;
+      dummy = *(volatile int *)lr.pBits;
       DXBlockSurface[dblock]->UnlockRect();
     }
 
@@ -4914,7 +4914,7 @@ sBool sRender3DBegin()
 
     sGFXCurrentFrame++;
 //    sGFXMtrlIsSet = 0;
-    for(sInt i=0;i<sCOUNTOF(sDXStates);i++)
+    for(int i=0;i<sCOUNTOF(sDXStates);i++)
       sDXStates[i] = 0xdeadc0de;
 
     // default states
@@ -4934,10 +4934,10 @@ sBool sRender3DBegin()
     DXErr(DXDev->SetRenderState(D3DRS_SPECULARMATERIALSOURCE,D3DMCS_MATERIAL ));
     DXErr(DXDev->SetRenderState(D3DRS_AMBIENTMATERIALSOURCE ,D3DMCS_MATERIAL ));
     DXErr(DXDev->SetRenderState(D3DRS_EMISSIVEMATERIALSOURCE,D3DMCS_MATERIAL ));
-//    for(sInt i=0;i<16;i++)
+//    for(int i=0;i<16;i++)
 //      DXErr(DXDev->SetSamplerState(i,D3DSAMP_MAXANISOTROPY,8));
     // dxstates are reset to 0xffffffff, so set color 0xffffffff
-    for(sInt i=0;i<16;i++)
+    for(int i=0;i<16;i++)
     {
       DXErr(DXDev->SetSamplerState(i,D3DSAMP_BORDERCOLOR ,0xffffffff ));
     }
@@ -4960,11 +4960,11 @@ sBool sRender3DBegin()
     sClear(CurrentVSBools);
     sClear(CurrentPSBools);
     sClearCurrentCBuffers();
-    for(sInt i=0;i<sCOUNTOF(CurrentTexture);i++)
+    for(int i=0;i<sCOUNTOF(CurrentTexture);i++)
       CurrentTexture[i] = (sTextureBase *) 1;     // make sure they are flushed!
-    for(sInt i=0;i<sMTRL_MAXPSTEX;i++)
+    for(int i=0;i<sMTRL_MAXPSTEX;i++)
       sSetTexture(i|sMTB_PS, 0);
-    for(sInt i=0;i<sMTRL_MAXVSTEX;i++)
+    for(int i=0;i<sMTRL_MAXVSTEX;i++)
       sSetTexture(i|sMTB_VS, 0);
 
     // set main view cfg, otherwise sViewport::SetTargetCurrent/SetTarget(0) don't
@@ -4995,11 +4995,11 @@ void sRender3DEnd(sBool flip)
 
   // finish up rendertarget
 
-  for(sInt i=0;i<DXScreenCount;i++)
+  for(int i=0;i<DXScreenCount;i++)
     sResolveTargetPrivate(sGetScreenColorBuffer(i));
 
   DXErr(DXDev->SetRenderTarget(0,DXBackBuffer[0]->Surf2D));
-  for(sInt i=1;i<sMin<sInt>(4,DXCaps.NumSimultaneousRTs);i++)
+  for(int i=1;i<sMin<int>(4,DXCaps.NumSimultaneousRTs);i++)
     DXErr(DXDev->SetRenderTarget(i,0));
   DXErr(DXDev->SetDepthStencilSurface(0));
   sRelease(DXTargetSurf);
@@ -5042,7 +5042,7 @@ void sRender3DEnd(sBool flip)
   StatsEnable = 1;
   BufferedStats.StaticTextureMem = DXTotalTextureMem;
   sDInt mem = 0;
-  for(sInt i=0;i<sGeoBufferCount;i++)
+  for(int i=0;i<sGeoBufferCount;i++)
   {
     if(sGeoBuffers[i].Duration==sGD_STATIC)
       mem += sGeoBuffers[i].Used;
@@ -5075,7 +5075,7 @@ void sSetDesiredFrameRate(sF32 rate)
 void sSetScreenGamma(sF32 gamma)
 {
   D3DGAMMARAMP ramp;
-  for(sInt i=0;i<256;i++)
+  for(int i=0;i<256;i++)
   {
     ramp.red[i] = 0xffff*sFPow(i/255.0f,gamma);
     ramp.green[i] = 0xffff*sFPow(i/255.0f,gamma);

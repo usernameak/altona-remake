@@ -28,8 +28,8 @@ void MyWindow::OnPaint2D()
   
   sF32 width = 1.5f;
 
-  sInt sx = Client.SizeX();
-  sInt sy = Client.SizeY();
+  int sx = Client.SizeX();
+  int sy = Client.SizeY();
 
   sImage img(sx,sy);
   sVectorRasterizer raster(&img);
@@ -65,10 +65,10 @@ MyParentWin::MyParentWin()
   sVSplitFrame *v;
   sToolBorder *tb;
 
-  for(sInt i=0;i<4;i++)
+  for(int i=0;i<4;i++)
   {
     v = new sVSplitFrame;
-    for(sInt j=0;j<4;j++)
+    for(int j=0;j<4;j++)
     {
       sWindow *w;
       if(i==2 && j==2)

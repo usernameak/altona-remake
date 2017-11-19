@@ -13,7 +13,7 @@
 #include "shaders.hpp"
 #include "util/ipp.hpp"
 
-extern sInt sExitFlag;
+extern int sExitFlag;
 
 /****************************************************************************/
 
@@ -46,7 +46,7 @@ sRenderTargetManager_::Target *sRenderTargetManager_::Find(sTextureBase *tex)
 }
 
 
-sTexture2D *sRenderTargetManager_::Acquire(sInt x,sInt y,sInt format)
+sTexture2D *sRenderTargetManager_::Acquire(int x,int y,int format)
 {
   Target *t;
   format = (format & sTEX_FORMAT) | sTEX_2D | sTEX_RENDERTARGET;
@@ -89,7 +89,7 @@ sTextureBase *sRenderTargetManager_::AcquireProxy(sTexture2D *tex)
   return t->Texture;
 }
 
-sTextureCube *sRenderTargetManager_::AcquireCube(sInt edge,sInt format)
+sTextureCube *sRenderTargetManager_::AcquireCube(int edge,int format)
 {
   Target *t;
   format = (format & sTEX_FORMAT) | sTEX_CUBE | sTEX_RENDERTARGET;
@@ -158,7 +158,7 @@ void sRenderTargetManager_::Flush()
   Refs.Reset();
 }
 
-void sRenderTargetManager_::ResolutionCheck(void *ref,sInt xs,sInt ys)
+void sRenderTargetManager_::ResolutionCheck(void *ref,int xs,int ys)
 {
   Reference *r = sFind(Refs,&Reference::Ref,ref);
   if(r)
@@ -225,7 +225,7 @@ void sRenderTargetManager_::SetScreen(const sTargetSpec &spec)
   if(spec.Window.IsEmpty())
   {
     Window = 0;
-    sInt z;
+    int z;
     spec.Color->GetSize(ScreenX,ScreenY,z);
   }
   else
@@ -283,7 +283,7 @@ sTexture2D *sRenderTargetManager_::WriteScreen(sBool finish)
   return ScreenProxy;
 }
 
-void sRenderTargetManager_::SetTarget(sTexture2D *tex,sInt clrflags,sU32 clrcol,sTexture2D *dep)
+void sRenderTargetManager_::SetTarget(sTexture2D *tex,int clrflags,sU32 clrcol,sTexture2D *dep)
 {
   if(tex)
     sSetTarget(sTargetPara((clrflags&3)|sST_NOMSAA,clrcol,0,tex,dep));
@@ -299,7 +299,7 @@ void sRenderTargetManager_::FinishScreen()
     if (ScreenProxyDirty)
     {
       const sRect sr(0,0,ScreenX,ScreenY);
-      sInt z;
+      int z;
       sCopyTexturePara ctp;
       ctp.Source = ScreenProxy;
       ctp.SourceRect = sr;

@@ -48,7 +48,7 @@ NewShader::NewShader()
 NewShader::~NewShader()
 {
   delete ByteCode;
-  for(sInt i=0;i<PermuteCount;i++)
+  for(int i=0;i<PermuteCount;i++)
     delete Permutes[i];
   delete[] Permutes;
 }
@@ -62,7 +62,7 @@ NewMaterial::NewMaterial()
 
 NewMaterial::~NewMaterial()
 {
-  for(sInt i=0;i<sCOUNTOF(Shaders);i++)
+  for(int i=0;i<sCOUNTOF(Shaders);i++)
     delete Shaders[i];
 }
 
@@ -215,7 +215,7 @@ sBool Compiler::Process(NewShader *ns)
       ns->PermuteCount = 1<<ASC->UsePermute->MaxShift;
       ns->Permutes = new NewCode*[ns->PermuteCount];
       
-      for(sInt i=0;i<ns->PermuteCount;i++)
+      for(int i=0;i<ns->PermuteCount;i++)
       {
         ns->Permutes[i] = 0;
         if(ASC->IsValidPermutation(ASC->UsePermute,i))

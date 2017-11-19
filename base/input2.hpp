@@ -160,27 +160,27 @@ friend class sInput2Scheme;
 public:
   virtual              ~sInput2Device() {}
                        sInput2Device() { MotorSlow = MotorFast = 0; }
-  virtual void         OnGameStep(sInt time, sBool ignoreTimestamp = sFALSE, sBool mute = sFALSE) = 0;// call once per gamestep        
-  virtual sF32         GetRel(sInt id) const = 0;                       //! get relative value of id and return zero if below threshold
-  virtual sF32         GetAbs(sInt id) const = 0;                       //! get absolute value of id and return zero if below threshold
+  virtual void         OnGameStep(int time, sBool ignoreTimestamp = sFALSE, sBool mute = sFALSE) = 0;// call once per gamestep        
+  virtual sF32         GetRel(int id) const = 0;                       //! get relative value of id and return zero if below threshold
+  virtual sF32         GetAbs(int id) const = 0;                       //! get absolute value of id and return zero if below threshold
   virtual sU32         GetStatusWord() const = 0;                       //! return administrative status of device (connected, identified, ....)
   sBool                IsStatus(sInput2Status condition) const { return (GetStatusWord()&condition)!=0; }
-  virtual sInt         GetTimestamp() const = 0;                        //! return timestamp prior to current gamestep time
+  virtual int         GetTimestamp() const = 0;                        //! return timestamp prior to current gamestep time
   virtual sU32         GetType() const = 0;                             //! return device type
-  virtual sInt         GetId() const = 0;                               //! return device id
-  virtual sInt         Pressed(sInt id, sF32 threshold) const = 0;
-  virtual sInt         Released(sInt id, sF32 threshold) const = 0;
+  virtual int         GetId() const = 0;                               //! return device id
+  virtual int         Pressed(int id, sF32 threshold) const = 0;
+  virtual int         Released(int id, sF32 threshold) const = 0;
   
   virtual sArrayRange<sF32> GetStatusVector() = 0;          // returns full statusvector, don't use it if you don't write for gameframes
 
-  void                 SetMotor(sInt slow, sInt fast) { MotorSlow = slow; MotorFast = fast; } //! set motor of the device. this should REALLY be replaced by something more intelligent and is not really part of an input system.
-  volatile sInt MotorSlow;
-  volatile sInt MotorFast;
+  void                 SetMotor(int slow, int fast) { MotorSlow = slow; MotorFast = fast; } //! set motor of the device. this should REALLY be replaced by something more intelligent and is not really part of an input system.
+  volatile int MotorSlow;
+  volatile int MotorFast;
 
   sDNode DNode;
 
 protected:
-  virtual sInt KeyCount() const = 0;
+  virtual int KeyCount() const = 0;
   
 };
 
@@ -189,20 +189,20 @@ protected:
 /****************************************************************************/
 
 
-template<sInt NUM>
+template<int NUM>
 class sInput2DeviceImpl : public sInput2Device 
 {
 public:
-  sInput2DeviceImpl(sU32 type, sInt id) 
+  sInput2DeviceImpl(sU32 type, int id) 
   { 
     Type = type;
     Id = id;
     Clear();
   }
 
-  sInt KeyCount() const        { return NUM; }
+  int KeyCount() const        { return NUM; }
   sU32 GetType() const         { return Type; }
-  sInt GetId() const           { return Id; }
+  int GetId() const           { return Id; }
 
   void Clear()
   {
@@ -211,7 +211,7 @@ public:
     sClear(ValuesRel);
   }
 
-  void OnGameStep(sInt time, sBool ignoreTimestamp = sFALSE, sBool mute = sFALSE) 
+  void OnGameStep(int time, sBool ignoreTimestamp = sFALSE, sBool mute = sFALSE) 
   {
     // calculate from all applicable values
     sClear(ValuesRel);
@@ -221,7 +221,7 @@ public:
       Values.RemHead(v);
 
       if (!mute) {
-        for (sInt i=0; i<NUM; i++) { 
+        for (int i=0; i<NUM; i++) { 
           ValuesRel[i] +=v.Value[i] - ValuesAbs[i];    // calc all deltas and add them to Rel Value
           ValuesAbs[i] = v.Value[i];                   // set new Abs Value
         }
@@ -233,19 +233,19 @@ public:
     }
   }
 
-  sINLINE sF32 GetRel(sInt id) const
+  sINLINE sF32 GetRel(int id) const
   {
     sVERIFY2(id >= 0 && id < NUM, L"input2: invalid key id specified in sInput2Device::getRel() or sInput2Scheme::Bind()")
     return ValuesRel[id];
   }
 
-  sINLINE sF32 GetAbs(sInt id) const
+  sINLINE sF32 GetAbs(int id) const
   {
     sVERIFY2(id >= 0 && id < NUM, L"input2: invalid key id specified in sInput2Device::getAbs() or sInput2Scheme::Bind()")
     return ValuesAbs[id];
   }
 
-  sINLINE sInt Pressed(sInt id, sF32 threshold) const
+  sINLINE int Pressed(int id, sF32 threshold) const
   {
     sVERIFY2(id >= 0 && id < NUM, L"input2: invalid key id specified in sInput2Device::getPressed() or sInput2Scheme::Bind()")
 #if 1
@@ -263,7 +263,7 @@ public:
     return 0;
   }
 
-  sINLINE sInt Released(sInt id, sF32 threshold) const
+  sINLINE int Released(int id, sF32 threshold) const
   {
     sVERIFY2(id >= 0 && id < NUM, L"input2: invalid key id specified in sInput2Device::getReleased() or sInput2Scheme::Bind()")
 
@@ -284,13 +284,13 @@ public:
 
   sU32 GetStatusWord() const { return Status; }
 
-  sInt GetTimestamp() const { return Timestamp; }
+  int GetTimestamp() const { return Timestamp; }
 
   // everything below is FOR INTERNAL USE ONLY
 
   struct Value_ {
     sF32          Value[NUM];
-    sInt          Timestamp;
+    int          Timestamp;
     sU32          Status;
   };
   void addValues(const Value_& v)
@@ -309,9 +309,9 @@ private:
   sF32        ValuesAbs[NUM];                           // current values for Get*() functions. this is set by OnGameStep
   sF32        ValuesRel[NUM];                           // relative values since last OnGameStep
   sU32        Type;                                     // device type
-  sInt        Id;                                       // device ordinal
+  int        Id;                                       // device ordinal
   sU32        Status;
-  sInt        Timestamp;
+  int        Timestamp;
 };
 
 
@@ -321,23 +321,23 @@ private:
 /***                                                                      ***/
 /****************************************************************************/
 
-sInput2Device* sFindInput2Device(sU32 type, sInt id);         //! find a specific sINPUT2_TYPE_??? device
-sInt sInput2NumDevices(sU32 type);                            //! find number of devices of a specific sINPUT2_TYPE_??? type
-sInt sInput2NumDevicesConnected(sInt type);                   //! find number of connected devices of a specific sINPUT2_TYPE_??? type
-void sInput2Update(sInt time, sBool ignoreTimstamp = sFALSE); //! call this once per gamestep
+sInput2Device* sFindInput2Device(sU32 type, int id);         //! find a specific sINPUT2_TYPE_??? device
+int sInput2NumDevices(sU32 type);                            //! find number of devices of a specific sINPUT2_TYPE_??? type
+int sInput2NumDevicesConnected(int type);                   //! find number of connected devices of a specific sINPUT2_TYPE_??? type
+void sInput2Update(int time, sBool ignoreTimstamp = sFALSE); //! call this once per gamestep
 void sInput2RegisterDevice(sInput2Device* device);            // only use in system implementations 
 void sInput2RemoveDevice(sInput2Device* device);              // only use in system implementations
 void sInput2SetMute(sBool pause);                             //! set mute state for the WHOLE system. use for system menues.
 
 /****************************************************************************/
 
-template <sInt NUM> class sInput2CustomEvaluator : public sInput2DeviceImpl<NUM>
+template <int NUM> class sInput2CustomEvaluator : public sInput2DeviceImpl<NUM>
 {
 public:
 
   sInput2CustomEvaluator() : sInput2DeviceImpl<NUM>(sINPUT2_TYPE_UNKNOWN, 0), LastTime(0)
   {
-    extern sInt sInput2CECounter;
+    extern int sInput2CECounter;
     Id = sInput2CECounter++;
     sInput2RegisterDevice(this);
   }
@@ -349,18 +349,18 @@ public:
 
 protected:
 
-  virtual sBool Tick(sInt delta, sF32 *out) = 0;
+  virtual sBool Tick(int delta, sF32 *out) = 0;
   virtual void Reset() {};
 
 private:
 
-  static sInt IdCounter;
-  sInt Id;
-  sInt LastTime;
+  static int IdCounter;
+  int Id;
+  int LastTime;
 
-  sInt GetId() { return Id; }
+  int GetId() { return Id; }
 
-  void OnGameStep(sInt time, sBool ignoreTimestamp = sFALSE, sBool mute = sFALSE)
+  void OnGameStep(int time, sBool ignoreTimestamp = sFALSE, sBool mute = sFALSE)
   {
     if (LastTime == 0 || ignoreTimestamp)
     {
@@ -394,7 +394,7 @@ friend class sInput2Mapping;
 public:
   sInput2Key() { Device = sNULL; KeyId = 0; ThresholdAnalog = 0.0f; ThresholdDigitalLo = 0.5f; ThresholdDigitalHi = 0.8f; Next = sNULL; }
   sInput2Key(const sInput2Key& other) { Device = other.Device; KeyId = other.KeyId; ThresholdAnalog = other.ThresholdAnalog; ThresholdDigitalHi = other.ThresholdDigitalHi; ThresholdDigitalLo = other.ThresholdDigitalLo; Next = 0; }
-  sInput2Key(const sInput2Device* device, sInt keyId, sF32 thresholdAnalog = 0.0f, sF32 thresholdDigitalLo = 0.2f, sF32 thresholdDigitalHi = 0.8f)
+  sInput2Key(const sInput2Device* device, int keyId, sF32 thresholdAnalog = 0.0f, sF32 thresholdDigitalLo = 0.2f, sF32 thresholdDigitalHi = 0.8f)
   { 
     Device = device;
     KeyId = keyId; 
@@ -407,7 +407,7 @@ public:
 
 private:
   const sInput2Device* Device;
-  sInt KeyId;
+  int KeyId;
   sF32 ThresholdAnalog;
   sF32 ThresholdDigitalLo;
   sF32 ThresholdDigitalHi;
@@ -426,42 +426,42 @@ private:
 class sInput2Scheme 
 {
 public:
-  static const sInt DEFAULT_RETRIGGER_RATE =100;
-  static const sInt DEFAULT_RETRIGGER_DELAY=500;
+  static const int DEFAULT_RETRIGGER_RATE =100;
+  static const int DEFAULT_RETRIGGER_DELAY=500;
 
-  static const sInt DEFAULT_RETRIGGER_RATE_KINECT = 200;
-  static const sInt DEFAULT_RETRIGGER_DELAY_KINECT = 1400;
+  static const int DEFAULT_RETRIGGER_RATE_KINECT = 200;
+  static const int DEFAULT_RETRIGGER_DELAY_KINECT = 1400;
 
               ~sInput2Scheme();
-  void        Init(sInt capacity);                    //! init capacity. specify maximum binding-id + 1. <pre>enum { INPUT_LEFT, INPUT_RIGHT, INPUT_MAX }; Scheme.Init(INPUT_MAX); </pre> is a good idiom.
-  void        OnGameStep(sInt delta);                 //! tick once per frame. only needed when using retriggers
-  void        Bind(sInt id, const sInput2Key& key);   //! bind a key to an id
-  void        Bind(sInt id, sInput2Key* key);         //! bind a list of keys to an id
-  void        Bind(sInt id, const sInput2Device* device, sInt keyId, sF32 thresholdAnalog = 0.0f, sF32 thresholdDigitalLo = 0.2f, sF32 thresholdDigitalHi = 0.8f); //! convenience function
-  void        SetRetrigger(sInt id, sInt rate=DEFAULT_RETRIGGER_RATE, sInt delay=DEFAULT_RETRIGGER_DELAY); //! set key retrigger values for id. \param rate retrigger rate after delay \param delay retrigger delay before first retrigger
-  void        SetRetriggerPermanent(sInt id, sInt rate, sInt delay); //! for ageing-test will always retrigger 
-  void        Unbind(sInt id);                        //! unbind all keys with id
+  void        Init(int capacity);                    //! init capacity. specify maximum binding-id + 1. <pre>enum { INPUT_LEFT, INPUT_RIGHT, INPUT_MAX }; Scheme.Init(INPUT_MAX); </pre> is a good idiom.
+  void        OnGameStep(int delta);                 //! tick once per frame. only needed when using retriggers
+  void        Bind(int id, const sInput2Key& key);   //! bind a key to an id
+  void        Bind(int id, sInput2Key* key);         //! bind a list of keys to an id
+  void        Bind(int id, const sInput2Device* device, int keyId, sF32 thresholdAnalog = 0.0f, sF32 thresholdDigitalLo = 0.2f, sF32 thresholdDigitalHi = 0.8f); //! convenience function
+  void        SetRetrigger(int id, int rate=DEFAULT_RETRIGGER_RATE, int delay=DEFAULT_RETRIGGER_DELAY); //! set key retrigger values for id. \param rate retrigger rate after delay \param delay retrigger delay before first retrigger
+  void        SetRetriggerPermanent(int id, int rate, int delay); //! for ageing-test will always retrigger 
+  void        Unbind(int id);                        //! unbind all keys with id
 
-  sInt        Pressed(sInt id) const;                 //! number of presses since last gamestep
-  sInt        Released(sInt id) const;                //! number of releases since last gamestep
-  sBool       Hold(sInt id) const;                    //! current status mapped to [0..1]
-  sF32        Relative(sInt id) const;                //! accumulated relative movement since last gamestep
-  sF32        Analog(sInt id) const;                  //! current status
-  sVector2    Coords(sInt id) const;                  //! 2d vector. specify only axes as ids.
-  sVector31   Position(sInt id) const;                //! 3d vector. use for kinect & move positions
-  sVector30   Normal(sInt id) const;                  //! 3d vector. use for kinect & move normals
-  sQuaternion Quaternion(sInt id) const;              //! quaternion. use for move rotation
-  sVector4    Vector4(sInt id) const;                 //! 4d vector. use for kinect floor equation
+  int        Pressed(int id) const;                 //! number of presses since last gamestep
+  int        Released(int id) const;                //! number of releases since last gamestep
+  sBool       Hold(int id) const;                    //! current status mapped to [0..1]
+  sF32        Relative(int id) const;                //! accumulated relative movement since last gamestep
+  sF32        Analog(int id) const;                  //! current status
+  sVector2    Coords(int id) const;                  //! 2d vector. specify only axes as ids.
+  sVector31   Position(int id) const;                //! 3d vector. use for kinect & move positions
+  sVector30   Normal(int id) const;                  //! 3d vector. use for kinect & move normals
+  sQuaternion Quaternion(int id) const;              //! quaternion. use for move rotation
+  sVector4    Vector4(int id) const;                 //! 4d vector. use for kinect floor equation
 
-  sInt        GetTimestamp() const;                   //! get timestamp of all bindings of this scheme for current tick
+  int        GetTimestamp() const;                   //! get timestamp of all bindings of this scheme for current tick
 
-  const sInput2Device* GetDevice(sInt id) const;      //! get device of the binding if Hold() is true. if more than one binding returns true, the first one is returned
+  const sInput2Device* GetDevice(int id) const;      //! get device of the binding if Hold() is true. if more than one binding returns true, the first one is returned
 
 private:
   sStaticArray<sInput2Key*>   Bindings;
-  mutable sStaticArray<sInt>  RetriggerTime;
-  sStaticArray<sInt>          RetriggerRate;
-  sStaticArray<sInt>          RetriggerDelay;
+  mutable sStaticArray<int>  RetriggerTime;
+  sStaticArray<int>          RetriggerRate;
+  sStaticArray<int>          RetriggerDelay;
   mutable sStaticArray<sBool> RetriggerPressed;
 };
 
@@ -471,17 +471,17 @@ class sInput2Mapping {
 public:
   sInput2Mapping();
   ~sInput2Mapping();
-  void Init(sInt maxPlayers, sInt maxKeys);                  // init
+  void Init(int maxPlayers, int maxKeys);                  // init
   void Clear();                                              // clear all bindings for all players
-  void Rem(sInt player, sInt logicalKey);                    // clear a specific binding for a specific player
-  void Add(sInt player, sInt logicalKey, sInput2Key key);    // add a binding for a specific player
-  void Add(sInt player, sInt logicalKey, const sInput2Device* device, sInt key, sF32 ThresholdAnalog = 0.0f, sF32 ThresholdDigital = 0.2f); // convenience function
-  sInput2Key* Get(sInt player, sInt logicalKey);             // get a list of keybindings that can be passed to Scheme.Bind()
+  void Rem(int player, int logicalKey);                    // clear a specific binding for a specific player
+  void Add(int player, int logicalKey, sInput2Key key);    // add a binding for a specific player
+  void Add(int player, int logicalKey, const sInput2Device* device, int key, sF32 ThresholdAnalog = 0.0f, sF32 ThresholdDigital = 0.2f); // convenience function
+  sInput2Key* Get(int player, int logicalKey);             // get a list of keybindings that can be passed to Scheme.Bind()
 
 private:
   sStaticArray<sInput2Key*> Mapping;
-  sInt MaxPlayers;
-  sInt MaxKeys;
+  int MaxPlayers;
+  int MaxKeys;
 };
 
 

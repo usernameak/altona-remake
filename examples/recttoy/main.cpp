@@ -64,8 +64,8 @@ void RectWindow::OnPaint2D()
 {
   RectElement *r;
   sRect rect,*rp;
-  sInt x = Client.x0;
-  sInt y = Client.y0;
+  int x = Client.x0;
+  int y = Client.y0;
 
   sGui->BeginBackBuffer(Client);
 
@@ -131,9 +131,9 @@ void RectWindow::InitWire(const sChar *name)
 
 void RectWindow::OnDragDraw(const sWindowDrag &dd,sDInt mode)
 {
-  sInt mx = dd.MouseX-Client.x0;
-  sInt my = dd.MouseY-Client.y0;
-  const sInt m = 12;
+  int mx = dd.MouseX-Client.x0;
+  int my = dd.MouseY-Client.y0;
+  const int m = 12;
 
   switch(dd.Mode)
   {
@@ -184,8 +184,8 @@ void RectWindow::OnDragDraw(const sWindowDrag &dd,sDInt mode)
 void RectWindow::OnDragSelect(const sWindowDrag &dd)
 {
   RectElement *hit,*r;
-  sInt mx = dd.MouseX-Client.x0;
-  sInt my = dd.MouseY-Client.y0;
+  int mx = dd.MouseX-Client.x0;
+  int my = dd.MouseY-Client.y0;
 
   switch(dd.Mode)
   {
@@ -203,10 +203,10 @@ void RectWindow::OnDragSelect(const sWindowDrag &dd)
 void RectWindow::OnDragMove(const sWindowDrag &dd)
 {
   RectElement *hit,*r;
-  sInt mx = dd.MouseX-Client.x0;
-  sInt my = dd.MouseY-Client.y0;
-  const sInt w = 4;
-  const sInt m = 12;
+  int mx = dd.MouseX-Client.x0;
+  int my = dd.MouseY-Client.y0;
+  const int w = 4;
+  const int m = 12;
 
   switch(dd.Mode)
   {
@@ -276,10 +276,10 @@ MainWindow::MainWindow()
   ListWin = new sSingleListWindow<RectElement>(&Doc->Rects);
   ListWin->InitWire(L"List");
   ListWin->AddFieldChoice(L"Mode",sLWF_EDIT,50,sMEMBERPTR(RectElement,Add),L"Sub|Add");
-  ListWin->AddField(L"x0",sLWF_EDIT,50,sMemberPtr<sInt>(sOFFSET(RectElement,Rect.x0)),-1024,1024,0.25f);
-  ListWin->AddField(L"y0",sLWF_EDIT,50,sMemberPtr<sInt>(sOFFSET(RectElement,Rect.y0)),-1024,1024,0.25f);
-  ListWin->AddField(L"x1",sLWF_EDIT,50,sMemberPtr<sInt>(sOFFSET(RectElement,Rect.x1)),-1024,1024,0.25f);
-  ListWin->AddField(L"y1",sLWF_EDIT,50,sMemberPtr<sInt>(sOFFSET(RectElement,Rect.y1)),-1024,1024,0.25f);
+  ListWin->AddField(L"x0",sLWF_EDIT,50,sMemberPtr<int>(sOFFSET(RectElement,Rect.x0)),-1024,1024,0.25f);
+  ListWin->AddField(L"y0",sLWF_EDIT,50,sMemberPtr<int>(sOFFSET(RectElement,Rect.y0)),-1024,1024,0.25f);
+  ListWin->AddField(L"x1",sLWF_EDIT,50,sMemberPtr<int>(sOFFSET(RectElement,Rect.x1)),-1024,1024,0.25f);
+  ListWin->AddField(L"y1",sLWF_EDIT,50,sMemberPtr<int>(sOFFSET(RectElement,Rect.y1)),-1024,1024,0.25f);
   ListWin->AddBorder(new sListWindow2Header(ListWin));
   ListWin->ChangeMsg = sMessage(this,&MainWindow::Update);
   RectWin = new RectWindow;

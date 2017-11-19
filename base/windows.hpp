@@ -30,7 +30,7 @@ class sImage2D;
 /****************************************************************************/
 /****************************************************************************/
 
-void sSetMousePointer(sInt code);
+void sSetMousePointer(int code);
 
 enum sMousePointerCodes
 {
@@ -56,13 +56,13 @@ const sChar *sGetWindowName();
 
 /****************************************************************************/
 
-void sSetWindowMode(sInt mode);
-sInt sGetWindowMode();
+void sSetWindowMode(int mode);
+int sGetWindowMode();
 sBool sHasWindowFocus();            // does our application window have the os-focus?
-void sSetWindowSize(sInt x,sInt y);
-void sSetWindowPos(sInt x,sInt y);
-void sGetWindowPos(sInt &x,sInt &y);
-void sGetWindowSize(sInt &sx,sInt &sy);
+void sSetWindowSize(int x,int y);
+void sSetWindowPos(int x,int y);
+void sGetWindowPos(int &x,int &y);
+void sGetWindowSize(int &sx,int &sy);
 
 enum sWindowModeCodes
 {
@@ -78,11 +78,11 @@ void sUpdateWindow(const sRect &);
 
 /****************************************************************************/
 
-void sSetClipboard(const sChar *,sInt len=-1);
+void sSetClipboard(const sChar *,int len=-1);
 sChar *sGetClipboard();
 
-void sSetClipboard(const sU8 *data,sDInt size,sU32 serid,sInt sermode);
-sU8 *sGetClipboard(sDInt &size,sU32 serid,sInt sermode);
+void sSetClipboard(const sU8 *data,sDInt size,sU32 serid,int sermode);
+sU8 *sGetClipboard(sDInt &size,sU32 serid,int sermode);
 
 void sEnableFileDrop(sBool enable);
 const sChar *sGetDragDropFile();
@@ -180,7 +180,7 @@ enum sSystemFileOpenDialogFlags
   sSOF_MULTISELECT = 4,
 };
 
-sBool sSystemOpenFileDialog(const sChar *label,const sChar *extensions,sInt flags,const sStringDesc &buffer);
+sBool sSystemOpenFileDialog(const sChar *label,const sChar *extensions,int flags,const sStringDesc &buffer);
 
 enum sSystemMessageFlags
 {
@@ -190,8 +190,8 @@ enum sSystemMessageFlags
   sSMF_YESNO = 4,
 };
 
-sBool sSystemMessageDialog(const sChar *label,sInt flags);
-sBool sSystemMessageDialog(const sChar *label,sInt flags,const sChar *title);
+sBool sSystemMessageDialog(const sChar *label,int flags);
+sBool sSystemMessageDialog(const sChar *label,int flags,const sChar *title);
 
 /****************************************************************************/
 /****************************************************************************/
@@ -207,20 +207,20 @@ sBool sSystemMessageDialog(const sChar *label,sInt flags,const sChar *title);
 
 // drawing
 
-void sSetColor2D(sInt colid,sU32 color);
-sU32 sGetColor2D(sInt colid);
-void sRect2D(sInt x0,sInt y0,sInt x1,sInt y1,sInt colid);
-void sRect2D(const sRect &,sInt colid);
-void sRectInvert2D(sInt x0,sInt y0,sInt x1,sInt y1);
+void sSetColor2D(int colid,sU32 color);
+sU32 sGetColor2D(int colid);
+void sRect2D(int x0,int y0,int x1,int y1,int colid);
+void sRect2D(const sRect &,int colid);
+void sRectInvert2D(int x0,int y0,int x1,int y1);
 void sRectInvert2D(const sRect &);
-void sRectFrame2D(sInt x0,sInt y0,sInt x1,sInt y1,sInt colid);
-void sRectFrame2D(const sRect &,sInt colid);
-void sRectHole2D(const sRect &out,const sRect &hole,sInt colid);
-void sLine2D(sInt x0,sInt y0,sInt x1,sInt y1,sInt colid);
-void sLine2D(sInt *list,sInt count,sInt colid);
-void sLineList2D(sInt *list,sInt count,sInt colid);
-void sBlit2D(const sU32 *data,sInt width,const sRect &dest);      // good for constantly changing data, for constant images use sImage2D!
-void sStretch2D(const sU32 *data,sInt width,const sRect &source,const sRect &dest);
+void sRectFrame2D(int x0,int y0,int x1,int y1,int colid);
+void sRectFrame2D(const sRect &,int colid);
+void sRectHole2D(const sRect &out,const sRect &hole,int colid);
+void sLine2D(int x0,int y0,int x1,int y1,int colid);
+void sLine2D(int *list,int count,int colid);
+void sLineList2D(int *list,int count,int colid);
+void sBlit2D(const sU32 *data,int width,const sRect &dest);      // good for constantly changing data, for constant images use sImage2D!
+void sStretch2D(const sU32 *data,int width,const sRect &source,const sRect &dest);
 
 // clipping
 
@@ -233,7 +233,7 @@ void sClipRect(const sRect &);
 // render control. you can call it during OnPaint2D(), but do not nest any further.
 
 void sRender2DBegin();                // this renders on screen, outside messageloop
-void sRender2DBegin(sInt xs,sInt ys); // render to throwaway-offscreen surface
+void sRender2DBegin(int xs,int ys); // render to throwaway-offscreen surface
 void sRender2DBegin(sImage2D *);      // render to preallocated offscreen surface
 void sRender2DEnd();                                  
 void sRender2DSet(sU32 *data);        // set pixels (data -> bitmap)
@@ -245,20 +245,20 @@ void sRender2DGet(sU32 *data);        // get pixels (bitmap -> data)
 struct sPrintInfo
 {
   void Init();
-  sInt Mode;                      // sPIM_???         
+  int Mode;                      // sPIM_???         
 
-  sInt CursorPos;                 // print cursor here. -1 to disable
-  sInt Overwrite;                 // print a fat overwrite cursor
-  sInt SelectStart;               // start selection mark here, -1 to disable
-  sInt SelectEnd;                 // end selection mark here, must be greater than start
+  int CursorPos;                 // print cursor here. -1 to disable
+  int Overwrite;                 // print a fat overwrite cursor
+  int SelectStart;               // start selection mark here, -1 to disable
+  int SelectEnd;                 // end selection mark here, must be greater than start
   sU32 SelectBackColor;           // second back color for selection. -1 to swap front and back instead
-  sInt HintLine;                  // fine vertical line that hints the right border of the page
+  int HintLine;                  // fine vertical line that hints the right border of the page
   sU32 HintLineColor;             // sGC_???
 
   sRect CullRect;                 // multiline prints profit from culling
 
-  sInt QueryX;
-  sInt QueryY;
+  int QueryX;
+  int QueryY;
   const sChar *QueryPos;
   sBool HasSelection() { return SelectStart>=0 && SelectEnd>=0 && SelectStart<SelectEnd; }
 };
@@ -276,15 +276,15 @@ class sFont2D
 {
   struct sFont2DPrivate *prv;
 public:
-  sFont2D(const sChar *name,sInt size,sInt flags,sInt width=0);
+  sFont2D(const sChar *name,int size,int flags,int width=0);
   ~sFont2D();
 
-  sInt GetHeight();
-  sInt GetBaseline();
-  sInt GetCharHeight();
-  sInt GetWidth(const sChar *text,sInt len=-1);
-  sInt GetAdvance(const sChar *text,sInt len=-1);
-  sInt GetCharCountFromWidth(sInt width,const sChar *text,sInt len=-1);
+  int GetHeight();
+  int GetBaseline();
+  int GetCharHeight();
+  int GetWidth(const sChar *text,int len=-1);
+  int GetAdvance(const sChar *text,int len=-1);
+  int GetCharCountFromWidth(int width,const sChar *text,int len=-1);
 
   struct sLetterDimensions
   {
@@ -299,13 +299,13 @@ public:
   sBool LetterExists(sChar letter);
 
   static void AddResource(const sChar *filename);
-  void Init(const sChar *name,sInt size,sInt flags,sInt width=0);
+  void Init(const sChar *name,int size,int flags,int width=0);
   void Exit();
-  void SetColor(sInt text,sInt back);
-  void PrintMarked(sInt flags,const sRect *r,sInt x,sInt y,const sChar *text,sInt len=-1,sPrintInfo *pi=0);
-  void PrintBasic(sInt flags,const sRect *r,sInt x,sInt y,const sChar *text,sInt len=-1);
-  void Print(sInt flags,sInt x,sInt y,const sChar *text,sInt len=-1);
-  sInt Print(sInt flags,const sRect &r,const sChar *text,sInt len=-1,sInt margin=0,sInt xo=0,sInt yo=0,sPrintInfo *pi=0);
+  void SetColor(int text,int back);
+  void PrintMarked(int flags,const sRect *r,int x,int y,const sChar *text,int len=-1,sPrintInfo *pi=0);
+  void PrintBasic(int flags,const sRect *r,int x,int y,const sChar *text,int len=-1);
+  void Print(int flags,int x,int y,const sChar *text,int len=-1);
+  int Print(int flags,const sRect &r,const sChar *text,int len=-1,int margin=0,int xo=0,int yo=0,sPrintInfo *pi=0);
 };
 
 enum sFont2DCreateFlags
@@ -340,16 +340,16 @@ class sImage2D
   friend void sRender2DBegin(sImage2D *img);
   public: struct sImage2DPrivate *prv; // TODO: make non-public
 public:
-  sImage2D(sInt xs,sInt ys,sU32 *data);
+  sImage2D(int xs,int ys,sU32 *data);
   ~sImage2D();
 
   void Update(sU32 *data);
-  void Paint(sInt x,sInt y);
-  void Paint(const sRect &source,sInt x,sInt y);
+  void Paint(int x,int y);
+  void Paint(const sRect &source,int x,int y);
   void Stretch(const sRect &source,const sRect &dest);
 
-  sInt GetSizeX();
-  sInt GetSizeY();
+  int GetSizeX();
+  int GetSizeY();
 };
 
 /****************************************************************************/

@@ -51,22 +51,22 @@ void sTabBorderBase::OnPaint2D()
 
   sFont2D *font = sGui->PropFont;
   font->SetColor(sGC_TEXT,sGC_BACK);
-  sInt max = GetTabCount();
-  sInt space = (font->GetWidth(L" ")/2+1)*2;
-  sInt kill = (Height/4)*2+1;
+  int max = GetTabCount();
+  int space = (font->GetWidth(L" ")/2+1)*2;
+  int kill = (Height/4)*2+1;
   if(max==1)
     kill = -2*space;
   Rects.Resize(max);
-  sInt arrow = font->GetWidth(L"\x25c4  ");
+  int arrow = font->GetWidth(L"\x25c4  ");
 
   // layout rects
 
-  sInt xs=0;
-  for(sInt i=0;i<max;i++)
+  int xs=0;
+  for(int i=0;i<max;i++)
   {
     xs+=space;
     const sChar *text = GetTabName(i);
-    sInt xw = font->GetWidth(text);
+    int xw = font->GetWidth(text);
 
     Rects[i].Client.Init(Rect.x0+xs,Rect.y0+2,Rect.x0+xs+space*4+xw+kill,Rect.y1-1);
     xs+= space*4 + xw + kill;
@@ -92,7 +92,7 @@ void sTabBorderBase::OnPaint2D()
 
     if(ScrollTo>=0 && ScrollTo<max)
     {
-      sInt over = 2*arrow;
+      int over = 2*arrow;
       if(Rects[ScrollTo].Client.x0-Scroll < Client.x0+over)
         Scroll = (Rects[ScrollTo].Client.x0)-(Client.x0+over);
       if(Rects[ScrollTo].Client.x1-Scroll > Client.x1-2*arrow-over)
@@ -101,7 +101,7 @@ void sTabBorderBase::OnPaint2D()
       ScrollTo = -1;
     }
 
-    sInt xo = arrow-sMin(Scroll,ScrollWidth);
+    int xo = arrow-sMin(Scroll,ScrollWidth);
 
     Info *info;
     sFORALL(Rects,info)
@@ -148,7 +148,7 @@ void sTabBorderBase::OnPaint2D()
   // draw tabs
 
 
-  for(sInt i=0;i<max;i++)
+  for(int i=0;i<max;i++)
   {
     const sChar *text = GetTabName(i);
     sRect r = Rects[i].Client;
@@ -166,9 +166,9 @@ void sTabBorderBase::OnPaint2D()
       sRectFrame2D(rr,sGC_DRAW);
       rr.Extend(-1);
       sRect2D(rr,(ActiveTab==i)?sGC_BUTTON:sGC_BACK);
-      sInt x = rr.CenterX();
-      sInt y = rr.CenterY();
-      sInt h = kill/2-3;
+      int x = rr.CenterX();
+      int y = rr.CenterY();
+      int h = kill/2-3;
       sLine2D(x-h,y-h,x+h+1,y+h+1,(HoverKill==i)?sGC_HIGH:sGC_DRAW);
       sLine2D(x-h,y+h,x+h+1,y-h-1,(HoverKill==i)?sGC_HIGH:sGC_DRAW);
       sClipExclude(Rects[i].Kill);
@@ -189,14 +189,14 @@ void sTabBorderBase::OnPaint2D()
   sClipPop();
   if(MoveBefore>=0 && MoveBefore<=max)
   {
-    sInt x = 0;
+    int x = 0;
     if(MoveBefore==max)
       x = Rects[MoveBefore-1].Client.x1+space/2;
     else 
       x = Rects[MoveBefore].Client.x0-space/2;
-    sInt h=5;
-    sInt y = Rect.y1-1;
-    for(sInt i=0;i<h;i++)
+    int h=5;
+    int y = Rect.y1-1;
+    for(int i=0;i<h;i++)
       sLine2D(x-i,y-h+i,x+i+1,y-h+i,sGC_DRAW);
   }
   sClipPop();
@@ -207,8 +207,8 @@ sBool sTabBorderBase::OnKey(sU32 key)
 {
   if(key & sKEYQ_SHIFT) key |= sKEYQ_SHIFT;
   if(key & sKEYQ_CTRL) key |= sKEYQ_CTRL;
-  sInt max = GetTabCount();
-  sInt cur = GetTab();
+  int max = GetTabCount();
+  int cur = GetTab();
   switch(key & (sKEYQ_MASK|sKEYQ_SHIFT|sKEYQ_CTRL|sKEYQ_ALT|sKEYQ_BREAK))
   {
   case sKEY_LEFT:
@@ -236,10 +236,10 @@ void sTabBorderBase::OnDrag(const sWindowDrag &dd)
   if(dd.Buttons!=4)
   {
     Info *r;
-    sInt seltab = -1;
-    sInt selkill = -1;
-    sInt mb = -1;
-    sInt max = GetTabCount();
+    int seltab = -1;
+    int selkill = -1;
+    int mb = -1;
+    int max = GetTabCount();
     sFORALL(Rects,r)
     {
       if(r->Client.Hit(dd.MouseX,dd.MouseY))
@@ -279,7 +279,7 @@ void sTabBorderBase::OnDrag(const sWindowDrag &dd)
     case sDD_STOP:
       if(ActiveTab>=0 && ActiveTab<max && MoveBefore>=0 && MoveBefore<=max && ActiveTab!=MoveBefore && ActiveTab!=MoveBefore-1)
       {
-        sInt m = MoveBefore;
+        int m = MoveBefore;
         if(MoveBefore>ActiveTab)
           m--;
         MoveTab(ActiveTab,m);
@@ -295,7 +295,7 @@ void sTabBorderBase::OnDrag(const sWindowDrag &dd)
   }
   else
   {
-    sInt x = Scroll;
+    int x = Scroll;
     switch(dd.Mode)
     {
     case sDD_START:
@@ -315,7 +315,7 @@ void sTabBorderBase::OnDrag(const sWindowDrag &dd)
 
 /****************************************************************************/
 
-sInt sTabBorderBase::GetTab() 
+int sTabBorderBase::GetTab() 
 { 
   if(ActiveTab>=0 && ActiveTab<GetTabCount()) 
     return ActiveTab; 
@@ -323,7 +323,7 @@ sInt sTabBorderBase::GetTab()
     return -1; 
 }
 
-void sTabBorderBase::SetTab(sInt tab) 
+void sTabBorderBase::SetTab(int tab) 
 {
   if(ActiveTab!=tab)
   {
@@ -334,9 +334,9 @@ void sTabBorderBase::SetTab(sInt tab)
   }
 }
 
-void sTabBorderBase::DelTab(sInt tab)
+void sTabBorderBase::DelTab(int tab)
 {
-  sInt max = GetTabCount();
+  int max = GetTabCount();
   if(tab>=0 && tab<max && max>1)
   {
     DeleteTab(tab);

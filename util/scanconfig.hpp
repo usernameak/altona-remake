@@ -49,10 +49,10 @@ public:
   void Scan(const sChar *coderoot=0);
   void DPrint();
 
-  sInt SDK;
-  sInt Solution;
-  sInt Makefile;
-  sInt ExecutablePostfix;
+  int SDK;
+  int Solution;
+  int Makefile;
+  int ExecutablePostfix;
 
   sPoolString CodeRoot_System;
   sPoolString CodeRoot_Windows;
@@ -67,7 +67,7 @@ public:
   sPoolString VSVersion;            // like "2005sp1" or "2008"
 };
 
-sInt sParseSDK(const sChar *name);    // return sSDK_?? for string, or 0
+int sParseSDK(const sChar *name);    // return sSDK_?? for string, or 0
 
 /****************************************************************************/
 

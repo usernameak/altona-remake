@@ -59,12 +59,12 @@ void Compiler::Run(const sChar *fn)
   NewMaterial *nm;
   sFORALL(NewMtrls,nm)
   {
-    for(sInt i=0;i<sCOUNTOF(nm->Shaders);i++)
+    for(int i=0;i<sCOUNTOF(nm->Shaders);i++)
       if(nm->Shaders[i]) Process(nm->Shaders[i]);
   }
   sFORALL(ComputeShaders,nm)
   {
-    for(sInt i=0;i<sCOUNTOF(nm->Shaders);i++)
+    for(int i=0;i<sCOUNTOF(nm->Shaders);i++)
       if(nm->Shaders[i]) Process(nm->Shaders[i]);
   }
 

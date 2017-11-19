@@ -33,7 +33,7 @@ void MyWindow::OnPaint2D()
   if(BackBuffer) sGui->BeginBackBuffer(Client);
   sRect2D(Client,sGC_BACK);
 
-  for(sInt i=50;i>1;i--)
+  for(int i=50;i>1;i--)
   {
     r.x0 = Client.CenterX()-Client.SizeX()*i/110;
     r.x1 = Client.CenterX()+Client.SizeX()*i/110;

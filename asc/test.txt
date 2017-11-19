@@ -184,7 +184,7 @@ material sMtrlIppCombine : sEngBaseMtrl
     VertexShader = VS();
     
     // pick fragment shader
-    sInt n = 0;
+    int n = 0;
     if (DoF)            n |= sIppFinalPsPermMask_DoF;
     if (Glare)          n |= sIppFinalPsPermMask_Glare;
     if (MotionBlur)     n |= sIppFinalPsPermMask_MotionBlur;

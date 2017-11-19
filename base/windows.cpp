@@ -40,8 +40,8 @@ struct sImage2DPrivate
   HBITMAP DDB;
   HBITMAP OriginalBitmap;
   HDC DC;
-  sInt SizeX;
-  sInt SizeY;
+  int SizeX;
+  int SizeY;
 };
 
 /****************************************************************************/
@@ -71,8 +71,8 @@ static sU32 BrushColor[MAX_BRUSHES];
 static HBRUSH BrushHandle[MAX_BRUSHES];
 static HPEN BrushPen[MAX_BRUSHES];
 static HRGN ClipStack[MAX_CLIPS];
-static sInt ClipStackResult[MAX_CLIPS];
-static sInt ClipIndex;
+static int ClipStackResult[MAX_CLIPS];
+static int ClipIndex;
 static sString<256> WindowName;
 static sString<2048> DragDropFilename;
 static sU32 ClipboardFormat;
@@ -88,13 +88,13 @@ void InitGDI()
 //  if(sGetSystemFlags() & sISF_2D)
   {
     sU32 color = GDICOL(0);
-    for(sInt i=0;i<MAX_BRUSHES;i++)
+    for(int i=0;i<MAX_BRUSHES;i++)
     {
       BrushColor[i] = color;
       BrushHandle[i] = CreateSolidBrush(color);
       BrushPen[i] = CreatePen(PS_SOLID,0,color);
     }
-    for(sInt i=0;i<MAX_CLIPS;i++)
+    for(int i=0;i<MAX_CLIPS;i++)
     {
       ClipStack[i] = CreateRectRgn(0,0,0,0);
     }
@@ -115,7 +115,7 @@ void InitGDI()
       IDC_SIZENESW,
     };
     Cursors[0] = 0;
-    for(sInt i=1;i<sMP_MAX;i++)
+    for(int i=1;i<sMP_MAX;i++)
       Cursors[i] = LoadCursorW(0,cursormap[i]);
   }
 }
@@ -124,12 +124,12 @@ void ExitGDI()
 {
   if(sGetSystemFlags() & sISF_2D)
   {
-    for(sInt i=0;i<MAX_BRUSHES;i++)
+    for(int i=0;i<MAX_BRUSHES;i++)
     {
       DeleteObject(BrushHandle[i]);
       DeleteObject(BrushPen[i]);
     }
-    for(sInt i=0;i<MAX_CLIPS;i++)
+    for(int i=0;i<MAX_CLIPS;i++)
     {
       DeleteObject(ClipStack[i]);
     }
@@ -154,9 +154,9 @@ void sUpdateWindow(const sRect &r)
   InvalidateRect(sHWND,(CONST RECT *)&r,0);
 }
 
-void sSetMousePointer(sInt code)
+void sSetMousePointer(int code)
 {
-  static sInt oldcursor = 0xaaaaaaaa;
+  static int oldcursor = 0xaaaaaaaa;
   sVERIFY(code>=0 && code<sMP_MAX);
   if(Cursors[code])                         // when GDI is not initialized, we can not set the cursor, but we still can enable/disable it!
     SetCursor(Cursors[code]);
@@ -184,7 +184,7 @@ void sSetWindowName(const sChar *name)
   }
 }
 
-void sSetWindowMode(sInt mode)
+void sSetWindowMode(int mode)
 {
   switch(mode)
   {
@@ -200,7 +200,7 @@ void sSetWindowMode(sInt mode)
   }
 }
 
-void sSetWindowSize(sInt xs,sInt ys)
+void sSetWindowSize(int xs,int ys)
 {
   RECT r2;
   r2.left = r2.top = 0;
@@ -210,7 +210,7 @@ void sSetWindowSize(sInt xs,sInt ys)
   SetWindowPos(sHWND,HWND_NOTOPMOST,0,0,r2.right-r2.left,r2.bottom-r2.top,SWP_NOMOVE|SWP_NOZORDER);
 }
 
-sInt sGetWindowMode()
+int sGetWindowMode()
 {
   WINDOWPLACEMENT wp;
   if(GetWindowPlacement(sHWND,&wp))
@@ -227,7 +227,7 @@ sInt sGetWindowMode()
   return sWM_NORMAL;
 }
 
-void sGetWindowPos(sInt &x,sInt &y)
+void sGetWindowPos(int &x,int &y)
 {
   RECT r;
   GetWindowRect(sHWND, &r);
@@ -236,7 +236,7 @@ void sGetWindowPos(sInt &x,sInt &y)
   y = r.top;
 }
 
-void sGetWindowSize(sInt &sx,sInt &sy)
+void sGetWindowSize(int &sx,int &sy)
 {
   RECT r;
   GetWindowRect(sHWND, &r);
@@ -246,7 +246,7 @@ void sGetWindowSize(sInt &sx,sInt &sy)
 }
 
 
-void sSetWindowPos(sInt x,sInt y)
+void sSetWindowPos(int x,int y)
 {
   RECT r;
   GetWindowRect(sHWND, &r);
@@ -262,23 +262,23 @@ sBool sHasWindowFocus()
 #endif
 }
 
-void sSetClipboard(const sChar *text,sInt len)
+void sSetClipboard(const sChar *text,int len)
 {
   OpenClipboard(sHWND);
   EmptyClipboard();
 
   if(len==-1)
     len = sGetStringLen(text);
-  sInt size = len+1;
+  int size = len+1;
 
-  for(sInt i=0;text[i];i++)
+  for(int i=0;text[i];i++)
     if(text[i]=='\n')
       size++;
 
   HANDLE hmem = GlobalAlloc(GMEM_MOVEABLE,size*2);
 
   sChar *d = (sChar *) GlobalLock(hmem);
-  for(sInt i=0;i<len;i++)
+  for(int i=0;i<len;i++)
   {
     if(text[i]=='\n')
       *d++ = '\r';
@@ -301,9 +301,9 @@ sChar *sGetClipboard()
   if(hmem)
   {
     sChar *s = (sChar *)GlobalLock(hmem);
-    sInt size = sGetStringLen(s)+1;
+    int size = sGetStringLen(s)+1;
     result = new sChar[size];
-    sInt i = 0;
+    int i = 0;
 
     while(*s)
     {
@@ -326,7 +326,7 @@ sChar *sGetClipboard()
   return result;
 }
 
-void sSetClipboard(const sU8 *data,sDInt size,sU32 serid,sInt sermode)
+void sSetClipboard(const sU8 *data,sDInt size,sU32 serid,int sermode)
 {
   OpenClipboard(sHWND);
   EmptyClipboard();
@@ -344,7 +344,7 @@ void sSetClipboard(const sU8 *data,sDInt size,sU32 serid,sInt sermode)
   CloseClipboard();
 }
 
-sU8 *sGetClipboard(sDInt &size,sU32 serid,sInt sermode)
+sU8 *sGetClipboard(sDInt &size,sU32 serid,int sermode)
 {
   sU8 *data = 0;
   size = 0;
@@ -389,23 +389,23 @@ const sChar *sGetDragDropFile()
 
 /****************************************************************************/
 
-sBool sSystemOpenFileDialog(const sChar *label,const sChar *extensions,sInt flags,const sStringDesc &buffer)
+sBool sSystemOpenFileDialog(const sChar *label,const sChar *extensions,int flags,const sStringDesc &buffer)
 {
   sChar oldpath[2048];
   OPENFILENAMEW ofn;
-  sInt result=0;
+  int result=0;
 
   // determine default extension (=first in list)
   sString<256> defaultExt;
   defaultExt = extensions;
-  sInt pipePos;
+  int pipePos;
   if((pipePos = sFindFirstChar(defaultExt,'|')) != -1)
     defaultExt[pipePos] = 0;
 
   sChar ext[2048];
   sClear(ext);
   sChar *extp = ext;
-  sInt filterindex = 0;
+  int filterindex = 0;
 
   if((flags & 3) == sSOF_LOAD && sFindChar(extensions,'|')>=0) // opening, more than one extension specified?
   {
@@ -472,7 +472,7 @@ sBool sSystemOpenFileDialog(const sChar *label,const sChar *extensions,sInt flag
     sGetCurrentDir(initialdir);
     initialdir.AddPath(buffer.Buffer);
     sChar *lastslash = 0;
-    for(sInt i=0;initialdir[i];i++)
+    for(int i=0;initialdir[i];i++)
       if(initialdir[i]=='/' || initialdir[i]=='\\')
         lastslash = &initialdir[i];
     if(lastslash)
@@ -484,8 +484,8 @@ sBool sSystemOpenFileDialog(const sChar *label,const sChar *extensions,sInt flag
   if(!defaultExt.IsEmpty())
     ofn.lpstrDefExt = defaultExt;
 
-  for(sInt i=0;buffer.Buffer[i];i++) if(buffer.Buffer[i]=='/') buffer.Buffer[i]='\\';
-  sInt len = sGetStringLen(buffer.Buffer);
+  for(int i=0;buffer.Buffer[i];i++) if(buffer.Buffer[i]=='/') buffer.Buffer[i]='\\';
+  int len = sGetStringLen(buffer.Buffer);
   if(len>0 && buffer.Buffer[len-1]=='\\') buffer.Buffer[len-1]=0;
 
   GetCurrentDirectoryW(sCOUNTOF(oldpath),oldpath);
@@ -538,7 +538,7 @@ sBool sSystemOpenFileDialog(const sChar *label,const sChar *extensions,sInt flag
   sWin32::ModalDialogActive = sFALSE;
   SetCurrentDirectoryW(oldpath);
 
-  for(sInt i=0;buffer.Buffer[i];i++)
+  for(int i=0;buffer.Buffer[i];i++)
     if(buffer.Buffer[i]=='\\') buffer.Buffer[i]='/';
 
   return result;
@@ -546,7 +546,7 @@ sBool sSystemOpenFileDialog(const sChar *label,const sChar *extensions,sInt flag
 
 /****************************************************************************/
 
-sBool sSystemMessageDialog(const sChar *label,sInt flags)
+sBool sSystemMessageDialog(const sChar *label,int flags)
 {
   const sChar *title = sGetWindowName();
   if((flags & 7)==sSMF_ERROR) title = L"error";
@@ -554,7 +554,7 @@ sBool sSystemMessageDialog(const sChar *label,sInt flags)
   return sSystemMessageDialog(label,flags,title);
 }
 
-sBool sSystemMessageDialog(const sChar *label,sInt flags,const sChar *title)
+sBool sSystemMessageDialog(const sChar *label,int flags,const sChar *title)
 {
   sBool result = 0;
   switch(flags&7)
@@ -617,7 +617,7 @@ void sClipRect(const sRect &r)
 /***                                                                      ***/
 /****************************************************************************/
 
-void sSetColor2D(sInt colid,sU32 color)
+void sSetColor2D(int colid,sU32 color)
 {
   sVERIFY(colid>=0 && colid<MAX_BRUSHES);
   color = GDICOL(color);
@@ -631,13 +631,13 @@ void sSetColor2D(sInt colid,sU32 color)
   }
 }
 
-sU32 sGetColor2D(sInt colid)
+sU32 sGetColor2D(int colid)
 {
   sVERIFY(colid>=0 && colid<MAX_BRUSHES);
   return GDICOL(BrushColor[colid]);
 }
 
-void sRect2D(sInt x0,sInt y0,sInt x1,sInt y1,sInt colid)
+void sRect2D(int x0,int y0,int x1,int y1,int colid)
 {
   sVERIFY(colid>=0 && colid<MAX_BRUSHES);
   if(x0!=x1 && y0!=y1)
@@ -647,14 +647,14 @@ void sRect2D(sInt x0,sInt y0,sInt x1,sInt y1,sInt colid)
   }
 }
 
-void sRect2D(const sRect &r,sInt colid)
+void sRect2D(const sRect &r,int colid)
 {
   sVERIFY(colid>=0 && colid<MAX_BRUSHES);
   if(r.SizeX()>0 && r.SizeY()>0)
     FillRect(sGDIDC,(const RECT *) &r,BrushHandle[colid]);
 }
 
-void sRectHole2D(const sRect &out,const sRect &hole,sInt colid)
+void sRectHole2D(const sRect &out,const sRect &hole,int colid)
 {
   sRect2D(out .x0,out .y0,out .x1,hole.y0,colid);
   sRect2D(out .x0,hole.y0,hole.x0,hole.y1,colid);
@@ -662,7 +662,7 @@ void sRectHole2D(const sRect &out,const sRect &hole,sInt colid)
   sRect2D(out .x0,hole.y1,out .x1,out .y1,colid);
 }
 
-void sRectInvert2D(sInt x0,sInt y0,sInt x1,sInt y1)
+void sRectInvert2D(int x0,int y0,int x1,int y1)
 {
   BitBlt(sGDIDC,x0,y0,x1-x0,y1-y0,0,0,0,DSTINVERT);
 }
@@ -672,12 +672,12 @@ void sRectInvert2D(const sRect &r)
   BitBlt(sGDIDC,r.x0,r.y0,r.SizeX(),r.SizeY(),0,0,0,DSTINVERT);
 }
 
-void sRectFrame2D(const sRect &r,sInt colid)
+void sRectFrame2D(const sRect &r,int colid)
 {
   sRectFrame2D(r.x0,r.y0,r.x1,r.y1,colid);
 }
 
-void sRectFrame2D(sInt x0,sInt y0,sInt x1,sInt y1,sInt colid)
+void sRectFrame2D(int x0,int y0,int x1,int y1,int colid)
 {
   sRect2D(x0  ,y0  ,x1  ,y0+1,colid);
   sRect2D(x0  ,y1-1,x1  ,y1  ,colid);
@@ -685,7 +685,7 @@ void sRectFrame2D(sInt x0,sInt y0,sInt x1,sInt y1,sInt colid)
   sRect2D(x1-1,y0+1,x1  ,y1-1,colid);
 }
 
-void sLine2D(sInt x0,sInt y0,sInt x1,sInt y1,sInt colid)
+void sLine2D(int x0,int y0,int x1,int y1,int colid)
 {
   sVERIFY(colid>=0 && colid<MAX_BRUSHES);
   SelectObject(sGDIDC,BrushPen[colid]);
@@ -693,28 +693,28 @@ void sLine2D(sInt x0,sInt y0,sInt x1,sInt y1,sInt colid)
   LineTo(sGDIDC,x1,y1);
 }
 
-void sLine2D(sInt *list,sInt count,sInt colid)
+void sLine2D(int *list,int count,int colid)
 {
   sVERIFY(colid>=0 && colid<MAX_BRUSHES);
   if(count<2) return;
   SelectObject(sGDIDC,BrushPen[colid]);
   MoveToEx(sGDIDC,list[0],list[1],0);
-  for(sInt i=1;i<count;i++)
+  for(int i=1;i<count;i++)
     LineTo(sGDIDC,list[i*2+0],list[i*2+1]);
 }
 
-void sLineList2D(sInt *list,sInt count,sInt colid)
+void sLineList2D(int *list,int count,int colid)
 {
   sVERIFY(colid>=0 && colid<MAX_BRUSHES);
   SelectObject(sGDIDC,BrushPen[colid]);
-  for(sInt i=0;i<count;i++)
+  for(int i=0;i<count;i++)
   {
     MoveToEx(sGDIDC,list[i*4+0],list[i*4+1],0);
     LineTo(sGDIDC,list[i*4+2],list[i*4+3]);
   }
 }
 
-void sBlit2D(const sU32 *data,sInt width,const sRect &dest)
+void sBlit2D(const sU32 *data,int width,const sRect &dest)
 {
   BITMAPINFO bmi;
   sClear(bmi);
@@ -728,7 +728,7 @@ void sBlit2D(const sU32 *data,sInt width,const sRect &dest)
   SetDIBitsToDevice(sGDIDC,dest.x0,dest.y0,dest.SizeX(),dest.SizeY(),0,0,0,dest.SizeY(),data,&bmi,DIB_RGB_COLORS);
 }
 
-void sStretch2D(const sU32 *data,sInt width,const sRect &source,const sRect &dest)
+void sStretch2D(const sU32 *data,int width,const sRect &source,const sRect &dest)
 {
   BITMAPINFO bmi;
   sClear(bmi);
@@ -754,12 +754,12 @@ void sStretch2D(const sU32 *data,sInt width,const sRect &source,const sRect &des
 /****************************************************************************/
 
 static sBool Render2DMode;
-static sInt Render2DSizeX;
-static sInt Render2DSizeY;
+static int Render2DSizeX;
+static int Render2DSizeY;
 static HDC WMPaintDC;
 HBITMAP Render2DBM;
 
-void sRender2DBegin(sInt xs,sInt ys)
+void sRender2DBegin(int xs,int ys)
 {
   HDC screendc;
   sVERIFY(Render2DMode==0);
@@ -876,7 +876,7 @@ void sRender2DGet(sU32 *data)
 /***                                                                      ***/
 /****************************************************************************/
 
-sImage2D::sImage2D(sInt xs,sInt ys,sU32 *data)
+sImage2D::sImage2D(int xs,int ys,sU32 *data)
 {
   prv = new sImage2DPrivate;
   prv->SizeX = xs;
@@ -899,12 +899,12 @@ sImage2D::~sImage2D()
   delete prv;
 }
 
-sInt sImage2D::GetSizeX()
+int sImage2D::GetSizeX()
 {
   return prv->SizeX;
 }
 
-sInt sImage2D::GetSizeY()
+int sImage2D::GetSizeY()
 {
   return prv->SizeY;
 }
@@ -928,12 +928,12 @@ void sImage2D::Update(sU32 *data)
   SelectObject(prv->DC,prv->DDB);
 }
 
-void sImage2D::Paint(sInt x,sInt y)
+void sImage2D::Paint(int x,int y)
 {
   BitBlt(sGDIDC,x,y,prv->SizeX,prv->SizeY,prv->DC,0,0,SRCCOPY);
 }
 
-void sImage2D::Paint(const sRect &source,sInt x,sInt y)
+void sImage2D::Paint(const sRect &source,int x,int y)
 {
   BitBlt(sGDIDC,x,y,source.SizeX(),source.SizeY(),prv->DC,source.x0,source.y0,SRCCOPY);
 }
@@ -951,13 +951,13 @@ void sImage2D::Stretch(const sRect &source,const sRect &dest)
 /***                                                                      ***/
 /****************************************************************************/
 
-static const sInt NUMABC = 256; // cache ABCWidths for first N unicode characters
+static const int NUMABC = 256; // cache ABCWidths for first N unicode characters
 
 struct sFont2DPrivate
 {
-  sInt Height;
-  sInt CharHeight;
-  sInt Baseline;
+  int Height;
+  int CharHeight;
+  int Baseline;
   HFONT Font;
   sU32 BackPen;
   sU32 BackColor;
@@ -965,7 +965,7 @@ struct sFont2DPrivate
   ABC Widths[NUMABC];
 };
 
-sFont2D::sFont2D(const sChar *name,sInt size,sInt flags,sInt width)
+sFont2D::sFont2D(const sChar *name,int size,int flags,int width)
 {
   prv=0;
   Init(name,size,flags,width);
@@ -981,7 +981,7 @@ void sFont2D::AddResource(const sChar *filename)
   AddFontResourceExW(filename, FR_PRIVATE, NULL);
 }
 
-void sFont2D::Init(const sChar *name,sInt size,sInt flags,sInt width)
+void sFont2D::Init(const sChar *name,int size,int flags,int width)
 {
   Exit();
 
@@ -1046,17 +1046,17 @@ void sFont2D::Exit()
   sDelete(prv);
 }
 
-sInt sFont2D::GetHeight()
+int sFont2D::GetHeight()
 {
   return prv->Height;
 }
 
-sInt sFont2D::GetBaseline()
+int sFont2D::GetBaseline()
 {
   return prv->Baseline;
 }
 
-sInt sFont2D::GetWidth(const sChar *text,sInt len)
+int sFont2D::GetWidth(const sChar *text,int len)
 {
   SIZE out;
 
@@ -1065,12 +1065,12 @@ sInt sFont2D::GetWidth(const sChar *text,sInt len)
 
   SelectObject(sGDIDCOffscreen,prv->Font);
   GetTextExtentPoint32W(sGDIDCOffscreen,text,len,&out);
-  sInt width = out.cx;
+  int width = out.cx;
 
   if(1)  // exact calculation, usefull for italics
   {
-    sInt abcC;
-    sInt ch = text[len-1];
+    int abcC;
+    int ch = text[len-1];
     if(ch < NUMABC)
       abcC = prv->Widths[ch].abcC;
     else
@@ -1087,7 +1087,7 @@ sInt sFont2D::GetWidth(const sChar *text,sInt len)
   return width;
 }
 
-sInt sFont2D::GetAdvance(const sChar *text,sInt len)
+int sFont2D::GetAdvance(const sChar *text,int len)
 {
   SIZE out;
 
@@ -1099,12 +1099,12 @@ sInt sFont2D::GetAdvance(const sChar *text,sInt len)
   return out.cx;
 }
 
-sInt sFont2D::GetCharHeight()
+int sFont2D::GetCharHeight()
 {
   return prv->CharHeight;
 }
 
-sInt sFont2D::GetCharCountFromWidth(sInt width,const sChar *text,sInt len)
+int sFont2D::GetCharCountFromWidth(int width,const sChar *text,int len)
 {
   SIZE out;
   INT count;
@@ -1186,7 +1186,7 @@ sBool sFont2D::LetterExists(sChar letter)
   return out[0]!=0xffff;
 }
 
-void sFont2D::SetColor(sInt text,sInt back)
+void sFont2D::SetColor(int text,int back)
 {
   sVERIFY(text>=0 && text<MAX_BRUSHES);
   sVERIFY(back>=0 && back<MAX_BRUSHES);
@@ -1195,15 +1195,15 @@ void sFont2D::SetColor(sInt text,sInt back)
   prv->TextColor = BrushColor[text];
 }
 
-void sFont2D::PrintMarked(sInt flags,const sRect *rc,sInt x,sInt y,const sChar *text,sInt len,sPrintInfo *pi)
+void sFont2D::PrintMarked(int flags,const sRect *rc,int x,int y,const sChar *text,int len,sPrintInfo *pi)
 {
   if(len==-1) len=sGetStringLen(text);
   sVERIFY(rc);
   sVERIFY(pi);
   sRect r(*rc);
   const sChar *ot = text;
-  sInt ol = len;
-  sInt ox = x;
+  int ol = len;
+  int ox = x;
   sBool nocull = 0;
 
   switch(pi->Mode)
@@ -1212,7 +1212,7 @@ void sFont2D::PrintMarked(sInt flags,const sRect *rc,sInt x,sInt y,const sChar *
     nocull = pi->CullRect.IsEmpty() || rc->IsInside(pi->CullRect);
     if(pi->SelectStart<len && pi->SelectEnd>0 && pi->SelectEnd>pi->SelectStart)
     {
-      sInt i = pi->SelectStart;
+      int i = pi->SelectStart;
       if(i>0)
       {
         r.x1 = x + GetWidth(text,i);
@@ -1271,8 +1271,8 @@ void sFont2D::PrintMarked(sInt flags,const sRect *rc,sInt x,sInt y,const sChar *
 
     if(pi->CursorPos>=0 && pi->CursorPos<=ol && pi->Mode==sPIM_PRINT)
     {
-      sInt t = GetWidth(ot,pi->CursorPos);
-      sInt w = 2;
+      int t = GetWidth(ot,pi->CursorPos);
+      int w = 2;
       if(pi->Overwrite)
       {
         if(pi->CursorPos<ol)
@@ -1288,7 +1288,7 @@ void sFont2D::PrintMarked(sInt flags,const sRect *rc,sInt x,sInt y,const sChar *
     if(pi->QueryY>=rc->y0 && pi->QueryY<rc->y1)
     {
       x = ox;
-	    sInt i;
+	    int i;
       for(i=0;i<len;i++)
       {
         x += GetWidth(ot+i,1);
@@ -1304,7 +1304,7 @@ void sFont2D::PrintMarked(sInt flags,const sRect *rc,sInt x,sInt y,const sChar *
     if(pi->QueryPos>=ot && pi->QueryPos<=ot+len)
     {
       pi->QueryY = rc->y0;
-      pi->QueryX = ox+GetWidth(ot,sInt(pi->QueryPos-ot));
+      pi->QueryX = ox+GetWidth(ot,int(pi->QueryPos-ot));
     }
     break;
   }
@@ -1312,7 +1312,7 @@ void sFont2D::PrintMarked(sInt flags,const sRect *rc,sInt x,sInt y,const sChar *
 
 
 
-void sFont2D::PrintBasic(sInt flags,const sRect *r,sInt x,sInt y,const sChar *text,sInt len)
+void sFont2D::PrintBasic(int flags,const sRect *r,int x,int y,const sChar *text,int len)
 {
   UINT opt;
 
@@ -1338,13 +1338,13 @@ void sFont2D::PrintBasic(sInt flags,const sRect *r,sInt x,sInt y,const sChar *te
   ExtTextOutW(sGDIDC,x,y,opt,(CONST RECT *)r,text,len,0);
 }
 
-sInt sFont2D::Print(sInt flags,const sRect &r,const sChar *text,sInt len,sInt margin,sInt xo,sInt yo,sPrintInfo *pi)
+int sFont2D::Print(int flags,const sRect &r,const sChar *text,int len,int margin,int xo,int yo,sPrintInfo *pi)
 {
   if(len==-1) len=sGetStringLen(text);
-  sInt x,y;
+  int x,y;
   sPrintInfo pil;
   const sChar *textstart=text;
-  sInt result;
+  int result;
 
   sRect r2(r);
 
@@ -1361,8 +1361,8 @@ sInt sFont2D::Print(sInt flags,const sRect &r,const sChar *text,sInt len,sInt ma
   r2.Extend(-margin);
   x = r2.x0 + xo;
   y = r2.y0 + yo;
-  sInt xs = r2.SizeX();
-  sInt h = GetHeight();
+  int xs = r2.SizeX();
+  int h = GetHeight();
   sRect rs(r);
   result = rs.y0;
 
@@ -1378,14 +1378,14 @@ sInt sFont2D::Print(sInt flags,const sRect &r,const sChar *text,sInt len,sInt ma
     const sChar *textend = text+len;
     for(;;)
     {
-      sInt i=0;
-      sInt best = 0;
+      int i=0;
+      int best = 0;
       if(pi)
       {
-        pil.CursorPos   = pi->CursorPos   - sInt(text-textstart);
+        pil.CursorPos   = pi->CursorPos   - int(text-textstart);
         pil.Overwrite   = pi->Overwrite;
-        pil.SelectStart = pi->SelectStart - sInt(text-textstart);
-        pil.SelectEnd   = pi->SelectEnd   - sInt(text-textstart);
+        pil.SelectStart = pi->SelectStart - int(text-textstart);
+        pil.SelectEnd   = pi->SelectEnd   - int(text-textstart);
       }
       for(;;)
       {
@@ -1462,7 +1462,7 @@ sInt sFont2D::Print(sInt flags,const sRect &r,const sChar *text,sInt len,sInt ma
   }
   else
   {
-    sInt space=0;
+    int space=0;
     if(flags & sF2P_SPACE)
       space = GetWidth(L" ");
     if(flags & sF2P_LEFT)
@@ -1534,7 +1534,7 @@ void sPrintInfo::Init()
   HintLineColor = 0;
 }
 
-void sFont2D::Print(sInt flags,sInt x,sInt y,const sChar *text,sInt len)
+void sFont2D::Print(int flags,int x,int y,const sChar *text,int len)
 {
   if(len==-1) len=sGetStringLen(text);
 

@@ -65,7 +65,7 @@ void sGuiApp::OnInput(const sInput2Event &ie)
   sGui->OnInput(ie);
 }
 
-void sGuiApp::OnEvent(sInt id)
+void sGuiApp::OnEvent(int id)
 {
   sGui->OnEvent(id);
 }
@@ -78,11 +78,11 @@ void sGuiApp::OnEvent(sInt id)
 /****************************************************************************/
 /****************************************************************************/
 
-static sInt MouseHardX = 0;
-static sInt MouseHardY = 0;
-static sInt MouseX = 0;
-static sInt MouseY = 0;
-void sGetMouseHard(sInt &x, sInt &y)
+static int MouseHardX = 0;
+static int MouseHardY = 0;
+static int MouseX = 0;
+static int MouseY = 0;
+void sGetMouseHard(int &x, int &y)
 {
   x = MouseHardX;
   y = MouseHardY;
@@ -190,12 +190,12 @@ void sGui_::CheckToolTip()
     tr.x0 = Hover->Client.x0;
     tr.y0 = Hover->Client.y0;
     const sChar *str = Hover->ToolTip;
-    sInt len = Hover->ToolTipLength;
+    int len = Hover->ToolTipLength;
     if(len==-1) len = sGetStringLen(str);
-    sInt lines = 0;
-    sInt width = 0;
-    sInt t0 = 0;
-    for(sInt i=0;i<len;i++)
+    int lines = 0;
+    int width = 0;
+    int t0 = 0;
+    for(int i=0;i<len;i++)
     {
       if(str[i]=='\n')
       {
@@ -295,20 +295,20 @@ void sGui_::SendMouse(const sGui_::Event &ie)
   sWindowDrag dd;
   sWindow *w;
   sBool changed;
-  sInt rawkey;
+  int rawkey;
 
   sU32 key = ie.Key;
-  sInt mx = ie.MouseX;
-  sInt my = ie.MouseY;
-  sInt hmx = ie.HardX;
-  sInt hmy = ie.HardY;
+  int mx = ie.MouseX;
+  int my = ie.MouseY;
+  int hmx = ie.HardX;
+  int hmy = ie.HardY;
 
   // update mouse
 
 
   changed = DragData.MouseX!=mx || DragData.MouseY!=my || HardMouseX!=hmx || HardMouseY!=hmy;
   rawkey = key&sKEYQ_MASK;
-  if(rawkey>=sInt(sKEY_LMB) && rawkey<=sInt(sKEY_LASTMB))
+  if(rawkey>=int(sKEY_LMB) && rawkey<=int(sKEY_LASTMB))
     rawkey = rawkey-sKEY_LMB;
   else
     rawkey = -1;
@@ -462,7 +462,7 @@ void sGui_::OnPrepareFrame()
 
 void sGui_::OnPaint(const sRect &client,const sRect &update)
 {
-  static sInt colortimer;
+  static int colortimer;
 #if DEBUGOVERDRAW
   sSetColor2D(sGC_BACK    ,0xc0c0c0+colortimer-32);
   sSetColor2D(sGC_BUTTON  ,0xa0a0a0+colortimer-32);
@@ -556,7 +556,7 @@ void sGui_::SendKey(sU32 key)
   ProcessPost();
 }
 
-void sGui_::OnEvent(sInt event)
+void sGui_::OnEvent(int event)
 {
   switch(event)
   {
@@ -618,7 +618,7 @@ void sGui_::AddFloatingWindow(sWindow *w,const sChar *title, sBool closeable)
   SetFocus(w);
 }
 
-void sGui_::AddWindow(sWindow *w,sInt x,sInt y)
+void sGui_::AddWindow(sWindow *w,int x,int y)
 {
   CalcSize(w);
   PositionWindow(w,x,y);
@@ -654,7 +654,7 @@ void sGui_::AddPulldownWindow(sWindow *w,const sRect &client)
   AddWindow(w,client.x0,client.y1);
 }
 
-void sGui_::PositionWindow(sWindow *w,sInt x,sInt y)
+void sGui_::PositionWindow(sWindow *w,int x,int y)
 {
   w->Outer.x0 = x;
   w->Outer.y0 = y;
@@ -679,7 +679,7 @@ void sGui_::SetRoot(sWindow *r)
 
 /****************************************************************************/
 
-static void MarkFocusR(sWindow *p,sInt flag)
+static void MarkFocusR(sWindow *p,int flag)
 {
   while(p)
   {
@@ -784,12 +784,12 @@ void sGui_::Layout(const sRect &r)
   sGui->Update(r);
 }
 
-sWindow *sGui_::HitWindow(sInt x,sInt y)
+sWindow *sGui_::HitWindow(int x,int y)
 {
   return RecHitWindow(Root,x,y,0);
 }
 
-sWindow *sGui_::RecHitWindow(sWindow *w,sInt x,sInt y,sBool border) const
+sWindow *sGui_::RecHitWindow(sWindow *w,int x,int y,sBool border) const
 {
   sWindow *c;
   sWindow *t;
@@ -961,7 +961,7 @@ void sGui_::RecPaint3d(sWindow *w,const sRect &pw)
 
 /****************************************************************************/
 
-void sGui_::RecCommand(sWindow *w,sInt cmd)
+void sGui_::RecCommand(sWindow *w,int cmd)
 {
   if(cmd>=sCMD_USER || cmd==sCMD_DUMMY)
   {
@@ -974,7 +974,7 @@ void sGui_::RecCommand(sWindow *w,sInt cmd)
   }
 }
 
-void sGui_::CommandToAll(sInt cmd,sWindow *w)
+void sGui_::CommandToAll(int cmd,sWindow *w)
 {
   sWindow *c;
   if(w==0) w=Root;
@@ -992,7 +992,7 @@ void sGui_::ProcessPost()
   sMessage::Pump();
 }
 
-void sGui_::Post(sWindow *w,sInt cmd)
+void sGui_::Post(sWindow *w,int cmd)
 {
   PostQueueEntry *pq;
   pq = PostQueue.AddMany(1);
@@ -1000,7 +1000,7 @@ void sGui_::Post(sWindow *w,sInt cmd)
   pq->Command = cmd;
 }
 
-void sGui_::PostAsync(sWindow *w,sInt cmd)
+void sGui_::PostAsync(sWindow *w,int cmd)
 {
   if(!Shutdown)
   {
@@ -1012,7 +1012,7 @@ void sGui_::PostAsync(sWindow *w,sInt cmd)
   }
 }
 
-void sGui_::Send(sWindow *w,sInt cmd)
+void sGui_::Send(sWindow *w,int cmd)
 {
   RecCommand(w,cmd);
 }
@@ -1090,7 +1090,7 @@ void sGui_::Notify(const void *ptr,sDInt n)
 
 /****************************************************************************/
 
-void sGui_::RectHL(const sRect &r,sInt colh,sInt coll) const
+void sGui_::RectHL(const sRect &r,int colh,int coll) const
 {
   sRect2D(r.x0,r.y0,r.x1,r.y0+1,colh);
   sRect2D(r.x0,r.y1-1,r.x1,r.y1,coll);
@@ -1106,7 +1106,7 @@ void sGui_::RectHL(const sRect &r, sBool invert) const
     RectHL(r,sGC_HIGH2,sGC_LOW2);
 }
 
-void sGui_::PaintHandle(sInt x,sInt y,sBool select) const
+void sGui_::PaintHandle(int x,int y,sBool select) const
 {
   sRect r(x-3,y-3,x+4,y+4);
 
@@ -1115,7 +1115,7 @@ void sGui_::PaintHandle(sInt x,sInt y,sBool select) const
   sRect2D(r,select?sGC_SELECT:sGC_BACK);
 }
 
-sBool sGui_::HitHandle(sInt x,sInt y,sInt mx,sInt my) const
+sBool sGui_::HitHandle(int x,int y,int mx,int my) const
 {
   sRect r(x-3,y-3,x+4,y+4);
   return r.Hit(mx,my);
@@ -1139,15 +1139,15 @@ void sGui_::PaintButtonBorder(sRect &r,sBool pressed) const
   }
 }
 
-void sGui_::PaintButton(const sRect &rect,const sChar *text,sInt flags,sInt len,sU32 backcolor) const
+void sGui_::PaintButton(const sRect &rect,const sChar *text,int flags,int len,sU32 backcolor) const
 {
   sRect r(rect);
 
   PaintButtonBorder(r,(flags & sGPB_DOWN));
 
-  sInt bp = sGC_BUTTON;
+  int bp = sGC_BUTTON;
 
-  sInt fp = (flags&sGPB_GRAY)?sGC_LOW2:sGC_TEXT;
+  int fp = (flags&sGPB_GRAY)?sGC_LOW2:sGC_TEXT;
   if(backcolor)
   {
     sSetColor2D(0,backcolor);
@@ -1253,7 +1253,7 @@ const sGuiTheme sGuiThemeDarker =
 
 template <class streamer> void sGuiTheme::Serialize_(streamer &s)
 {
-  sInt version=s.Header(sSerId::sGuiTheme,1);
+  int version=s.Header(sSerId::sGuiTheme,1);
   sVERIFY(version>0);
 
   s | BackColor | DocColor | ButtonColor | TextColor | DrawColor;

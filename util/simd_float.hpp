@@ -144,7 +144,7 @@ static sINLINE sSSE sVecFloat2Int(sSSE a)
 
 // ---- Mask building
 
-static sINLINE sInt sVecMask(sSSE v)                    { return _mm_movemask_ps(v); }
+static sINLINE int sVecMask(sSSE v)                    { return _mm_movemask_ps(v); }
 
 #else
 

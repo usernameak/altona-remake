@@ -26,7 +26,7 @@ void Compiler::_Code(sPoolString &code)
 }
 
 
-void Compiler::_CodeNoLine(sPoolString &code,sInt lineoffset)
+void Compiler::_CodeNoLine(sPoolString &code,int lineoffset)
 {
   sTextBuffer tb;
 
@@ -199,7 +199,7 @@ void Compiler::_Material()
   }
 }
 
-void Compiler::_Shader(NewMaterial *nm,sInt ascshaderkind,sInt altonashaderkind)
+void Compiler::_Shader(NewMaterial *nm,int ascshaderkind,int altonashaderkind)
 {
   if (!nm->Shaders[ascshaderkind])
   {

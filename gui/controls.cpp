@@ -57,7 +57,7 @@ void sControl::PostDone()
 /***                                                                      ***/
 /****************************************************************************/
 
-sButtonControl::sButtonControl(const sChar *label,const sMessage &msg,sInt style)
+sButtonControl::sButtonControl(const sChar *label,const sMessage &msg,int style)
 {
   Style = style;
   ChangeMsg = msg;
@@ -81,40 +81,40 @@ sButtonControl::sButtonControl()
   Shortcut = 0;
 }
 
-void sButtonControl::InitRadio(sInt *ptr,sInt val)
+void sButtonControl::InitRadio(int *ptr,int val)
 {
   RadioPtr = ptr;
   RadioValue = val;
   Style |= sBCS_RADIO;
   ClearNotify();
-  AddNotify(RadioPtr,sizeof(sInt));
+  AddNotify(RadioPtr,sizeof(int));
 }
 
-void sButtonControl::InitToggle(sInt *ptr)
+void sButtonControl::InitToggle(int *ptr)
 {
   RadioPtr = ptr;
   RadioValue = 1;
   Style |= sBCS_TOGGLE;
   ClearNotify();
-  AddNotify(RadioPtr,sizeof(sInt));
+  AddNotify(RadioPtr,sizeof(int));
 }
 
-void sButtonControl::InitReadOnly(sInt *ptr,sInt val)
+void sButtonControl::InitReadOnly(int *ptr,int val)
 {
   RadioPtr = ptr;
   RadioValue = val;
   Style |= sBCS_READONLY;
   ClearNotify();
-  AddNotify(RadioPtr,sizeof(sInt));
+  AddNotify(RadioPtr,sizeof(int));
 }
 
-void sButtonControl::InitCheckmark(sInt *ptr,sInt val)
+void sButtonControl::InitCheckmark(int *ptr,int val)
 {
   RadioPtr = ptr;
   RadioValue = val;
   Style |= sBCS_CHECKMARK;
   ClearNotify();
-  AddNotify(RadioPtr,sizeof(sInt));
+  AddNotify(RadioPtr,sizeof(int));
 }
 
 
@@ -222,7 +222,7 @@ void sButtonControl::OnPaint2D()
 {
   if(Style & sBCS_NOBORDER)
   {
-    sInt bp = sGC_BACK;
+    int bp = sGC_BACK;
     if(BackColor)
     {
       sSetColor2D(0,BackColor);
@@ -239,7 +239,7 @@ void sButtonControl::OnPaint2D()
     {
       sRect r2 = r;
       sRect r3;
-      sInt w = 5;
+      int w = 5;
       r.x0 = r2.x1 = r2.x0+r2.SizeY();
       r3.x0 = r2.CenterX()-w;
       r3.x1 = r3.x0 + w*2;
@@ -281,7 +281,7 @@ void sButtonControl::OnPaint2D()
   }
   else
   {
-    sInt f = Pressed ? sGPB_DOWN : 0;
+    int f = Pressed ? sGPB_DOWN : 0;
     if(RadioPtr)
     {
       if(Style & sBCS_TOGGLEBIT)
@@ -356,7 +356,7 @@ sBool sButtonControl::OnKey(sU32 key)
   return 0;
 }
 
-sBool sButtonControl::OnCommand(sInt cmd)
+sBool sButtonControl::OnCommand(int cmd)
 {
   switch(cmd)
   {
@@ -371,7 +371,7 @@ sBool sButtonControl::OnCommand(sInt cmd)
           *RadioPtr = !*RadioPtr;
         else if(Style & sBCS_TOGGLEBIT)
           *RadioPtr = *RadioPtr ^ RadioValue; 
-        sGui->Notify(RadioPtr,sizeof(sInt));
+        sGui->Notify(RadioPtr,sizeof(int));
   //      Parent->Update();
       }
       SendChange();
@@ -394,7 +394,7 @@ sBool sButtonControl::OnCommand(sInt cmd)
 /***                                                                      ***/
 /****************************************************************************/
 
-sFileDialogControl::sFileDialogControl(const sStringDesc &string,const sChar *text,const sChar *ext,sInt flags) : String(string)
+sFileDialogControl::sFileDialogControl(const sStringDesc &string,const sChar *text,const sChar *ext,int flags) : String(string)
 {
   Text = text;
   Extensions = ext;
@@ -421,7 +421,7 @@ void sFileDialogControl::CmdStart()
 /***                                                                      ***/
 /****************************************************************************/
 
-sChoiceControl::sChoiceControl(const sChar *choices,sInt *val)
+sChoiceControl::sChoiceControl(const sChar *choices,int *val)
 {
   InitChoices(choices,val);
   Width = 0;
@@ -437,21 +437,21 @@ sChoiceControl::sChoiceControl()
   Pressed = 0;
 }
 
-void sChoiceControl::AddMultiChoice(sInt *val)
+void sChoiceControl::AddMultiChoice(int *val)
 {
   ChoiceMulti *e = Values.AddMany(1);
   e->Ptr = val;
   e->Default = *val;
-  AddNotify(val,sizeof(sInt));
+  AddNotify(val,sizeof(int));
 }
 
-void sChoiceControl::InitChoices(const sChar *&s,sInt *val)
+void sChoiceControl::InitChoices(const sChar *&s,int *val)
 {
-  sInt id = 0;
+  int id = 0;
   ChoiceInfo *ci;
-  sInt min=0;
-  sInt max=0;
-  sInt len;
+  int min=0;
+  int max=0;
+  int len;
   sBool fullmask = 0;
   
   Choices.Clear();
@@ -507,7 +507,7 @@ void sChoiceControl::InitChoices(const sChar *&s,sInt *val)
     Values.Clear();
     AddMultiChoice(val);
     ClearNotify();
-    AddNotify(val,sizeof(sInt));
+    AddNotify(val,sizeof(int));
     Style = Choices.GetCount()==2 ? sCBS_CYCLE : sCBS_DROPDOWN;
   }
   else
@@ -540,11 +540,11 @@ void sChoiceControl::OnPaint2D()
   sVERIFY(Values.GetCount()>0);
   ChoiceMulti *cm;
 
-  sInt flags = Pressed ? 1 : 0;
+  int flags = Pressed ? 1 : 0;
   if(Style & sBCS_STATIC)
     flags |= sGPB_GRAY;
 
-  sInt val = (*(Values[0].Ptr) & ValueMask)>>ValueShift;
+  int val = (*(Values[0].Ptr) & ValueMask)>>ValueShift;
   sFORALL(Values,cm)
   {
     if(((*(cm->Ptr) & ValueMask)>>ValueShift)!=val)
@@ -646,7 +646,7 @@ sBool sChoiceControl::OnKey(sU32 key)
   return 0;
 }
 
-sBool sChoiceControl::OnCommand(sInt cmd)
+sBool sChoiceControl::OnCommand(int cmd)
 {
   switch(cmd)
   {
@@ -663,8 +663,8 @@ sBool sChoiceControl::OnCommand(sInt cmd)
 void sChoiceControl::Next()
 {
   ChoiceInfo *ci;
-  sInt *value = (Values[0].Ptr);
-  sInt val = (*value & ValueMask)>>ValueShift;
+  int *value = (Values[0].Ptr);
+  int val = (*value & ValueMask)>>ValueShift;
 
   sFORALL(Choices,ci)
   {
@@ -674,25 +674,25 @@ void sChoiceControl::Next()
       if(_i>=Choices.GetCount())
         _i = 0;
       *value = (*value & ~ValueMask) | (Choices[_i].Value<<ValueShift);
-      sGui->Notify(value,sizeof(sInt));
+      sGui->Notify(value,sizeof(int));
       PostChange();
       PostDone();
       return;
     }
   }
   *value = (*value & ~ValueMask) | (Choices[0].Value<<ValueShift);
-  sGui->Notify(value,sizeof(sInt));
+  sGui->Notify(value,sizeof(int));
   PostChange();
   PostDone();
 }
 
-void sChoiceControl::FakeDropdown(sInt x,sInt y)
+void sChoiceControl::FakeDropdown(int x,int y)
 {
   sMenuFrame *mf;
   ChoiceInfo *ci;
 
   sWindow *w=this;
-  sInt max = 1;
+  int max = 1;
   if(w->Parent==0)
   {
     max = 20;
@@ -702,7 +702,7 @@ void sChoiceControl::FakeDropdown(sInt x,sInt y)
     while (w->Parent) w=w->Parent;
     max=sMax(1,w->Client.SizeY()/(sGui->PropFont->GetHeight()+2));
   }
-  sInt n=0;
+  int n=0;
   mf = new sMenuFrame(this);
   if(Values.GetCount()>=2)
     mf->AddItem(L"(differ)",sMessage(this,&sChoiceControl::SetDefaultValue,0),0,-1,n++/max);
@@ -727,11 +727,11 @@ void sChoiceControl::SetValue(sDInt newval)
   sBool changed = 0;
   sFORALL(Values,cm)
   {
-    sInt val = (*cm->Ptr & ~ValueMask) | ((newval)<<ValueShift);
+    int val = (*cm->Ptr & ~ValueMask) | ((newval)<<ValueShift);
     if(val!=*cm->Ptr)
     {
       *cm->Ptr = val;
-      sGui->Notify(cm->Ptr,sizeof(sInt));
+      sGui->Notify(cm->Ptr,sizeof(int));
       changed = 1;
     }    
   }
@@ -748,11 +748,11 @@ void sChoiceControl::SetDefaultValue()
   sBool changed = 0;
   sFORALL(Values,cm)
   {
-    sInt val = (*cm->Ptr & ~ValueMask) | ((cm->Default & ValueMask));
+    int val = (*cm->Ptr & ~ValueMask) | ((cm->Default & ValueMask));
     if(val!=*cm->Ptr)
     {
       *cm->Ptr = val;
-      sGui->Notify(cm->Ptr,sizeof(sInt));
+      sGui->Notify(cm->Ptr,sizeof(int));
       changed = 1;
     }    
   }
@@ -776,7 +776,7 @@ sStringControl::sStringControl(const sStringDesc &desc)
   InitString(desc);
 }
 
-sStringControl::sStringControl(sInt size,sChar *buffer)
+sStringControl::sStringControl(int size,sChar *buffer)
 {
   Style = 0;
   BackColor = 0xffff0000;
@@ -908,7 +908,7 @@ void sStringControl::OnPaint2D()
   if(Style&sSCS_BACKCOLOR)
   {
     sSetColor2D(0,BackColor);
-    sInt i = ((BackColor>>16)&255) + ((BackColor>>8)&255) + ((BackColor>>0)&255);
+    int i = ((BackColor>>16)&255) + ((BackColor>>8)&255) + ((BackColor>>0)&255);
     sGui->PropFont->SetColor(i>3*128 ? sGC_BLACK : sGC_WHITE , 0);
   }
   else if(Style & sSCS_STATIC)
@@ -931,7 +931,7 @@ void sStringControl::OnPaint2D()
   {
     sRect r0,r1;
     r0 = r1 = r;
-    r0.x1 = r1.x0 = r.x0 + sInt(Percent * r.SizeX());
+    r0.x1 = r1.x0 = r.x0 + int(Percent * r.SizeX());
     sClipPush();
     sClipRect(r1);
     sGui->PropFont->Print(sF2P_SPACE|sF2P_LEFT|sF2P_OPAQUE,r,text,-1,0,0,0,pi);
@@ -952,12 +952,12 @@ void sStringControl::OnPaint2D()
 
 sBool sStringControl::OnKey(sU32 key)
 {
-  sInt len;
+  int len;
   sBool update;
   sBool change;
   sBool result;
   sBool updatemark;
-  sInt oldcursorpos;
+  int oldcursorpos;
 
   if(!Buffer) return 0;
   if(Style & sSCS_STATIC) return 0;
@@ -1044,7 +1044,7 @@ sBool sStringControl::OnKey(sU32 key)
     }
     else
     {
-      for(sInt i=PrintInfo.CursorPos;i<len;i++)
+      for(int i=PrintInfo.CursorPos;i<len;i++)
         Buffer[i] = Buffer[i+1];
     }
     change = 1;
@@ -1184,8 +1184,8 @@ sBool sStringControl::OnKey(sU32 key)
 void sStringControl::DeleteMark()
 {
   if(!Buffer) return;
-  sInt len = sGetStringLen(Buffer);
-  for(sInt i=PrintInfo.SelectEnd;i<=len;i++)
+  int len = sGetStringLen(Buffer);
+  for(int i=PrintInfo.SelectEnd;i<=len;i++)
     Buffer[i+PrintInfo.SelectStart-PrintInfo.SelectEnd] = Buffer[i];
   if(PrintInfo.CursorPos == PrintInfo.SelectEnd)
   {
@@ -1196,11 +1196,11 @@ void sStringControl::DeleteMark()
   Changed = 1;
 }
 
-void sStringControl::InsertChar(sInt c)
+void sStringControl::InsertChar(int c)
 {
   if(!Buffer) return;
-  sInt len = sGetStringLen(Buffer);
-  for(sInt i=len;i>=PrintInfo.CursorPos;i--)
+  int len = sGetStringLen(Buffer);
+  for(int i=len;i>=PrintInfo.CursorPos;i--)
     Buffer[i+1] = Buffer[i];
   Buffer[PrintInfo.CursorPos++] = c;
   Changed = 1;
@@ -1223,10 +1223,10 @@ sStringDesc sStringControl::GetBuffer()
 
 /****************************************************************************/
 
-void sStringControl::SetCharPos(sInt x)
+void sStringControl::SetCharPos(int x)
 {
-  sInt pos = x - sGui->PropFont->GetWidth(L" ");
-  sInt charPos = sGui->PropFont->GetCharCountFromWidth(pos,Buffer?Buffer:L"");
+  int pos = x - sGui->PropFont->GetWidth(L" ");
+  int charPos = sGui->PropFont->GetCharCountFromWidth(pos,Buffer?Buffer:L"");
     if(PrintInfo.CursorPos != charPos || PrintInfo.SelectStart != -1
       || PrintInfo.SelectEnd != -1)
     Update();
@@ -1241,7 +1241,7 @@ void sStringControl::SetCharPos(sInt x)
 
 void sStringControl::OnDrag(const sWindowDrag &dd)
 {
-  sInt pos,charPos,start,end;
+  int pos,charPos,start,end;
   sBool update = sFALSE;
 
   pos = dd.MouseX - Inner.x0 - sGui->PropFont->GetWidth(L" ");
@@ -1295,7 +1295,7 @@ void sStringControl::OnDrag(const sWindowDrag &dd)
     Update();
 }
 
-sBool sStringControl::OnCommand(sInt cmd)
+sBool sStringControl::OnCommand(int cmd)
 {
   sBool changed = 0;
   switch(cmd)
@@ -1378,9 +1378,9 @@ template <> sBool sValueControl<sU8>::MakeBuffer(sBool unconditional)
 template <> sBool sValueControl<sU8>::ParseBuffer()
 {
   const sChar *s = String;
-  sInt val;
+  int val;
   sBool ok = 1;
-  sInt code;
+  int code;
   
   // scan print format
 
@@ -1406,7 +1406,7 @@ template <> sBool sValueControl<sU8>::ParseBuffer()
 
   if(val<Min || val>Max)
   {
-    val = sClamp(val,sInt(Min),sInt(Max));
+    val = sClamp(val,int(Min),int(Max));
 //    ok = 0;
   }
 
@@ -1456,9 +1456,9 @@ template <> sBool sValueControl<sU16>::MakeBuffer(sBool unconditional)
 template <> sBool sValueControl<sU16>::ParseBuffer()
 {
   const sChar *s = String;
-  sInt val;
+  int val;
   sBool ok = 1;
-  sInt code;
+  int code;
 
   // scan print format
 
@@ -1484,7 +1484,7 @@ template <> sBool sValueControl<sU16>::ParseBuffer()
 
   if(val<Min || val>Max)
   {
-    val = sClamp(val,sInt(Min),sInt(Max));
+    val = sClamp(val,int(Min),int(Max));
     //    ok = 0;
   }
 
@@ -1515,14 +1515,14 @@ template <> void sValueControl<sU16>::OnPaint2D()
 
 template <> const sChar *sIntControl::ClassName() { return L"sIntControl"; }
 
-template <> void sValueControl<sInt>::MoreInit() { RightStep = 0.25f; }
+template <> void sValueControl<int>::MoreInit() { RightStep = 0.25f; }
 
-template <> sBool sValueControl<sInt>::MakeBuffer(sBool unconditional)
+template <> sBool sValueControl<int>::MakeBuffer(sBool unconditional)
 {
   if(unconditional || *Value != OldValue)
   { 
     OldValue = *Value;
-    sInt i = (OldValue & DisplayMask) >> DisplayShift;
+    int i = (OldValue & DisplayMask) >> DisplayShift;
     sSPrintF(String,Format,i);
     return 1; 
   }
@@ -1532,12 +1532,12 @@ template <> sBool sValueControl<sInt>::MakeBuffer(sBool unconditional)
   } 
 }
 
-template <> sBool sValueControl<sInt>::ParseBuffer()
+template <> sBool sValueControl<int>::ParseBuffer()
 {
   const sChar *s = String;
-  sInt val;
+  int val;
   sBool ok = 1;
-  sInt code;
+  int code;
   
   // scan print format
 
@@ -1579,7 +1579,7 @@ template <> sBool sValueControl<sInt>::ParseBuffer()
 }
 
 
-template <> void sValueControl<sInt>::OnPaint2D()
+template <> void sValueControl<int>::OnPaint2D()
 {
   if(ColorPtr)
   {
@@ -1649,9 +1649,9 @@ template <> void sValueControl<sF32>::OnPaint2D()
 {
   if(ColorPtr)
   {
-    sInt r= sClamp(sInt(ColorPtr[0]*255),0,255);
-    sInt g= sClamp(sInt(ColorPtr[1]*255),0,255);
-    sInt b= sClamp(sInt(ColorPtr[2]*255),0,255);
+    int r= sClamp(int(ColorPtr[0]*255),0,255);
+    int g= sClamp(int(ColorPtr[1]*255),0,255);
+    int b= sClamp(int(ColorPtr[2]*255),0,255);
     BackColor = 0xff000000|(r<<16)|(g<<8)|(b<<0);
   }
   Percent = sF32(*Value-Min)/(Max-Min);
@@ -1676,7 +1676,7 @@ sFlagControl::sFlagControl()
   Toggle = 0;
 }
 
-sFlagControl::sFlagControl(sInt *val,const sChar *choices)
+sFlagControl::sFlagControl(int *val,const sChar *choices)
 {
   Val = val;
   Mask = ~0;
@@ -1687,7 +1687,7 @@ sFlagControl::sFlagControl(sInt *val,const sChar *choices)
   Toggle = 0;
 }
 
-sFlagControl::sFlagControl(sInt *val,const sChar *choices,sInt mask,sInt shift)
+sFlagControl::sFlagControl(int *val,const sChar *choices,int mask,int shift)
 {
   Val = val;
   Mask = mask;
@@ -1700,20 +1700,20 @@ sFlagControl::sFlagControl(sInt *val,const sChar *choices,sInt mask,sInt shift)
 
 /****************************************************************************/
 
-sInt sFlagControl::GetValue()
+int sFlagControl::GetValue()
 {
-  sInt n = ((*Val&Mask)>>Shift);
+  int n = ((*Val&Mask)>>Shift);
   return sClamp(n,0,Max-1);
 }
 
-void sFlagControl::SetValue(sInt n)
+void sFlagControl::SetValue(int n)
 {
   *Val = (*Val & ~Mask) | (n<<Shift);
 }
 
-void sFlagControl::NextChoice(sInt delta)
+void sFlagControl::NextChoice(int delta)
 {
-  sInt n = GetValue() + delta;
+  int n = GetValue() + delta;
 
   while(n<0) n+=Max;
   while(n>Max-1) n-=Max;
@@ -1721,7 +1721,7 @@ void sFlagControl::NextChoice(sInt delta)
   SetValue(n);
 }
 
-void sFlagControl::MakeChoice(sInt n,const sStringDesc &desc)
+void sFlagControl::MakeChoice(int n,const sStringDesc &desc)
 {
   const sChar *s = Choices;
   sChar *d = desc.Buffer;
@@ -1742,10 +1742,10 @@ void sFlagControl::MakeChoice(sInt n,const sStringDesc &desc)
   *d++ = 0;
 }
 
-sInt sFlagControl::CountChoices()
+int sFlagControl::CountChoices()
 {
   const sChar *s = Choices;
-  sInt max = 1;
+  int max = 1;
 
   while(*s)
   {
@@ -1854,7 +1854,7 @@ void sBitmaskControl::OnCalcSize()
 
 void sBitmaskControl::OnLayout()
 {
-  for(sInt i=0;i<=8;i++)
+  for(int i=0;i<=8;i++)
     X[i] = Client.x0 + (Client.SizeX()-1)*i/8;
 }
 
@@ -1862,11 +1862,11 @@ void sBitmaskControl::OnPaint2D()
 {
   sRect2D(Client,sGC_RED);
   sRectFrame2D(Client,sGC_DRAW);
-  for(sInt i=1;i<8;i++)
+  for(int i=1;i<8;i++)
     sRect2D(X[i],Client.y0+1,X[i]+1,Client.y1-1,sGC_DRAW);
-  for(sInt i=0;i<8;i++)
+  for(int i=0;i<8;i++)
   {
-    sInt col = sGC_DOC;
+    int col = sGC_DOC;
     if(Val && (*Val & (1<<i)))
       col = sGC_SELECT;
     sRect2D(X[i]+1,Client.y0+1,X[i+1],Client.y1-1,col);
@@ -1877,7 +1877,7 @@ void sBitmaskControl::OnDrag(const sWindowDrag &dd)
 {
   if(dd.Mode==sDD_START && Val)
   {
-    for(sInt i=0;i<8;i++)
+    for(int i=0;i<8;i++)
     {
       if(dd.StartX>=X[i] && dd.StartX<X[i+1])
       {

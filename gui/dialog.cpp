@@ -13,7 +13,7 @@
 /****************************************************************************/
 
 
-void sOpenFileDialog(const sChar *label,const sChar *extensions,sInt flags,sPoolString &ps,const sMessage &ok,const sMessage &cancel,sObject *tagme)
+void sOpenFileDialog(const sChar *label,const sChar *extensions,int flags,sPoolString &ps,const sMessage &ok,const sMessage &cancel,sObject *tagme)
 {
   sString<sMAXPATH> buffer;
 
@@ -29,7 +29,7 @@ void sOpenFileDialog(const sChar *label,const sChar *extensions,sInt flags,sPool
     cancel.Post();
 }
 
-void sOpenFileDialog(const sChar *label,const sChar *extensions,sInt flags,const sStringDesc &buffer,const sMessage &ok,const sMessage &cancel,sObject *tagme)
+void sOpenFileDialog(const sChar *label,const sChar *extensions,int flags,const sStringDesc &buffer,const sMessage &ok,const sMessage &cancel,sObject *tagme)
 {
   sBool result = sSystemOpenFileDialog(label,extensions,flags,buffer);
   if (sGui)
@@ -295,7 +295,7 @@ void sMultipleChoiceDialog::OnPaint2D()
 {
   sRect t,b,r,l;
   Item *item;
-  sInt h;
+  int h;
   sFont2D *font = sGui->PropFont;
 
   sClipPush();
@@ -339,7 +339,7 @@ void sMultipleChoiceDialog::OnPaint2D()
 void sMultipleChoiceDialog::OnDrag(const sWindowDrag &dd)
 {
   Item *item;
-  sInt hit = -1;
+  int hit = -1;
   sFORALL(Items,item)
     if(item->Rect.Hit(dd.MouseX,dd.MouseY))
       hit = _i;
@@ -415,7 +415,7 @@ void sMultipleChoiceDialog::Start()
   sPrintInfo pi;
   pi.Mode = sPIM_GETHEIGHT;
   r.Init(0,0,ReqSizeX*2/3-8,1000);
-  sInt h = sGui->PropFont->Print(sF2P_OPAQUE|sF2P_LEFT|sF2P_TOP|sF2P_MULTILINE,r,Text,-1,0,0,0,&pi)+8;
+  int h = sGui->PropFont->Print(sF2P_OPAQUE|sF2P_LEFT|sF2P_TOP|sF2P_MULTILINE,r,Text,-1,0,0,0,&pi)+8;
   ReqSizeY = sMax(ReqSizeY,h);
 
   AddBorder(new sThickBorder());
@@ -463,10 +463,10 @@ sProgressDialog *sProgressDialog::Instance = 0;
 
 sProgressDialog::sProgressDialog(const sChar *title,const sChar *text)
 {
-  sInt ReqSizeX = 400;
-  sInt ReqSizeY = sGui->PropFont->GetHeight()*5/2 + 8 + 15 + 4;
+  int ReqSizeX = 400;
+  int ReqSizeY = sGui->PropFont->GetHeight()*5/2 + 8 + 15 + 4;
 
-  sInt sx = 1024,sy = 768; // FIXME:
+  int sx = 1024,sy = 768; // FIXME:
   //sGetScreenSize(sx,sy);
   WindowRect.Init((sx - ReqSizeX)/2,(sy - ReqSizeY) / 2,(sx + ReqSizeX + 1)/2,(sy + ReqSizeY + 1)/2);
 
@@ -575,7 +575,7 @@ void sProgressDialog::SetText(const sChar *message,sBool forceUpdate)
 
 sBool sProgressDialog::SetProgress(sF32 percentage)
 {
-  sInt now = sGetTime();
+  int now = sGetTime();
 
   if(Instance && now >= Instance->LastUpdate + 50)
   {
@@ -606,7 +606,7 @@ void sProgressDialog::PushLevel(sF32 start,sF32 end)
   }
 }
 
-void sProgressDialog::PushLevelCounter(sInt current,sInt max)
+void sProgressDialog::PushLevelCounter(int current,int max)
 {
   PushLevel(1.0f*current/max,1.0f*(current+1)/max);
 }
@@ -622,7 +622,7 @@ void sProgressDialog::PopLevel()
   }
 }
 
-void sProgressDialog::ChangeLevelCounter(sInt current,sInt max)
+void sProgressDialog::ChangeLevelCounter(int current,int max)
 {
   PopLevel();
   PushLevelCounter(current,max);
@@ -630,7 +630,7 @@ void sProgressDialog::ChangeLevelCounter(sInt current,sInt max)
 
 /****************************************************************************/
 
-sProgressDialogScope::sProgressDialogScope(const sChar *text,sInt current,sInt max)
+sProgressDialogScope::sProgressDialogScope(const sChar *text,int current,int max)
 {
   sProgressDialog::SetText(text);
   sProgressDialog::PushLevelCounter(current,max);
@@ -656,8 +656,8 @@ class sFindWindow : public sWindow
   sWindow *OldFocus;
   sArray<sPoolString> IncList;
   sRect ListRect;
-  sInt Selected;
-  sInt Height;
+  int Selected;
+  int Height;
 public:
   const sChar *Header;
   sStringDesc EditString;
@@ -733,7 +733,7 @@ void sFindWindow::OnCalcSize()
 
 void sFindWindow::OnPaint2D()
 {
-  sInt y = ListRect.y0;
+  int y = ListRect.y0;
   sPoolString *str;
   sRect r = Client;
   r.y0 = y; y+=1;
@@ -758,7 +758,7 @@ void sFindWindow::OnDrag(const sWindowDrag &dd)
   {
     if(ListRect.Hit(dd.StartX,dd.StartY))
     {
-      sInt i = (dd.StartY-(ListRect.y0+1))/Height;
+      int i = (dd.StartY-(ListRect.y0+1))/Height;
       if(i>=0 && i<IncList.GetCount())
       {
         Selected = i;
@@ -848,7 +848,7 @@ protected:
 
   enum { CANCEL, OK, LOAD, SAVE, };
   sGuiTheme &Theme;
-  sInt Live;
+  int Live;
   sGuiTheme Buffer;
   sPoolString Filename;
 

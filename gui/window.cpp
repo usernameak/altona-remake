@@ -100,7 +100,7 @@ sBool sWindow::OnShortcut(sU32 key)
   return 0;
 }
 
-sBool sWindow::OnCommand(sInt cmd)
+sBool sWindow::OnCommand(int cmd)
 {
   return 0;
 }
@@ -123,7 +123,7 @@ void sWindow::OnCalcSize()
   }
 }
 
-void sWindow::OnNotify(const void*, sInt)
+void sWindow::OnNotify(const void*, int)
 {
   Update();
 }
@@ -159,7 +159,7 @@ void sWindow::AddBorderHead(sWindow *w)
   sGui->Layout();
 }
 
-sButtonControl *sWindow::AddButton(const sChar *label,const sMessage &cmd,sInt style)
+sButtonControl *sWindow::AddButton(const sChar *label,const sMessage &cmd,int style)
 {
   sButtonControl *bc;
 
@@ -169,7 +169,7 @@ sButtonControl *sWindow::AddButton(const sChar *label,const sMessage &cmd,sInt s
   return bc;
 }
 
-sButtonControl *sWindow::AddRadioButton(const sChar *label,sInt *ptr,sInt val,const sMessage &cmd,sInt style)
+sButtonControl *sWindow::AddRadioButton(const sChar *label,int *ptr,int val,const sMessage &cmd,int style)
 {
   sButtonControl *bc;
 
@@ -180,7 +180,7 @@ sButtonControl *sWindow::AddRadioButton(const sChar *label,sInt *ptr,sInt val,co
   return bc;
 }
 
-sButtonControl *sWindow::AddToggleButton(const sChar *label,sInt *ptr,const sMessage &cmd,sInt style)
+sButtonControl *sWindow::AddToggleButton(const sChar *label,int *ptr,const sMessage &cmd,int style)
 {
   sButtonControl *bc;
 
@@ -237,7 +237,7 @@ void sWindow::Close()
   PopupParent = 0;
 }
 
-void sWindow::SetToolTipIfNarrow(const sChar *str,sInt len,sInt space)
+void sWindow::SetToolTipIfNarrow(const sChar *str,int len,int space)
 {
   ToolTip = 0;
   ToolTipLength = -1;
@@ -249,7 +249,7 @@ void sWindow::SetToolTipIfNarrow(const sChar *str,sInt len,sInt space)
 }
 
 
-void sWindow::Post(sInt cmd) 
+void sWindow::Post(int cmd) 
 { 
   sGui->Post(this,cmd); 
 }
@@ -271,10 +271,10 @@ class sScrollBorder *sWindow::AddScrolling(sBool x,sBool y)
 
 void sWindow::ScrollTo(const sRect &r,sBool save)
 {
-  sInt c,s;
+  int c,s;
   sRect vis;
-  sInt oldx = ScrollX;
-  sInt oldy = ScrollY;
+  int oldx = ScrollX;
+  int oldy = ScrollY;
   vis = r;
   vis.x0 -= Client.x0;
   vis.y0 -= Client.y0;
@@ -328,15 +328,15 @@ void sWindow::ScrollTo(const sRect &r,sBool save)
     Layout();
 }
 
-void sWindow::ScrollTo(sInt newx,sInt newy)
+void sWindow::ScrollTo(int newx,int newy)
 {
-  sInt xs = Client.SizeX()-Inner.SizeX();
-  sInt ys = Client.SizeY()-Inner.SizeY();
+  int xs = Client.SizeX()-Inner.SizeX();
+  int ys = Client.SizeY()-Inner.SizeY();
   if(xs<0) xs = 0;
   if(ys<0) ys = 0;
 
-  sInt oldx = ScrollX;
-  sInt oldy = ScrollY;
+  int oldx = ScrollX;
+  int oldy = ScrollY;
   ScrollX = sClamp(newx,0,xs);
   ScrollY = sClamp(newy,0,ys);
   
@@ -362,7 +362,7 @@ sBool sWindow::MMBScroll(const sWindowDrag &dd)
   case sDD_DRAG:
     if(MMBScrollMode)
     {
-      sInt speed = (sGetKeyQualifier()&sKEYQ_SHIFT)?8:1;
+      int speed = (sGetKeyQualifier()&sKEYQ_SHIFT)?8:1;
       ScrollX = sClamp(MMBScrollStartX-(dd.MouseX-dd.StartX)*speed , 0 , sMax(0,ReqSizeX-Inner.SizeX()));
       ScrollY = sClamp(MMBScrollStartY-(dd.MouseY-dd.StartY)*speed , 0 , sMax(0,ReqSizeY-Inner.SizeY()));
       sGui->Update(Outer);

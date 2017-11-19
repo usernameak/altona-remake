@@ -40,12 +40,12 @@ public:
   virtual sBool OnInput(const sInput2Event &ie); // please use only for debugging
 
   // these are called every frame, in this order
-  virtual void OnFrame(sInt delta);
+  virtual void OnFrame(int delta);
   virtual void OnPaintPre(const class sViewport &vp); // per viewport
   virtual void OnPaintMain(); // per viewport
   virtual void OnPaintIPP(); // per viewport
 
-  sInt Order;                     // suggested range: -128..127
+  int Order;                     // suggested range: -128..127
 };
 
 /****************************************************************************/
@@ -63,12 +63,12 @@ public:
   void OnInit();
   sBool OnInput(const sInput2Event &ie); 
 
-  void OnFrame(sInt delta);
+  void OnFrame(int delta);
   void OnPaintPre(const class sViewport &vp); // per viewport
   void OnPaintMain(); // per viewport
   void OnPaintIPP(); // per viewport
 
-  void FullService(sInt delta,const class sViewport &vp);   // implement OnTick(), OnFrame(), OnPaint*()
+  void FullService(int delta,const class sViewport &vp);   // implement OnTick(), OnFrame(), OnPaint*()
 };
 
 extern sEffectManager_ *sEffectManager; // global effect manager is not really required.

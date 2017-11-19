@@ -26,7 +26,7 @@
 static sThread *DXSThread;
 static sThreadLock *DXSLock;
 static sThreadEvent *DXSEvent;
-//static sInt DXSRun;
+//static int DXSRun;
 
 // generic
 
@@ -39,15 +39,15 @@ static IDirectSoundBuffer *DXSOPrimary;
 static IDirectSoundBuffer8 *DXSOBuffer;
 static sSoundHandler DXSOHandler;
 
-static volatile sInt DXSOReadOffset;
-static volatile sInt DXSOReadStart;
-static volatile sInt DXSOTime;
-static volatile sInt DXSOIndex;
-static volatile sInt DXSOTotalSamples;
-static volatile sInt DXSOFirstFrames;
-static sInt DXSOSamples=1000;
-static sInt DXSORate=44100;
-static sInt DXSOChannels=2;
+static volatile int DXSOReadOffset;
+static volatile int DXSOReadStart;
+static volatile int DXSOTime;
+static volatile int DXSOIndex;
+static volatile int DXSOTotalSamples;
+static volatile int DXSOFirstFrames;
+static int DXSOSamples=1000;
+static int DXSORate=44100;
+static int DXSOChannels=2;
 
 // input
 
@@ -55,9 +55,9 @@ static IDirectSoundCapture8 *DXSI;
 static IDirectSoundCaptureBuffer8 *DXSIBuffer;
 static sSoundHandler DXSIHandler;
 
-static sInt DXSIIndex;
-static sInt DXSISamples=0xc000;
-static sInt DXSIRate=44100;
+static int DXSIIndex;
+static int DXSISamples=0xc000;
+static int DXSIRate=44100;
 
 /****************************************************************************/
 
@@ -120,7 +120,7 @@ void sPingSound()
     return;
 
   sLockSound();
-  sInt sample = DXSOReadStart + DXSOReadOffset + sMulDiv(timeGetTime()-DXSOTime,DXSORate,1000) - DXSOSamples;
+  int sample = DXSOReadStart + DXSOReadOffset + sMulDiv(timeGetTime()-DXSOTime,DXSORate,1000) - DXSOSamples;
 //  sDPrintF(L"delta = %d %08x %08x %s\n",sample-DXSOTotalSamples,DXSOReadStart,DXSOTotalSamples,sample<DXSOTotalSamples?L" !!!!!!!!!":L"");
   if(DXSOFirstFrames<5 || sample<0)
     DXSOTotalSamples = 0;
@@ -160,7 +160,7 @@ static void SoundThreadCode(sThread *thread, void *userdata)
 
   while(thread->CheckTerminate())
   {
-    sInt timeout = (DXSOSamples*1000/DXSORate)/3;
+    int timeout = (DXSOSamples*1000/DXSORate)/3;
     DXSEvent->Wait(timeout);
 
     // output
@@ -168,10 +168,10 @@ static void SoundThreadCode(sThread *thread, void *userdata)
     sLockSound();
     if(DXSOBuffer)
     {
-      const sInt SAMPLESIZE = 2*DXSOChannels;
+      const int SAMPLESIZE = 2*DXSOChannels;
 
-      sInt play,dummy;
-      sInt size,pplay;
+      int play,dummy;
+      int size,pplay;
 
       hr = DXSOBuffer->GetCurrentPosition((DWORD*)&play,(DWORD*)&dummy);
       if(!FAILED(hr))
@@ -197,7 +197,7 @@ static void SoundThreadCode(sThread *thread, void *userdata)
               DXSOIndex-=DXSOSamples;
               DXSOReadStart += DXSOSamples;
             }
-            sVERIFY((sInt)(count1+count2)==(size*SAMPLESIZE));
+            sVERIFY((int)(count1+count2)==(size*SAMPLESIZE));
           
             if(DXSOHandler)
             {
@@ -221,7 +221,7 @@ static void SoundThreadCode(sThread *thread, void *userdata)
 /****************************************************************************/
 /****************************************************************************/
 
-sBool sSetSoundHandler(sInt freq,sSoundHandler handler,sInt latency,sInt flags)
+sBool sSetSoundHandler(int freq,sSoundHandler handler,int latency,int flags)
 {
   HRESULT hr;
   DSBUFFERDESC dsbd;
@@ -316,7 +316,7 @@ void sClearSoundHandler()
   sUnlockSound();
 }
 
-sInt sGetCurrentSample()
+int sGetCurrentSample()
 {
   return DXSOTotalSamples;
 }
@@ -333,7 +333,7 @@ void sClearSoundInHandler()
   sUnlockSound();
 }
 
-sBool sSetSoundInHandler(sInt freq,sSoundHandler handler,sInt latency)
+sBool sSetSoundInHandler(int freq,sSoundHandler handler,int latency)
 {
   HRESULT hr;
   DSCBUFFERDESC desc;
@@ -389,14 +389,14 @@ error:
 void sSoundInput()
 {
   HRESULT hr;
-  const sInt SAMPLESIZE = 4;
+  const int SAMPLESIZE = 4;
   DWORD count1,count2;
   void *pos1,*pos2;
 
   sLockSound();
   if(DXSIBuffer)
   {
-    sInt play,pplay,size,dummy;
+    int play,pplay,size,dummy;
 
     hr = DXSIBuffer->GetCurrentPosition((DWORD *)&dummy,(DWORD *)&play);
     if(!FAILED(hr))
@@ -424,7 +424,7 @@ void sSoundInput()
             DXSIIndex-=DXSISamples;
 //            DXSIReadStart += DXSISamples;
           }
-          sVERIFY((sInt)(count1+count2)==(size*4));
+          sVERIFY((int)(count1+count2)==(size*4));
         
           if(DXSIHandler)
           {
@@ -441,7 +441,7 @@ void sSoundInput()
   sUnlockSound();
 }
 
-sInt sGetCurrentInSample()
+int sGetCurrentInSample()
 {
   return 0;
 }

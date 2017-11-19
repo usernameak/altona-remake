@@ -86,17 +86,17 @@ MyApp::MyApp()
   TorusMtrl->LodBias[0] = -1.0f;
   TorusMtrl->Prepare(sVertexFormatStandard);
 
-  sInt tx = 64;
-  sInt ty = 48;
+  int tx = 64;
+  int ty = 48;
   sF32 ro = 2.0f;
   sF32 ri = 0.85f;
   sVertexStandard *vp;
   sU16 *ip;
   TorusGeo = new sGeometry(sGF_TRILIST|sGF_INDEX16,sVertexFormatStandard);
   TorusGeo->BeginLoadVB((tx+1)*(ty+1),sGD_STATIC,&vp);
-  for(sInt y=0;y<=ty;y++)
+  for(int y=0;y<=ty;y++)
   {
-    for(sInt x=0;x<=tx;x++)
+    for(int x=0;x<=tx;x++)
     {
       sF32 px = x * sPI2F / tx;
       sF32 py = y * sPI2F / ty;
@@ -113,8 +113,8 @@ MyApp::MyApp()
   }
   TorusGeo->EndLoadVB();
   TorusGeo->BeginLoadIB(tx*ty*6,sGD_STATIC,&ip);
-  for(sInt y=0;y<ty;y++)
-    for(sInt x=0;x<tx;x++)
+  for(int y=0;y<ty;y++)
+    for(int x=0;x<tx;x++)
       sQuad(ip,y*(tx+1)+x,1,0,tx+1,tx+2);
   TorusGeo->EndLoadIB();
 }
@@ -162,7 +162,7 @@ void MyApp::OnPaint3D()
 
 void MyApp::RenderCubemap()
 {
-  for(sInt i=0;i<6;i++)
+  for(int i=0;i<6;i++)
   {
     sTargetPara tp(sST_CLEARALL,0xff808080,0,TorusCubemap,TorusDepth);
     tp.Cubeface = i;

@@ -48,20 +48,20 @@ void sSpin();                     // waste some time without doing much on the b
 /***                                                                      ***/
 /****************************************************************************/
 
-typedef void (*sStsCode)(sStsManager *,sStsThread *,sInt start,sInt count,void *data);
+typedef void (*sStsCode)(sStsManager *,sStsThread *,int start,int count,void *data);
 
 struct sStsTask                   // an array of tasks to do
 {
-  sInt Start;                     // First Subtask under control of this structure
-  sInt End;                       // last subtask +1
+  int Start;                     // First Subtask under control of this structure
+  int End;                       // last subtask +1
   void *Data;                     // user pointer
   sStsCode Code;                  // user code
 
-  sInt Granularity;               // always grab this many subtasks
-  sInt EndGame;                   // do not split below this threshold
+  int Granularity;               // always grab this many subtasks
+  int EndGame;                   // do not split below this threshold
   sStsWorkload *Workload;         // pointer to workload (for adding new tasks)
   
-  sInt SyncCount;                 // number of syncs to decrease after this task
+  int SyncCount;                 // number of syncs to decrease after this task
   sStsSync **Syncs;               // pointer to the syncs (usually directly after task structure
 };
 
@@ -80,10 +80,10 @@ struct sStsSync                   // syncro-point
 struct sStsQueue
 {
   sStsTask **Tasks;
-  sInt TaskMax;
-  sInt TaskCount;
-  sInt SubTaskCount;
-  sInt ExeCount;
+  int TaskMax;
+  int TaskCount;
+  int SubTaskCount;
+  int ExeCount;
   volatile sBool DontSteal;       // please don' steal my last task :-)
 };
 
@@ -96,20 +96,20 @@ class sStsThread
   sStsLock *Lock;              // lock for manipulating task queue
   sThreadEvent *Event;
   sThread *Thread;                // thread for execution
-  sInt Index;                     // index of this thread in manager
+  int Index;                     // index of this thread in manager
   sThreadLock WorkloadReadLock;
 
 //  volatile sBool Running; 
   void DecreaseSync(sStsTask *t);
 public:
-  sStsThread(sStsManager *,sInt index,sInt taskcount,sBool thread);
+  sStsThread(sStsManager *,int index,int taskcount,sBool thread);
   ~sStsThread();
 
   void AddTask(sStsTask *);
   void StealTasksFrom(sStsThread *);
   sBool Execute();
 
-  sInt GetIndex() { return Index; }
+  int GetIndex() { return Index; }
 };
 
 
@@ -124,28 +124,28 @@ class sStsManager
   friend class sStsThread;
   friend class sStsWorkload;
   friend void sStsThreadFunc(class sThread *thread, void *_user);
-  sInt ConfigPoolMem;
-  sInt ConfigMaxTasks;
+  int ConfigPoolMem;
+  int ConfigMaxTasks;
 
   sStsThread **Threads;           // threads[0] is the master thread
-  sInt ThreadCount;               // number of threads, including master thread
-  sInt ThreadBits;                // 1<<ThreadBits >= ThreadCount
+  int ThreadCount;               // number of threads, including master thread
+  int ThreadBits;                // 1<<ThreadBits >= ThreadCount
 
 //  sU8 *Mem;
 //  volatile sPtr MemUsed;
 //  sPtr MemEnd;
-//  sU8 *AllocBytes(sInt bytes);
-//  template <class T> T *Alloc(sInt count=1) { return (T *) AllocBytes(sizeof(T)*count); }
+//  sU8 *AllocBytes(int bytes);
+//  template <class T> T *Alloc(int count=1) { return (T *) AllocBytes(sizeof(T)*count); }
 
   volatile sBool Running;         // Indicate running state to threads
   sU32 TotalTasksLeft;
 
 
-  sBool StealTasks(sInt to);      // implementation of thread stealing
+  sBool StealTasks(int to);      // implementation of thread stealing
 
   sDList2<sStsWorkload> FreeWorkloads;
   sDList2<sStsWorkload> ActiveWorkloads;
-  volatile sInt ActiveWorkloadCount;
+  volatile int ActiveWorkloadCount;
 
   void Start();                               
   void StartSingle();             // start single threaded
@@ -154,9 +154,9 @@ class sStsManager
   void WorkloadWriteLock();
   void WorkloadWriteUnlock();
 public:
-  sStsManager(sInt memory,sInt taskqueuelength,sInt maxcore=0);
+  sStsManager(int memory,int taskqueuelength,int maxcore=0);
   ~sStsManager();
-  sInt GetThreadCount() { return ThreadCount; }
+  int GetThreadCount() { return ThreadCount; }
 
 // call this only from master thread
 
@@ -198,7 +198,7 @@ class sStsWorkload
   friend class sStsManager;
 
   sStsManager *Manager;
-  sInt ThreadCount;
+  int ThreadCount;
 
   sU8 *Mem;
   volatile sPtr MemUsed;
@@ -214,21 +214,21 @@ public:
   sStsWorkload(sStsManager *);
   ~sStsWorkload();
 
-  sStsTask *NewTask(sStsCode code,void* data,sInt subtasks,sInt syncs);
+  sStsTask *NewTask(sStsCode code,void* data,int subtasks,int syncs);
   void AddTask(sStsTask *);                
 
   void Start() { Manager->StartWorkload(this); }
   void Sync()  { Manager->SyncWorkload(this); }
   void End()   { Manager->EndWorkload(this); }
-  sU8 *AllocBytes(sInt bytes);
-  template <class T> T *Alloc(sInt count=1) { return (T *) AllocBytes(sizeof(T)*count); }
+  sU8 *AllocBytes(int bytes);
+  template <class T> T *Alloc(int count=1) { return (T *) AllocBytes(sizeof(T)*count); }
 
 
   sDNode Node;
 
   // stats
 
-  sInt Mode;
+  int Mode;
 
   sU32 StealCount;
   sU32 SpinCount;
@@ -260,25 +260,25 @@ class sStsPerfMon
     sU32 Timestamp;
     sU32 Color;
   };
-  sInt ThreadCount;
-  sInt DataCount;
-  sInt CountMask;
+  int ThreadCount;
+  int DataCount;
+  int CountMask;
 
-  sInt DataMax;
-  sInt **Counters;
+  int DataMax;
+  int **Counters;
   Entry **Datas;
-  sInt **OldCounters;
+  int **OldCounters;
   Entry **OldDatas;
   sU64 OldStart;
   sU64 OldEnd;
   sU64 TimeStart;
-  sInt Enable;
+  int Enable;
 
   sRect *Rects;
 
   class sGeometry *Geo;
   class sMaterial *Mtrl;
-  sInt GeoAlloc,GeoUsed;
+  int GeoAlloc,GeoUsed;
   struct sVertexBasic *GeoPtr;
   void Box(sF32 x0,sF32 y0,sF32 x1,sF32 y1,sU32 col);
   void BoxEnd();
@@ -287,12 +287,12 @@ public:
   ~sStsPerfMon();
 
   void FlipFrame();
-  void Begin(sInt thread,sU32 color)  { if(!Enable) return; sInt cnt = *Counters[thread]; *Counters[thread]=cnt+1; Entry *e = &Datas[thread][cnt&CountMask]; e->Timestamp = sU32(sGetTimeStamp()-TimeStart); e->Color = color|0xff000000; }
-  void End(sInt thread)               { if(!Enable) return; sInt cnt = *Counters[thread]; *Counters[thread]=cnt+1; Entry *e = &Datas[thread][cnt&CountMask]; e->Timestamp = sU32(sGetTimeStamp()-TimeStart); e->Color = 0; }
+  void Begin(int thread,sU32 color)  { if(!Enable) return; int cnt = *Counters[thread]; *Counters[thread]=cnt+1; Entry *e = &Datas[thread][cnt&CountMask]; e->Timestamp = sU32(sGetTimeStamp()-TimeStart); e->Color = color|0xff000000; }
+  void End(int thread)               { if(!Enable) return; int cnt = *Counters[thread]; *Counters[thread]=cnt+1; Entry *e = &Datas[thread][cnt&CountMask]; e->Timestamp = sU32(sGetTimeStamp()-TimeStart); e->Color = 0; }
 
   void Paint(const struct sTargetSpec &ts);
 
-  sInt Scale;
+  int Scale;
 };
 
 extern sStsPerfMon *sSchedMon;

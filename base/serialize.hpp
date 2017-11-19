@@ -30,7 +30,7 @@
 class sWriter
 {
   sU8 *Buffer;
-  sInt BufferSize;
+  int BufferSize;
   sU8 *CheckEnd;
   sFile *File;
   sBool Ok;
@@ -39,7 +39,7 @@ class sWriter
   // object serialization
   struct sWriteLink *WOH[256]; 
   struct sWriteLink *WOL;
-  sInt WOCount;
+  int WOCount;
 
 public:
 
@@ -53,14 +53,14 @@ public:
   sINLINE sBool IsReading() const { return 0; }
   sINLINE sBool IsWriting() const { return 1; }
 
-  sInt Header(sU32 id,sInt currentversion);
+  int Header(sU32 id,int currentversion);
   sU32 PeekHeader() { return 0 /*sSerId::Error*/; }
   sBool PeekFooter() { return sFALSE; }
   sU32 PeekU32() { return 0; }
   void Footer();
-  void Skip(sInt bytes);
-  void Align(sInt alignment=4);
-  sInt RegisterPtr(void *);
+  void Skip(int bytes);
+  void Align(int alignment=4);
+  int RegisterPtr(void *);
   sBool IsRegistered(void *);
   void VoidPtr(const void *obj);
   template <typename T> void Ptr(const T *obj) { VoidPtr((const void *)obj); }
@@ -70,18 +70,18 @@ public:
   template <typename T> void Once(T *obj) { if(If(obj && !IsRegistered(obj))){RegisterPtr(obj);obj->Serialize(*this);} Ptr(obj); }
   template <typename T> void OnceRef(T *obj) { if(If(obj && !IsRegistered(obj))){RegisterPtr(obj);obj->Serialize(*this);} Ptr(obj); }
   template <typename T,typename A> void OnceRef(T *obj,A *x) { if(If(obj && !IsRegistered(obj))){RegisterPtr(obj);obj->Serialize(*this,x);} Ptr(obj); }
-  void Bits(sInt *a,sInt *b,sInt *c,sInt *d,sInt *e,sInt *f,sInt *g,sInt *h);
+  void Bits(int *a,int *b,int *c,int *d,int *e,int *f,int *g,int *h);
 
   void U8(sU8 v)     { Data[0] = v;                           Data+=1; }
   void U16(sU16 v)   { sUnalignedLittleEndianStore16(Data,v); Data+=2; }
   void U32(sU8 &v)   { sUnalignedLittleEndianStore32(Data,v); Data+=4; } // useful variant for streaming 8 bit variables as 32 bit stream
   void U32(sU32 v)   { sUnalignedLittleEndianStore32(Data,v); Data+=4; }
   void U64(sU64 v)   { sUnalignedLittleEndianStore64(Data,v); Data+=8; }
-  void ArrayU8(const sU8 *ptr,sInt count);
-  void ArrayU16(const sU16 *ptr,sInt count);
-  void ArrayU16Align4(const sU16 *ptr,sInt count);
-  void ArrayU32(const sU32 *ptr,sInt count);
-  void ArrayU64(const sU64 *ptr,sInt count);
+  void ArrayU8(const sU8 *ptr,int count);
+  void ArrayU16(const sU16 *ptr,int count);
+  void ArrayU16Align4(const sU16 *ptr,int count);
+  void ArrayU32(const sU32 *ptr,int count);
+  void ArrayU64(const sU64 *ptr,int count);
   void String(const sChar *v);
 
   void S8(sS8 v)     { U8((sU8) v); }
@@ -90,22 +90,22 @@ public:
   void S64(sS64 v)    { U64((sU64) v); }
   void F32(sF32 v)   { U32(sRawCast<sU32,sF32>(v)); }
   void F64(sF64 v)   { U64(sRawCast<sU64,sF64>(v)); }
-  void ArrayS8(const sS8 *ptr,sInt count)     { ArrayU8((const sU8 *)ptr,count);  }
-  void ArrayS16(const sS16 *ptr,sInt count)   { ArrayU16((const sU16 *)ptr,count); }
-  void ArrayChar(const sChar *ptr,sInt count) { ArrayU16((const sU16 *)ptr,count); }
-  void ArrayS32(const sS32 *ptr,sInt count)   { ArrayU32((const sU32 *)ptr,count); }
-  void ArrayS64(const sS64 *ptr,sInt count)   { ArrayU64((const sU64 *)ptr,count); }
-  void ArrayF32(const sF32 *ptr,sInt count)   { ArrayU32((const sU32 *)ptr,count); }
-  void ArrayF64(const sF64 *ptr,sInt count)   { ArrayU64((const sU64 *)ptr,count); }
+  void ArrayS8(const sS8 *ptr,int count)     { ArrayU8((const sU8 *)ptr,count);  }
+  void ArrayS16(const sS16 *ptr,int count)   { ArrayU16((const sU16 *)ptr,count); }
+  void ArrayChar(const sChar *ptr,int count) { ArrayU16((const sU16 *)ptr,count); }
+  void ArrayS32(const sS32 *ptr,int count)   { ArrayU32((const sU32 *)ptr,count); }
+  void ArrayS64(const sS64 *ptr,int count)   { ArrayU64((const sU64 *)ptr,count); }
+  void ArrayF32(const sF32 *ptr,int count)   { ArrayU32((const sU32 *)ptr,count); }
+  void ArrayF64(const sF64 *ptr,int count)   { ArrayU64((const sU64 *)ptr,count); }
 
   template <class Type> void Array(const sStaticArray<Type> &a) { S32(a.GetCount()); }
   template <class Type> void ArrayNew(const sStaticArray<Type *> &a) { S32(a.GetCount()); }
-  template <class Type> void ArrayNewHint(const sStaticArray<Type *> &a,sInt additional) { S32(a.GetCount()); }
+  template <class Type> void ArrayNewHint(const sStaticArray<Type *> &a,int additional) { S32(a.GetCount()); }
 
   template <class Type> void ArrayRegister(sStaticArray<Type *> &a) {Type *e; sFORALL(a,e) RegisterPtr(e); }
 
-  template <class Type> void ArrayAll(sStaticArray<Type> &a) { S32(a.GetCount()); for (sInt i=0; i<a.GetCount(); i++) { *this | a[i]; if((i&0xFF)==0) Check();} }
-  template <class Type> void ArrayAllPtr(sStaticArray<Type *> &a) { S32(a.GetCount()); for (sInt i=0; i<a.GetCount(); i++) { *this | a[i]; if((i&0xFF)==0) Check();}  }
+  template <class Type> void ArrayAll(sStaticArray<Type> &a) { S32(a.GetCount()); for (int i=0; i<a.GetCount(); i++) { *this | a[i]; if((i&0xFF)==0) Check();} }
+  template <class Type> void ArrayAllPtr(sStaticArray<Type *> &a) { S32(a.GetCount()); for (int i=0; i<a.GetCount(); i++) { *this | a[i]; if((i&0xFF)==0) Check();}  }
 
   sDInt GetSize();
 };
@@ -117,7 +117,7 @@ class sReader
   sFile *File;
   const sU8 *Map;
   sU8 *Buffer;
-  sInt BufferSize;
+  int BufferSize;
   const sU8 *Data;
   const sU8 *CheckEnd;
   sU8 *LoadEnd;
@@ -126,7 +126,7 @@ class sReader
   sU32 LastId;
 
   void **ROL;
-  sInt ROCount;
+  int ROCount;
 
 public:
   sBool DontMap;          // for debug purposes
@@ -137,19 +137,19 @@ public:
   void Check();
   sBool IsOk() { return Ok; }
   void Fail() { Ok = 0; }
-  sOBSOLETE const sU8 *GetPtr(sInt bytes); // get acces to data and advance pointer
+  sOBSOLETE const sU8 *GetPtr(int bytes); // get acces to data and advance pointer
   sINLINE sBool IsReading() const { return 1; }
   sINLINE sBool IsWriting() const { return 0; }
-  void DebugPeek(sInt count);
+  void DebugPeek(int count);
 
-  sInt Header(sU32 id,sInt currentversion);
+  int Header(sU32 id,int currentversion);
   sU32 PeekHeader();
   sU32 PeekU32();
   sBool PeekFooter();
   void Footer();
-  void Skip(sInt bytes);
-  void Align(sInt alignment=4);
-  sInt RegisterPtr(void *);
+  void Skip(int bytes);
+  void Align(int alignment=4);
+  int RegisterPtr(void *);
   sBool IsRegistered(void *) { sVERIFYFALSE; return sTRUE; } // don't use. included only to make template functions compile.
   void VoidPtr(void *&obj);
   template <typename T> void Ptr(T *&obj) { VoidPtr((void *&)obj); }
@@ -159,45 +159,45 @@ public:
   template <typename T> void Once(T *&obj) { if(If(0)){obj=new T;RegisterPtr(obj);obj->Serialize(*this); } Ptr(obj); }
   template <typename T> void OnceRef(T *&obj) { if(If(0)){obj=new T;RegisterPtr(obj);obj->Serialize(*this);Ptr(obj);} else {Ptr(obj);obj->AddRef();} }
   template <typename T,typename A> void OnceRef(T *&obj,A *x) { if(If(0)){obj=new T;RegisterPtr(obj);obj->Serialize(*this,x);Ptr(obj);} else {Ptr(obj);obj->AddRef();} }
-  void Bits(sInt *a,sInt *b,sInt *c,sInt *d,sInt *e,sInt *f,sInt *g,sInt *h);
+  void Bits(int *a,int *b,int *c,int *d,int *e,int *f,int *g,int *h);
 
   void U8(sU8 &v)    { v = Data[0];                          Data+=1; }
-  void U8(sInt &v)   { v = Data[0];                          Data+=1; }
+  void U8(int &v)   { v = Data[0];                          Data+=1; }
   void U16(sU16 &v)  { sUnalignedLittleEndianLoad16(Data,v); Data+=2; }
-  void U16(sInt &v)  { v = Data[0]|(Data[1]<<8);             Data+=2; }
+  void U16(int &v)  { v = Data[0]|(Data[1]<<8);             Data+=2; }
   void U32(sU8 &v)   { v = Data[0];                          Data+=4; } // useful variant for streaming 8 bit variables as 32 bit stream
   void U32(sU32 &v)  { sUnalignedLittleEndianLoad32(Data,v); Data+=4; }
   void U64(sU64 &v)  { sUnalignedLittleEndianLoad64(Data,v); Data+=8; }
-  void ArrayU8(sU8 *ptr,sInt count);
-  void ArrayU16(sU16 *ptr,sInt count);
-  void ArrayU32(sU32 *ptr,sInt count);
-  void ArrayU64(sU64 *ptr,sInt count);
-  void String(sChar *v,sInt maxsize);
+  void ArrayU8(sU8 *ptr,int count);
+  void ArrayU16(sU16 *ptr,int count);
+  void ArrayU32(sU32 *ptr,int count);
+  void ArrayU64(sU64 *ptr,int count);
+  void String(sChar *v,int maxsize);
 
   void S8(sS8 &v)     { U8((sU8 &) v); }
-  void S8(sInt &v)     { U8((sInt &) v); }
+  void S8(int &v)     { U8((int &) v); }
   void S16(sS16 &v)    { U16((sU16 &) v); }
-  void S16(sInt &v)    { U16((sInt &) v); }
+  void S16(int &v)    { U16((int &) v); }
   void S32(sS32 &v)    { U32((sU32 &) v); }
   void S64(sS64 &v)    { U64((sU64 &) v); }
   void F32(sF32 &v)   { U32(*((sU32 *) &v)); }
   void F64(sF64 &v)   { U64(*((sU64 *) &v)); }
-  void ArrayS8(sS8 *ptr,sInt count)     { ArrayU8((sU8 *)ptr,count);  }
-  void ArrayS16(sS16 *ptr,sInt count)   { ArrayU16((sU16 *)ptr,count); }
-  void ArrayChar(sChar *ptr,sInt count) { ArrayU16((sU16 *)ptr,count); }
-  void ArrayS32(sS32 *ptr,sInt count)   { ArrayU32((sU32 *)ptr,count); }
-  void ArrayS64(sS64 *ptr,sInt count)   { ArrayU64((sU64 *)ptr,count); }
-  void ArrayF32(sF32 *ptr,sInt count)   { ArrayU32((sU32 *)ptr,count); }
-  void ArrayF64(sF64 *ptr,sInt count)   { ArrayU64((sU64 *)ptr,count); }
+  void ArrayS8(sS8 *ptr,int count)     { ArrayU8((sU8 *)ptr,count);  }
+  void ArrayS16(sS16 *ptr,int count)   { ArrayU16((sU16 *)ptr,count); }
+  void ArrayChar(sChar *ptr,int count) { ArrayU16((sU16 *)ptr,count); }
+  void ArrayS32(sS32 *ptr,int count)   { ArrayU32((sU32 *)ptr,count); }
+  void ArrayS64(sS64 *ptr,int count)   { ArrayU64((sU64 *)ptr,count); }
+  void ArrayF32(sF32 *ptr,int count)   { ArrayU32((sU32 *)ptr,count); }
+  void ArrayF64(sF64 *ptr,int count)   { ArrayU64((sU64 *)ptr,count); }
 
   template <class Type> void Array(sStaticArray<Type> &a) 
-  { sInt max; S32(max); sVERIFY(a.GetCount()==0); sTAG_CALLER(); a.Resize(max); } 
+  { int max; S32(max); sVERIFY(a.GetCount()==0); sTAG_CALLER(); a.Resize(max); } 
   template <class Type> void ArrayNew(sStaticArray<Type *> &a) 
-  { sInt max; S32(max); sVERIFY(a.GetCount()==0); sTAG_CALLER(); a.Resize(max); 
-    for(sInt i=0;i<max;i++) { sTAG_CALLER(); a[i]=new Type; } }
-  template <class Type> void ArrayNewHint(sStaticArray<Type *> &a,sInt additional) 
-  { sInt max; S32(max); sVERIFY(a.GetCount()==0); sTAG_CALLER(); a.HintSize(max+additional); a.Resize(max); 
-    for(sInt i=0;i<max;i++) { sTAG_CALLER(); a[i]=new Type; } }
+  { int max; S32(max); sVERIFY(a.GetCount()==0); sTAG_CALLER(); a.Resize(max); 
+    for(int i=0;i<max;i++) { sTAG_CALLER(); a[i]=new Type; } }
+  template <class Type> void ArrayNewHint(sStaticArray<Type *> &a,int additional) 
+  { int max; S32(max); sVERIFY(a.GetCount()==0); sTAG_CALLER(); a.HintSize(max+additional); a.Resize(max); 
+    for(int i=0;i<max;i++) { sTAG_CALLER(); a[i]=new Type; } }
 
   template <class Type> void ArrayRegister(sStaticArray<Type *> &a) 
   {Type *e; sFORALL(a,e) RegisterPtr(e); }
@@ -205,10 +205,10 @@ public:
 
   template <class Type> void ArrayAll(sStaticArray<Type> &a)
   {
-    sInt max; S32(max); sVERIFY(a.GetCount()==0); sTAG_CALLER(); a.Resize(max);
-	  sInt interval = 4095/sizeof(Type);
-	  sInt ic=0;
-    for (sInt i=0; i<max; i++) 
+    int max; S32(max); sVERIFY(a.GetCount()==0); sTAG_CALLER(); a.Resize(max);
+	  int interval = 4095/sizeof(Type);
+	  int ic=0;
+    for (int i=0; i<max; i++) 
 	  {
 		  *this | a[i];
 		  if (++ic==interval)
@@ -221,10 +221,10 @@ public:
 
   template <class Type> void ArrayAllPtr(sStaticArray<Type *> &a)
   {
-    sInt max; S32(max); sVERIFY(a.GetCount()==0); sTAG_CALLER(); a.Resize(max);
-    sInt interval = 4095/sizeof(Type);
-    sInt ic=0;
-    for (sInt i=0; i<max; i++)
+    int max; S32(max); sVERIFY(a.GetCount()==0); sTAG_CALLER(); a.Resize(max);
+    int interval = 4095/sizeof(Type);
+    int ic=0;
+    for (int i=0; i<max; i++)
     { 
       sTAG_CALLER(); a[i] = new Type;
       *this | a[i]; 

@@ -19,10 +19,10 @@
 #include "base/system.hpp"
 
 void sClearSoundHandler() {}
-sBool sSetSoundHandler(sInt freq,sSoundHandler,sInt latency,sInt flags) {
+sBool sSetSoundHandler(int freq,sSoundHandler,int latency,int flags) {
     return false;
 }
-sInt sGetCurrentSample()
+int sGetCurrentSample()
 {
   return 0;
 }

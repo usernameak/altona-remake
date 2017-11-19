@@ -30,11 +30,11 @@ template<typename T> class sArray;
 /***                                                                      ***/
 /****************************************************************************/
 
-void sInit(sInt flags,sInt xs=0,sInt ys=0); // this function should also have parameters to specify the window position
+void sInit(int flags,int xs=0,int ys=0); // this function should also have parameters to specify the window position
 void sExit();
 void sRestart();
-sInt sGetSystemFlags();
-void sSetErrorCode(sInt i=1);           // set the commandline error code. 0=OK, 1=ERROR
+int sGetSystemFlags();
+void sSetErrorCode(int i=1);           // set the commandline error code. 0=OK, 1=ERROR
 
 extern sBool sGUIEnabled;
 
@@ -76,9 +76,9 @@ enum sInitSystemFlags
 /****************************************************************************/
 
 sBool sIsSubsystemRunning(const sChar *name);
-void sAddSubsystem(const sChar *name,sInt priority,void (*init)(),void (*exit)());
-void sSetRunlevel(sInt priority);
-sInt sGetRunlevel();
+void sAddSubsystem(const sChar *name,int priority,void (*init)(),void (*exit)());
+void sSetRunlevel(int priority);
+int sGetRunlevel();
 #define sADDSUBSYSTEM(n,p,i,e) namespace sSubSystems { struct n##_type { n##_type() {sAddSubsystem(sTXT(#n),p,i,e);} } n##_global; }
 
 /****************************************************************************/
@@ -106,7 +106,7 @@ struct sDateAndTime
   sU8  Second;      // 0-60 (! - leap seconds!)
 
   sDateAndTime();
-  sInt Compare(const sDateAndTime &x) const;
+  int Compare(const sDateAndTime &x) const;
 
   bool operator ==(const sDateAndTime &x) const   { return Compare(x) == 0; }
   bool operator !=(const sDateAndTime &x) const   { return Compare(x) != 0; }
@@ -125,17 +125,17 @@ sBool sGetEnvironmentVariable(const sStringDesc &dst,const sChar *var);
 void sEnableGUI();
 
 void sConsoleWindowClear();
-sInt sGetTime();
+int sGetTime();
 sU64 sGetTimeUS(); // microseconds, resolution as good as possible
 
 sDateAndTime sGetDateAndTime(); // local time
-sDateAndTime sAddLocalTime(sDateAndTime origin,sInt seconds);
+sDateAndTime sAddLocalTime(sDateAndTime origin,int seconds);
 sS64 sDiffLocalTime(sDateAndTime a,sDateAndTime b); // a-b (returns difference in seconds)
 sU8 sGetFirstDayOfWeek(); //! Gets first day of week, depending on users locale setting. (0=Sunday)
 sBool sIsLeapYear(sU16 year);
 sBool sIsDateValid(sU16 year, sU8 month, sU8 day);
 sBool sIsDateValid(const sDateAndTime &date);
-sInt sGetDaysInMonth(sU16 year, sU8 month);
+int sGetDaysInMonth(sU16 year, sU8 month);
 sU8 sGetDayOfWeek(const sDateAndTime &date);
 
 void sCatchCtrlC(sBool enable=1);
@@ -149,10 +149,10 @@ sPRINTING1(sSysLogF,sFormatStringBuffer buf; sFormatStringBaseCtx(buf,format);bu
 
 sBool sDaemonize(); // turns the process into a daemon (if successful)
 
-sInt sGetNumInstances(); // returns the number of times, the application is currently running
+int sGetNumInstances(); // returns the number of times, the application is currently running
 #endif
 
-sInt sGetRandomSeed();
+int sGetRandomSeed();
 const sChar *sGetCommandLine();
 
 extern sHooks *sFrameHook;        // called every frame
@@ -168,7 +168,7 @@ extern sHooks2<const sInput2Event &,sBool &> *sInputHook; // called on input (fo
 
 
 
-sBool sStackTrace(const sStringDesc &tgt,sInt skipCount=1,sInt maxCount=8); // call stack trace for sFatal etc. return sFALSE if not implemented.
+sBool sStackTrace(const sStringDesc &tgt,int skipCount=1,int maxCount=8); // call stack trace for sFatal etc. return sFALSE if not implemented.
 
 // if called within App::OnPaint, prevent recursive painting this once.
 void sPreventPaint();
@@ -176,7 +176,7 @@ void sPreventPaint();
 // timing helper for easy scope profiling
 struct sTimeHelper
 {
-  sInt Start;
+  int Start;
   const sChar *Msg;
   sU32 *TotalTime;
   sTimeHelper(const sChar *msg):Msg(msg) { TotalTime = 0; Start = sGetTime(); }
@@ -184,7 +184,7 @@ struct sTimeHelper
   ~sTimeHelper()
   {
 #if !sSTRIPPED
-    sInt End = sGetTime(); sInt time = (End-Start);
+    int End = sGetTime(); int time = (End-Start);
     if(TotalTime)
     {
       *TotalTime += time;
@@ -259,7 +259,7 @@ enum sSysMemKind
 
 struct sSysMemInfo
 {
-  sInt Kind;
+  int Kind;
   sCONFIG_SIZET PhysicalTotal;
   sCONFIG_SIZET PhysicalAvailable;
   sCONFIG_SIZET VirtualTotal;
@@ -267,7 +267,7 @@ struct sSysMemInfo
 };
 
 // returns number of different memory types, fillst up to count info entries with mem infos
-sInt sGetSystemMemInfo(sSysMemInfo* info=0, sInt count=0);
+int sGetSystemMemInfo(sSysMemInfo* info=0, int count=0);
 
 sS64 sGetUsedMainMemory();          // negative result: memory free
 void sEnableMemoryAllocation(sBool enable);
@@ -324,17 +324,17 @@ struct sThreadContext
   //  void *UserData;                   // free for your own business
   class sThread *Thread;            // thread linked to context
 
-  sInt MemTypeStack[16];
-  sInt MemTypeStackIndex;
+  int MemTypeStack[16];
+  int MemTypeStackIndex;
 
 #if sCONFIG_DEBUGMEM
-  sInt TagMemLine;
+  int TagMemLine;
   const char *TagMemFile;
   const char *TagLastFile;
 
   sChar MemLeakDescBuffer[sMemoryLeakDesc::STRINGLEN];
   sChar MemLeakDescBuffer2[sMemoryLeakDesc::STRINGLEN]; 
-  sInt MLDBPos;
+  int MLDBPos;
   sU32 MLDBCRC;
 
 #endif
@@ -389,24 +389,24 @@ class sThread
 
 
 public:
-  sThread(sThreadFunc *threadFunc,sInt pri=0,sInt stacksize=0x4000, void *userdata=sNULL, sInt flags=0);
+  sThread(sThreadFunc *threadFunc,int pri=0,int stacksize=0x4000, void *userdata=sNULL, int flags=0);
   ~sThread();
 
   void Terminate()          { TerminateFlag = 1; }
   sBool CheckTerminate()     { return !TerminateFlag; }
   sThreadContext *GetContext() { return Context; } 
-  void SetHomeCore(sInt core);
+  void SetHomeCore(int core);
 };
 
 /****************************************************************************/
 
-void sSleep(sInt ms);
-sInt sGetCPUCount();
+void sSleep(int ms);
+int sGetCPUCount();
 sThreadContext *sGetThreadContext();
 sThreadContext *sCreateThreadContext(sThread *);
-sPtr sAllocTls(sPtr bytes,sInt align);
+sPtr sAllocTls(sPtr bytes,int align);
 inline void *sGetTls(sPtr offset) { return sGetThreadContext()->GetTls(offset); }
-template <typename T> sPtr sAllocTls(T*& ptr, sInt align=4) { sPtr offset=sAllocTls(sizeof(T),align); ptr = sGetTls(offset); return offset; }
+template <typename T> sPtr sAllocTls(T*& ptr, int align=4) { sPtr offset=sAllocTls(sizeof(T),align); ptr = sGetTls(offset); return offset; }
 template <typename T> inline  T *sGetTls(sPtr offset) { return (T *) sGetThreadContext()->GetTls(offset); }
 
 /****************************************************************************/
@@ -439,7 +439,7 @@ public:
   // (can be usefull to synchronising multiple threads)
   ~sThreadEvent();
 
-  sBool Wait(sInt timeout=-1);    // 0 for immediate return, -1 for infinite wait
+  sBool Wait(int timeout=-1);    // 0 for immediate return, -1 for infinite wait
   void Signal();                  // the signal is consumed by the first thread for automatic events
   void Reset();                   // go into nonsignaled state
 };
@@ -460,9 +460,9 @@ public:
 // locks by simply disabling interrupts - only avaliable on single-CPU platforms!
 class sIRQScopeLock
 {
-  sInt OldIRQ;
+  int OldIRQ;
 public:
-  sIRQScopeLock(sInt *dummy);
+  sIRQScopeLock(int *dummy);
   ~sIRQScopeLock();
 };
 
@@ -502,10 +502,10 @@ inline void sReadBarrier() { _ReadBarrier(); }
 
 // these functions return the NEW value after the operation was done on the memory address
 
-inline sU32 sAtomicAdd(volatile sU32 *p,sInt i) { sU32 e = _InterlockedExchangeAdd((volatile long *)p,i); return e+i; }
+inline sU32 sAtomicAdd(volatile sU32 *p,int i) { sU32 e = _InterlockedExchangeAdd((volatile long *)p,i); return e+i; }
 inline sU32 sAtomicInc(volatile sU32 *p) { return _InterlockedIncrement((long *)p); }
 inline sU32 sAtomicDec(volatile sU32 *p) { return _InterlockedDecrement((long *)p); }
-inline sU64 sAtomicAdd(volatile sU64 *p,sInt i) { sU64 e = _InterlockedExchangeAdd64((volatile __int64 *)p,i); return e+i; }
+inline sU64 sAtomicAdd(volatile sU64 *p,int i) { sU64 e = _InterlockedExchangeAdd64((volatile __int64 *)p,i); return e+i; }
 inline sU64 sAtomicInc(volatile sU64 *p) { return _InterlockedIncrement64((__int64 *)p); }
 inline sU64 sAtomicDec(volatile sU64 *p) { return _InterlockedDecrement64((__int64 *)p); }
 inline sU32 sAtomicSwap(volatile sU32 *p, sU32 i) { return _InterlockedExchange((long*)p,i); }
@@ -587,8 +587,8 @@ inline sU32 sAtomicSwap(volatile sU32 *p, sU32 val) { sU32 i = *p; *p = val; ret
 template <class T,int max> class sLocklessQueue
 {
   T * volatile Data[max];
-  volatile sInt Write;
-  volatile sInt Read;
+  volatile int Write;
+  volatile int Read;
 public:
   sLocklessQueue()   { Write=0;Read=0;sVERIFY(sIsPower2(max)); }
   ~sLocklessQueue()  {}
@@ -596,16 +596,16 @@ public:
   // may be called by producer
 
   sBool IsFull()      { return Write >= Read+max; }
-  void AddTail(T *e)  { sInt i=Write; sVERIFY(i < Read+max); Data[i&(max-1)] = e; sWriteBarrier(); Write=i+1; }
+  void AddTail(T *e)  { int i=Write; sVERIFY(i < Read+max); Data[i&(max-1)] = e; sWriteBarrier(); Write=i+1; }
 
   // may be called by consumer
 
   sBool IsEmpty()     { return Read >= Write; }
-  T *RemHead()        { sInt i=Read; if(i>=Write) return 0; T *e=Data[i&(max-1)]; sWriteBarrier(); Read=i+1; return e; }
+  T *RemHead()        { int i=Read; if(i>=Write) return 0; T *e=Data[i&(max-1)]; sWriteBarrier(); Read=i+1; return e; }
 
   // this is an approximation!
 
-  sInt GetUsed()      { return Write-Read; }
+  int GetUsed()      { return Write-Read; }
 };
 
 /****************************************************************************/
@@ -616,8 +616,8 @@ public:
 template <class T,int max> class sLockQueue
 {
   T Data[max];
-  sInt Write;
-  sInt Read;
+  int Write;
+  int Read;
 
   typedef sScopeLock ScopeLock;
   sThreadLock Lock;
@@ -638,7 +638,7 @@ public:
 
   // this is an approximation!
 
-  sInt GetUsed()      { ScopeLock s(&Lock); return Write-Read; }
+  int GetUsed()      { ScopeLock s(&Lock); return Write-Read; }
 };
 
 /****************************************************************************/
@@ -779,15 +779,15 @@ enum
 sU32 sGetKeyQualifier();                    // get shift-state sKEYQ
 void sInput2ClearQueue();
 void sInput2SendEvent(const sInput2Event& event);
-sBool sInput2PopEvent(sInput2Event& event, sInt time);
-sBool sInput2PeekEvent(sInput2Event& event, sInt time);
+sBool sInput2PopEvent(sInput2Event& event, int time);
+sBool sInput2PeekEvent(sInput2Event& event, int time);
 
-sInt sMakeUnshiftedKey(sInt ascii);
-void sSetMouse(sInt x,sInt y);
+int sMakeUnshiftedKey(int ascii);
+void sSetMouse(int x,int y);
 void sSetMouseCenter();
 sBool sCheckBreakKey();
 
-sBool sInput2IsKeyboardKey(sInt key);
+sBool sInput2IsKeyboardKey(int key);
 
 /****************************************************************************/
 /***                                                                      ***/
@@ -812,7 +812,7 @@ enum sFilePriorityFlags
   sFP_REALTIME = 2,
 };
 
-typedef sInt sFileReadHandle;
+typedef int sFileReadHandle;
 
 class sFile
 {
@@ -842,8 +842,8 @@ public:
 
   // helper functions
   sU8 *MapAll();                              // map whole file. if mapping is not supported, copy by hand.
-  sInt CopyFrom(sFile *f);                    // copies from f into itself
-  sInt CopyFrom(sFile *f, sS64 max);          // copies max bytes from f into itself
+  int CopyFrom(sFile *f);                    // copies from f into itself
+  int CopyFrom(sFile *f, sS64 max);          // copies max bytes from f into itself
 };
 
 class sFailsafeFile : public sFile // file that stores to a different name and renames when finished. only for writing!
@@ -879,8 +879,8 @@ void sRemFileHandler(sFileHandler *);
 class sFile *sCreateFile(const sChar *name,sFileAccess access=sFA_READ);
 class sFile *sCreateFailsafeFile(const sChar *name,sFileAccess access=sFA_READ);
 
-class sFile *sCreateMemFile(const void *data,sDInt size,sBool owndata=1,sInt blocksize=1);  // readonly
-class sFile *sCreateMemFile(void *data,sDInt size,sBool owndata=1,sInt blocksize=1,sFileAccess access=sFA_READ);
+class sFile *sCreateMemFile(const void *data,sDInt size,sBool owndata=1,int blocksize=1);  // readonly
+class sFile *sCreateMemFile(void *data,sDInt size,sBool owndata=1,int blocksize=1,sFileAccess access=sFA_READ);
 class sFile *sCreateMemFile(const sChar *name);
 
 class sFile *sCreateGrowMemFile();
@@ -890,8 +890,8 @@ class sFile *sCreateGrowMemFile();
 class sCalcMD5File : public sFile
 {
   sU8 TempBuf[64];
-  sInt TempCount;
-  sInt TotalCount;
+  int TempCount;
+  int TotalCount;
 public:
   sChecksumMD5 Checksum;
 
@@ -934,9 +934,9 @@ sBool sFileCalcMD5(const sChar *name, sChecksumMD5 &md5);
 // seektime_in_ms==0 : disables seek time emulation
 // always returns the set seek time (or last set, when not changing seek time with seektime_in_ms<0)
 // (dvd drives have about 120ms average seek time)
-sInt sFileSeekTimeEmulation(sInt seektime_in_ms=-1);
+int sFileSeekTimeEmulation(int seektime_in_ms=-1);
 #else
-sINLINE sInt sFileSeekTimeEmulation(sInt seektime_in_ms=-1) { return 0; }
+sINLINE int sFileSeekTimeEmulation(int seektime_in_ms=-1) { return 0; }
 #endif
 
 /****************************************************************************/
@@ -946,8 +946,8 @@ void sSetProjectDir(const sChar *name);
 struct sDirEntry
 {
   sString<256> Name;
-  sInt Size;
-  sInt Flags;
+  int Size;
+  int Flags;
   sU64 LastWriteTime;
 };
 
@@ -961,7 +961,7 @@ enum sDirEntryFlags
 sBool sCopyFile(const sChar *source,const sChar *dest,sBool failifexists=0);
 sBool sCopyFileFailsafe(const sChar *source,const sChar *dest,sBool failifexists=0);
 sBool sRenameFile(const sChar *source,const sChar *dest, sBool overwrite=sFALSE);
-sBool sFindFile(sChar *foundname, sInt foundnamesize, const sChar *path,const sChar *pattern = 0);
+sBool sFindFile(sChar *foundname, int foundnamesize, const sChar *path,const sChar *pattern = 0);
 #if sPLATFORM==sPLAT_WINDOWS || sPLATFORM==sPLAT_LINUX 
 sBool sLoadDir(sArray<sDirEntry> &list,const sChar *path,const sChar *pattern=0);
 sDateAndTime sFromFileTime(sU64 fileTime); // OS specific times, e.g. LastWriteTime
@@ -1000,7 +1000,7 @@ public:
   virtual sBool WriteFrame(const sU32 *data) = 0;
 };
 
-sVideoWriter *sCreateVideoWriter(const sChar *filename,const sChar *codec,sF32 fps,sInt xRes,sInt yRes);
+sVideoWriter *sCreateVideoWriter(const sChar *filename,const sChar *codec,sF32 fps,int xRes,int yRes);
 
 /****************************************************************************/
 /***                                                                      ***/
@@ -1008,7 +1008,7 @@ sVideoWriter *sCreateVideoWriter(const sChar *filename,const sChar *codec,sF32 f
 /***                                                                      ***/
 /****************************************************************************/
 
-sBool sGetUserName(const sStringDesc &dest, sInt joypadId);
+sBool sGetUserName(const sStringDesc &dest, int joypadId);
 
 /****************************************************************************/
 

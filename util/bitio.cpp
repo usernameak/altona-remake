@@ -74,7 +74,7 @@ void sBitWriter::Start(sU8 *outBuffer,sDInt bufferSize)
 
 void sBitWriter::Start(sFile *outFile)
 {
-  static const sInt BufferSize = 4096;
+  static const int BufferSize = 4096;
 
   sVERIFY(outFile != 0);
   Start(new sU8[BufferSize],BufferSize);
@@ -170,7 +170,7 @@ void sBitReader::Start(const sU8 *buffer,sDInt size)
   Error = sFALSE;
 
   // fill bitbuffer (as far as possible)
-  for(sInt i=0;i<sMin<sDInt>(size,4);i++)
+  for(int i=0;i<sMin<sDInt>(size,4);i++)
   {
     BitsLeft += 8;
     BitBuffer |= *BufferPtr++ << (32 - BitsLeft);
@@ -179,7 +179,7 @@ void sBitReader::Start(const sU8 *buffer,sDInt size)
 
 void sBitReader::Start(sFile *file)
 {
-  static const sInt bufferSize = 4096;
+  static const int bufferSize = 4096;
 
   sVERIFY(file != 0);
   File = file;
@@ -197,7 +197,7 @@ void sBitReader::Start(sFile *file)
   // fill bitbuffer (as far as possible)
   RefillBuffer();
 
-  for(sInt i=0;i<sMin<sDInt>(BufferEnd-Buffer,4);i++)
+  for(int i=0;i<sMin<sDInt>(BufferEnd-Buffer,4);i++)
   {
     BitsLeft += 8;
     BitBuffer |= *BufferPtr++ << (32 - BitsLeft);
@@ -248,15 +248,15 @@ static sU32 AddWeights(sU32 w0,sU32 w1)
   return wN | dN;
 }
 
-static void AddToHeap(sStaticArray<sInt> &heap,const sStaticArray<sU32> &weight,sInt item)
+static void AddToHeap(sStaticArray<int> &heap,const sStaticArray<sU32> &weight,int item)
 {
   heap.AddTail(item);
 
   // sift it up
-  sInt child = heap.GetCount() - 1;
+  int child = heap.GetCount() - 1;
   while(child > 0)
   {
-    sInt root = (child-1)/2;
+    int root = (child-1)/2;
     if(weight[heap[child]] < weight[heap[root]])
     {
       sSwap(heap[root],heap[child]);
@@ -267,19 +267,19 @@ static void AddToHeap(sStaticArray<sInt> &heap,const sStaticArray<sU32> &weight,
   }
 }
 
-static sInt PopHeap(sStaticArray<sInt> &heap,const sStaticArray<sU32> &weight)
+static int PopHeap(sStaticArray<int> &heap,const sStaticArray<sU32> &weight)
 {
   sVERIFY(heap.GetCount() > 0);
-  sInt ret = heap[0];
+  int ret = heap[0];
 
-  sInt last = heap.RemTail();
+  int last = heap.RemTail();
   if(heap.GetCount())
   {
     heap[0] = last;
 
     // sift it down
-    sInt count = heap.GetCount();
-    sInt root = 0, child;
+    int count = heap.GetCount();
+    int root = 0, child;
     while((child=root*2+1)<count)
     {
       if(child<count-1 && weight[heap[child]]>weight[heap[child+1]])
@@ -298,17 +298,17 @@ static sInt PopHeap(sStaticArray<sInt> &heap,const sStaticArray<sU32> &weight)
   return ret;
 }
 
-void sBuildHuffmanCodeLens(sInt *lens,const sU32 *freq,sInt count,sInt maxLen)
+void sBuildHuffmanCodeLens(int *lens,const sU32 *freq,int count,int maxLen)
 {
   sStaticArray<sU32> weight(count*2-1);
-  sStaticArray<sInt> parent(count*2-1);
-  sStaticArray<sInt> heap(count+1);
+  sStaticArray<int> parent(count*2-1);
+  sStaticArray<int> heap(count+1);
 
   weight.Resize(count*2-1);
   parent.Resize(count*2-1);
 
-  sInt alphabetSize = 0;
-  for(sInt i=0;i<count;i++)
+  int alphabetSize = 0;
+  for(int i=0;i<count;i++)
   {
     sVERIFY(freq[i] < (1<<24));
     weight[i] = freq[i] << 8;
@@ -328,8 +328,8 @@ void sBuildHuffmanCodeLens(sInt *lens,const sU32 *freq,sInt count,sInt maxLen)
   {
     // push all nonzero frequency symbols onto heap
     heap.Clear();
-    sInt nNodes = count;
-    for(sInt i=0;i<count;i++)
+    int nNodes = count;
+    for(int i=0;i<count;i++)
     {
       parent[i] = -1;
       if(weight[i])
@@ -340,8 +340,8 @@ void sBuildHuffmanCodeLens(sInt *lens,const sU32 *freq,sInt count,sInt maxLen)
     while(heap.GetCount() > 1)
     {
       // pop two smallest nodes
-      sInt n0 = PopHeap(heap,weight);
-      sInt n1 = PopHeap(heap,weight);
+      int n0 = PopHeap(heap,weight);
+      int n1 = PopHeap(heap,weight);
 
       // build new node
       parent[n0] = parent[n1] = nNodes;
@@ -353,10 +353,10 @@ void sBuildHuffmanCodeLens(sInt *lens,const sU32 *freq,sInt count,sInt maxLen)
     // calc code lengths
     tooLong = sFALSE;
 
-    for(sInt i=0;i<count;i++)
+    for(int i=0;i<count;i++)
     {
-      sInt len = 0;
-      for(sInt j=i;parent[j] != -1;j=parent[j])
+      int len = 0;
+      for(int j=i;parent[j] != -1;j=parent[j])
         len++;
 
       lens[i] = len;
@@ -365,18 +365,18 @@ void sBuildHuffmanCodeLens(sInt *lens,const sU32 *freq,sInt count,sInt maxLen)
 
     if(tooLong) // flatten the frequencies and try again
     {
-      for(sInt i=0;i<count;i++)
+      for(int i=0;i<count;i++)
         weight[i] = ((weight[i] + 256) >> 1) & ~0xff;
     }
   }
   while(tooLong);
 }
 
-void sBuildHuffmanCodeValues(sU32 *value,const sInt *lens,sInt count)
+void sBuildHuffmanCodeValues(sU32 *value,const int *lens,int count)
 {
   // find min/max len
-  sInt minLen = 0x7fffffff, maxLen = 0;
-  for(sInt i=0;i<count;i++)
+  int minLen = 0x7fffffff, maxLen = 0;
+  for(int i=0;i<count;i++)
   {
     if(!lens[i]) // unused code
       continue;
@@ -389,9 +389,9 @@ void sBuildHuffmanCodeValues(sU32 *value,const sInt *lens,sInt count)
 
   // assign codes
   sU32 code = 0;
-  for(sInt i=minLen;i<=maxLen;i++)
+  for(int i=minLen;i<=maxLen;i++)
   {
-    for(sInt j=0;j<count;j++)
+    for(int j=0;j<count;j++)
       if(lens[j] == i)
         value[j] = code++;
 
@@ -399,18 +399,18 @@ void sBuildHuffmanCodeValues(sU32 *value,const sInt *lens,sInt count)
   }
 }
 
-void sBuildHuffmanCodes(sU32 *codes,sInt *lens,const sU32 *freq,sInt count,sInt maxLen)
+void sBuildHuffmanCodes(sU32 *codes,int *lens,const sU32 *freq,int count,int maxLen)
 {
   sBuildHuffmanCodeLens(lens,freq,count,maxLen);
   sBuildHuffmanCodeValues(codes,lens,count);
 }
 
-sBool sWriteHuffmanCodeLens(sBitWriter &writer,const sInt *lens,sInt count)
+sBool sWriteHuffmanCodeLens(sBitWriter &writer,const int *lens,int count)
 {
-  sInt lastLen = -1;
-  for(sInt i=0;i<count;i++)
+  int lastLen = -1;
+  for(int i=0;i<count;i++)
   {
-    sInt len = lens[i];
+    int len = lens[i];
     writer.PutBits(len != 0,1);
     
     if(len)
@@ -423,7 +423,7 @@ sBool sWriteHuffmanCodeLens(sBitWriter &writer,const sInt *lens,sInt count)
         if(len != lastLen)
         {
           writer.PutBits(len < lastLen,1);
-          sInt diff = sAbs(len - lastLen);
+          int diff = sAbs(len - lastLen);
 
           while(diff > 1)
           {
@@ -442,10 +442,10 @@ sBool sWriteHuffmanCodeLens(sBitWriter &writer,const sInt *lens,sInt count)
   return writer.IsOk();
 }
 
-sBool sReadHuffmanCodeLens(sBitReader &reader,sInt *lens,sInt count)
+sBool sReadHuffmanCodeLens(sBitReader &reader,int *lens,int count)
 {
-  sInt len = -1;
-  for(sInt i=0;i<count;i++)
+  int len = -1;
+  for(int i=0;i<count;i++)
   {
     if(!reader.GetBits(1))
       lens[i] = 0;
@@ -459,7 +459,7 @@ sBool sReadHuffmanCodeLens(sBitReader &reader,sInt *lens,sInt count)
       }
       else if(reader.GetBits(1)) // len has changed
       {
-        sInt adj = reader.GetBits(1) ? -1 : 1;
+        int adj = reader.GetBits(1) ? -1 : 1;
         do
         {
           len += adj;
@@ -489,26 +489,26 @@ sFastHuffmanDecoder::~sFastHuffmanDecoder()
   delete[] CodeMap;
 }
 
-sBool sFastHuffmanDecoder::Init(const sInt *lens,sInt count)
+sBool sFastHuffmanDecoder::Init(const int *lens,int count)
 {
   sVERIFY(count <= 4096); // max because of 16bit fastpath encoding
   CodeMap = new sU16[count];
   sU32 *codes = new sU32[count];
 
   // find min/max len
-  sInt maxLen = 0;
-  for(sInt i=0;i<count;i++)
+  int maxLen = 0;
+  for(int i=0;i<count;i++)
     maxLen = sMax(maxLen,lens[i]);
   
   sVERIFY(maxLen <= 24);
 
   // build slow decode tables
   sU32 code = 0;
-  sInt syms = 0;
-  for(sInt i=1;i<=24;i++)
+  int syms = 0;
+  for(int i=1;i<=24;i++)
   {
     Delta[i] = syms - code;
-    for(sInt j=0;j<count;j++)
+    for(int j=0;j<count;j++)
     {
       if(lens[j] == i)
       {
@@ -532,14 +532,14 @@ sBool sFastHuffmanDecoder::Init(const sInt *lens,sInt count)
   // build fast-path decoding table
   sClear(FastPath); // clear to invalid
 
-  for(sInt i=0;i<count;i++)
+  for(int i=0;i<count;i++)
   {
-    sInt len = lens[i];
+    int len = lens[i];
     if(len && len <= FastBits)
     {
       sU32 c = codes[i] << (FastBits - len);
-      sInt n = 1 << (FastBits - len);
-      for(sInt j=0;j<n;j++)
+      int n = 1 << (FastBits - len);
+      for(int j=0;j<n;j++)
         FastPath[c+j] = (len<<12) + i;
     }
   }
@@ -548,7 +548,7 @@ sBool sFastHuffmanDecoder::Init(const sInt *lens,sInt count)
   return sTRUE;
 }
 
-sInt sFastHuffmanDecoder::DecodeSymbol(sBitReader &reader)
+int sFastHuffmanDecoder::DecodeSymbol(sBitReader &reader)
 {
   sLocalBitReader localReader(reader);
   return DecodeSymbol(localReader);

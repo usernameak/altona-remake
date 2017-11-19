@@ -36,7 +36,7 @@ void sSplitFrame::MakeChildData()
   {
     Initialized = 0;
     ChildData.AddMany(Count+1);
-    for(sInt i=0;i<Count+1;i++)
+    for(int i=0;i<Count+1;i++)
     {
       ChildData[i].Pos = 0;
       ChildData[i].StartPos = -1;
@@ -46,13 +46,13 @@ void sSplitFrame::MakeChildData()
   }
 }
 
-void sSplitFrame::SplitLayout(sInt t)
+void sSplitFrame::SplitLayout(int t)
 {
   MakeChildData();
 
   if(!Initialized)
   {
-    for(sInt i=0;i<=Count;i++)
+    for(int i=0;i<=Count;i++)
     {
       if(ChildData[i].StartPos==-1)
       {
@@ -75,7 +75,7 @@ void sSplitFrame::SplitLayout(sInt t)
   {
     if(OldT!=t)
     {
-      for(sInt i=1;i<Count;i++)
+      for(int i=1;i<Count;i++)
       {
         ChildData[i].Pos = sMulDiv(ChildData[i].RelPos,t,RelT);
       }
@@ -86,7 +86,7 @@ void sSplitFrame::SplitLayout(sInt t)
   {
     if(OldT != t)
     {
-      for(sInt i=0;i<=Count;i++)
+      for(int i=0;i<=Count;i++)
       {
         if(ChildData[i].Align)
           ChildData[i].Pos -= OldT-t;
@@ -100,7 +100,7 @@ void sSplitFrame::SplitLayout(sInt t)
 
   sBool updateall=0;
 
-  for(sInt i=1;i<Drag;i++)
+  for(int i=1;i<Drag;i++)
   {
     if(ChildData[i].Pos>ChildData[Drag].Pos-Knop*(Drag-i))
     {
@@ -108,7 +108,7 @@ void sSplitFrame::SplitLayout(sInt t)
       updateall = 1;
     }
   }
-  for(sInt i=1;i<=Count;i++)
+  for(int i=1;i<=Count;i++)
   {
     if(ChildData[i].Pos<ChildData[i-1].Pos+Knop)
     {
@@ -130,16 +130,16 @@ void sSplitFrame::SplitLayout(sInt t)
     Update();
 }
 
-sInt sSplitFrame::SplitDrag(const sWindowDrag &dd,sInt mousedelta,sInt mousepos)
+int sSplitFrame::SplitDrag(const sWindowDrag &dd,int mousedelta,int mousepos)
 {
   sBool updateknop = 0;
   switch(dd.Mode)
   {
   case sDD_START:
     Drag = 0;
-    for(sInt i=1;i<Count;i++)
+    for(int i=1;i<Count;i++)
     {
-      sInt p = ChildData[i].Pos;
+      int p = ChildData[i].Pos;
       if(mousepos>=p-Knop && mousepos<p)
       {
         Drag = i;
@@ -155,7 +155,7 @@ sInt sSplitFrame::SplitDrag(const sWindowDrag &dd,sInt mousedelta,sInt mousepos)
       sRect r; 
       r.Add(Childs[Drag-1]->Outer,Childs[Drag]->Outer);
       sGui->Layout(r);
-      for(sInt i=1;i<Count;i++)
+      for(int i=1;i<Count;i++)
         ChildData[Drag].RelPos = ChildData[Drag].Pos;
       RelT = OldT;
     }
@@ -168,27 +168,27 @@ sInt sSplitFrame::SplitDrag(const sWindowDrag &dd,sInt mousedelta,sInt mousepos)
   return updateknop;
 }
 
-void sSplitFrame::Preset(sInt splitter,sInt value,sBool align)
+void sSplitFrame::Preset(int splitter,int value,sBool align)
 {
   MakeChildData();
   sVERIFY(splitter>=1 && splitter<Count);
   ChildData[splitter].StartPos = value;
   ChildData[splitter].Align = align;
 }
-void sSplitFrame::PresetPos(sInt splitter,sInt value)
+void sSplitFrame::PresetPos(int splitter,int value)
 {
   MakeChildData();
   sVERIFY(splitter>=1 && splitter<Count);
   ChildData[splitter].StartPos = value;
 }
-void sSplitFrame::PresetAlign(sInt splitter,sBool align)
+void sSplitFrame::PresetAlign(int splitter,sBool align)
 {
   MakeChildData();
   sVERIFY(splitter>=1 && splitter<Count);
   ChildData[splitter].Align = align;
 }
 
-sInt sSplitFrame::GetPos(sInt splitter)
+int sSplitFrame::GetPos(int splitter)
 {
   if(splitter>=Count)
     return -1;
@@ -205,7 +205,7 @@ sHSplitFrame::sHSplitFrame()
 /*
 void sHSplitFrame::OnCalcSize()
 {
-  sInt n=-Knop;
+  int n=-Knop;
   sWindow *w;
   sFORALL(Childs,w)
     n += w->DecoratedSizeY + Knop;
@@ -232,10 +232,10 @@ void sHSplitFrame::OnLayout()
 
 void sHSplitFrame::OnPaint2D()
 {
-  for(sInt i=1;i<Count;i++)
+  for(int i=1;i<Count;i++)
   {
     sBool press = (i==Drag);
-    sInt y = Client.y0 + ChildData[i].Pos - Knop;
+    int y = Client.y0 + ChildData[i].Pos - Knop;
     sRect2D(Client.x0,y       ,Client.x1,y+1     ,press?sGC_LOW:sGC_HIGH);
     sRect2D(Client.x0,y+1     ,Client.x1,y+Knop-1,sGC_BUTTON);
     sRect2D(Client.x0,y+Knop-1,Client.x1,y+Knop  ,press?sGC_HIGH:sGC_LOW);
@@ -244,7 +244,7 @@ void sHSplitFrame::OnPaint2D()
 
 void sHSplitFrame::OnDrag(const sWindowDrag &dd)
 {
-  sInt knop = SplitDrag(dd,dd.MouseY-dd.StartY,dd.MouseY-Client.y0);
+  int knop = SplitDrag(dd,dd.MouseY-dd.StartY,dd.MouseY-Client.y0);
   if(knop)
   {
     sRect r;
@@ -265,7 +265,7 @@ sVSplitFrame::sVSplitFrame()
 /*
 void sVSplitFrame::OnCalcSize()
 {
-  sInt n=-Knop;
+  int n=-Knop;
   sWindow *w;
   sFORALL(Childs,w)
     n += w->DecoratedSizeX + Knop;
@@ -292,10 +292,10 @@ void sVSplitFrame::OnLayout()
 
 void sVSplitFrame::OnPaint2D()
 {
-  for(sInt i=1;i<Count;i++)
+  for(int i=1;i<Count;i++)
   {
     sBool press = (i==Drag);
-    sInt p = Client.x0 + ChildData[i].Pos - Knop;
+    int p = Client.x0 + ChildData[i].Pos - Knop;
     sRect2D(p       ,Client.y0,p+1     ,Client.y1,press?sGC_LOW:sGC_HIGH);
     sRect2D(p+1     ,Client.y0,p+Knop-1,Client.y1,sGC_BUTTON);
     sRect2D(p+Knop-1,Client.y0,p+Knop  ,Client.y1,press?sGC_HIGH:sGC_LOW);
@@ -304,7 +304,7 @@ void sVSplitFrame::OnPaint2D()
 
 void sVSplitFrame::OnDrag(const sWindowDrag &dd)
 {
-  sInt knop = SplitDrag(dd,dd.MouseX-dd.StartX,dd.MouseX-Client.x0);
+  int knop = SplitDrag(dd,dd.MouseX-dd.StartX,dd.MouseX-Client.x0);
   if(knop)
   {
     sRect r;
@@ -355,14 +355,14 @@ void sMenuFrame::OnCalcSize()
 {
   Item *item;  
 
-  for(sInt i=0;i<MaxColumn;i++)
+  for(int i=0;i<MaxColumn;i++)
   {
     ColumnHeight[i] = 0;
     ColumnWidth[i] = 0;
   }
   sFORALL(Items,item)
   {
-    sInt c = item->Column;
+    int c = item->Column;
     sVERIFY(c>=0 && c<MaxColumn);
     ColumnHeight[c] += item->Window->DecoratedSizeY;
     ColumnWidth[c] = sMax(ColumnWidth[c],item->Window->DecoratedSizeX);
@@ -370,7 +370,7 @@ void sMenuFrame::OnCalcSize()
   
   ReqSizeX = -1;
   ReqSizeY = 0;
-  for(sInt i=0;i<MaxColumn;i++)
+  for(int i=0;i<MaxColumn;i++)
   {
     if(ColumnWidth[i]>0)
     {
@@ -384,14 +384,14 @@ void sMenuFrame::OnLayout()
 {
   sWindow *w;
   Item *item;
-  sInt x,c;
+  int x,c;
 
-  sInt pos[MaxColumn+1];
-  sInt y[MaxColumn];
+  int pos[MaxColumn+1];
+  int y[MaxColumn];
 
   pos[0] = 0;
   x = 0;
-  for(sInt i=0;i<MaxColumn;i++)
+  for(int i=0;i<MaxColumn;i++)
   {
     if(ColumnWidth[i]>0)
       x += ColumnWidth[i]+1;
@@ -450,7 +450,7 @@ sBool sMenuFrame::OnShortcut(sU32 key)
 }
 
 /* // this seems not needed anymore. sWF_AUTOKILL does it all!
-sBool sMenuFrame::OnCommand(sInt cmd)
+sBool sMenuFrame::OnCommand(int cmd)
 {
   if(cmd==sCMD_DUMMY)
   {
@@ -481,10 +481,10 @@ void sMenuFrame::CmdPressedNoKill(sDInt id)
 
 void sMenuFrame::OnPaint2D()
 {
-  sInt x0;
-  sInt x1;
-  sInt x = Client.x0;
-  for(sInt i=0;i<MaxColumn;i++)
+  int x0;
+  int x1;
+  int x = Client.x0;
+  for(int i=0;i<MaxColumn;i++)
   {
     if(ColumnWidth[i]>0)
     {
@@ -502,11 +502,11 @@ void sMenuFrame::OnPaint2D()
 
 /****************************************************************************/
 
-void sMenuFrame::AddItem(const sChar *name,const sMessage &msg,sU32 Shortcut,sInt len,sInt column,sU32 backcol)
+void sMenuFrame::AddItem(const sChar *name,const sMessage &msg,sU32 Shortcut,int len,int column,sU32 backcol)
 {
   sButtonControl *con;
   Item *item;
-  sInt id;
+  int id;
   
   Shortcut = (Shortcut & ~sKEYQ_MASK) | sMakeUnshiftedKey(Shortcut & sKEYQ_MASK);
   id = Items.GetCount();
@@ -524,11 +524,11 @@ void sMenuFrame::AddItem(const sChar *name,const sMessage &msg,sU32 Shortcut,sIn
   item->Window = con;
 }
 
-void sMenuFrame::AddCheckmark(const sChar *name,const sMessage &msg,sU32 Shortcut,sInt *checkref,sInt checkvalue,sInt len,sInt column,sU32 backcol,sInt buttonstyle)
+void sMenuFrame::AddCheckmark(const sChar *name,const sMessage &msg,sU32 Shortcut,int *checkref,int checkvalue,int len,int column,sU32 backcol,int buttonstyle)
 {
   sButtonControl *con;
   Item *item;
-  sInt id;
+  int id;
   
   Shortcut = (Shortcut & ~sKEYQ_MASK) | sMakeUnshiftedKey(Shortcut & sKEYQ_MASK);
   id = Items.GetCount();
@@ -582,7 +582,7 @@ public:
   }
 };
 
-void sMenuFrame::AddSpacer(sInt column)
+void sMenuFrame::AddSpacer(int column)
 {
   Item *item;
   item = Items.AddMany(1);
@@ -617,7 +617,7 @@ public:
   }
 };
 
-void sMenuFrame::AddHeader(sPoolString name,sInt column)
+void sMenuFrame::AddHeader(sPoolString name,int column)
 {
   Item *item;
   item = Items.AddMany(1);
@@ -631,7 +631,7 @@ void sMenuFrame::AddHeader(sPoolString name,sInt column)
 void sMenuFrame::AddChoices(const sChar *choices,const sMessage &msg_)
 {
   sMessage msg(msg_);
-  sInt n=0;
+  int n=0;
   for(;;)
   {
     while(*choices=='|')
@@ -674,7 +674,7 @@ void sPopupChoices(const sChar *choices,const sMessage &msg)
 /***                                                                      ***/
 /****************************************************************************/
 
-sLayoutFrameWindow::sLayoutFrameWindow(sLayoutFrameWindowMode mode,sWindow *window,sInt pos) 
+sLayoutFrameWindow::sLayoutFrameWindow(sLayoutFrameWindowMode mode,sWindow *window,int pos) 
 {
   Mode = mode;
   Window = window;
@@ -714,7 +714,7 @@ void sLayoutFrame::Tag()
   sNeed(Windows);
 }
 
-void sLayoutFrame::SetSubSwitchR(sLayoutFrameWindow *p,sPoolString name,sInt nr)
+void sLayoutFrame::SetSubSwitchR(sLayoutFrameWindow *p,sPoolString name,int nr)
 {
   sLayoutFrameWindow *c;
 
@@ -724,7 +724,7 @@ void sLayoutFrame::SetSubSwitchR(sLayoutFrameWindow *p,sPoolString name,sInt nr)
     SetSubSwitchR(c,name,nr);
 }
 
-void sLayoutFrame::GetSubSwitchR(sLayoutFrameWindow *p,sPoolString name,sInt &nr)
+void sLayoutFrame::GetSubSwitchR(sLayoutFrameWindow *p,sPoolString name,int &nr)
 {
   sLayoutFrameWindow *c;
 
@@ -734,16 +734,16 @@ void sLayoutFrame::GetSubSwitchR(sLayoutFrameWindow *p,sPoolString name,sInt &nr
     GetSubSwitchR(c,name,nr);
 }
 
-void sLayoutFrame::SetSubSwitch(sPoolString name,sInt nr)
+void sLayoutFrame::SetSubSwitch(sPoolString name,int nr)
 {
   sLayoutFrameWindow *lfw;
   sFORALL(Screens,lfw)
     SetSubSwitchR(lfw,name,nr);
 }
 
-sInt sLayoutFrame::GetSubSwitch(sPoolString name)
+int sLayoutFrame::GetSubSwitch(sPoolString name)
 {
-  sInt nr = -1;
+  int nr = -1;
   sLayoutFrameWindow *lfw;
   sFORALL(Screens,lfw)
     GetSubSwitchR(lfw,name,nr);
@@ -753,7 +753,7 @@ sInt sLayoutFrame::GetSubSwitch(sPoolString name)
 
 /****************************************************************************/
 
-void sLayoutFrame::Switch(sInt screen)
+void sLayoutFrame::Switch(int screen)
 {
   sWindow *win;
 
@@ -779,7 +779,7 @@ void sLayoutFrameWindow::Layout(sWindow *parent,sLayoutFrame *root)
 {
   sSplitFrame *split;
   sLayoutFrameWindow *lfw;
-  sInt i;
+  int i;
   switch(Mode)
   {
   case sLFWM_WINDOW:
@@ -884,7 +884,7 @@ void sSwitchFrame::Tag()
   sNeed(Windows);
 }
 
-void sSwitchFrame::Switch(sInt screen)
+void sSwitchFrame::Switch(int screen)
 {
   Childs.Clear();
   if(screen!=-1)
@@ -928,7 +928,7 @@ void sGridFrame::OnCalcSize()
 {
   sGridFrameLayout *lay;
 
-  sInt ymax=0;
+  int ymax=0;
 
   sFORALL(Layout,lay)
     ymax = sMax(ymax,lay->GridRect.y1);
@@ -940,10 +940,10 @@ void sGridFrame::OnLayout()
 {
   sGridFrameLayout *lay;
 
-  sInt xs = Client.SizeX();
-  sInt ys = Height;
-  sInt x = Client.x0;
-  sInt y = Client.y0;
+  int xs = Client.SizeX();
+  int ys = Height;
+  int x = Client.x0;
+  int y = Client.y0;
 
   sFORALL(Layout,lay)
   {
@@ -967,10 +967,10 @@ void sGridFrame::OnPaint2D()
   sGridFrameLayout *lay;
   sRect r;
 
-  sInt xs = Client.SizeX();
-  sInt ys = Height;
-  sInt x = Client.x0;
-  sInt y = Client.y0;
+  int xs = Client.SizeX();
+  int ys = Height;
+  int x = Client.x0;
+  int y = Client.y0;
 
   sClipPush();
   sFORALL(Layout,lay)
@@ -990,14 +990,14 @@ void sGridFrame::OnPaint2D()
       sGui->PropFont->SetColor(sGC_TEXT,sGC_BACK);
       if(lay->Flags & sGFLF_GROUP)
       {
-        sInt h = r.SizeY()/2;
+        int h = r.SizeY()/2;
         if(lay->Label)
         {
           sRect rr;
           sGui->PropFont->Print(sF2P_OPAQUE,r,lay->Label);
-          sInt w = sGui->PropFont->GetWidth(lay->Label);
+          int w = sGui->PropFont->GetWidth(lay->Label);
 
-          sInt hh = h;
+          int hh = h;
           if(lay->Flags & sGFLF_NARROWGROUP) { hh = 1; h/=2; }
 
           rr.Init(r.x0+h,r.CenterY(),r.CenterX()-w/2-hh,r.CenterY()+2);
@@ -1015,14 +1015,14 @@ void sGridFrame::OnPaint2D()
       }
       else if(lay->Flags & sGFLF_LEAD)
       {
-        sInt h = r.SizeY()/2;
+        int h = r.SizeY()/2;
         sRect2D(r,sGC_BACK);
-        sInt y = r.CenterY();
+        int y = r.CenterY();
         sRect2D(r.x0+h,y,r.x1-h,y+1,sGC_BUTTON);
       }
       else
       {
-        sInt flags = sF2P_SPACE|sF2P_RIGHT|sF2P_OPAQUE;
+        int flags = sF2P_SPACE|sF2P_RIGHT|sF2P_OPAQUE;
         if(flags & sGFLF_CENTER)
           flags = sF2P_OPAQUE;
         sGui->PropFont->Print(flags,r,lay->Label);
@@ -1047,7 +1047,7 @@ void sGridFrame::Reset()
   sWindow::Layout();
 }
 
-void sGridFrame::AddGrid(sWindow *win,sInt x,sInt y,sInt xs,sInt ys,sInt flags)
+void sGridFrame::AddGrid(sWindow *win,int x,int y,int xs,int ys,int flags)
 {
   sGridFrameLayout *lay;
 
@@ -1060,7 +1060,7 @@ void sGridFrame::AddGrid(sWindow *win,sInt x,sInt y,sInt xs,sInt ys,sInt flags)
   lay->GridRect.Init(x,y,x+xs,y+ys);
 }
 
-void sGridFrame::AddLabel(const sChar *str,sInt x,sInt y,sInt xs,sInt ys,sInt flags)
+void sGridFrame::AddLabel(const sChar *str,int x,int y,int xs,int ys,int flags)
 {
   sGridFrameLayout *lay;
 
@@ -1073,7 +1073,7 @@ void sGridFrame::AddLabel(const sChar *str,sInt x,sInt y,sInt xs,sInt ys,sInt fl
 
 sBool sGridFrame::OnKey(sU32 key)
 {
-  sInt inc = 0;
+  int inc = 0;
   key = key & ~sKEYQ_CAPS;
   if(key & sKEYQ_SHIFT) key |= sKEYQ_SHIFT;
    
@@ -1085,7 +1085,7 @@ sBool sGridFrame::OnKey(sU32 key)
   if(inc)
   {
     sWindow *w;
-    sInt n = -1;
+    int n = -1;
     sFORALL(Childs,w)
       if(w->Flags & sWF_CHILDFOCUS)
         n = _i;
@@ -1200,7 +1200,7 @@ void sGridFrameHelper::Textline(const sChar *text)
   NextLine();
 }
 
-class sButtonControl *sGridFrameHelper::PushButton(const sChar *label,const sMessage &done,sInt layoutflags)
+class sButtonControl *sGridFrameHelper::PushButton(const sChar *label,const sMessage &done,int layoutflags)
 {
   if(Left+ControlWidth>Right) NextLine();
   sButtonControl *con = new sButtonControl();
@@ -1213,7 +1213,7 @@ class sButtonControl *sGridFrameHelper::PushButton(const sChar *label,const sMes
   return con;
 }
 
-class sButtonControl *sGridFrameHelper::Box(const sChar *label,const sMessage &done,sInt layoutflags)
+class sButtonControl *sGridFrameHelper::Box(const sChar *label,const sMessage &done,int layoutflags)
 {
   if(Left>Right-BoxWidth) NextLine();
   sButtonControl *con = new sButtonControl();
@@ -1226,7 +1226,7 @@ class sButtonControl *sGridFrameHelper::Box(const sChar *label,const sMessage &d
   return con;
 }
 
-class sButtonControl *sGridFrameHelper::BoxToggle(const sChar *label,sInt *value,const sMessage &done,sInt layoutflags)
+class sButtonControl *sGridFrameHelper::BoxToggle(const sChar *label,int *value,const sMessage &done,int layoutflags)
 {
   if(Left>Right-BoxWidth) NextLine();
   sButtonControl *con = new sButtonControl();
@@ -1240,7 +1240,7 @@ class sButtonControl *sGridFrameHelper::BoxToggle(const sChar *label,sInt *value
   return con;
 }
 
-void sGridFrameHelper::BoxFileDialog(const sStringDesc &string,const sChar *text,const sChar *ext,sInt flags)
+void sGridFrameHelper::BoxFileDialog(const sStringDesc &string,const sChar *text,const sChar *ext,int flags)
 {
   if(Left>Right-BoxWidth) NextLine();
   sButtonControl *con = new sFileDialogControl(string,text,ext,flags);
@@ -1282,14 +1282,14 @@ void sGridFrameHelper::Tie(sStringControl *vc)
   }
 }
 
-void sGridFrameHelper::SetColumns(sInt left,sInt middle,sInt right)
+void sGridFrameHelper::SetColumns(int left,int middle,int right)
 {
   Left = left;
   Right = left+middle;
   Grid->Columns = left+middle+right;
 }
 
-void sGridFrameHelper::MaxColumns(sInt left,sInt middle,sInt right)
+void sGridFrameHelper::MaxColumns(int left,int middle,int right)
 {
   if(Left<left)
   {
@@ -1308,10 +1308,10 @@ void sGridFrameHelper::MaxColumns(sInt left,sInt middle,sInt right)
 
 /****************************************************************************/
 
-void sGridFrameHelper::Radio(sInt *val,const sChar *choices,sInt width)
+void sGridFrameHelper::Radio(int *val,const sChar *choices,int width)
 {
-  sInt id=0;
-  sInt len;
+  int id=0;
+  int len;
   if(width==-1)
     width = ControlWidth;
   for(;;)
@@ -1343,7 +1343,7 @@ void sGridFrameHelper::Radio(sInt *val,const sChar *choices,sInt width)
 }
 
 
-sButtonControl *sGridFrameHelper::Toggle(sInt *val,const sChar *label)
+sButtonControl *sGridFrameHelper::Toggle(int *val,const sChar *label)
 {
   if(Left+ControlWidth>Right) NextLine();
   sButtonControl *con = new sButtonControl(L"",DoneMsg,0);
@@ -1369,7 +1369,7 @@ sButtonControl *sGridFrameHelper::Button(const sChar *label,const sMessage &msg)
   return con;
 }
 
-class sChoiceControl *sGridFrameHelper::Choice(sInt *val,const sChar *choices)
+class sChoiceControl *sGridFrameHelper::Choice(int *val,const sChar *choices)
 {
   if(Left+ControlWidth>Right) NextLine();
   sChoiceControl *con = new sChoiceControl(choices,val);
@@ -1381,10 +1381,10 @@ class sChoiceControl *sGridFrameHelper::Choice(sInt *val,const sChar *choices)
   return con;
 }
 
-sControl *sGridFrameHelper::Flags(sInt *val,const sChar *choices)
+sControl *sGridFrameHelper::Flags(int *val,const sChar *choices)
 {
-  sInt mask=0;
-  sInt count=0;
+  int mask=0;
+  int count=0;
   sChoiceControl *con;
   while(*choices)
   {
@@ -1409,9 +1409,9 @@ sControl *sGridFrameHelper::Flags(sInt *val,const sChar *choices)
     return 0;
 }
 
-void sGridFrameHelper::Flags(sInt *val,const sChar *choices,const sMessage &msg)
+void sGridFrameHelper::Flags(int *val,const sChar *choices,const sMessage &msg)
 {
-  sInt mask=0;
+  int mask=0;
   while(*choices)
   {
     if(Left+ControlWidth>Right) NextLine();
@@ -1432,7 +1432,7 @@ void sGridFrameHelper::Flags(sInt *val,const sChar *choices,const sMessage &msg)
   }
 }
 
-sStringControl *sGridFrameHelper::String(const sStringDesc &string,sInt width)
+sStringControl *sGridFrameHelper::String(const sStringDesc &string,int width)
 {
   if(Left+WideWidth>Right) NextLine();
   sStringControl *con = new sStringControl(string);
@@ -1445,7 +1445,7 @@ sStringControl *sGridFrameHelper::String(const sStringDesc &string,sInt width)
   return con;
 }
 
-sStringControl *sGridFrameHelper::String(sPoolString *pool,sInt width)
+sStringControl *sGridFrameHelper::String(sPoolString *pool,int width)
 {
   if(Left+WideWidth>Right) NextLine();
   sStringControl *con = new sStringControl(pool);
@@ -1458,7 +1458,7 @@ sStringControl *sGridFrameHelper::String(sPoolString *pool,sInt width)
   return con;
 }
 
-sStringControl *sGridFrameHelper::String(sTextBuffer *tb,sInt width)
+sStringControl *sGridFrameHelper::String(sTextBuffer *tb,int width)
 {
   if(Left+WideWidth>Right) NextLine();
   sStringControl *con = new sStringControl(tb);
@@ -1471,7 +1471,7 @@ sStringControl *sGridFrameHelper::String(sTextBuffer *tb,sInt width)
   return con;
 }
 
-sTextWindow *sGridFrameHelper::Text(sTextBuffer *tb,sInt lines,sInt width)
+sTextWindow *sGridFrameHelper::Text(sTextBuffer *tb,int lines,int width)
 {
   sTextWindow *tw = new sTextWindow;
   tw->AddScrolling(0,1);
@@ -1490,7 +1490,7 @@ sTextWindow *sGridFrameHelper::Text(sTextBuffer *tb,sInt lines,sInt width)
   return tw;
 }
 
-sByteControl *sGridFrameHelper::Byte(sU8 *val,sInt min,sInt max,sF32 step,sU8 *colptr)
+sByteControl *sGridFrameHelper::Byte(sU8 *val,int min,int max,sF32 step,sU8 *colptr)
 {
   if(Left+ControlWidth>Right) NextLine();
   sByteControl *con = new sByteControl(val,min,max,step,colptr);
@@ -1503,7 +1503,7 @@ sByteControl *sGridFrameHelper::Byte(sU8 *val,sInt min,sInt max,sF32 step,sU8 *c
   return con;
 }
 
-sWordControl *sGridFrameHelper::Word(sU16 *val,sInt min,sInt max,sF32 step,sU16 *colptr)
+sWordControl *sGridFrameHelper::Word(sU16 *val,int min,int max,sF32 step,sU16 *colptr)
 {
   if(Left+ControlWidth>Right) NextLine();
   sWordControl *con = new sWordControl(val,min,max,step,colptr);
@@ -1516,7 +1516,7 @@ sWordControl *sGridFrameHelper::Word(sU16 *val,sInt min,sInt max,sF32 step,sU16 
   return con;
 }
 
-sIntControl *sGridFrameHelper::Int(sInt *val,sInt min,sInt max,sF32 step,sInt *colptr,const sChar *format)
+sIntControl *sGridFrameHelper::Int(int *val,int min,int max,sF32 step,int *colptr,const sChar *format)
 {
   if(Left+ControlWidth>Right) NextLine();
   sIntControl *con = new sIntControl(val,min,max,step,colptr);
@@ -1646,7 +1646,7 @@ public:
   sU32 *UPtr;
   sF32 *FPtr;
   sObject *TagRef;
-  sInt Alpha;
+  int Alpha;
   sMessage ChangeMsg;
 
   void CmdOpen();
@@ -1710,7 +1710,7 @@ sColorGradientControl *sGridFrameHelper::Gradient(class sColorGradient *g,sBool 
 }
 
 
-void sGridFrameHelper::Bitmask(sU8 *x,sInt width)
+void sGridFrameHelper::Bitmask(sU8 *x,int width)
 {
   if(Left>Right-BoxWidth) NextLine();
   sBitmaskControl *con = new sBitmaskControl();
@@ -1761,7 +1761,7 @@ void sGridFrameHelper::SRT(sSRT &srt)
 }
 
 
-void sGridFrameHelper::Control(sControl *con,sInt width)
+void sGridFrameHelper::Control(sControl *con,int width)
 {
   if(width==-1) width = ControlWidth;
   if(Left+width>Right) NextLine();
@@ -1771,14 +1771,14 @@ void sGridFrameHelper::Control(sControl *con,sInt width)
   EmptyLine = 0;
 }
 
-void sGridFrameHelper::Custom(sWindow *con,sInt width,sInt height)
+void sGridFrameHelper::Custom(sWindow *con,int width,int height)
 {
   if(width==-1) width = ControlWidth;
   if(Left+width>Right) NextLine();
   Grid->AddGrid(con,Left,Line,width,height);
   Left += width;
   EmptyLine = 0;
-  for(sInt i=1;i<height;i++)
+  for(int i=1;i<height;i++)
   {
     NextLine();
     EmptyLine = 0;
@@ -1797,7 +1797,7 @@ sBool sGridFrameTemplate::Condition(void *obj_)
 {
   sU8 *obj = (sU8 *) obj_;
 
-  sInt val = (*(sInt *)(obj+ConditionOffset)) & ConditionMask;
+  int val = (*(int *)(obj+ConditionOffset)) & ConditionMask;
   sBool cond = (val == ConditionValue);
   if(Flags & sGFF_CONDNEGATE)
     cond = !cond;
@@ -1833,28 +1833,28 @@ void sGridFrameTemplate::Add(sGridFrameHelper &gh,void *obj_,const sMessage &cha
     break;
 
   case sGFT_RADIO:
-    gh.Radio((sInt *)(obj+Offset),Choices,(Flags&sGFF_WIDERADIO)?2:-1);
+    gh.Radio((int *)(obj+Offset),Choices,(Flags&sGFF_WIDERADIO)?2:-1);
     break;
   case sGFT_CHOICE:
-    gh.Choice((sInt *)(obj+Offset),Choices);
+    gh.Choice((int *)(obj+Offset),Choices);
     break;
   case sGFT_FLAGS:
-    gh.Flags((sInt *)(obj+Offset),Choices);
+    gh.Flags((int *)(obj+Offset),Choices);
     break;
   case sGFT_STRING:
     gh.String(sStringDesc((sChar *)(obj+Offset),Count));
     break;
   case sGFT_INT:
-    for(sInt i=0;i<Count;i++)
-      gh.Int((sInt *)(obj+Offset+i*sizeof(sInt)),sInt(Min),sInt(Max),Step);
+    for(int i=0;i<Count;i++)
+      gh.Int((int *)(obj+Offset+i*sizeof(int)),int(Min),int(Max),Step);
     break;
   case sGFT_FLOAT:
-    for(sInt i=0;i<Count;i++)
+    for(int i=0;i<Count;i++)
       gh.Float((sF32 *)(obj+Offset+i*sizeof(sF32)),Min,Max,Step);
     break;
   case sGFT_BYTE:
-    for(sInt i=0;i<Count;i++)
-      gh.Byte((sU8 *)(obj+Offset+i*sizeof(sU8)),sInt(Min),sInt(Max),Step);
+    for(int i=0;i<Count;i++)
+      gh.Byte((sU8 *)(obj+Offset+i*sizeof(sU8)),int(Min),int(Max),Step);
     break;
   case sGFT_COLOR:
     gh.Color((sU32 *)(obj+Offset),Choices);
@@ -1865,7 +1865,7 @@ void sGridFrameTemplate::Add(sGridFrameHelper &gh,void *obj_,const sMessage &cha
   }
 }
 
-sGridFrameTemplate *sGridFrameTemplate::HideCond(sInt offset,sInt mask,sInt value)
+sGridFrameTemplate *sGridFrameTemplate::HideCond(int offset,int mask,int value)
 {
   ConditionOffset = offset;
   ConditionMask = mask;
@@ -1874,7 +1874,7 @@ sGridFrameTemplate *sGridFrameTemplate::HideCond(sInt offset,sInt mask,sInt valu
   return this;
 }
 
-sGridFrameTemplate *sGridFrameTemplate::HideCondNot(sInt offset,sInt mask,sInt value)
+sGridFrameTemplate *sGridFrameTemplate::HideCondNot(int offset,int mask,int value)
 {
   ConditionOffset = offset;
   ConditionMask = mask;
@@ -1923,7 +1923,7 @@ sGridFrameTemplate * sGridFrameTemplate::InitBox(const sChar *label,const sMessa
   return this;
 }
 
-sGridFrameTemplate * sGridFrameTemplate::InitRadio(const sChar *label,sInt offset,const sChar *choices)
+sGridFrameTemplate * sGridFrameTemplate::InitRadio(const sChar *label,int offset,const sChar *choices)
 {
   Init();
   Type = sGFT_RADIO;
@@ -1933,7 +1933,7 @@ sGridFrameTemplate * sGridFrameTemplate::InitRadio(const sChar *label,sInt offse
   return this;
 }
 
-sGridFrameTemplate * sGridFrameTemplate::InitChoice(const sChar *label,sInt offset,const sChar *choices)
+sGridFrameTemplate * sGridFrameTemplate::InitChoice(const sChar *label,int offset,const sChar *choices)
 {
   Init();
   Type = sGFT_CHOICE;
@@ -1943,7 +1943,7 @@ sGridFrameTemplate * sGridFrameTemplate::InitChoice(const sChar *label,sInt offs
   return this;
 }
 
-sGridFrameTemplate * sGridFrameTemplate::InitFlags(const sChar *label,sInt offset,const sChar *choices)
+sGridFrameTemplate * sGridFrameTemplate::InitFlags(const sChar *label,int offset,const sChar *choices)
 {
   Init();
   Type = sGFT_FLAGS;
@@ -1953,7 +1953,7 @@ sGridFrameTemplate * sGridFrameTemplate::InitFlags(const sChar *label,sInt offse
   return this;
 }
 
-sGridFrameTemplate * sGridFrameTemplate::InitString(const sChar *label,sInt offset,sInt count)
+sGridFrameTemplate * sGridFrameTemplate::InitString(const sChar *label,int offset,int count)
 {
   Init();
   Type = sGFT_STRING;
@@ -1963,7 +1963,7 @@ sGridFrameTemplate * sGridFrameTemplate::InitString(const sChar *label,sInt offs
   return this;
 }
 
-sGridFrameTemplate * sGridFrameTemplate::InitFloat(const sChar *label,sInt offset,sInt count,sF32 min,sF32 max,sF32 step)
+sGridFrameTemplate * sGridFrameTemplate::InitFloat(const sChar *label,int offset,int count,sF32 min,sF32 max,sF32 step)
 {
   Init();
   Type = sGFT_FLOAT;
@@ -1976,7 +1976,7 @@ sGridFrameTemplate * sGridFrameTemplate::InitFloat(const sChar *label,sInt offse
   return this;
 }
 
-sGridFrameTemplate * sGridFrameTemplate::InitInt(const sChar *label,sInt offset,sInt count,sInt min,sInt max,sF32 step)
+sGridFrameTemplate * sGridFrameTemplate::InitInt(const sChar *label,int offset,int count,int min,int max,sF32 step)
 {
   Init();
   Type = sGFT_INT;
@@ -1989,7 +1989,7 @@ sGridFrameTemplate * sGridFrameTemplate::InitInt(const sChar *label,sInt offset,
   return this;
 }
 
-sGridFrameTemplate * sGridFrameTemplate::InitByte(const sChar *label,sInt offset,sInt count,sInt min,sInt max,sF32 step)
+sGridFrameTemplate * sGridFrameTemplate::InitByte(const sChar *label,int offset,int count,int min,int max,sF32 step)
 {
   Init();
   Type = sGFT_BYTE;
@@ -2002,7 +2002,7 @@ sGridFrameTemplate * sGridFrameTemplate::InitByte(const sChar *label,sInt offset
   return this;
 }
 
-sGridFrameTemplate * sGridFrameTemplate::InitColor(const sChar *label,sInt offset,const sChar *config)
+sGridFrameTemplate * sGridFrameTemplate::InitColor(const sChar *label,int offset,const sChar *config)
 {
   Init();
   Type = sGFT_COLOR;
@@ -2012,7 +2012,7 @@ sGridFrameTemplate * sGridFrameTemplate::InitColor(const sChar *label,sInt offse
   return this;
 }
 
-sGridFrameTemplate * sGridFrameTemplate::InitColorF(const sChar *label,sInt offset,const sChar *config)
+sGridFrameTemplate * sGridFrameTemplate::InitColorF(const sChar *label,int offset,const sChar *config)
 {
   Init();
   Type = sGFT_COLORF;

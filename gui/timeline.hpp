@@ -27,14 +27,14 @@ public:
   virtual void AddNotify(sWindow *)=0;
 
   // initialisation
-  virtual void SetTimeline(sInt end,sInt speed)=0;
-  virtual void SetLoop(sInt start,sInt end)=0;
+  virtual void SetTimeline(int end,int speed)=0;
+  virtual void SetLoop(int start,int end)=0;
 
   // getters
-  virtual sInt GetEnd()=0;
-  virtual sInt GetSpeed()=0;
-  virtual sInt GetBeat()=0;
-  virtual void GetLoop(sInt &start,sInt &end)=0;
+  virtual int GetEnd()=0;
+  virtual int GetSpeed()=0;
+  virtual int GetBeat()=0;
+  virtual void GetLoop(int &start,int &end)=0;
   virtual sBool GetPlaying()=0;
   virtual sBool GetLooping()=0;
   virtual sBool GetScratching()=0;
@@ -46,82 +46,82 @@ public:
   // scratching is (dis)allowed! That depends only on whether the relevant messages are
   // wired (or not).
   virtual void EnableScratching(sBool scratch)=0;
-  virtual void SeekBeat(sInt beat)=0;
+  virtual void SeekBeat(int beat)=0;
 };
 
 
 class sTimerTimeline : public sTimelineInterface
 {
-  sInt BeatTime;                  // 16:16 current time
-  sInt BeatEnd;                   // 16:16 end of timeline
-  sInt LoopStart;                 // 16:16 start of loop
-  sInt LoopEnd;                   // 16:16 end of loop. the loop is set if start<end
-  sInt Speed;                     // 16:16 time_beat = time_seconds * Speed / 0x10000
+  int BeatTime;                  // 16:16 current time
+  int BeatEnd;                   // 16:16 end of timeline
+  int LoopStart;                 // 16:16 start of loop
+  int LoopEnd;                   // 16:16 end of loop. the loop is set if start<end
+  int Speed;                     // 16:16 time_beat = time_seconds * Speed / 0x10000
   sBool LoopEnable;               // activate looping.
   sBool Playing;                  // handled by Start()/Stop()
   sBool Scratching;               // special mode: like play, but with time frozen
 
-  sInt LastTime;
-  sInt Time;
+  int LastTime;
+  int Time;
 public:
   sTimerTimeline();
   ~sTimerTimeline();
   void OnFrame();
   void AddNotify(sWindow *);
-  void SetTimeline(sInt end,sInt speed);
-  void SetLoop(sInt start,sInt end);
-  sInt GetEnd();
-  sInt GetBeat();
-  sInt GetSpeed();
-  void GetLoop(sInt &start,sInt &end);
+  void SetTimeline(int end,int speed);
+  void SetLoop(int start,int end);
+  int GetEnd();
+  int GetBeat();
+  int GetSpeed();
+  void GetLoop(int &start,int &end);
   sBool GetPlaying();
   sBool GetLooping();
   sBool GetScratching();
   void EnableLoop(sBool loop);
   void EnablePlaying(sBool play);
   void EnableScratching(sBool scratch);
-  void SeekBeat(sInt beat);
+  void SeekBeat(int beat);
 };
 
 class sMusicTimeline : public sTimelineInterface
 {
-  sInt BeatTime;                  // 16:16 current time
-  sInt BeatEnd;                   // 16:16 end of timeline
-  sInt LoopStart;                 // 16:16 start of loop
-  sInt LoopEnd;                   // 16:16 end of loop. the loop is set if start<end
-  sInt Speed;                     // 16:16 time_beat = time_seconds * Speed / 0x10000
+  int BeatTime;                  // 16:16 current time
+  int BeatEnd;                   // 16:16 end of timeline
+  int LoopStart;                 // 16:16 start of loop
+  int LoopEnd;                   // 16:16 end of loop. the loop is set if start<end
+  int Speed;                     // 16:16 time_beat = time_seconds * Speed / 0x10000
   sBool LoopEnable;               // activate looping.
   sBool Playing;                  // handled by Start()/Stop()
   sBool Scratching;               // special mode: like play, but with time frozen
 
-  sInt LastTime;
-  sInt Time;
+  int LastTime;
+  int Time;
 
   sMusicPlayer *Music;
-  sInt TotalSamples;
-  sInt MusicSamples;
+  int TotalSamples;
+  int MusicSamples;
 
 
-  friend void sMusicTimelineSoundHandler(sS16 *samples,sInt count);
-  void SoundHandler(sS16 *samples,sInt count);
+  friend void sMusicTimelineSoundHandler(sS16 *samples,int count);
+  void SoundHandler(sS16 *samples,int count);
 public:
   sMusicTimeline(sMusicPlayer *music);
   ~sMusicTimeline();
   void OnFrame();
   void AddNotify(sWindow *);
-  void SetTimeline(sInt end,sInt speed);
-  void SetLoop(sInt start,sInt end);
-  sInt GetEnd();
-  sInt GetBeat();
-  sInt GetSpeed();
-  void GetLoop(sInt &start,sInt &end);
+  void SetTimeline(int end,int speed);
+  void SetLoop(int start,int end);
+  int GetEnd();
+  int GetBeat();
+  int GetSpeed();
+  void GetLoop(int &start,int &end);
   sBool GetPlaying();
   sBool GetLooping();
   sBool GetScratching();
   void EnableLoop(sBool loop);
   void EnablePlaying(sBool play);
   void EnableScratching(sBool scratch);
-  void SeekBeat(sInt beat);
+  void SeekBeat(int beat);
 };
 
 /****************************************************************************/
@@ -133,18 +133,18 @@ class sTimeTableClip : public sObject
 public:
   sCLASSNAME(sTimeTableClip);
   sTimeTableClip();
-  sTimeTableClip(sInt start,sInt end,sInt line,const sChar *name);
+  sTimeTableClip(int start,int end,int line,const sChar *name);
 
   void AddNotify(sWindow *);
 
   sString<64> Name;
-  sInt Start;
-  sInt Length;
-  sInt Line;
-  sInt Selected;
+  int Start;
+  int Length;
+  int Line;
+  int Selected;
 
-  sInt DragStartX;
-  sInt DragStartY;
+  int DragStartX;
+  int DragStartY;
 };
 
 class sTimetable : public sObject
@@ -154,8 +154,8 @@ public:
   sTimetable();
   void Tag();
   
-  sInt MaxLines;
-  sInt LinesUsed;
+  int MaxLines;
+  int LinesUsed;
 
   sArray<sTimeTableClip *> Clips;
 
@@ -172,7 +172,7 @@ public:
 class sWinTimeline : public sWireClientWindow
 {
 protected:
-  sInt Height;
+  int Height;
   sTimelineInterface *Timeline;
   sBool DecimalTimebase; // false: use powers of 2 (for music); true: use powers of 10 (seconds/frames etc.)
 
@@ -208,13 +208,13 @@ class sWinTimetable : public sWireClientWindow
 protected:
   sTimetable *Timetable;
   sTimelineInterface *Timeline;
-  sInt Height;
-  sInt Zoom;
+  int Height;
+  int Zoom;
   sRect DragRect;
-  sInt DragMode;
-  sInt DragStartX;
-  sInt DragZoomX;
-  sInt DragCenterX;
+  int DragMode;
+  int DragStartX;
+  int DragZoomX;
+  int DragCenterX;
   DragLockFlag DragLockFlags;
 
   void EntryToScreen(const sTimeTableClip *ent,sRect &rect);

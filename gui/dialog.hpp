@@ -17,8 +17,8 @@
 
 /****************************************************************************/
 
-void sOpenFileDialog(const sChar *label,const sChar *extensions,sInt flags,const sStringDesc &buffer,const sMessage &ok,const sMessage &cancel,sObject *tagme=0);
-void sOpenFileDialog(const sChar *label,const sChar *extensions,sInt flags,sPoolString &ps,const sMessage &ok,const sMessage &cancel,sObject *tagme=0);
+void sOpenFileDialog(const sChar *label,const sChar *extensions,int flags,const sStringDesc &buffer,const sMessage &ok,const sMessage &cancel,sObject *tagme=0);
+void sOpenFileDialog(const sChar *label,const sChar *extensions,int flags,sPoolString &ps,const sMessage &ok,const sMessage &cancel,sObject *tagme=0);
 void sErrorDialog(const sMessage &msg,const sChar *text);
 void sOkDialog(const sMessage &ok,const sChar *text);
 void sOkCancelDialog(const sMessage &ok,const sMessage &cancel,const sChar *text);
@@ -56,8 +56,8 @@ private:
   sArray<Item> Items;
   sPoolString Title;
   sPoolString Text;
-  sInt PressedItem;
-  sInt PressedOk;
+  int PressedItem;
+  int PressedOk;
 
 public:
   sMultipleChoiceDialog(const sChar *title,const sChar *text);
@@ -91,7 +91,7 @@ class sProgressDialog
   sString<256> Title;
   sString<256> Text;
   sF32 Percentage;
-  sInt LastUpdate;
+  int LastUpdate;
 
   sRect WindowRect;
   sBool CancelFlag;
@@ -120,17 +120,17 @@ public:
   static void PushLevel(sF32 start,sF32 end);
 
   // Same as PushLevel, for the common case where you're iterating over a collection of stuff.
-  static void PushLevelCounter(sInt current,sInt max);
+  static void PushLevelCounter(int current,int max);
   
   // For every push, there's a matching pop.
   static void PopLevel();
 
-  static void ChangeLevelCounter(sInt current,sInt max); // first push, then pop
+  static void ChangeLevelCounter(int current,int max); // first push, then pop
 };
 
 struct sProgressDialogScope
 {
-  sProgressDialogScope(const sChar *text,sInt current,sInt max);
+  sProgressDialogScope(const sChar *text,int current,int max);
   ~sProgressDialogScope();
 };
 

@@ -62,7 +62,7 @@ class RectWindow : public sWireClientWindow
 
   RectElement *DragElem;
   sRect DragRect;
-  sInt DragMask;
+  int DragMask;
 
   sRectRegion Region;
 public:

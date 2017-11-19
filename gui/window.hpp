@@ -30,17 +30,17 @@ typedef void(sWindow::*sDragFunc)(const sWindowDrag &dd,sDInt);
 
 struct sWindowDrag
 {
-  sInt Mode;                      // sDD_xxx
-  sInt Buttons;                   // LMB | RMB | MMB - 0x8000 is reserved for faking (sValueControl::OnDrag())
-  sInt Flags;                     // double clicked?
-  sInt MouseX;                    // current position
-  sInt MouseY;
-  sInt StartX;                    // position at start of drag
-  sInt StartY;
-  sInt DeltaX;                    // delta since start of drag
-  sInt DeltaY;
-  sInt HardDeltaX;                // delta since start of drag, using hardware mouse without clipping and acceleration
-  sInt HardDeltaY;
+  int Mode;                      // sDD_xxx
+  int Buttons;                   // LMB | RMB | MMB - 0x8000 is reserved for faking (sValueControl::OnDrag())
+  int Flags;                     // double clicked?
+  int MouseX;                    // current position
+  int MouseY;
+  int StartX;                    // position at start of drag
+  int StartY;
+  int DeltaX;                    // delta since start of drag
+  int DeltaY;
+  int HardDeltaX;                // delta since start of drag, using hardware mouse without clipping and acceleration
+  int HardDeltaY;
 };
 
 
@@ -136,26 +136,26 @@ enum sWindowCommands              // only user-commands and sCMD_DUMMY are send 
 
 class sWindow : public sObject
 {
-  sInt MMBScrollStartX;
-  sInt MMBScrollStartY;
-  sInt MMBScrollMode;
+  int MMBScrollStartX;
+  int MMBScrollStartY;
+  int MMBScrollMode;
 public:
   sRect Outer;                    // area of window on screen
   sRect Inner;                    // area of window on screen minus border decoration
   sRect Client;                   // area to paint to, due to scrolling it may be larger than screen area or have negative coordinates
-  sInt ReqSizeX;                  // requested size of paint area for OnCalcSize()
-  sInt ReqSizeY;
-  sInt DecoratedSizeX;            // ReqSizeX plus all borders
-  sInt DecoratedSizeY;
-  sInt ScrollX;                   // scrolling of paint area inside screen area
-  sInt ScrollY;
-  sInt MousePointer;              // sMP_???: current mouse pointer image
+  int ReqSizeX;                  // requested size of paint area for OnCalcSize()
+  int ReqSizeY;
+  int DecoratedSizeX;            // ReqSizeX plus all borders
+  int DecoratedSizeY;
+  int ScrollX;                   // scrolling of paint area inside screen area
+  int ScrollY;
+  int MousePointer;              // sMP_???: current mouse pointer image
   const sChar *ToolTip;           // optional tooltip text for hovering
-  sInt ToolTipLength;             // character count of tooltip, or -1 for null termination
+  int ToolTipLength;             // character count of tooltip, or -1 for null termination
   
-  sInt Flags;                     // sWF_???: important behavour flags
-  sInt Temp;                      // used by whoever needs something temporarly
-  sInt WireSets;                  // used by wire to switch command sets in a window
+  int Flags;                     // sWF_???: important behavour flags
+  int Temp;                      // used by whoever needs something temporarly
+  int WireSets;                  // used by wire to switch command sets in a window
 
   sWindow *Parent;
   sWindow *PopupParent;           // popup windows have a second parent, that is used for focus. the "real" parent is the overlapped window frame.
@@ -174,19 +174,19 @@ public:
   virtual void OnPaint3D();
   virtual void OnLayout();
   virtual void OnCalcSize();
-  virtual void OnNotify(const void *ptr, sInt size);
+  virtual void OnNotify(const void *ptr, int size);
   virtual sBool OnKey(sU32 key);
   virtual sBool OnShortcut(sU32 key);
-  virtual sBool OnCommand(sInt cmd);
+  virtual sBool OnCommand(int cmd);
   virtual void OnDrag(const sWindowDrag &dd);
 
 
   void AddChild(sWindow *);
   void AddBorder(sWindow *);
   void AddBorderHead(sWindow *);
-  class sButtonControl *AddButton(const sChar *label,const sMessage &cmd,sInt style=0);
-  class sButtonControl *AddRadioButton(const sChar *label,sInt *ptr,sInt val,const sMessage &cmd,sInt style=0);
-  class sButtonControl *AddToggleButton(const sChar *label,sInt *ptr,const sMessage &cmd,sInt style=0);
+  class sButtonControl *AddButton(const sChar *label,const sMessage &cmd,int style=0);
+  class sButtonControl *AddRadioButton(const sChar *label,int *ptr,int val,const sMessage &cmd,int style=0);
+  class sButtonControl *AddToggleButton(const sChar *label,int *ptr,const sMessage &cmd,int style=0);
   void AddNotify(const void *,sDInt);
   template<typename Type> void AddNotify(const Type &Val) { AddNotify(&Val,sizeof(Val)); }
   void ClearNotify();
@@ -195,13 +195,13 @@ public:
   void Layout();
   void Close();
 
-  void SetToolTipIfNarrow(const sChar *string,sInt len=-1,sInt space=4);
+  void SetToolTipIfNarrow(const sChar *string,int len=-1,int space=4);
 
-  void Post(sInt cmd);
+  void Post(int cmd);
   sBool MMBScroll(const sWindowDrag &dd);
   class sScrollBorder *AddScrolling(sBool x,sBool y);
   void ScrollTo(const sRect &vis,sBool save);
-  void ScrollTo(sInt x,sInt y);
+  void ScrollTo(int x,int y);
 };
 
 enum sWindowFlag

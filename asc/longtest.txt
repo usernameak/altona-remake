@@ -1216,7 +1216,7 @@ shader MaterialIppFilter
     sGetMatrix(modelscreen,sGM_MODELSCREEN);
     modelscreen.Trans4();
     
-    for(sInt i=0;i<8;i++)
+    for(int i=0;i<8;i++)
     {
       sF32 f = (i*(2.0f/7.0f))-1.0f;
       shift[i].Init(DistX*f,DistY*f,0,0);
@@ -4354,7 +4354,7 @@ shader MaterialBillboards : sEngBaseMtrl
     sU32 Color;
     sF32 SizeX = 1;
     sF32 SizeY = 1;
-    sInt Mode = 0;
+    int Mode = 0;
   }
 
   // the vertex sahder
@@ -4579,7 +4579,7 @@ shader sMtrlFilter4 : sEngBaseMtrl
   {
     sGetMatrix(mvp,sGM_MODELSCREEN);
     mvp.Trans4();
-    for (sInt i=0; i<4; i++)
+    for (int i=0; i<4; i++)
       offset[i] = ipp->FilterKernel[i];
   }
 };
@@ -4624,7 +4624,7 @@ shader sMtrlFilter8 : sEngBaseMtrl
   {
     sGetMatrix(mvp,sGM_MODELSCREEN);
     mvp.Trans4();
-    for (sInt i=0; i<8; i++)
+    for (int i=0; i<8; i++)
       offset[i] = ipp->FilterKernel[i];
   }
 };
@@ -4669,7 +4669,7 @@ shader sMtrlFilter16 : sEngBaseMtrl
   {
     sGetMatrix(mvp,sGM_MODELSCREEN);
     mvp.Trans4();
-    for (sInt i=0; i<16; i++)
+    for (int i=0; i<16; i++)
       offset[i] = ipp->FilterKernel[i];
   }
 };
@@ -4724,7 +4724,7 @@ shader sMtrlFilterMax8 : sEngBaseMtrl
   {
     sGetMatrix(mvp,sGM_MODELSCREEN);
     mvp.Trans4();
-    for (sInt i=0; i<8; i++)
+    for (int i=0; i<8; i++)
       offset[i] = ipp->FilterKernel[i];
   }
 };
@@ -4779,7 +4779,7 @@ shader sMtrlFilterMax16 : sEngBaseMtrl
   {
     sGetMatrix(mvp,sGM_MODELSCREEN);
     mvp.Trans4();
-    for (sInt i=0; i<16; i++)
+    for (int i=0; i<16; i++)
       offset[i] = ipp->FilterKernel[i];
   }
 };
@@ -4949,7 +4949,7 @@ shader sMtrlLumAvgInit : sEngBaseMtrl
   {
     sGetMatrix(mvp,sGM_MODELSCREEN);
     mvp.Trans4();
-    for (sInt i=0; i<8; i++)
+    for (int i=0; i<8; i++)
       offset[i] = ipp->FilterKernel[i];
   }
 };
@@ -5002,7 +5002,7 @@ shader sMtrlLumAvgFinish : sEngBaseMtrl
   {
     sGetMatrix(mvp,sGM_MODELSCREEN);
     mvp.Trans4();
-    for (sInt i=0; i<4; i++)
+    for (int i=0; i<4; i++)
       offset[i] = ipp->FilterKernel[i];
   }
 };

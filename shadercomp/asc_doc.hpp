@@ -108,22 +108,22 @@ public:
   ~ACType();
 
   sPoolString Name;               // name of the type (may be nameless)
-  sInt Type;                      // ACT_??? : int, float, struct, array
+  int Type;                      // ACT_??? : int, float, struct, array
 
-  sInt Rows;                      // int or float: rows is number of components (xyzw)
-  sInt Columns;                   // int or float: columns is number of registers ( column major default)
+  int Rows;                      // int or float: rows is number of components (xyzw)
+  int Columns;                   // int or float: columns is number of registers ( column major default)
   ACType *BaseType;               // struct or array: link to base type
   struct ACExpression *ArrayCountExpr;
-  sInt ArrayCount;                // array: count
+  int ArrayCount;                // array: count
   sArray<class ACVar *> Members;  // struct: list of members
   sArray<class ACExtern *> Externs;  // cbuffer: code fragments 
-  sInt CRegStart,CRegCount;       // constant buffer range, when using auto-constants
-  sInt CSlot;                     // constant buffer slot
+  int CRegStart,CRegCount;       // constant buffer range, when using auto-constants
+  int CSlot;                     // constant buffer slot
   ACType *Template;               // one template parameter <x>
-  sInt TemplateCount;             // second template parameter <x,n>
-  sInt Temp;
+  int TemplateCount;             // second template parameter <x,n>
+  int Temp;
 
-  void SizeOf(sInt &columns,sInt &rows);
+  void SizeOf(int &columns,int &rows);
 };
 
 class ACVar                       // a variable (local to a function)
@@ -136,9 +136,9 @@ public:
   sPoolString Name;
   class ACType *Type;
   sPoolString Semantic;           // "POSITION", "TEXCOORD1"
-  sInt RegisterType;              // 0: no explicit register binding, 'c' or 's' otherwise
-  sInt RegisterNum;
-  sInt Usages;
+  int RegisterType;              // 0: no explicit register binding, 'c' or 's' otherwise
+  int RegisterNum;
+  int Usages;
   sBool Function;                 // this is actually an ACFunc
   struct ACExpression *Permute;          // permutation dependent variable declarations
 
@@ -153,17 +153,17 @@ public:
   sPoolString Para;
   sPoolString Body;
   const sChar *File;
-  sInt ParaLine;
-  sInt BodyLine;
+  int ParaLine;
+  int BodyLine;
 };
 
 struct ACPermuteMember
 {
   sPoolString Name;
-  sInt Value;             // value.
-  sInt Max;               // group: max value (inclusive)
-  sInt Mask;              // group only: mask to apply (after shift)
-  sInt Shift;             // shift amount, for creating symbols
+  int Value;             // value.
+  int Max;               // group: max value (inclusive)
+  int Mask;              // group only: mask to apply (after shift)
+  int Shift;             // shift amount, for creating symbols
   sBool Group;            // 1:group, 0:element in group
 };
 
@@ -171,7 +171,7 @@ class ACPermute
 {
 public:
   sPoolString Name;
-  sInt MaxShift;
+  int MaxShift;
   sArray<ACPermuteMember> Members;
   sArray<struct ACExpression *> Asserts;
 };
@@ -223,15 +223,15 @@ struct ACLiteral
   ACExpression *Expr;             // sometimes, literals are expressions.. used in {}
   sPoolString Value;              // lexical value, for exact float reproduction
   sF32 ValueF;
-  sInt ValueI;
-  sInt Token;                     // sTOK_INT, sTOK_FLOAT
+  int ValueI;
+  int Token;                     // sTOK_INT, sTOK_FLOAT
 };
 
 struct ACExpression
 {
   ACExpression *Left;
   ACExpression *Right;
-  sInt Op;
+  int Op;
 
   ACType *CastType;               // ACE_CAST
   ACVar *Variable;                // ACE_VAR, ACE_CALL
@@ -263,14 +263,14 @@ struct ACStatement
 {
 public:
   ACStatement *Next;              // link to next statement in block
-  sInt Op;                        // ACS_???
+  int Op;                        // ACS_???
   ACStatement *Body;              // all flow control
   ACStatement *Else;              // else body (if any), for-init
   ACExpression *Cond;             // for-cond, if, while
   ACExpression *Expr;             // expr, return, for-step
   ACType *Type;                   // ACS_TYPEDECL
   ACVar *Var;                     // ACS_VARDECL
-  sInt SourceLine;
+  int SourceLine;
   const sChar *SourceFile;
 };
 
@@ -286,13 +286,13 @@ enum ACGlobalType
 
 struct ACGlobal
 {
-  sInt Kind;
+  int Kind;
   ACVar *Var;
   ACType *Type;
   ACExpression *Init;
   ACExpression *Permute;          // ACG_ATTRIBUTE, ACG_PRAGMA
   sPoolString Attribute;          // ACG_ATTRIBUTE, ACG_PRAGMA
-  sInt SourceLine;
+  int SourceLine;
   const sChar *SourceFile;
 };
 
@@ -304,10 +304,10 @@ class ACDoc
 
   sMemoryPool *Pool;              // pool for ACStatement and ACExpression
   sScanner Scan;
-  sInt CurrentLine;
+  int CurrentLine;
   const sChar *CurrentFile;
   void Print(const sChar *str);
-  void PrintLine(sInt line,const sChar *file);
+  void PrintLine(int line,const sChar *file);
   sPRINTING0(PrintF, sString<1024> tmp; sFormatStringBuffer buf=sFormatStringBase(tmp,format);buf,Print((const sChar*)tmp););
 
   // default types and functions. initialized only once!
@@ -328,7 +328,7 @@ public:
   sArray<ACVar *> AllVariables;   // for memory management
   sArray<ACGlobal> Program;       // all global items
   ACFunc *Function;               // current function
-  sInt Scope;                     // current variable scope level
+  int Scope;                     // current variable scope level
   ACPermute *UsePermute;          // "use permute" clause
 
   // small helpers
@@ -337,12 +337,12 @@ private:
   ACFunc *FindFunc(sPoolString);  // search Functions and Intrinsics
   ACVar *FindVar(sPoolString);    // search local and global variables
 
-  void AddDefTypes(const sChar *name,sInt type,sBool many);
-  void AddDefType(const sChar *name,sInt type,sInt row,sInt col);
+  void AddDefTypes(const sChar *name,int type,sBool many);
+  void AddDefType(const sChar *name,int type,int row,int col);
   void AddDefFunc(const sChar *name);
-  ACExpression *NewExpr(sInt op,ACExpression *a,ACExpression *b);
+  ACExpression *NewExpr(int op,ACExpression *a,ACExpression *b);
   ACStatement *NewStat();
-  sInt ConstFoldInt(ACExpression *expr);
+  int ConstFoldInt(ACExpression *expr);
 
   // parser
 
@@ -350,29 +350,29 @@ private:
   void _Line();
   sBool _IsDecl();
   ACVar *_Decl();
-  ACVar *_DeclPost(ACType *type,sInt usages);
-  void _Register(sInt &regtype,sInt &regnum);
+  ACVar *_DeclPost(ACType *type,int usages);
+  void _Register(int &regtype,int &regnum);
   ACStatement *_Block();          // scan one or more statement, open new scope
-  ACType *_Struct(sInt type);     // ACT_STRUCT or ACT_CBUFFER
+  ACType *_Struct(int type);     // ACT_STRUCT or ACT_CBUFFER
   ACExtern *_Extern();
   void _Permute();
 
   ACStatement *_Statement();      // scan one or more statements without new scope
   ACExpression *_Expression();
-  ACExpression *_Expression1(sInt level);
+  ACExpression *_Expression1(int level);
   ACExpression *_Value();
   ACLiteral *_Literal();
   void _ParameterList(ACExpression **patch);
 
   // output
   
-  sInt OutputLanguage;
-  sInt OutputRender;
+  int OutputLanguage;
+  int OutputRender;
   void OutStruct(ACType *type);
   void OutTypeDecoration(ACType *type,sPoolString name);
   void OutVar(ACVar *var,ACExpression *init);
-  void OutBlock(ACStatement *stat,sInt indent);
-  void OutStat(ACStatement *stat,sInt indent);
+  void OutBlock(ACStatement *stat,int indent);
+  void OutStat(ACStatement *stat,int indent);
   void OutBinary(ACExpression *left,ACExpression *right,const sChar *name,sBool brackets);
   void OutExpr(ACExpression *expr,sBool brackets=0);
   void OutLiteral(ACLiteral *lit);
@@ -388,8 +388,8 @@ public:
   void NewFile();                   // clears cbuffers / permutations
   sBool Parse(const sChar *source); // parse a shader or cbuffer/permute source
   void Void();                      // invalidate ASC buffer. Output will fail.
-  void Output(sInt shadertype,sInt renderer);     // output shader as sSTF_CG or sSTF_DX (hlsl), sSTF_VERTEX or sSTF_PIXEL. pif(renderer)
-  sBool IsValidPermutation(ACPermute *perm,sInt n);
+  void Output(int shadertype,int renderer);     // output shader as sSTF_CG or sSTF_DX (hlsl), sSTF_VERTEX or sSTF_PIXEL. pif(renderer)
+  sBool IsValidPermutation(ACPermute *perm,int n);
 };
 
 /****************************************************************************/

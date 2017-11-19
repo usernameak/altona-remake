@@ -23,8 +23,8 @@ static sBool sMidiLog, sMidiOnlyPhys;
 template <class T,int max> class sLocklessQueue2
 {
   T Data[max];
-  volatile sInt Write;
-  volatile sInt Read;
+  volatile int Write;
+  volatile int Read;
 public:
   sLocklessQueue2()   { Write=0;Read=0;sVERIFY(sIsPower2(max)); }
   ~sLocklessQueue2()  {}
@@ -32,16 +32,16 @@ public:
   // may be called by producer
 
   sBool IsFull()      { return Write >= Read+max; }
-  void AddTail(const T &e)  { sInt i=Write; sVERIFY(i < Read+max); Data[i&(max-1)] = e; sWriteBarrier(); Write=i+1; }
+  void AddTail(const T &e)  { int i=Write; sVERIFY(i < Read+max); Data[i&(max-1)] = e; sWriteBarrier(); Write=i+1; }
 
   // may be called by consumer
 
   sBool IsEmpty()     { return Read >= Write; }
-  sBool RemHead(T &e)        { sInt i=Read; if(i>=Write) return 0; e=Data[i&(max-1)]; sWriteBarrier(); Read=i+1; return 1; }
+  sBool RemHead(T &e)        { int i=Read; if(i>=Write) return 0; e=Data[i&(max-1)]; sWriteBarrier(); Read=i+1; return 1; }
 
   // this is an approximation!
 
-  sInt GetUsed()      { return Write-Read; }
+  int GetUsed()      { return Write-Read; }
 };
 
 /****************************************************************************/
@@ -71,7 +71,7 @@ class sMidiHandlerWin : public sMidiHandler_
 public:
   sMidiHandlerWin();
   ~sMidiHandlerWin();
-  const sChar *GetDeviceName(sBool out,sInt dev);
+  const sChar *GetDeviceName(sBool out,int dev);
 
   sBool HasInput();
   sBool GetInput(sMidiEvent &e);
@@ -112,18 +112,18 @@ void CALLBACK sMidiOutProc(HMIDIOUT out,UINT msg,DWORD inst,DWORD p0,DWORD p1)
 
 sMidiHandlerWin::sMidiHandlerWin()
 {
-  sInt max;
+  int max;
   sMidiIn *in;
   sMidiOut *out;
   sString<128> str;
 
   max = midiInGetNumDevs();
   In.HintSize(max);
-  for(sInt i=0;i<max;i++)
+  for(int i=0;i<max;i++)
   {
     HMIDIIN hnd;
     MIDIINCAPSW caps;
-    sInt n = In.GetCount();
+    int n = In.GetCount();
     MMRESULT r = midiInOpen(&hnd,i,(DWORD_PTR)sMidiInProc,n,CALLBACK_FUNCTION);
     if(r==MMSYSERR_NOERROR)
     {
@@ -143,11 +143,11 @@ sMidiHandlerWin::sMidiHandlerWin()
 
   max = midiOutGetNumDevs();
   Out.HintSize(max);
-  for(sInt i=0;i<max;i++)
+  for(int i=0;i<max;i++)
   {
     HMIDIOUT hnd;
     MIDIOUTCAPSW caps;
-    sInt n = Out.GetCount();
+    int n = Out.GetCount();
     MMRESULT r = midiOutOpen(&hnd,i,(DWORD_PTR)sMidiOutProc,n,CALLBACK_FUNCTION);
     if(r==MMSYSERR_NOERROR)
     {
@@ -167,7 +167,7 @@ sMidiHandlerWin::sMidiHandlerWin()
   }
 }
 
-const sChar *sMidiHandlerWin::GetDeviceName(sBool out,sInt dev)
+const sChar *sMidiHandlerWin::GetDeviceName(sBool out,int dev)
 {
   if(out)
   {

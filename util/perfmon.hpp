@@ -18,7 +18,7 @@ struct sThreadContext;
 #if sPERFMON_ENABLED
 
 // put this into sMain()
-void sAddPerfMon(sInt maxThreads=8, sInt maxEvents=8000, sInt maxValues=100, sInt maxSwitches=40);
+void sAddPerfMon(int maxThreads=8, int maxEvents=8000, int maxValues=100, int maxSwitches=40);
 
 // returns if perf mon is running
 sBool sPerfMonInited();
@@ -122,10 +122,10 @@ public:
 // submits an integer variable for tracking. if you've got many values
 // to track, give them the same group id and they'll be sorted nicely.
 // the display supports overflow/underflow, so choose min/max accordingly :)
-void sPerfAddValue(const sChar *name, const sInt *ptr, sInt min, sInt max, sInt group=-1);
+void sPerfAddValue(const sChar *name, const int *ptr, int min, int max, int group=-1);
 
 // removes variable from tracking
-void sPerfRemValue(const sInt *ptr);
+void sPerfRemValue(const int *ptr);
 
 
 /****************************************************************************/
@@ -136,9 +136,9 @@ void sPerfRemValue(const sInt *ptr);
 
 // adds debug switch. Specify a name, a choice (like "off|on") and an integer
 // variable to store the result in.
-void sPerfAddSwitch(const sChar *name, const sChar *choice, sInt *ptr);
+void sPerfAddSwitch(const sChar *name, const sChar *choice, int *ptr);
 
-void sPerfRemSwitch(sInt *ptr);
+void sPerfRemSwitch(int *ptr);
 
 /****************************************************************************/
 /***                                                                      ***/
@@ -146,10 +146,10 @@ void sPerfRemSwitch(sInt *ptr);
 /***                                                                      ***/
 /****************************************************************************/
 
-void sPerfIntGetValue(sInt index, const sChar *&name, sInt &value, sBool &groupstart);
+void sPerfIntGetValue(int index, const sChar *&name, int &value, sBool &groupstart);
 
-void sPerfIntGetSwitch(sInt index, const sChar *&name, const sChar *&choice, sInt &value);
-void sPerfIntSetSwitch(const sChar *name, sInt newvalue);
+void sPerfIntGetSwitch(int index, const sChar *&name, const sChar *&choice, int &value);
+void sPerfIntSetSwitch(const sChar *name, int newvalue);
 
 #else
 

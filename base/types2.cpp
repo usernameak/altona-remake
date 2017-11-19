@@ -21,8 +21,8 @@
 /***                                                                      ***/
 /****************************************************************************/
 
-static sInt GCFlag=0;
-static sInt GCCollecting=0;
+static int GCFlag=0;
+static int GCCollecting=0;
 static sArray<sObject *> *GCObjects;
 static sArray<sObject *> *GCRoots;
 static sThreadLock *GCLock=0;       // internal lock for safe mulithreaded access to gc data
@@ -67,7 +67,7 @@ void sRemRoot(sObject *o)
   }
 }
 
-sInt sGetRootCount()
+int sGetRootCount()
 {
   return GCRoots->GetCount();
 }
@@ -94,7 +94,7 @@ void sCollector(sBool exit=sFALSE)
     GCFlag = 1;
   }
 
-  sInt lastcount = 0;
+  int lastcount = 0;
   do
   {
     lastcount = GCRoots->GetCount();
@@ -111,7 +111,7 @@ void sCollector(sBool exit=sFALSE)
       sFORALL(*GCObjects,o)
         if(!o->NeedFlag)
           o->Finalize();
-      for(sInt i=0;i<GCObjects->GetCount();)
+      for(int i=0;i<GCObjects->GetCount();)
       {
         o = (*GCObjects)[i];
         if(!o->NeedFlag)
@@ -201,7 +201,7 @@ void sObject::Finalize()
 
 //static sMessage sMessagePool[0x4000];
 static sLockQueue<sMessage,0x4000> *sMessageQueue;
-//static sInt sMessageUsed=0;
+//static int sMessageUsed=0;
 //static sThreadLock *sMessageLock;
 
 void sInitMessage()
@@ -271,7 +271,7 @@ void sMessage::Pump()
     msg.Send();
     /*
   sMessageLock->Lock();
-  for(sInt i=0;i<sMessageUsed;i++)
+  for(int i=0;i<sMessageUsed;i++)
     sMessagePool[i].Send();
   sMessageUsed = 0;
   sMessageLock->Unlock();
@@ -311,7 +311,7 @@ void sMessageTimerThread(sThread *t,void *v)
   while(t->CheckTerminate() && timer->Loop);
 }
 
-sMessageTimer::sMessageTimer(const sMessage &msg,sInt delay,sInt loop)
+sMessageTimer::sMessageTimer(const sMessage &msg,int delay,int loop)
 {
   Msg = msg;
   Delay = delay;
@@ -377,7 +377,7 @@ sTextBuffer& sTextBuffer::operator=(const sChar* t)
 template <class streamer> void sTextBuffer::Serialize_(streamer &s)
 {
   sVERIFY(sizeof(sChar)==sizeof(sU16));
-  sInt len = Used;
+  int len = Used;
   s | len;
   if(s.IsReading())
   {
@@ -417,7 +417,7 @@ void sTextBuffer::Init()
   Buffer = new sChar[Alloc];
 }
 
-void sTextBuffer::Grow(sInt add)
+void sTextBuffer::Grow(int add)
 {
   if(Used+add+1 >= Alloc)
   {
@@ -430,7 +430,7 @@ void sTextBuffer::Clear()
   Used = 0;
 }
 
-void sTextBuffer::SetSize(sInt count)
+void sTextBuffer::SetSize(int count)
 {
   if(Alloc<count)
   {
@@ -459,22 +459,22 @@ sChar *sTextBuffer::Get()
   return Buffer;
 }
 
-sInt sTextBuffer::GetLength() {
+int sTextBuffer::GetLength() {
   return Used;
 }
 
-void sTextBuffer::Insert(sInt pos,sChar c)
+void sTextBuffer::Insert(int pos,sChar c)
 {
   sVERIFY(pos>=0 && pos<=Used);
   Grow(1);
 
   Used++;
-  for(sInt i=Used;i>pos;i--)
+  for(int i=Used;i>pos;i--)
     Buffer[i] = Buffer[i-1];
   Buffer[pos] = c;
 }
 
-void sTextBuffer::Insert(sInt pos,const sChar *c,sInt len)
+void sTextBuffer::Insert(int pos,const sChar *c,int len)
 {
   sVERIFY(pos>=0 && pos<=Used);
   if(len==-1) len = sGetStringLen(c);
@@ -482,30 +482,30 @@ void sTextBuffer::Insert(sInt pos,const sChar *c,sInt len)
   Grow(len);
 
   Used+=len;
-  for(sInt i=Used;i>pos;i--)
+  for(int i=Used;i>pos;i--)
     Buffer[i] = Buffer[i-len];
-  for(sInt i=0;i<len;i++)
+  for(int i=0;i<len;i++)
     Buffer[pos+i] = c[i];
 }
 
 
-void sTextBuffer::Delete(sInt pos)
+void sTextBuffer::Delete(int pos)
 {
   sVERIFY(pos>=0 && pos<Used);
   Used--;
-  for(sInt i=pos;i<Used;i++)
+  for(int i=pos;i<Used;i++)
     Buffer[i] = Buffer[i+1];
 }
 
-void sTextBuffer::Delete(sInt pos,sInt count)
+void sTextBuffer::Delete(int pos,int count)
 {
   sVERIFY(pos>=0 && pos<Used);
   Used-=count;
-  for(sInt i=pos;i<Used;i++)
+  for(int i=pos;i<Used;i++)
     Buffer[i] = Buffer[i+count];
 }
 
-void sTextBuffer::Set(sInt pos,sChar c)
+void sTextBuffer::Set(int pos,sChar c)
 {
   sVERIFY(pos>=0 && pos<Used);
   Buffer[pos] = c;
@@ -513,18 +513,18 @@ void sTextBuffer::Set(sInt pos,sChar c)
 
 /****************************************************************************/
 
-void sTextBuffer::Indent(sInt count)
+void sTextBuffer::Indent(int count)
 {
-  sInt pos = Used;
+  int pos = Used;
   while(pos>=0 && Buffer[pos]!='\n')
     pos--;
   pos++;
-  sInt spaces = Used-pos;
+  int spaces = Used-pos;
   if(spaces<count)
     PrintF(L"%_",count-spaces);
 }
 
-void sTextBuffer::PrintChar(sInt c)
+void sTextBuffer::PrintChar(int c)
 {
   Grow(1);
   Buffer[Used++] = c;
@@ -535,19 +535,19 @@ void sTextBuffer::Print(const sChar *text)
   Print(text,sGetStringLen(text));
 }
 
-void sTextBuffer::Print(const sChar *text,sInt c)
+void sTextBuffer::Print(const sChar *text,int c)
 {
   Grow(c);
   sCopyMem(Buffer+Used,text,c*sizeof(sChar));
   Used+=c;
 }
 
-void sTextBuffer::PrintListing(const sChar *text,sInt line)
+void sTextBuffer::PrintListing(const sChar *text,int line)
 {
   while(*text)
   {
     PrintF(L"%04d ",line);
-    sInt n = 0;
+    int n = 0;
     while(text[n] && text[n]!='\n')
       n++;
     Print(text,n);
@@ -601,7 +601,7 @@ void sTextFileWriter::Begin(const sChar *filename)
 
 void sTextFileWriter::Flush()
 {
-  const sInt BUFFER_SIZE = 2048;
+  const int BUFFER_SIZE = 2048;
   sU8 buffer[BUFFER_SIZE];
   sBool lastWasCR = sFALSE;
 
@@ -609,7 +609,7 @@ void sTextFileWriter::Flush()
   const sChar *data = Buffer.Get();
   while(*data)
   {
-    sInt pos = 0;
+    int pos = 0;
     while(*data && pos < BUFFER_SIZE - 2)
     {
       if(sCONFIG_SYSTEM_WINDOWS)
@@ -673,7 +673,7 @@ public:
     delete Entries;
   }
 
-  const sChar *Add(const sChar *s,sInt len, sBool *isnew)
+  const sChar *Add(const sChar *s,int len, sBool *isnew)
   {
     sStringPoolEntry *e;
     sStringPoolEntry **hp;
@@ -708,17 +708,17 @@ public:
 static sStringPool_ *sStringPool;
 const sChar *sPoolStringEmpty;
 
-const sChar *sAddToStringPool(const sChar *s,sInt len, sBool *isnew)
+const sChar *sAddToStringPool(const sChar *s,int len, sBool *isnew)
 {
   return sStringPool->Add(s,len,isnew);
 }
 
-const sChar *sAddToStringPool2(const sChar *a,sInt al,const sChar *b,sInt bl)
+const sChar *sAddToStringPool2(const sChar *a,int al,const sChar *b,int bl)
 {
   sChar *s = sALLOCSTACK(sChar,al+bl);
-  for(sInt i=0;i<al;i++)
+  for(int i=0;i<al;i++)
     s[i] = a[i];
-  for(sInt i=0;i<bl;i++)
+  for(int i=0;i<bl;i++)
     s[al+i] = b[i];
   sPoolString p(s,al+bl);
   return p;
@@ -746,12 +746,12 @@ sADDSUBSYSTEM(StringPool,0x11,sInitStringPool,sClearStringPool)
 /***                                                                      ***/
 /****************************************************************************/
 
-sHashTableBase::sHashTableBase(sInt size,sInt nodesperblock)
+sHashTableBase::sHashTableBase(int size,int nodesperblock)
 {
   HashSize = size;
   HashMask = size-1;
   HashTable = new Node*[HashSize];
-  for(sInt i=0;i<HashSize;i++)
+  for(int i=0;i<HashSize;i++)
     HashTable[i] = 0;
 
   NodesPerBlock = nodesperblock;
@@ -768,7 +768,7 @@ sHashTableBase::~sHashTableBase()
 
 void sHashTableBase::Clear()
 {
-  for(sInt i=0;i<HashSize;i++)
+  for(int i=0;i<HashSize;i++)
     HashTable[i] = 0;
   sDeleteAll(NodeBlocks);
   FreeNodes = 0;
@@ -847,7 +847,7 @@ void *sHashTableBase::Rem(const void *key)
 void sHashTableBase::ClearAndDeleteValues()
 {
   Node *n;
-  for(sInt i=0;i<HashSize;i++)
+  for(int i=0;i<HashSize;i++)
   {
     n = HashTable[i];
     while(n)
@@ -862,7 +862,7 @@ void sHashTableBase::ClearAndDeleteValues()
 void sHashTableBase::ClearAndDeleteKeys()
 {
   Node *n;
-  for(sInt i=0;i<HashSize;i++)
+  for(int i=0;i<HashSize;i++)
   {
     n = HashTable[i];
     while(n)
@@ -877,7 +877,7 @@ void sHashTableBase::ClearAndDeleteKeys()
 void sHashTableBase::ClearAndDelete()
 {
   Node *n;
-  for(sInt i=0;i<HashSize;i++)
+  for(int i=0;i<HashSize;i++)
   {
     n = HashTable[i];
     while(n)
@@ -892,7 +892,7 @@ void sHashTableBase::ClearAndDelete()
 
 void sHashTableBase::GetAll(sArray<void *> *a)
 {
-  for(sInt i=0;i<HashSize;i++)
+  for(int i=0;i<HashSize;i++)
   {
     Node *n = HashTable[i];
     while(n)
@@ -923,7 +923,7 @@ void sRectRegion::Add(const sRect &add)
 void sRectRegion::Sub(const sRect &sub)
 {
   sRect r;
-  sInt i;
+  int i;
 
   for(i=0;i<Rects.GetCount();)
   {
@@ -945,10 +945,10 @@ void sRectRegion::And(const sRect &clip)
 {
   sRect r;
 
-  sInt max = Rects.GetCount();
-  sInt write = 0;
+  int max = Rects.GetCount();
+  int write = 0;
 
-  for(sInt i=0;i<max;i++)
+  for(int i=0;i<max;i++)
   {
     r = Rects[i];
 
@@ -1003,7 +1003,7 @@ void sRectRegion::AddParts(sRect old,const sRect &sub)
 /***                                                                      ***/
 /****************************************************************************/
 
-sStringMap_::sStringMap_ (sInt numSlots)
+sStringMap_::sStringMap_ (int numSlots)
 {
   Size = numSlots;
   Slots = new Slot*[Size];
@@ -1022,7 +1022,7 @@ sStringMap_::~sStringMap_ ()
 
 void sStringMap_::Clear ()
 {
-  for (sInt i = 0; i < Size; i++)
+  for (int i = 0; i < Size; i++)
   {
     Slot * slot;
     while ((slot = Slots[i])!=0)
@@ -1038,7 +1038,7 @@ sU32 sStringMap_::Hash (const sChar * key) const
 {
   sU32 hash = 0;
 
-  for (sInt i = 0; key[i]; i++)
+  for (int i = 0; key[i]; i++)
   {
     hash += key[i];
     hash += (hash << 10);
@@ -1056,7 +1056,7 @@ sU32 sStringMap_::Hash (const sChar * key) const
 
 void sStringMap_::Del (const sChar * key)
 {
-  sInt slotNum = Hash(key);
+  int slotNum = Hash(key);
   Slot * slot = Slots[slotNum];
   Slot * last = sNULL;
 
@@ -1092,7 +1092,7 @@ void sStringMap_::Del (const sChar * key)
 
 void * sStringMap_::Get (const sChar * key) const
 {
-  sInt slotNum = Hash(key);
+  int slotNum = Hash(key);
   Slot * slot = Slots[slotNum];
   if (slot)
   {
@@ -1112,7 +1112,7 @@ void * sStringMap_::Get (const sChar * key) const
 
 void sStringMap_::Set (const sChar * key, void * value)
 {
-  sInt slotNum = Hash(key);
+  int slotNum = Hash(key);
 
   Slot * slot = Slots[slotNum];
   if (slot)
@@ -1142,17 +1142,17 @@ void sStringMap_::Set (const sChar * key, void * value)
   }
 
   slot->value = value;  
-  sInt keyLen = sGetStringLen(key)+1;
+  int keyLen = sGetStringLen(key)+1;
   slot->key = new sChar[keyLen];
   sCopyString(slot->key, key, keyLen);
 }
 
 /****************************************************************************/
 
-sInt sStringMap_::GetCount () const
+int sStringMap_::GetCount () const
 {
-  sInt count = 0;
-  for (sInt slotNum = 0; slotNum < Size; slotNum++)
+  int count = 0;
+  for (int slotNum = 0; slotNum < Size; slotNum++)
   {
     if (Slots[slotNum])
     {
@@ -1169,7 +1169,7 @@ sInt sStringMap_::GetCount () const
 sStaticArray<sChar *> * sStringMap_::GetKeys () const
 {
   sStaticArray<sChar *> * keys = new sStaticArray<sChar *>(GetCount());
-  for (sInt slotNum = 0; slotNum < Size; slotNum++)
+  for (int slotNum = 0; slotNum < Size; slotNum++)
   {
     if (Slots[slotNum])
     {
@@ -1185,7 +1185,7 @@ sStaticArray<sChar *> * sStringMap_::GetKeys () const
 
 void sStringMap_::Dump () const
 {
-  for (sInt i = 0; i < Size; i++)
+  for (int i = 0; i < Size; i++)
   {
     Slot * slot = Slots[i];
     sPrintF(L"%02d: ", i);
@@ -1223,7 +1223,7 @@ void sStringMap_::Dump () const
 #define BYTESPERWORD (1<<(BITSHIFT-3))
 #define BITSPERCHUNK ((1<<BITSHIFT)*WORDSPERCHUNK)
 
-void sBitVector::Resize(sInt bits)
+void sBitVector::Resize(int bits)
 {
   sPtr words = ((bits+BITSPERCHUNK-1)/BITSPERCHUNK)*4;
   if(Words<words)
@@ -1262,7 +1262,7 @@ sBitVector::~sBitVector()
   delete[] Data;
 }
 
-sBool sBitVector::Get(sInt n)
+sBool sBitVector::Get(int n)
 {
   sPtr b = n>>BITSHIFT;
   if(b<Words)
@@ -1271,29 +1271,29 @@ sBool sBitVector::Get(sInt n)
     return NewVal & 1;
 }
 
-void sBitVector::Set(sInt n)
+void sBitVector::Set(int n)
 {
   Resize(n+1);
   Data[n>>BITSHIFT] |= (1<<(n&BITMASK));
 }
 
-void sBitVector::Clear(sInt n)
+void sBitVector::Clear(int n)
 {
   Resize(n+1);
   Data[n>>BITSHIFT] &= ~(1<<(n&BITMASK));
 }
 
-void sBitVector::Assign(sInt n,sInt v)
+void sBitVector::Assign(int n,int v)
 {
   Resize(n+1);
-  sInt mask = 1<<(n&BITMASK);
-  sInt byte = n>>BITSHIFT;
+  int mask = 1<<(n&BITMASK);
+  int byte = n>>BITSHIFT;
 
   Data[byte] &= ~mask;
   Data[byte] |= ((v&1)<<(n&BITMASK));
 }
 
-sBool sBitVector::NextBit(sInt &n)
+sBool sBitVector::NextBit(int &n)
 {
   sVERIFY(NewVal==0);
 

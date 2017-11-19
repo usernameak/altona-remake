@@ -53,7 +53,7 @@ public:
   sDInt Used;
   sDInt Free;
 
-  sInt MappedCount;
+  int MappedCount;
   sU8 *MapPtr;
 };
 
@@ -69,7 +69,7 @@ class sGeoBufferManager
   sDList2<sGeoBuffer11> Free;
   sDList2<sGeoBuffer11> Used;
   sGeoBuffer11 *Current;
-  sInt BlockSize;
+  int BlockSize;
 
   void NewBuffer();
 public:
@@ -86,8 +86,8 @@ class sGeometryPrivate
 protected:
   struct Buffer
   {
-    sInt ElementCount;
-    sInt ElementSize;
+    int ElementCount;
+    int ElementSize;
 
     sGeoMapHandle DynMap;
     void *LoadBuffer;             // for static loading
@@ -102,12 +102,12 @@ protected:
   };
   Buffer VB[4];
   Buffer IB;
-  sInt DXIndexFormat;
-  sInt Topology;
-  sInt Mapped;
+  int DXIndexFormat;
+  int Topology;
+  int Mapped;
 
-  void BeginLoadPrv(Buffer *,sInt duration,void **vp,sInt bindflag);
-  void EndLoadPrv(Buffer *,sInt count,sInt bindflag);
+  void BeginLoadPrv(Buffer *,int duration,void **vp,int bindflag);
+  void EndLoadPrv(Buffer *,int count,int bindflag);
 };
 
 /****************************************************************************/
@@ -122,12 +122,12 @@ class sCBuffer11
 {
 public:
   sDNode Node;
-  sCBuffer11(sInt size,sInt bin);
+  sCBuffer11(int size,int bin);
   ~sCBuffer11();
 
   struct ID3D11Buffer *DXBuffer;
-  sInt Size;
-  sInt Bin;
+  int Size;
+  int Bin;
   sBool IsMapped;
 };
 
@@ -146,7 +146,7 @@ public:
   sCBufferManager();
   ~sCBufferManager();
 
-  void Map(sCBufferMap &map,sInt Size);
+  void Map(sCBufferMap &map,int Size);
   void Unmap(sCBufferMap &map);
   void Flush();
 };
@@ -183,7 +183,7 @@ protected:
 class sTextureBasePrivate 
 {
   friend void InitGFX();
-  friend void ResizeGFX(sInt x,sInt y);
+  friend void ResizeGFX(int x,int y);
   friend void sSetTarget(const struct sTargetPara &para);
   friend void sCopyTexture(const struct sCopyTexturePara &para);
   friend void sBeginReadTexture(const sU8*& data, sS32& pitch, enum sTextureFlags& flags,class sTexture2D *tex);
@@ -204,9 +204,9 @@ protected:
   struct ID3D11RenderTargetView *DXCubeRenderView[6];
   sU8 *LoadPtr;
   sBool Dynamic;
-  sInt LoadMipmap;
-  sInt LoadCubeFace;
-  sInt DXFormat;
+  int LoadMipmap;
+  int LoadCubeFace;
+  int DXFormat;
 
   struct ID3D11Texture2D *DXReadTex;    // the first time a texture is read by CPU, a buffer gets allocated, that will not go away until the whole texture is deleted. because it is likely that the same texture is read again
 
@@ -232,7 +232,7 @@ protected:
     struct ID3D11RasterizerState *RasterState;
     struct ID3D11SamplerState *SamplerStates[sMTRL_MAXTEX];
     sVector4 BlendFactor;
-    sInt StencilRef;
+    int StencilRef;
   };
 
   StateObjects *Variants;
@@ -243,7 +243,7 @@ protected:
 struct sOccQueryNode
 {
   sDNode Node;
-  sInt Pixels;
+  int Pixels;
   struct ID3D11Query *Query;
 };
 
@@ -271,9 +271,9 @@ public:
 class sGpuToCpuPrivate 
 {
 protected:
-  sInt SizeX,SizeY;
-  sInt Flags;
-  sInt DXFormat;
+  int SizeX,SizeY;
+  int Flags;
+  int DXFormat;
   sBool Locked;
 
   struct ID3D11Texture2D *Dest;
@@ -284,8 +284,8 @@ protected:
 class sComputeShaderPrivate
 {
 public:
-  static const sInt MaxTexture = 16;
-  static const sInt MaxUAV = 4;
+  static const int MaxTexture = 16;
+  static const int MaxUAV = 4;
 protected:
 
   struct ID3D11SamplerState *Sampler[MaxTexture];

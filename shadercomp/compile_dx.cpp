@@ -20,7 +20,7 @@
 #define new sDEFINE_NEW
 
 
-sBool sShaderCompileDX(const sChar *source,const sChar *profile,const sChar *main,sU8 *&data,sInt &size,sInt flags,sTextBuffer *errors)
+sBool sShaderCompileDX(const sChar *source,const sChar *profile,const sChar *main,sU8 *&data,int &size,int flags,sTextBuffer *errors)
 {
   ID3D10Blob *bytecode;
   ID3D10Blob *dxerrors;
@@ -39,7 +39,7 @@ sBool sShaderCompileDX(const sChar *source,const sChar *profile,const sChar *mai
   sChar8 main8[256];
   sCopyString(main8,main,sCOUNTOF(main8));
 
-  sInt len = sGetStringLen(source);
+  int len = sGetStringLen(source);
   sChar8 *src8 = new sChar8[len+1];
   sCopyString(src8,source,len+1);
 
@@ -58,9 +58,9 @@ sBool sShaderCompileDX(const sChar *source,const sChar *profile,const sChar *mai
 
   if(dxerrors)
   {
-    sInt elen = dxerrors->GetBufferSize();
+    int elen = dxerrors->GetBufferSize();
     const sChar8 *estr = (const sChar8*)dxerrors->GetBufferPointer();
-    for(sInt i=0;i<elen;i++)
+    for(int i=0;i<elen;i++)
       if(estr[i])
         errors->PrintChar(estr[i]);
     dxerrors->Release();
@@ -86,7 +86,7 @@ sBool sShaderCompileDX(const sChar *source,const sChar *profile,const sChar *mai
 
 #else
 
-sBool sShaderCompileDX(const sChar *source,const sChar *profile,const sChar *main,sU8 *&data,sInt &size,sInt flags,sTextBuffer *errors)
+sBool sShaderCompileDX(const sChar *source,const sChar *profile,const sChar *main,sU8 *&data,int &size,int flags,sTextBuffer *errors)
 {
   return 0;
 }

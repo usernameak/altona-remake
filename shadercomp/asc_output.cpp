@@ -17,7 +17,7 @@ void ACDoc::Print(const sChar *str)
       CurrentLine++;
 }
 
-void ACDoc::PrintLine(sInt line,const sChar *file)
+void ACDoc::PrintLine(int line,const sChar *file)
 {
   Print(L"\n");
   if(CurrentLine!=line || CurrentFile!=file)
@@ -30,7 +30,7 @@ void ACDoc::PrintLine(sInt line,const sChar *file)
 
 /****************************************************************************/
 
-void ACDoc::Output(sInt language,sInt renderer)
+void ACDoc::Output(int language,int renderer)
 {
   ACGlobal *gl;
   ACFunc *func;
@@ -108,7 +108,7 @@ void ACDoc::Output(sInt language,sInt renderer)
         if(gl->Type->Members.GetCount()>0)
         {
           PrintF(L"cbuffer __%d : register(b%d)\n{\n",gl->Type->CSlot,gl->Type->CSlot&(sCBUFFER_MAXSLOT)-1);
-          sInt base = gl->Type->Members[0]->RegisterNum;
+          int base = gl->Type->Members[0]->RegisterNum;
           sFORALL(gl->Type->Members,member)
           {
             PrintF(L"  ");
@@ -358,7 +358,7 @@ void ACDoc::OutVar(ACVar *var,ACExpression *init)
     PrintF(L" : register(%c%d)",var->RegisterType,var->RegisterNum);
 }
 
-void ACDoc::OutBlock(ACStatement *stat,sInt indent)
+void ACDoc::OutBlock(ACStatement *stat,int indent)
 {
   sBool braces = (indent==0) || stat->Next || stat->Op==ACS_VARDECL;
   if(braces)
@@ -372,7 +372,7 @@ void ACDoc::OutBlock(ACStatement *stat,sInt indent)
     PrintF(L"\n%_}",indent);
 }
 
-void ACDoc::OutStat(ACStatement *stat,sInt indent)
+void ACDoc::OutStat(ACStatement *stat,int indent)
 {
   if(stat->Op!=ACS_BLOCK)
     PrintLine(stat->SourceLine,stat->SourceFile);
@@ -592,7 +592,7 @@ void ACDoc::OutExpr(ACExpression *expr,sBool brackets)
       if(((this->OutputLanguage & sSTF_PLATFORM)==sSTF_HLSL45) && expr->Variable)
       {
         const sChar *dim = 0;
-        sInt mode = 0;
+        int mode = 0;
         if(expr->Variable->Name==L"tex1D") dim = L"1D";
         if(expr->Variable->Name==L"tex2D") dim = L"2D";
         if(expr->Variable->Name==L"tex3D") dim = L"3D";

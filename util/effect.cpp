@@ -36,7 +36,7 @@ sBool sEffect::OnInit()
   return sFALSE;
 }
 
-void sEffect::OnFrame(sInt)
+void sEffect::OnFrame(int)
 {
 }
 
@@ -101,7 +101,7 @@ void sEffectManager_::OnInit()
     e->Valid = e->OnInit();
 }
 
-void sEffectManager_::OnFrame(sInt delta)
+void sEffectManager_::OnFrame(int delta)
 {
   sEffect *e;
 
@@ -159,7 +159,7 @@ sBool sEffectManager_::OnInput(const sInput2Event &ie)
 
 /****************************************************************************/
 
-void sEffectManager_::FullService(sInt delta, const sViewport &vp)
+void sEffectManager_::FullService(int delta, const sViewport &vp)
 {
   OnFrame(delta);
   OnPaintPre(vp);

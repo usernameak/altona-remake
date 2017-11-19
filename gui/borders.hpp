@@ -52,10 +52,10 @@ public:
 
 class sSpaceBorder : public sWindow
 {
-  sInt Pen;
+  int Pen;
 public:
   sCLASSNAME(sThinBorder);
-  sSpaceBorder(sInt pen);
+  sSpaceBorder(int pen);
   void OnCalcSize();
   void OnLayout();
   void OnPaint2D();
@@ -64,7 +64,7 @@ public:
 class sToolBorder : public sWindow
 {
 protected:
-  void OnLayout(sInt y0,sInt y1);
+  void OnLayout(int y0,int y1);
 
   enum
   {
@@ -86,15 +86,15 @@ public:
 
 class sScrollBorder : public sWindow
 {
-  sInt Width;
-  sInt KnopMin;
-  sInt DragMode;
-  sInt DragStartX;
-  sInt DragStartY;
+  int Width;
+  int KnopMin;
+  int DragMode;
+  int DragStartX;
+  int DragStartY;
   sRect ButtonX;
   sRect ButtonY;
   sRect ButtonZ;
-  sBool CalcKnop(sInt &a,sInt &b,sInt client,sInt inner,sInt button,sInt scroll);
+  sBool CalcKnop(int &a,int &b,int client,int inner,int button,int scroll);
 public:
   sCLASSNAME(sScrollBorder);
   sScrollBorder();
@@ -107,10 +107,10 @@ public:
 struct sStatusBorderItem
 {
   sStatusBorderItem();
-  sInt Width;                     // width in pixel, negative from right border, 0 for all remaining
+  int Width;                     // width in pixel, negative from right border, 0 for all remaining
   sStringDesc Buffer;             // text mode
-  sInt ProgressMax;               // progress bar mode
-  sInt ProgressValue;
+  int ProgressMax;               // progress bar mode
+  int ProgressValue;
   sU32 Color;                     // 0 for default
 
   sRect Client;                   // calculated automatically
@@ -120,7 +120,7 @@ class sStatusBorder : public sWindow
 {
   sArray<sStatusBorderItem> Items;
   sString<1024> PrintBuffer;
-  sInt Height;
+  int Height;
   sU32 Color;
 public:
   sCLASSNAME(sStatusBorder);
@@ -131,12 +131,12 @@ public:
   void OnLayout();
   void OnPaint2D();
 
-  void AddTab(sInt width,sInt maxstring=256);
-  void Print(sInt tab,const sChar *string,sInt len=-1,sU32 color=0);
-  void SetColor(sInt tab,sU32 rgb);        // gets reset by Print/PrintF
-  void Progress(sInt tab,sInt value,sInt max);
+  void AddTab(int width,int maxstring=256);
+  void Print(int tab,const sChar *string,int len=-1,sU32 color=0);
+  void SetColor(int tab,sU32 rgb);        // gets reset by Print/PrintF
+  void Progress(int tab,int value,int max);
 
-  sPRINTING1(PrintF,sFormatStringBuffer buf=sFormatStringBase(PrintBuffer,format);buf,Print(arg1,PrintBuffer);,sInt);  
+  sPRINTING1(PrintF,sFormatStringBuffer buf=sFormatStringBase(PrintBuffer,format);buf,Print(arg1,PrintBuffer);,int);  
 };
 
 /****************************************************************************/

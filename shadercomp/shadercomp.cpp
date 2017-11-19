@@ -144,19 +144,19 @@ sShaderBlob *sCompileResult::GetBlob()
 
 /****************************************************************************/
 
-static const sInt MaxCompilerCount = 32;
+static const int MaxCompilerCount = 32;
 static struct sShaderCompiler
 {
   sCompilerFunc Func;
-  sInt SrcType;
-  sInt DstType;
+  int SrcType;
+  int DstType;
 } ShaderCompiler[MaxCompilerCount];
-static sInt CompilerCount=0;
+static int CompilerCount=0;
 
 
-sBool sShaderCompile(sCompileResult &result, sInt stype, sInt dtype, const sChar *source, sInt len, sInt flags /*=0*/, const sChar *name/*=0*/)
+sBool sShaderCompile(sCompileResult &result, int stype, int dtype, const sChar *source, int len, int flags /*=0*/, const sChar *name/*=0*/)
 {
-  for(sInt i=0;i<CompilerCount;i++)
+  for(int i=0;i<CompilerCount;i++)
   {
     if((ShaderCompiler[i].SrcType&(sSTF_PLATFORM|sSTF_PROFILE)) == (stype&(sSTF_PLATFORM|sSTF_PROFILE)) && (ShaderCompiler[i].DstType&(sSTF_PLATFORM|sSTF_PROFILE)) == (dtype&(sSTF_PLATFORM|sSTF_PROFILE)))
     {
@@ -174,7 +174,7 @@ sBool sShaderCompile(sCompileResult &result, sInt stype, sInt dtype, const sChar
   return sFALSE;
 }
 
-void sRegisterCompiler(sInt stype, sInt dtype, sCompilerFunc func)
+void sRegisterCompiler(int stype, int dtype, sCompilerFunc func)
 {
   sVERIFY(CompilerCount<MaxCompilerCount);
   sShaderCompiler *c = &ShaderCompiler[CompilerCount++];
@@ -183,7 +183,7 @@ void sRegisterCompiler(sInt stype, sInt dtype, sCompilerFunc func)
   c->DstType = dtype;
 }
 
-const sChar8* GetProfile(sInt type)
+const sChar8* GetProfile(int type)
 {
   switch(type&sSTF_KIND)
   {
@@ -225,7 +225,7 @@ const sChar8* GetProfile(sInt type)
 }
 
 
-static sBool sCompileDX9(sCompileResult &result, sInt stype, sInt dtype, sInt flags, const sChar8 *src, sInt len, const sChar8 *name)
+static sBool sCompileDX9(sCompileResult &result, int stype, int dtype, int flags, const sChar8 *src, int len, const sChar8 *name)
 {
 #if sCOMP_DX9_ENABLE
   ID3DXBuffer *bytecode;
@@ -258,7 +258,7 @@ static sBool sCompileDX9(sCompileResult &result, sInt stype, sInt dtype, sInt fl
   if(result.D3D9.Errors)
   {
     ID3DXBuffer *buffer = result.D3D9.Errors;
-    //sInt size = buffer->GetBufferSize();
+    //int size = buffer->GetBufferSize();
     sCopyString(result.Errors,(sChar8*)buffer->GetBufferPointer(),result.Errors.Size());
   }
 
@@ -306,7 +306,7 @@ static sBool GetCgError(const sStringDesc &errors)
 #endif
 }
 
-static sBool sCompileCg(sCompileResult &result, sInt stype, sInt dtype, sInt flags, const sChar8 *src, sInt len, const sChar8 *name)
+static sBool sCompileCg(sCompileResult &result, int stype, int dtype, int flags, const sChar8 *src, int len, const sChar8 *name)
 {
 #if sCOMP_CG_ENABLE
   if(result.Cg.Program)
@@ -324,7 +324,7 @@ static sBool sCompileCg(sCompileResult &result, sInt stype, sInt dtype, sInt fla
   if(GetCgError(result.Errors)) goto error;
   const sChar8 *out8 = cgGetProgramString(program,CG_COMPILED_PROGRAM);
   if(GetCgError(result.Errors)) goto error;
-  sInt size = 0;
+  int size = 0;
   while(out8[size]) size++;
 
   sAddShaderBlob(result.ShaderBlobs,dtype,size,(const sU8*)out8);
@@ -345,7 +345,7 @@ error:
 }
 
 
-static sBool sCompileDummy(sCompileResult &result, sInt stype, sInt dtype, sInt flags, const sChar8 *src, sInt len, const sChar8 *name)
+static sBool sCompileDummy(sCompileResult &result, int stype, int dtype, int flags, const sChar8 *src, int len, const sChar8 *name)
 {
   sAddShaderBlob(result.ShaderBlobs,dtype,4,(const sU8 *)"dumy");
   result.Valid = sTRUE;
@@ -384,15 +384,15 @@ void sShaderCompilerExit()
   CompilerCount = 0;
 }
 
-void sAddShaderBlob(sArray<sU8> &blob, sInt type, sInt bytes, const sU8 *data)
+void sAddShaderBlob(sArray<sU8> &blob, int type, int bytes, const sU8 *data)
 {
   if(blob.IsEmpty())
   {
-    sInt* dst = (sInt*) blob.AddMany(4);
+    int* dst = (int*) blob.AddMany(4);
     *dst = sSTF_NONE;
   }
 
-  sInt count = (bytes+3)&~3;
+  int count = (bytes+3)&~3;
   sShaderBlob *b = (sShaderBlob*)(blob.AddMany(8+count)-4);
   b->Type = type;
   b->Size = bytes;
@@ -404,7 +404,7 @@ void sAddShaderBlob(sArray<sU8> &blob, sInt type, sInt bytes, const sU8 *data)
 void sPrintBlob(sTextBuffer &tb, sArray<sU8> &blob)
 {
   tb.Print(L"  ");
-  for(sInt i=0;i<blob.GetCount();i++)
+  for(int i=0;i<blob.GetCount();i++)
   {
     tb.PrintF(L"0x%02x,",blob[i]);
     if((i%16)==15)
@@ -416,7 +416,7 @@ void sPrintBlob(sTextBuffer &tb, sArray<sU8> &blob)
 
 /****************************************************************************/
 
-sBool sShaderCompileDX(const sChar *source,const sChar *profile,const sChar *main,sU8 *&data,sInt &size,sInt flags,sTextBuffer *errors)
+sBool sShaderCompileDX(const sChar *source,const sChar *profile,const sChar *main,sU8 *&data,int &size,int flags,sTextBuffer *errors)
 {
 #if sCOMP_DX9_ENABLE
   ID3D10Blob *bytecode;
@@ -431,7 +431,7 @@ sBool sShaderCompileDX(const sChar *source,const sChar *profile,const sChar *mai
   sChar8 main8[256];
   sCopyString(main8,main,sCOUNTOF(main8));
 
-  sInt len = sGetStringLen(source);
+  int len = sGetStringLen(source);
   sChar8 *src8 = new sChar8[len+1];
   sCopyString(src8,source,len+1);
 
@@ -455,9 +455,9 @@ sBool sShaderCompileDX(const sChar *source,const sChar *profile,const sChar *mai
 //  errors->Clear();    // do not clear, this will overwrite old errors
   if(dxerrors)
   {
-    sInt elen = dxerrors->GetBufferSize();
+    int elen = dxerrors->GetBufferSize();
     const sChar8 *estr = (const sChar8*)dxerrors->GetBufferPointer();
-    for(sInt i=0;i<elen;i++)
+    for(int i=0;i<elen;i++)
       if(estr[i])
         errors->PrintChar(estr[i]);
     dxerrors->Release();
@@ -495,7 +495,7 @@ sBool sShaderCompileDX(const sChar *source,const sChar *profile,const sChar *mai
 /****************************************************************************/
 #if sPLATFORM == sPLAT_WINDOWS
 
-sBool sCompileExtern(sCompileCallback cb, sCompileResult &result, sInt stype, sInt dtype, sInt flags, const sChar8 *source, sInt len, const sChar8 *name)
+sBool sCompileExtern(sCompileCallback cb, sCompileResult &result, int stype, int dtype, int flags, const sChar8 *source, int len, const sChar8 *name)
 {
   if(cb)
   {

@@ -43,7 +43,7 @@ void sCamera::Handle(sViewport &vp)
 {
   sVERIFYFALSE;
 /*  sMouseData md;
-  sInt time,delta;
+  int time,delta;
 
   sGetMouse(md,1);
   OnDrag(md);
@@ -65,7 +65,7 @@ sTumbleCamera::sTumbleCamera()
   Speed.Init(0.0011f,0.0012f,0.0013f);
 }
 
-void sTumbleCamera::OnFrame(sInt delta,sViewport &vp)
+void sTumbleCamera::OnFrame(int delta,sViewport &vp)
 {
   Time += delta;
   vp.Camera.EulerXYZ(Time*Speed.x,Time*Speed.y,Time*Speed.z);
@@ -80,7 +80,7 @@ sOrbitCamera::sOrbitCamera()
   Dist = 2.25f;
 }
 
-void sOrbitCamera::OnFrame(sInt /*delta*/,sViewport &vp)
+void sOrbitCamera::OnFrame(int /*delta*/,sViewport &vp)
 {
   vp.Camera.EulerXYZ(Angles.x,Angles.y,0);
   vp.Camera.l = sVector31(vp.Camera.k * (-Dist*Dist));
@@ -121,7 +121,7 @@ sFreeCamera::sFreeCamera()
   JoypadControl = sTRUE;
 }
 
-void sFreeCamera::OnFrame(sInt delta,sViewport &vp)
+void sFreeCamera::OnFrame(int delta,sViewport &vp)
 {
   // joypad
   if (JoypadControl) {
@@ -244,7 +244,7 @@ void sCameraXSI::Init()
 
 /****************************************************************************/
 
-void sCameraXSI::OnFrame(sInt /*delta*/, sViewport &vp)
+void sCameraXSI::OnFrame(int /*delta*/, sViewport &vp)
 {
   vp.Camera.EulerXYZ(EulerRot.x,EulerRot.y,EulerRot.z);
 

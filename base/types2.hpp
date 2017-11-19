@@ -47,15 +47,15 @@ sArray is an automatically resizing version of sStaticArray.
 
 template <class Type> class sArray : public sStaticArray<Type>
 {
-  void ReAlloc(sInt max)          { if(max>=this->Used && max!=this->Alloc) { sTAG_CALLER(); Type *n=new Type[max];
-                                    if (n) { for(sInt i=0;i<this->Used;i++) n[i]=this->Data[i]; 
+  void ReAlloc(int max)          { if(max>=this->Used && max!=this->Alloc) { sTAG_CALLER(); Type *n=new Type[max];
+                                    if (n) { for(int i=0;i<this->Used;i++) n[i]=this->Data[i]; 
                                     delete[] this->Data; this->Data=n; this->Alloc=max; } } }
 
 public:
-  void Grow(sInt add)             { if(this->Used+add>this->Alloc) ReAlloc(sMax(this->Used+add,this->Alloc*2)); }
-  void GrowTo(sInt size)             { if(size>this->Alloc) ReAlloc(sMax(size,this->Alloc*2)); }
+  void Grow(int add)             { if(this->Used+add>this->Alloc) ReAlloc(sMax(this->Used+add,this->Alloc*2)); }
+  void GrowTo(int size)             { if(size>this->Alloc) ReAlloc(sMax(size,this->Alloc*2)); }
   void Swap(sArray<Type> &a)      { sStaticArray<Type>::Swap(a); }
-  void Swap(sInt i,sInt j)        { sStaticArray<Type>::Swap(i,j); }
+  void Swap(int i,int j)        { sStaticArray<Type>::Swap(i,j); }
 };
 
 template <class Type> class sAutoArray : public sArray<Type>
@@ -68,7 +68,7 @@ public:
 template <class Type> class sFixedArray : public sStaticArray<Type>
 {
 public:
-  sFixedArray(sInt count)         { sStaticArray<Type>::HintSize(count); sStaticArray<Type>::AddMany(count); }
+  sFixedArray(int count)         { sStaticArray<Type>::HintSize(count); sStaticArray<Type>::AddMany(count); }
 };
 
 
@@ -90,17 +90,17 @@ template <class Type> class sEndlessArray
 {
   Type Default;
   Type *Data;
-  sInt Used;
-  sInt Alloc;
+  int Used;
+  int Alloc;
 
-  void Grow(sInt max)
+  void Grow(int max)
   {
     if(max>Alloc)
     {
-      sInt newalloc = sMax(max,Alloc*2);
+      int newalloc = sMax(max,Alloc*2);
       Type *newdata = new Type[newalloc];
 
-      for(sInt i=0;i<Used;i++)
+      for(int i=0;i<Used;i++)
         newdata[i] = Data[i];
       delete[] Data;
       Data = newdata;
@@ -108,7 +108,7 @@ template <class Type> class sEndlessArray
     }
     if(max>Used)
     {
-      for(sInt i=Used;i<max;i++)
+      for(int i=Used;i<max;i++)
         Data[i] = Default;
       Used = max;
     }
@@ -121,22 +121,22 @@ public:
   ~sEndlessArray()   
   { delete[] Data; }
   //! indexing
-  const Type &operator[](sInt i) const 
+  const Type &operator[](int i) const 
   { sVERIFY(i>=0); if(i>=Used) return Default; else return Data[i]; }
   //! indexing
-  Type &operator[](sInt i)    
+  Type &operator[](int i)    
   { sVERIFY(i>=0); Grow(i+1); return Data[i]; }
   //! indexing
-  const Type &Get(sInt i) const 
+  const Type &Get(int i) const 
   { sVERIFY(i>=0); if(i>=Used) return Default; else return Data[i]; }
   //! pre-allocate storage
-  void HintSize(sInt i)
+  void HintSize(int i)
   { sVERIFY(i>=0); Grow(i); }
   //! clear array without freeing memory
   void Clear()
   { Used = 0; }
   //! get the highest element written to.
-  sInt GetCount()
+  int GetCount()
   { return Used; }
 };
 
@@ -201,7 +201,7 @@ public:
   virtual sObject *NewObjectVirtual() { sTAG_CALLER(); return new sObject; }
   virtual const sChar *GetClassName() { return ClassName(); }
   virtual void Finalize();        // finalize phase: all objects are still valid, but are soon deleted.
-  sInt NeedFlag;                  // flag needed objects
+  int NeedFlag;                  // flag needed objects
   void Need();                    // this implements the GC recursion
 };
 
@@ -224,7 +224,7 @@ void sRemRoot(sObject *);         // add an object as GC root
 void sCollect();                  // do the recursion
 void sGCLock();                   // lock/unlock for multithreaded GC use
 void sGCUnlock();
-sInt sGetRootCount();
+int sGetRootCount();
 
 /****************************************************************************/
 
@@ -260,7 +260,7 @@ void sNeed(ArrayType<BaseType> &a)
 
 struct sMessage
 {
-  sInt Type;
+  int Type;
   sDInt Code;
   sObject *Target;
   union
@@ -307,10 +307,10 @@ class sMessageTimer
   friend void sMessageTimerThread(class sThread *t,void *v);
   class sThread *Thread;
   sMessage Msg;
-  sInt Delay;
-  sInt Loop;
+  int Delay;
+  int Loop;
 public:
-  sMessageTimer(const sMessage &msg,sInt delay,sInt loop);
+  sMessageTimer(const sMessage &msg,int delay,int loop);
   ~sMessageTimer();
 };
 
@@ -330,10 +330,10 @@ public:
 
 class sTextBuffer
 {
-  sInt Alloc;                     // allocated character count
-  sInt Used;                      // used character count
+  int Alloc;                     // allocated character count
+  int Used;                      // used character count
   sChar *Buffer;                  // buffer. not alway 0-terminated
-  void Grow(sInt add);            // grow to make space for some additional chars
+  void Grow(int add);            // grow to make space for some additional chars
   void Init();
 public:
   sTextBuffer();
@@ -350,29 +350,29 @@ public:
   void Serialize(sWriter &stream);
   void Load(sChar *filename);
 
-  sInt GetLength();
+  int GetLength();
 
   // buffer management
 
   void Clear();                   // clear buffer. don't deallocate
-  void SetSize(sInt count);       // enlarge and preallocate buffer
+  void SetSize(int count);       // enlarge and preallocate buffer
   const sChar *Get() const;       // terminate buffer and return pointer !!! THIS IS NOT CONST !!!
   sChar *Get();                   // terminate buffer and return pointer
-  sInt GetCount() { return Used; };
-  sInt GetChar(sInt pos) { if(pos>=0 && pos<Used) return Buffer[pos]; else return 0; }
-  void Insert(sInt pos,sChar c);
-  void Insert(sInt pos,const sChar *c,sInt len=-1);
-  void Set(sInt pos,sChar c);
-  void Delete(sInt pos);
-  void Delete(sInt pos,sInt count);
+  int GetCount() { return Used; };
+  int GetChar(int pos) { if(pos>=0 && pos<Used) return Buffer[pos]; else return 0; }
+  void Insert(int pos,sChar c);
+  void Insert(int pos,const sChar *c,int len=-1);
+  void Set(int pos,sChar c);
+  void Delete(int pos);
+  void Delete(int pos,int count);
 
   // printing. this appends!
 
-  void Indent(sInt count);        // finds last linefeed and indents with spaces
-  void PrintChar(sInt c);
+  void Indent(int count);        // finds last linefeed and indents with spaces
+  void PrintChar(int c);
   void Print(const sChar *text);
-  void Print(const sChar *text,sInt len);
-  void PrintListing(const sChar *text,sInt firstline=1);
+  void Print(const sChar *text,int len);
+  void PrintListing(const sChar *text,int firstline=1);
 
   sPRINTING0(PrintF, sString<0x4000> tmp; sFormatStringBuffer buf=sFormatStringBase(tmp,format);buf,Print((const sChar*)tmp););
 };
@@ -386,7 +386,7 @@ public:
 
 class sTextFileWriter : public sTextStreamer
 {
-  static const sInt BufferSize = 0x4000;
+  static const int BufferSize = 0x4000;
 
   sString<BufferSize> PrintBuffer;
   sFile *Target;
@@ -428,46 +428,46 @@ template <typename T> class sPoolArray
 {
   struct PoolItem
   {
-    PoolItem(sInt size)                 { Data = new T[size]; }
+    PoolItem(int size)                 { Data = new T[size]; }
     ~PoolItem()                         { sDeleteArray(Data); }
     T *Data;
   };
 
   sArray<PoolItem*> Items;
-  sInt Used;
-  sInt Alloc;
-  sInt Log2Size;
+  int Used;
+  int Alloc;
+  int Log2Size;
 
-  sInt ItemSize;
-  sInt Mask;
+  int ItemSize;
+  int Mask;
 
   void Grow()                           { Items.AddTail(new PoolItem(ItemSize)); Alloc += ItemSize; }
 
-  const T& GetUnsafe(sInt i) const      { return Items[i>>Log2Size]->Data[i&Mask]; }
-  T& GetUnsafe(sInt i)                  { return Items[i>>Log2Size]->Data[i&Mask]; }
+  const T& GetUnsafe(int i) const      { return Items[i>>Log2Size]->Data[i&Mask]; }
+  T& GetUnsafe(int i)                  { return Items[i>>Log2Size]->Data[i&Mask]; }
 public:
 
-  sPoolArray(sInt l2s=12):Used(0),Alloc(0),Log2Size(l2s) { ItemSize = 1<<Log2Size; Mask = ItemSize-1; }
+  sPoolArray(int l2s=12):Used(0),Alloc(0),Log2Size(l2s) { ItemSize = 1<<Log2Size; Mask = ItemSize-1; }
   ~sPoolArray()                         { Reset(); }
 
   void Clear()                          { Used = 0; }
-  void Reset(sInt l2s=-1)               { sDeleteAll(Items); Alloc = 0; Used = 0; if(l2s!=-1) {Log2Size=l2s; ItemSize = 1<<l2s; Mask = ItemSize-1; } }
+  void Reset(int l2s=-1)               { sDeleteAll(Items); Alloc = 0; Used = 0; if(l2s!=-1) {Log2Size=l2s; ItemSize = 1<<l2s; Mask = ItemSize-1; } }
 
-  sInt GetCount() const                 { return Used; }
-  sInt GetItemCount() const             { return Items.GetCount(); }
-  sInt GetItemSize() const              { return ItemSize; }
+  int GetCount() const                 { return Used; }
+  int GetItemCount() const             { return Items.GetCount(); }
+  int GetItemSize() const              { return ItemSize; }
   sBool IsEmpty() const                 { return Used==0; }
   sBool IsFull() const                  { return Used==Alloc; }
 
   void AddTail(const T &e)              { if(Used>=Alloc) Grow(); GetUnsafe(Used) = e; Used++; }
   T* AddTail()                          { if(Used>=Alloc) Grow(); T *ptr = &(GetUnsafe(Used)); Used++; return ptr; }
-  T* AddMany(sInt &count)               { count = (ItemSize-(Used&Mask)); if(Used==Alloc) Grow(); T *ptr = &(GetUnsafe(Used)); Used+=count; return ptr;}
+  T* AddMany(int &count)               { count = (ItemSize-(Used&Mask)); if(Used==Alloc) Grow(); T *ptr = &(GetUnsafe(Used)); Used+=count; return ptr;}
 
-  const T& operator[](sInt i) const     { sVERIFY(i>=0 && i<=Used); return Items[i>>Log2Size]->Data[i&Mask]; }
-  T& operator[](sInt i)                 { sVERIFY(i>=0 && i<=Used); return Items[i>>Log2Size]->Data[i&Mask]; }
+  const T& operator[](int i) const     { sVERIFY(i>=0 && i<=Used); return Items[i>>Log2Size]->Data[i&Mask]; }
+  T& operator[](int i)                 { sVERIFY(i>=0 && i<=Used); return Items[i>>Log2Size]->Data[i&Mask]; }
 
 
-  void RemAt(sInt p)                    { (*this)[p] = (*this)[Used-1]; Used--; }
+  void RemAt(int p)                    { (*this)[p] = (*this)[Used-1]; Used--; }
   void RemTail()                        { sVERIFY(Used); Used--; }
 
   void Swap(sPoolArray &a)              { sSwap(Used,a.Used); sSwap(Alloc,a.Alloc); sSwap(Log2Size,a.Log2Size);
@@ -481,12 +481,12 @@ template <typename T>
 void sPoolArray<T>::ConvertTo(sStaticArray<T> &dest) const
 {
   dest.HintSize(Used);
-  sInt left = Used;
-  for(sInt i=0;i<Items.GetCount();i++)
+  int left = Used;
+  for(int i=0;i<Items.GetCount();i++)
   {
     T *dst = dest.AddMany(sMin(ItemSize,left));
     const T *src = Items[i]->Data;
-    for(sInt k=0;k<ItemSize && k<left;k++)
+    for(int k=0;k<ItemSize && k<left;k++)
       *dst++ = *src++;
     left -= ItemSize;
   }
@@ -508,10 +508,10 @@ template <typename T> class sSmallObjectPool
 {
   sMemoryPool InternalPool;
   void *FreeList;
-  sInt Alignment;
+  int Alignment;
 
 public:
-  sSmallObjectPool(sInt allocflags=sAMF_HEAP,sInt poolGranularity=4096,sInt alignment=16)
+  sSmallObjectPool(int allocflags=sAMF_HEAP,int poolGranularity=4096,int alignment=16)
     : InternalPool(poolGranularity*sizeof(T),allocflags,1024)
   {
     sVERIFYSTATIC(sizeof(T) >= sizeof(void*));
@@ -561,18 +561,18 @@ public:
 
 template <typename T> class sSmallObjectPoolStatic
 {
-  sInt TSize;
+  int TSize;
   sU8* InternalPool;
   T* FreeList;
 
 public:
-  explicit sSmallObjectPoolStatic(sInt count,sInt alignment=4,sInt allocflags=sAMF_DEFAULT)
+  explicit sSmallObjectPoolStatic(int count,int alignment=4,int allocflags=sAMF_DEFAULT)
   {
-    TSize=sAlign<sInt>(sizeof(T),alignment);
+    TSize=sAlign<int>(sizeof(T),alignment);
     sVERIFY(TSize >= sizeof(void*));
     InternalPool=(sU8*)sAllocMem(count*TSize,alignment,allocflags);
 
-    for (sInt i=0; i<count-1; i++)
+    for (int i=0; i<count-1; i++)
       *((T**)(InternalPool+i*TSize))=(T*)(InternalPool+(i+1)*TSize);
     *((T**)(InternalPool+(count-1)*TSize))=0;
 
@@ -625,8 +625,8 @@ public:
 /***                                                                      ***/
 /****************************************************************************/
 
-const sChar *sAddToStringPool(const sChar *s,sInt len, sBool *isnew=0);
-const sChar *sAddToStringPool2(const sChar *a,sInt al,const sChar *b,sInt bl);
+const sChar *sAddToStringPool(const sChar *s,int len, sBool *isnew=0);
+const sChar *sAddToStringPool2(const sChar *a,int al,const sChar *b,int bl);
 void sClearStringPool();       
 extern const sChar *sPoolStringEmpty;
 
@@ -637,32 +637,32 @@ private:
 public:
   sPoolString()                               { Buffer = sPoolStringEmpty; }
   sPoolString(const sChar *s)                 { Buffer = sAddToStringPool(s,sGetStringLen(s)); }
-  sPoolString(const sChar *s,sInt len)        { Buffer = sAddToStringPool(s,len); }
+  sPoolString(const sChar *s,int len)        { Buffer = sAddToStringPool(s,len); }
   sPoolString &operator=(const sChar *s)      { Buffer = sAddToStringPool(s,sGetStringLen(s)); return *this; }
   void Init(const sChar *s)                   { Buffer = sAddToStringPool(s,sGetStringLen(s)); }
-  void Init(const sChar *s,sInt len)          { Buffer = sAddToStringPool(s,len); }
+  void Init(const sChar *s,int len)          { Buffer = sAddToStringPool(s,len); }
 
   operator const sChar*() const               { return Buffer; }
   const sChar *Get() const                    { return Buffer; }
 
 
-  sInt operator==(const sChar *s) const       { return sCmpString(Buffer,s)==0; }
-  sInt operator==(const sPoolString &s) const { return Buffer==s.Buffer; }
-  sInt operator!=(const sChar *s) const       { return sCmpString(Buffer,s)!=0; }
-  sInt operator!=(const sPoolString &s) const { return Buffer!=s.Buffer; }
+  int operator==(const sChar *s) const       { return sCmpString(Buffer,s)==0; }
+  int operator==(const sPoolString &s) const { return Buffer==s.Buffer; }
+  int operator!=(const sChar *s) const       { return sCmpString(Buffer,s)!=0; }
+  int operator!=(const sPoolString &s) const { return Buffer!=s.Buffer; }
   bool operator< (const sPoolString &s) const { return sCmpString(Buffer,s.Buffer)<0; }
   bool operator> (const sPoolString &s) const { return sCmpString(Buffer,s.Buffer)>0; }
   bool operator<=(const sPoolString &s) const { return sCmpString(Buffer,s.Buffer)<=0; }
   bool operator>=(const sPoolString &s) const { return sCmpString(Buffer,s.Buffer)>=0; }
-  sChar operator[](sInt i) const              { return Buffer[i]; }
-  sInt Count() const                          { return sGetStringLen(Buffer); }
+  sChar operator[](int i) const              { return Buffer[i]; }
+  int Count() const                          { return sGetStringLen(Buffer); }
   sBool IsEmpty() const                       { return Buffer[0]==0; }
   sU32 GetHash() const                        { return sHashString(Buffer); }
 
   void Add(const sChar *a,const sChar *b)     { Buffer = sAddToStringPool2(a,sGetStringLen(a),b,sGetStringLen(b)); }
 };
 
-inline sReader& operator| (sReader &s,sPoolString &a) { sInt len; s | len; sChar *tmp = sALLOCSTACK(sChar,len); s.ArrayChar(tmp,len); a.Init(tmp,len); s.Align(4); return s; }
+inline sReader& operator| (sReader &s,sPoolString &a) { int len; s | len; sChar *tmp = sALLOCSTACK(sChar,len); s.ArrayChar(tmp,len); a.Init(tmp,len); s.Align(4); return s; }
 
 template<int size> inline sString<size>::sString(const sPoolString &s) { sCopyString(Buffer,s,size); }
 template<int size> inline sString<size> &sString<size>::operator =(const sPoolString &s) { if (s) sCopyString(Buffer,s,size); else Buffer[0]=0; return *this; }
@@ -714,15 +714,15 @@ private:
 
   // the hashtable
 
-  sInt HashSize;                  // size of hashtable (power of two)
-  sInt HashMask;                  // size-1;
+  int HashSize;                  // size of hashtable (power of two)
+  int HashMask;                  // size-1;
   Node **HashTable;                // the hashtable itself
 
   // don't allocate nodes one-by-one!
 
-  sInt NodesPerBlock;             // nodes per allocation block
+  int NodesPerBlock;             // nodes per allocation block
   Node *CurrentNodeBlock;         // current node allocation block
-  sInt CurrentNode;               // next free node in allocation block
+  int CurrentNode;               // next free node in allocation block
   sArray<Node *> NodeBlocks;      // all allocation blocks
   Node *FreeNodes;                // list of free nodes for reuse
 
@@ -730,7 +730,7 @@ private:
 
   Node *AllocNode();
 public:
-  sHashTableBase(sInt size=0x4000,sInt nodesperblock=0x100);
+  sHashTableBase(int size=0x4000,int nodesperblock=0x100);
   virtual ~sHashTableBase();
   void Clear();
   void ClearAndDeleteValues();
@@ -757,7 +757,7 @@ protected:
   sBool CompareKey(const void *k0,const void *k1)    { return (*(const KeyType *)k0)==(*(const KeyType *)k1); }
   sU32 HashKey(const void *key)                      { return ((const KeyType *)key)->Hash(); }
 public:
-  sHashTable(sInt s=0x4000,sInt n=0x100) : sHashTableBase(s,n)  {}
+  sHashTable(int s=0x4000,int n=0x100) : sHashTableBase(s,n)  {}
   void Add(const KeyType *key,ValueType *value)         { sHashTableBase::Add(key,value); }
   ValueType *Find(const KeyType *key)                   { return (ValueType *) sHashTableBase::Find(key); }
   ValueType *Rem(const KeyType *key)                    { return (ValueType *) sHashTableBase::Rem(key); }
@@ -809,7 +809,7 @@ class sStringMap_
 {
 protected:
 
-  sInt Size;
+  int Size;
   typedef struct Slot_ {Slot_ * next; sChar * key; void * value;} Slot;
   Slot ** Slots;
 
@@ -817,7 +817,7 @@ protected:
 
 public: 
 
-  sStringMap_ (sInt numSlots);    // creates a map with numSlots buckets
+  sStringMap_ (int numSlots);    // creates a map with numSlots buckets
   virtual ~sStringMap_ ();
   void Clear ();                  // deletes all key value pairs
 
@@ -825,7 +825,7 @@ public:
   void   Set (const sChar * key, void * value); // sets the value for key
   void   Del (const sChar * key);    // removes the value for key
 
-  sInt   GetCount () const;          // returns current number of key-value pairs
+  int   GetCount () const;          // returns current number of key-value pairs
   sStaticArray<sChar*> * GetKeys () const; // returns a newly allocated array with 
                                      // all the keys in arbitrary order
 
@@ -834,7 +834,7 @@ public:
 
 /****************************************************************************/
 
-template <class Type, sInt NumSlots> class sStringMap : public sStringMap_
+template <class Type, int NumSlots> class sStringMap : public sStringMap_
 {
 public:
 
@@ -867,16 +867,16 @@ class sBitVector
 public:
   sBitVector();
   ~sBitVector();
-  void Resize(sInt bit);          // resizing large bitvectors is more efficient than autogrow
+  void Resize(int bit);          // resizing large bitvectors is more efficient than autogrow
 
-  void Set(sInt n);               // set to 1. with autogrow.
-  void Clear(sInt n);             // set to 0. with autogrow.
-  void Assign(sInt n,sInt v);     // set to (v&1). with autogrow.
-  sBool Get(sInt n);              // get bit. may read beyond end of data, but will not grow data.
+  void Set(int n);               // set to 1. with autogrow.
+  void Clear(int n);             // set to 0. with autogrow.
+  void Assign(int n,int v);     // set to (v&1). with autogrow.
+  sBool Get(int n);              // get bit. may read beyond end of data, but will not grow data.
   void ClearAll();                // clear all. bits grown after this are cleared too.
   void SetAll();                  // set all. bits grown after this are set too.
 
-  sBool NextBit(sInt &n);         // iterate. return false if last bit. start with n==-1.
+  sBool NextBit(int &n);         // iterate. return false if last bit. start with n==-1.
 
   // it would not hurt to add serialization
 };
@@ -919,7 +919,7 @@ public:
 
   // sStream impl
   ~sStreamMemory();
-  sInt  GetFlags();
+  int  GetFlags();
   sBool  Close();
   sDInt Read(void *ptr, sDInt count);
   sDInt Write(const void *ptr, sDInt count);
@@ -954,7 +954,7 @@ public:
 
   // sStream impl
   ~sStreamPart();
-  sInt  GetFlags();
+  int  GetFlags();
   sBool Close();
   sDInt Read(void *ptr, sDInt count);
   sDInt Write(const void *ptr, sDInt count);
@@ -980,7 +980,7 @@ protected:
   sU8  *WBuf, *RBuf;
   sDInt RBufPos, RBufSize;
   sDInt WBufSize;
-  sInt Flags;
+  int Flags;
 
   void Flush();
 
@@ -993,7 +993,7 @@ public:
 
   // sStream impl
   ~sStreamCache();
-  sInt  GetFlags();
+  int  GetFlags();
   sBool Close();
   sDInt Read(void *ptr, sDInt count);
   sDInt Write(const void *ptr, sDInt count);
@@ -1008,7 +1008,7 @@ class sStreamTemp : public sStream
 {
 protected:
 
-  static const sInt BUFSIZE=65536;
+  static const int BUFSIZE=65536;
 
   struct Buffer
   {
@@ -1029,7 +1029,7 @@ public:
 
   // sStream impl
   ~sStreamTemp();
-  sInt  GetFlags();
+  int  GetFlags();
   sBool Close();
   sDInt Read(void *ptr, sDInt count);
   sDInt Write(const void *ptr, sDInt count);

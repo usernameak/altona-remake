@@ -19,9 +19,9 @@ class s3DWindow : public sWireClientWindow
   sF32 DragDist,DragRotX,DragRotY,DragRotZ;
   sMatrix34 DragPos;
 
-  sInt QuakeTime;
+  int QuakeTime;
   sBool QuakeMode;
-  sInt QuakeMask;
+  int QuakeMask;
   sVector30 QuakeSpeed;
 protected:
   sSimpleMaterial *WireMtrl;
@@ -30,11 +30,11 @@ protected:
   void PaintGrid();
 
   sRay DragRay;
-  sInt OldMouseHardX;
-  sInt OldMouseHardY;
+  int OldMouseHardX;
+  int OldMouseHardY;
 
 #if sRENDERER==sRENDER_DX11
-  sInt RTMultiLevel;
+  int RTMultiLevel;
   sTexture2D *ColorRT;
   sTexture2D *DepthRT;
 #endif
@@ -58,10 +58,10 @@ public:
   virtual void Paint(sViewport &view,const sTargetSpec &spec) {}
   virtual void PaintWire(sViewport &view,const sTargetSpec &spec) {}
 
-  void Lines(sVertexBasic *vp,sInt linecount,sBool zOn=sTRUE);
-  void Circle(const sVector31 &center, const sVector30 &normal, sF32 radius, sU32 color=0xffffff00, sBool zon=sTRUE, sInt segs=32);
+  void Lines(sVertexBasic *vp,int linecount,sBool zOn=sTRUE);
+  void Circle(const sVector31 &center, const sVector30 &normal, sF32 radius, sU32 color=0xffffff00, sBool zon=sTRUE, int segs=32);
 
-  sRay MakeRay(sInt x, sInt y); // makes ray from position within client window
+  sRay MakeRay(int x, int y); // makes ray from position within client window
   void SetCam(const sMatrix34 &mat,sF32 zoom); // move camera to position
 
   sF32 Zoom;
@@ -77,8 +77,8 @@ public:
 
   sF32 SideSpeed,ForeSpeed;     // quakecam speed, default 0.000020f
   sF32 SpeedDamping;
-  sInt GearShift;               // infinite speed settings through mousewheel. from -40 to +40 in sqrt(4) steps
-  sInt GearShiftDisplay;        // display speed factor if(GerShiftDisplay>sGetTime());
+  int GearShift;               // infinite speed settings through mousewheel. from -40 to +40 in sqrt(4) steps
+  int GearShiftDisplay;        // display speed factor if(GerShiftDisplay>sGetTime());
   sF32 GearSpeed;               // current gear speed
 
   sViewport View;
@@ -88,7 +88,7 @@ public:
   sBool OnKey(sU32 key);
   void OnDrag(const sWindowDrag &dd);
   void QuakeCam();
-  void PrintGear(sPainter *p,sInt x,sInt &y);
+  void PrintGear(sPainter *p,int x,int &y);
 
 
   void CmdReset();

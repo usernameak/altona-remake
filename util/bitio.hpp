@@ -23,7 +23,7 @@ class sBitWriter
   sU8 *Buffer;
   sU8 *BufferPtr,*BufferEnd;
   sU32 BitBuffer;
-  sInt BitsLeft;
+  int BitsLeft;
 
   sDInt Written;
   sBool Error;
@@ -49,7 +49,7 @@ public:
 
   sBool IsOk() const { return !Error; }
 
-  sINLINE void PutBits(sU32 bits,sInt count) // never write more than 24 bits at once!
+  sINLINE void PutBits(sU32 bits,int count) // never write more than 24 bits at once!
   {
 #if sCONFIG_BUILD_DEBUG // yes, not sDEBUG - only check in actual debug builds.
     sVERIFY(count <= 24);
@@ -80,9 +80,9 @@ class sBitReader
   sU8 *Buffer;
   sU8 *BufferPtr,*BufferEnd;
   sU32 BitBuffer;
-  sInt BitsLeft;
+  int BitsLeft;
 
-  sInt ExtraBytes;
+  int ExtraBytes;
   sBool Error;
 
   void RefillBuffer();
@@ -105,7 +105,7 @@ public:
 
   sBool IsOk() { return !Error && (ExtraBytes < 4 || BitsLeft == 32); }
 
-  sINLINE void SkipBits(sInt count)
+  sINLINE void SkipBits(int count)
   {
 #if sCONFIG_BUILD_DEBUG
     sVERIFY(count <= 24);
@@ -122,11 +122,11 @@ public:
   }
 
   // In case of error, PeekBits/GetBits always pad with zero bits - design your codes accordingly!
-  sINLINE sU32 PeekBits(sInt count)   { return BitBuffer >> (32 - count); }
-  sINLINE sS32 PeekBitsS(sInt count)  { return sS32(BitBuffer) >> (32 - count); }
+  sINLINE sU32 PeekBits(int count)   { return BitBuffer >> (32 - count); }
+  sINLINE sS32 PeekBitsS(int count)  { return sS32(BitBuffer) >> (32 - count); }
 
-  sINLINE sU32 GetBits(sInt count)    { sU32 r = PeekBits(count); SkipBits(count); return r; }
-  sINLINE sS32 GetBitsS(sInt count)   { sS32 r = PeekBitsS(count); SkipBits(count); return r; }
+  sINLINE sU32 GetBits(int count)    { sU32 r = PeekBits(count); SkipBits(count); return r; }
+  sINLINE sS32 GetBitsS(int count)   { sS32 r = PeekBitsS(count); SkipBits(count); return r; }
 };
 
 // sLocalBitReader is the same as sBitReader; use for "local" copies in inner loops, only
@@ -137,7 +137,7 @@ class sLocalBitReader
   sBitReader &Parent;
   sU8 *BufferPtr,*BufferEnd;
   sU32 BitBuffer;
-  sInt BitsLeft;
+  int BitsLeft;
 
   sINLINE sU8 GetByte()
   {
@@ -168,7 +168,7 @@ public:
     Parent.BitsLeft = BitsLeft;
   }
 
-  sINLINE void SkipBits(sInt count)
+  sINLINE void SkipBits(int count)
   {
 #if sCONFIG_BUILD_DEBUG
     sVERIFY(count <= 24);
@@ -185,11 +185,11 @@ public:
   }
 
   // In case of error, PeekBits/GetBits always pad with zero bits - design your codes accordingly!
-  sINLINE sU32 PeekBits(sInt count)   { return BitBuffer >> (32 - count); }
-  sINLINE sS32 PeekBitsS(sInt count)  { return sS32(BitBuffer) >> (32 - count); }
+  sINLINE sU32 PeekBits(int count)   { return BitBuffer >> (32 - count); }
+  sINLINE sS32 PeekBitsS(int count)  { return sS32(BitBuffer) >> (32 - count); }
 
-  sINLINE sU32 GetBits(sInt count)    { sU32 r = PeekBits(count); SkipBits(count); return r; }
-  sINLINE sS32 GetBitsS(sInt count)   { sS32 r = PeekBitsS(count); SkipBits(count); return r; }
+  sINLINE sU32 GetBits(int count)    { sU32 r = PeekBits(count); SkipBits(count); return r; }
+  sINLINE sS32 GetBitsS(int count)   { sS32 r = PeekBitsS(count); SkipBits(count); return r; }
 };
 
 /****************************************************************************/
@@ -200,41 +200,41 @@ public:
 
 // Input:   List of frequencies for <count> symbols (0=unused).
 // Output:  Length of huffman code for each symbol; all lengths are <=maxLen.
-void sBuildHuffmanCodeLens(sInt *lens,const sU32 *freq,sInt count,sInt maxLen);
+void sBuildHuffmanCodeLens(int *lens,const sU32 *freq,int count,int maxLen);
 
 // Turns the lengths from sBuildHuffmanCodeLens into the actual codes (for encoding).
-void sBuildHuffmanCodeValues(sU32 *codes,const sInt *lens,sInt count);
+void sBuildHuffmanCodeValues(sU32 *codes,const int *lens,int count);
 
 // Full service
-void sBuildHuffmanCodes(sU32 *codes,sInt *lens,const sU32 *freq,sInt count,sInt maxLen);
+void sBuildHuffmanCodes(sU32 *codes,int *lens,const sU32 *freq,int count,int maxLen);
 
 // Encode huffman code lengths (when you need to store them)
-sBool sWriteHuffmanCodeLens(sBitWriter &writer,const sInt *lens,sInt count);
+sBool sWriteHuffmanCodeLens(sBitWriter &writer,const int *lens,int count);
 
 // Decode huffman code lenghts written with above function
-sBool sReadHuffmanCodeLens(sBitReader &reader,sInt *lens,sInt count);
+sBool sReadHuffmanCodeLens(sBitReader &reader,int *lens,int count);
 
 class sFastHuffmanDecoder
 {
-  static const sInt FastBits = 8; // MUST be <16!
+  static const int FastBits = 8; // MUST be <16!
 
   sU16 FastPath[1<<FastBits];
   sU32 MaxCode[26];
-  sInt Delta[25];
+  int Delta[25];
   sU16 *CodeMap;
 
 public:
   sFastHuffmanDecoder();
   ~sFastHuffmanDecoder();
 
-  sBool Init(const sInt *lens,sInt count);
+  sBool Init(const int *lens,int count);
 
   // DecodeSymbol for sBitReader and sLocalBitReader do exactly the same thing.
   // Use the second variant where speed is critical (and where you're presumably using
   // sLocalBitReader anyway) and the second otherwise.
-  sInt DecodeSymbol(sBitReader &reader);
+  int DecodeSymbol(sBitReader &reader);
 
-  sINLINE sInt DecodeSymbol(sLocalBitReader &reader)
+  sINLINE int DecodeSymbol(sLocalBitReader &reader)
   {
     sU32 peek = reader.PeekBits(FastBits);
     sU16 fast = FastPath[peek];
@@ -247,7 +247,7 @@ public:
 
     // can't use fast path (code is too long); first, find actual code length
     peek = reader.PeekBits(24);
-    sInt len = FastBits+1;
+    int len = FastBits+1;
     while(peek >= MaxCode[len])
       len++;
 

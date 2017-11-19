@@ -37,7 +37,7 @@ class sTextureBasePrivate
 {
 protected:
   /*
-  friend void sSetRendertargetPrivate(class sTextureBase *tex,sInt xs,sInt ys,const sRect *vrp,sInt flags,struct IDirect3DSurface9 *cubesurface);
+  friend void sSetRendertargetPrivate(class sTextureBase *tex,int xs,int ys,const sRect *vrp,int flags,struct IDirect3DSurface9 *cubesurface);
   friend void sSetScreen(const sRect &rect,sU32 *data);
   friend void sResolveTargetPrivate();
 */
@@ -73,9 +73,9 @@ protected:
 
 class sShaderPrivate 
 {
-  friend sShader *sCreateShader(sInt type,const sU8 *code,sInt bytes);
-  friend sShader *sCreateShaderRaw(sInt type,const sU8 *code,sInt bytes);
-  friend void sSetShaders(sShader *vs,sShader *ps,sShader *gs,sLinkedShader **link,sCBufferBase **cbuffers,sInt cbcount);
+  friend sShader *sCreateShader(int type,const sU8 *code,int bytes);
+  friend sShader *sCreateShaderRaw(int type,const sU8 *code,int bytes);
+  friend void sSetShaders(sShader *vs,sShader *ps,sShader *gs,sLinkedShader **link,sCBufferBase **cbuffers,int cbcount);
   friend void sCreateShader2(sShader *shader,sShaderBlob *blob);
   friend void sDeleteShader2(sShader *shader);
   friend void sSetShader2(sShader *shader);
@@ -92,7 +92,7 @@ class sMaterialPrivate
 {
 public: // need access from specialized sToolPlatforms...
   sU32 **States;
-  sInt *StateCount;
+  int *StateCount;
 };
 
 /****************************************************************************/
@@ -100,7 +100,7 @@ public: // need access from specialized sToolPlatforms...
 struct sOccQueryNode
 {
   sDNode Node;
-  sInt Pixels;
+  int Pixels;
   struct IDirect3DQuery9 *Query;
 };
 
@@ -132,13 +132,13 @@ class sGfxThreadContextPrivate
 class sGpuToCpuPrivate
 {
 protected:
-  sInt SizeX,SizeY;
-  sInt Flags;
-  sInt DXFormat;
+  int SizeX,SizeY;
+  int Flags;
+  int DXFormat;
   sBool Locked;
   
   sTexture2D *SrcTex;
-  sInt SrcMipLevel;
+  int SrcMipLevel;
   struct IDirect3DSurface9 *Dest;
 };
 

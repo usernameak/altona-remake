@@ -13,32 +13,32 @@
 
 /****************************************************************************/
 
-static const sInt OVERSAMPLE_YF = 4; // more is probably overkill
-static const sInt OVERSAMPLE_Y = 1<<OVERSAMPLE_YF;
+static const int OVERSAMPLE_YF = 4; // more is probably overkill
+static const int OVERSAMPLE_Y = 1<<OVERSAMPLE_YF;
 
-static const sInt FIXSHIFT = 12;
-static const sInt FIXSCALE = 1 << FIXSHIFT;
-static const sInt SCALE_X = 1 << FIXSHIFT;
-static const sInt SCALE_Y = (1 << FIXSHIFT) * OVERSAMPLE_Y;
+static const int FIXSHIFT = 12;
+static const int FIXSCALE = 1 << FIXSHIFT;
+static const int SCALE_X = 1 << FIXSHIFT;
+static const int SCALE_Y = (1 << FIXSHIFT) * OVERSAMPLE_Y;
 
 /****************************************************************************/
 
-static sInt sCeilFix(sInt x)
+static int sCeilFix(int x)
 {
   return (x + (1 << FIXSHIFT)-1) >> FIXSHIFT;
 }
 
-sINLINE sInt sMulShift12(sInt var_a,sInt var_b)
+sINLINE int sMulShift12(int var_a,int var_b)
 {
-  return sInt((sS64(var_a) * var_b) >> 12);
+  return int((sS64(var_a) * var_b) >> 12);
 }
 
-sINLINE sInt sDivShift12(sInt var_a,sInt var_b)
+sINLINE int sDivShift12(int var_a,int var_b)
 {
-  return sInt((sS64(var_a) << 12) / var_b);
+  return int((sS64(var_a) << 12) / var_b);
 }
 
-sINLINE sU32 FadePixel(sU32 a,sU32 b,sInt fade) // fade in 0..256
+sINLINE sU32 FadePixel(sU32 a,sU32 b,int fade) // fade in 0..256
 {
   // ye olde double blend tricke.
   sU32 arb = (a >> 0) & 0xff00ff;
@@ -76,10 +76,10 @@ void sVectorRasterizer::MoveTo(const sVector2 &pos)
 
 void sVectorRasterizer::Edge(const sVector2& a, const sVector2& b)
 {
-  sInt x1 = sInt(a.x * SCALE_X), y1 = sInt(a.y * SCALE_Y);
-  sInt x2 = sInt(b.x * SCALE_X), y2 = sInt(b.y * SCALE_Y);
-  sInt dir = 1;
-  sInt dx;
+  int x1 = int(a.x * SCALE_X), y1 = int(a.y * SCALE_Y);
+  int x2 = int(b.x * SCALE_X), y2 = int(b.y * SCALE_Y);
+  int dir = 1;
+  int dx;
 
   Pos = b;
 
@@ -90,7 +90,7 @@ void sVectorRasterizer::Edge(const sVector2& a, const sVector2& b)
     dir = -1;
   }
 
-  sInt iy1 = sCeilFix(y1), iy2 = sCeilFix(y2);
+  int iy1 = sCeilFix(y1), iy2 = sCeilFix(y2);
   if(iy1 == iy2) // horizontal edge, skip
     return;
 
@@ -150,17 +150,17 @@ void sVectorRasterizer::BezierEdge(const sVector2& a, const sVector2& b, const s
   }
 }
 
-void sVectorRasterizer::RasterizeAll(sU32 color,sInt fillConvention)
+void sVectorRasterizer::RasterizeAll(sU32 color,int fillConvention)
 {
   Head->Prev = Head->Next = Head;
   sIntroSort(sAll(Edges));
 
   EdgeRec *ei = Edges.GetData(), *ee = Edges.GetData()+Edges.GetCount();
-  sInt windingMask = (fillConvention == sVRFC_EVENODD) ? 1 : -1;
-  sInt endY = sAlign(MaxY,OVERSAMPLE_Y); // make sure we always resolve the last row
-  sInt width = Target->SizeX;
+  int windingMask = (fillConvention == sVRFC_EVENODD) ? 1 : -1;
+  int endY = sAlign(MaxY,OVERSAMPLE_Y); // make sure we always resolve the last row
+  int width = Target->SizeX;
   
-  sInt coverSize = width * OVERSAMPLE_Y; 
+  int coverSize = width * OVERSAMPLE_Y; 
   sU8* cover = new sU8[coverSize];
   sU8* coverEnd = cover + coverSize;
   sU8* cp = cover + (MinY & (OVERSAMPLE_Y - 1)) * width;
@@ -168,7 +168,7 @@ void sVectorRasterizer::RasterizeAll(sU32 color,sInt fillConvention)
 
   sSetMem(cover, 0, coverSize);
 
-  for(sInt y=MinY;y<endY;y++)
+  for(int y=MinY;y<endY;y++)
   {
     EdgeRec *e, *en;
 
@@ -219,21 +219,21 @@ void sVectorRasterizer::RasterizeAll(sU32 color,sInt fillConvention)
     }
 
     // go through new active edge list and generate spans on the way
-    sInt winding = 0, lx;
+    int winding = 0, lx;
 
     for(e = Head->Next; e != Head; e = e->Next)
     {
       if(winding & windingMask)
       {
         // clip
-        sInt x0 = sMax(lx, 0);
-        sInt x1 = sMin(e->x, width << 12);
+        int x0 = sMax(lx, 0);
+        int x1 = sMin(e->x, width << 12);
 
         if(x1 > x0)
         {
           // generate span
-          sInt ix0 = (x0 + 0xfff) >> 12;
-          sInt ix1 = (x1 + 0xfff) >> 12;
+          int ix0 = (x0 + 0xfff) >> 12;
+          int ix1 = (x1 + 0xfff) >> 12;
 
           if(ix0 == ix1) // very thin part
             cp[ix0-1] = sU8(sMin(cp[ix0-1] + ((x1 - x0) >> 4), 255));
@@ -262,10 +262,10 @@ void sVectorRasterizer::RasterizeAll(sU32 color,sInt fillConvention)
     cp += width;
     if(cp == coverEnd) // row complete
     {
-      for(sInt x=0;x<width;x++)
+      for(int x=0;x<width;x++)
       {
         sU32 sum = 0;
-        for(sInt s=0;s<OVERSAMPLE_Y;s++)
+        for(int s=0;s<OVERSAMPLE_Y;s++)
           sum += cover[x+s*width];
 
         sum <<= 8 - OVERSAMPLE_YF;

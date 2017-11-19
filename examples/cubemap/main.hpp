@@ -26,7 +26,7 @@ class MyApp : public sApp
   sViewport View;
   sMaterialEnv Env;
   sTiming Timer;
-  sInt time;
+  int time;
 
   sGeometry *TorusGeo;
   sMaterial *TorusMtrl;

@@ -34,7 +34,7 @@ class sFastLzpCompressor
   sU8 *RawPos;
   sU8 *BitPos1,*BitPos2;
   sU32 BitBuffer;
-  sInt BitShift;
+  int BitShift;
 
   sU32 PWritePos;
   sBool PFirstBlock;
@@ -46,7 +46,7 @@ class sFastLzpCompressor
 
   // The BitPos1/BitPos2 stuff looks strange, I know. But it's all too make the
   // depacker very simple+fast.
-  sINLINE void PutBits(sU32 value,sInt nBits) // nBits must be <=16!!
+  sINLINE void PutBits(sU32 value,int nBits) // nBits must be <=16!!
   {
     BitShift -= nBits;
     BitBuffer |= value << BitShift;
@@ -55,7 +55,7 @@ class sFastLzpCompressor
       Shift();
   }
 
-  sINLINE void PutBitsLong(sU32 value,sInt nBits) // nBits may be up to 32
+  sINLINE void PutBitsLong(sU32 value,int nBits) // nBits may be up to 32
   {
     if(nBits <= 16)
       PutBits(value,nBits);
@@ -69,7 +69,7 @@ class sFastLzpCompressor
   sINLINE void PutByte(sU8 value) { *RawPos++ = value; }
   void PutExpGolomb(sU32 value);
 
-  sInt CompressChunk(sU32 nBytes,sBool isLast);
+  int CompressChunk(sU32 nBytes,sBool isLast);
   void Reset();
 
 public:
@@ -99,18 +99,18 @@ class sFastLzpDecompressor
 
   const sU8 *RawPos;
   sU32 BitBuffer;
-  sInt BitFill;
+  int BitFill;
 
   void StartRead(const sU8 *ptr);
 
   void Shift();
 
-  sINLINE sU32 PeekBits(sInt nBits) // nBits must be <=16!!
+  sINLINE sU32 PeekBits(int nBits) // nBits must be <=16!!
   {
     return BitBuffer >> (32 - nBits);
   }
 
-  sINLINE void SkipBits(sInt nBits) // nBist must be <=16!!
+  sINLINE void SkipBits(int nBits) // nBist must be <=16!!
   {
     BitBuffer <<= nBits;
     BitFill -= nBits;
@@ -118,7 +118,7 @@ class sFastLzpDecompressor
       Shift();
   }
 
-  sINLINE sU32 GetBits(sInt nBits) // nBits must be <=16!!
+  sINLINE sU32 GetBits(int nBits) // nBits must be <=16!!
   {
     sU32 v = PeekBits(nBits);
     SkipBits(nBits);
@@ -132,7 +132,7 @@ class sFastLzpDecompressor
 
   sU32 GetExpGolomb();
 
-  sInt DecompressChunk(sU32 blockLen,sBool &last,sU8 *&ptr);
+  int DecompressChunk(sU32 blockLen,sBool &last,sU8 *&ptr);
   void Reset();
 
   sU32 ReadLen(const sU8* ptr);

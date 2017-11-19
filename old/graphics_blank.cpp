@@ -43,7 +43,7 @@ extern HDC sGDIDC;
 static sU8 *DummyBuffer;
 static sDInt DummySize;
 
-static sU8 *GrowDummyBuffer(sInt newsize)
+static sU8 *GrowDummyBuffer(int newsize)
 {
   if(DummySize<newsize)
   {
@@ -64,8 +64,8 @@ static sScreenMode DXScreenMode;
 
 void sVertexFormatHandle::Create()
 {
-  sInt i,b[sVF_STREAMMAX];
-  sInt stream;
+  int i,b[sVF_STREAMMAX];
+  int stream;
 
   for(i=0;i<sVF_STREAMMAX;i++)
     b[i] = 0;
@@ -98,7 +98,7 @@ void sVertexFormatHandle::Create()
     i++;
   }
 
-  for(sInt i=0;i<sVF_STREAMMAX;i++)
+  for(int i=0;i<sVF_STREAMMAX;i++)
     VertexSize[i] = b[i];
 }
 
@@ -128,7 +128,7 @@ void sGeoBufferPart::Clear()
 {
 }
 
-void sGeoBufferPart::Init(sInt count,sInt size,sGeometryDuration duration,sInt buffertype)
+void sGeoBufferPart::Init(int count,int size,sGeometryDuration duration,int buffertype)
 {
   Start = 0;
   Count = count;
@@ -141,13 +141,13 @@ void sGeoBufferPart::Lock(void **ptr)
   *ptr = GrowDummyBuffer(0);
 }
 
-void sGeoBufferPart::Unlock(sInt count,sInt size)
+void sGeoBufferPart::Unlock(int count,int size)
 {
 }
 
 /****************************************************************************/
 
-void sGeometry::BeginWireGrid(void **data,sInt xs,sInt ys)
+void sGeometry::BeginWireGrid(void **data,int xs,int ys)
 {
 }
 
@@ -163,7 +163,7 @@ void sGeometry::EndQuadrics()
 {
 }
 
-void sGeometry::BeginQuad(void **data,sInt count)
+void sGeometry::BeginQuad(void **data,int count)
 {
   *data = GrowDummyBuffer(Format->GetSize(0)*count*4);
 }
@@ -172,7 +172,7 @@ void sGeometry::EndQuad()
 {
 }
 
-void sGeometry::BeginGrid(void **data,sInt xs,sInt ys)
+void sGeometry::BeginGrid(void **data,int xs,int ys)
 {
   *data = GrowDummyBuffer(Format->GetSize(0)*xs*ys);
 }
@@ -191,7 +191,7 @@ void sGeometry::Draw(const sGeometryDrawInfo &di)
 {
 }
 
-void sGeometry::Draw(sDrawRange *ir,sInt irc,sInt instancecount,sVertexOffset *)
+void sGeometry::Draw(sDrawRange *ir,int irc,int instancecount,sVertexOffset *)
 {
 }
 
@@ -243,7 +243,7 @@ sOccQuery::~sOccQuery()
 {
 }
 
-void sOccQuery::Begin(sInt pixels)
+void sOccQuery::Begin(int pixels)
 {
 }
 
@@ -273,7 +273,7 @@ sBool sReadTexture(sReader &s, sTextureBase *&tex)
 
 /****************************************************************************/
 
-void sTexture2D::Create2(sInt flags)
+void sTexture2D::Create2(int flags)
 {
 }
 
@@ -281,10 +281,10 @@ void sTexture2D::Destroy2()
 {
 }
 
-void sTexture2D::BeginLoad(sU8 *&data,sInt &pitch,sInt mipmap)
+void sTexture2D::BeginLoad(sU8 *&data,int &pitch,int mipmap)
 {
-  sInt xs = SizeX;
-  sInt ys = SizeY;
+  int xs = SizeX;
+  int ys = SizeY;
   pitch = xs*BitsPerPixel/8;
   switch(Flags & sTEX_FORMAT)
   {
@@ -310,7 +310,7 @@ void sTexture2D::BeginLoad(sU8 *&data,sInt &pitch,sInt mipmap)
   data = GrowDummyBuffer(pitch*ys);
 }
 
-void sTexture2D::BeginLoadPartial(const sRect &rect,sU8 *&data,sInt &pitch,sInt mipmap)
+void sTexture2D::BeginLoadPartial(const sRect &rect,sU8 *&data,int &pitch,int mipmap)
 {
   BeginLoad(data,pitch,mipmap);
 }
@@ -335,7 +335,7 @@ void sTexture2D::CalcOneMiplevel(const sRect &rect)
 
 /****************************************************************************/
 
-void sTextureCube::Create2(sInt flags)
+void sTextureCube::Create2(int flags)
 {
 }
 
@@ -343,7 +343,7 @@ void sTextureCube::Destroy2()
 {
 }
 
-void sTextureCube::BeginLoad(sTexCubeFace cf, sU8*& data, sInt& pitch, sInt mipmap)
+void sTextureCube::BeginLoad(sTexCubeFace cf, sU8*& data, int& pitch, int mipmap)
 {
   data = GrowDummyBuffer(BitsPerPixel*SizeXY);
   pitch = 0;
@@ -365,7 +365,7 @@ void sTextureProxy::Disconnect2()
 
 /****************************************************************************/
 
-void sPackDXT(sU8 *d,sU32 *bmp,sInt xs,sInt ys,sInt format,sBool dither)
+void sPackDXT(sU8 *d,sU32 *bmp,int xs,int ys,int format,sBool dither)
 {
   sFastPackDXT(d,bmp,xs,ys,format & sTEX_FORMAT,1 | (dither ? 0x80 : 0));
 }
@@ -384,7 +384,7 @@ void sMaterial::Destroy2()
 {
 }
 
-void sMaterial::Set(sCBufferBase **cbuffers,sInt cbcount,sBool additive)
+void sMaterial::Set(sCBufferBase **cbuffers,int cbcount,sBool additive)
 {
 }
 
@@ -392,11 +392,11 @@ void sMaterial::Prepare(sVertexFormatHandle *)
 {
 }
 
-void sMaterial::SetVariant(sInt var)
+void sMaterial::SetVariant(int var)
 {
 }
 
-void sMaterial::InitVariants(sInt var)
+void sMaterial::InitVariants(int var)
 {
 }
 
@@ -404,7 +404,7 @@ void sMaterial::DiscardVariants()
 {
 }
 
-void sMaterial::SetVariantRS(sInt var, const sMaterialRS &rs)
+void sMaterial::SetVariantRS(int var, const sMaterialRS &rs)
 {
 }
 
@@ -419,16 +419,16 @@ sShaderTypeFlag sGetShaderPlatform()
   return sSTF_NONE;
 }
 
-sInt sGetShaderProfile()
+int sGetShaderProfile()
 {
   return sSTF_NONE;
 }
 
-void sSetVSParam(sInt o, sInt count, const sVector4* vsf)
+void sSetVSParam(int o, int count, const sVector4* vsf)
 {
 }
 
-void sSetPSParam(sInt o, sInt count, const sVector4* psf)
+void sSetPSParam(int o, int count, const sVector4* psf)
 {
 }
 
@@ -454,7 +454,7 @@ void sDeleteShader2(sShader *shader)
 /***                                                                      ***/
 /****************************************************************************/
 
-sBool sSetOversizeScreen(sInt xs,sInt ys,sInt fsaa,sBool mayfail)
+sBool sSetOversizeScreen(int xs,int ys,int fsaa,sBool mayfail)
 {
   return sFALSE;
 }
@@ -469,7 +469,7 @@ void sGetScreenSafeArea(sF32 &xs, sF32 &ys)
 #endif
 }
 
-void PreInitGFX(sInt &flags,sInt &xs,sInt &ys)
+void PreInitGFX(int &flags,int &xs,int &ys)
 {
   if(!(DXScreenMode.Flags & sSM_VALID))
   {
@@ -491,7 +491,7 @@ void PreInitGFX(sInt &flags,sInt &xs,sInt &ys)
   }
 }
 
-void InitGFX(sInt flags,sInt xs,sInt ys)
+void InitGFX(int flags,int xs,int ys)
 {
   GrowDummyBuffer(1024);
   DXScreenMode.ScreenX = xs;
@@ -507,7 +507,7 @@ void ExitGFX()
   DummySize = 0;
 }
 
-void ResizeGFX(sInt xs,sInt ys)
+void ResizeGFX(int xs,int ys)
 {
   DXScreenMode.ScreenX = xs;
   DXScreenMode.ScreenY = ys;
@@ -519,12 +519,12 @@ void ResizeGFX(sInt xs,sInt ys)
 /***                                                                      ***/
 /****************************************************************************/
 
-sInt sGetDisplayCount()
+int sGetDisplayCount()
 {
   return 1;
 }
 
-void sGetScreenInfo(sScreenInfo &si,sInt flags,sInt display)
+void sGetScreenInfo(sScreenInfo &si,int flags,int display)
 {
   si.Clear();
   si.Resolutions.HintSize(1);
@@ -569,19 +569,19 @@ void sSetScreen(sTexture2D *, sGrabFilterFlags filter, const sRect *dst, const s
 {
 }
 
-void sSetRendertarget(const sRect *vrp, sInt clearflags, sU32 clearcolor)
+void sSetRendertarget(const sRect *vrp, int clearflags, sU32 clearcolor)
 {
 }
 
-void sSetRendertarget(const sRect *vrp,sTexture2D *tex, sInt flags, sU32 clearcolor)
+void sSetRendertarget(const sRect *vrp,sTexture2D *tex, int flags, sU32 clearcolor)
 {
 }
 
-void sSetRendertarget(const sRect *vrp,sInt flags,sU32 clearcolor,sTexture2D **tex,sInt count)
+void sSetRendertarget(const sRect *vrp,int flags,sU32 clearcolor,sTexture2D **tex,int count)
 {
 }
 
-void sSetRendertargetCube(sTextureCube*,sTexCubeFace,sInt cf, sU32 cc)
+void sSetRendertargetCube(sTextureCube*,sTexCubeFace,int cf, sU32 cc)
 {
 }
 
@@ -639,19 +639,19 @@ sBool sRender3DBegin()
   return 1;
 }
 
-void sSetRenderClipping(sRect *r,sInt count)
+void sSetRenderClipping(sRect *r,int count)
 {
 }
 
-void sSetTexture(sInt stage,class sTextureBase *tex)
+void sSetTexture(int stage,class sTextureBase *tex)
 {
 }
 
-void sSetRenderStates(const sU32 *data, sInt count)
+void sSetRenderStates(const sU32 *data, int count)
 {
 }
 
-sInt sRenderStateTexture(sU32 *data, sInt texstage, sU32 tflags,sF32 lodbias)
+int sRenderStateTexture(sU32 *data, int texstage, sU32 tflags,sF32 lodbias)
 {
   return 0;
 }

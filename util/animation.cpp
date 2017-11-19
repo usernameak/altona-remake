@@ -46,7 +46,7 @@ sF32 sFadeData::GetFactor(sU32 type)
 
 /****************************************************************************/
 
-void sFadeData::Fade (sInt delta, sFadeData::FadeDirection fade)
+void sFadeData::Fade (int delta, sFadeData::FadeDirection fade)
  {
    if      (fade==IN)  FadeIn(delta); 
    else if (fade==OUT) FadeOut(delta); 

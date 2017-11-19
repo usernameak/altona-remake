@@ -17,8 +17,8 @@ class sTextureBase;
 
 struct sMovieInfo
 {
-  sInt  XSize;   // width in pixels
-  sInt  YSize;   // height in pixels
+  int  XSize;   // width in pixels
+  int  YSize;   // height in pixels
   sF32  Aspect;  // actual aspect ratio (width/height)
   sF32  Length;  // length in seconds
   sF32  FPS;     // frames per second
@@ -105,7 +105,7 @@ enum sMovieFlags
 
 // creates a movie player instance. The alpha texture only applies to platforms
 // implementing the advanced API.
-sMoviePlayer * sCreateMoviePlayer(const sChar *filename, sInt flags, sTextureBase *alphatexture=0);
+sMoviePlayer * sCreateMoviePlayer(const sChar *filename, int flags, sTextureBase *alphatexture=0);
 
 /****************************************************************************/
 

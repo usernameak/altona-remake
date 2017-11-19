@@ -50,7 +50,7 @@ extern void sCollector(sBool exit = sFALSE);
 
 XVisualInfo *sXVisualInfo;
 Visual *sXVisual;
-sInt sXScreen;
+int sXScreen;
 Colormap sXColMap;
 Drawable sXWnd;
 Window sXWndFrontBuffer;
@@ -60,8 +60,8 @@ GC sXFrontGC;
 static Display *sXMainDisplay;
 static sPtr sXDisplayTls;
 
-extern sInt sSystemFlags;
-extern sInt sExitFlag;
+extern int sSystemFlags;
+extern int sExitFlag;
 extern sApp *sAppPtr;
 
 sU32 sKeyQual;
@@ -74,14 +74,14 @@ sU32 sKeyQual;
 
 //void Render3D();
 
-/*void PreInitGFX(sInt &flags, sInt &xs, sInt &ys);
-void InitGFX(sInt flags, sInt xs, sInt ys);
+/*void PreInitGFX(int &flags, int &xs, int &ys);
+void InitGFX(int flags, int xs, int ys);
 void ExitGFX();
-void ResizeGFX(sInt x, sInt y);*/
+void ResizeGFX(int x, int y);*/
 
 /****************************************************************************/
 
-static sInt ErrorCode = 0;
+static int ErrorCode = 0;
 
 // Includes home directory matching
 static void FromWideFileName(char *dest, const sChar *src, int size)
@@ -135,10 +135,10 @@ static char *FromWideFileName(const sChar *str)
   return buffer;
 }
 
-static sBool NormalizePathR(const sStringDesc &desc, sInt &inPos, sInt outPos, sInt count)
+static sBool NormalizePathR(const sStringDesc &desc, int &inPos, int outPos, int count)
 {
   // copy first part up to and including slash/null
-  for (sInt i = 0; i < count; i++)
+  for (int i = 0; i < count; i++)
     desc.Buffer[outPos++] = desc.Buffer[inPos++];
 
   while (desc.Buffer[inPos - 1])
@@ -156,7 +156,7 @@ static sBool NormalizePathR(const sStringDesc &desc, sInt &inPos, sInt outPos, s
     }
     else
     {
-      sInt count = 0;
+      int count = 0;
       while (cur[count] && cur[count] != L'/')
         count++;
 
@@ -169,14 +169,14 @@ static sBool NormalizePathR(const sStringDesc &desc, sInt &inPos, sInt outPos, s
 
 static void NormalizePath(const sStringDesc &desc)
 {
-  sInt slashPos = sFindFirstChar(desc.Buffer, L'/');
+  int slashPos = sFindFirstChar(desc.Buffer, L'/');
   if (slashPos == -1)
   {
     desc.Buffer[0] = 0;
     return; // nothing to do if no slashes
   }
 
-  sInt inPos = 0;
+  int inPos = 0;
   if (!NormalizePathR(desc, inPos, 0, slashPos + 1))
     desc.Buffer[0] = 0;
 }
@@ -209,7 +209,7 @@ void sDPrint(const sChar *text)
     sDebugOutHook->Call(text);
 #endif
 
-  sInt size = sGetStringLen(text) * 2 + 1;
+  int size = sGetStringLen(text) * 2 + 1;
   sChar8 *buffer = sALLOCSTACK(sChar8, size);
   sLinuxFromWide(buffer, text, size);
 
@@ -259,12 +259,12 @@ sBool sGotCtrlC()
   return sCtrlCFlag;
 }
 
-void sSetErrorCode(sInt code)
+void sSetErrorCode(int code)
 {
   ErrorCode = code;
 }
 
-sInt sStartTime = 0;
+int sStartTime = 0;
 
 void sInitGetTime()
 {
@@ -274,7 +274,7 @@ void sInitGetTime()
   sStartTime = currentTime.tv_sec * 1000 + currentTime.tv_nsec / 1000000;
 }
 
-sInt sGetTime()
+int sGetTime()
 {
   timespec currentTime;
   clock_gettime(CLOCK_REALTIME, &currentTime);
@@ -321,7 +321,7 @@ sDateAndTime sGetDateAndTime()
   return TimeFromSystemTime(t);
 }
 
-sDateAndTime sAddLocalTime(sDateAndTime origin, sInt seconds)
+sDateAndTime sAddLocalTime(sDateAndTime origin, int seconds)
 {
   struct tm t;
   TimeToSystemTime(&t, origin);
@@ -353,7 +353,7 @@ sU64 sToFileTime(sDateAndTime time)
   return mktime(&t);
 }
 
-sBool sStackTrace(const sStringDesc &tgt, sInt skipCount, sInt maxCount)
+sBool sStackTrace(const sStringDesc &tgt, int skipCount, int maxCount)
 {
   return sFALSE; // no stack traces on linux yet.
 }
@@ -388,7 +388,7 @@ sBool sDaemonize()
   return daemon(1, 1) == 0;
 }
 
-sInt sGetRandomSeed()
+int sGetRandomSeed()
 {
   sChecksumMD5 check;
   time_t tm = time(0);
@@ -833,7 +833,7 @@ sBool sCopyFile(const sChar *source, const sChar *dest, sBool failifexists)
   sLogF(L"file", L"copy from <%s>\n", source);
   sLogF(L"file", L"copy to   <%s>\n", dest);
 
-  static const sInt bufSize = 65536;
+  static const int bufSize = 65536;
   sU8 *buf = new sU8[bufSize];
   if (!buf)
   {
@@ -988,7 +988,7 @@ sThread *sGetCurrentThread()
   return (sThread *)pthread_getspecific(sThreadKey);
 }
 
-sInt sGetCurrentThreadId()
+int sGetCurrentThreadId()
 {
   return pthread_self();
 }
@@ -1008,12 +1008,12 @@ sThreadContext *sGetThreadContext()
 
 /****************************************************************************/
 
-void sSleep(sInt ms)
+void sSleep(int ms)
 {
   usleep(ms * 1000); //uSleep need microseconds
 }
 
-sInt sGetCPUCount()
+int sGetCPUCount()
 {
   return sysconf(_SC_NPROCESSORS_CONF);
 }
@@ -1054,7 +1054,7 @@ void *sSTDCALL sThreadTrunk_pthread(void *ptr)
 
 /****************************************************************************/
 
-sThread::sThread(void (*code)(sThread *, void *), sInt pri, sInt stacksize, void *userdata, sInt flags /*=0*/)
+sThread::sThread(void (*code)(sThread *, void *), int pri, int stacksize, void *userdata, int flags /*=0*/)
 {
   sVERIFY(sizeof(pthread_t) == sCONFIG_PTHREAD_T_SIZE);
 
@@ -1101,7 +1101,7 @@ sThread::~sThread()
   delete Context;
 }
 
-void sThread::SetHomeCore(sInt core)
+void sThread::SetHomeCore(int core)
 {
   /*if(this==0)
     SetThreadIdealProcessor(GetCurrentThread(),core);
@@ -1190,7 +1190,7 @@ sThreadEvent::~sThreadEvent()
 {
 }
 
-sBool sThreadEvent::Wait(sInt timeout)
+sBool sThreadEvent::Wait(int timeout)
 {
   if (ManualReset) // manual reset
   {
@@ -1202,7 +1202,7 @@ sBool sThreadEvent::Wait(sInt timeout)
       return sTRUE;
     }
 
-    sInt start = sGetTime();
+    int start = sGetTime();
     sU32 tDiff;
     sBool okay = sFALSE;
     do
@@ -1226,7 +1226,7 @@ sBool sThreadEvent::Wait(sInt timeout)
       return sTRUE;
     }
 
-    sInt start = sGetTime();
+    int start = sGetTime();
     sU32 tDiff, gotit;
     do
     {
@@ -1261,7 +1261,7 @@ static sThreadLock *InputThreadLock;
 class sKeyboardData
 {
 public:
-  sKeyboardData(sInt num)
+  sKeyboardData(int num)
       : Device(sINPUT2_TYPE_KEYBOARD, num)
   {
     keys.HintSize(256);
@@ -1278,7 +1278,7 @@ public:
   {
     InputThreadLock->Lock();
     sInput2DeviceImpl<sINPUT2_KEYBOARD_MAX>::Value_ v;
-    for (sInt i = 0; i < 255; i++)
+    for (int i = 0; i < 255; i++)
       v.Value[i] = keys[i] ? 1.0f : 0.0f;
     v.Timestamp = sGetTime();
     v.Status = 0;
@@ -1304,7 +1304,7 @@ public:
     sMB_X2 = 16,    // 5th mouse button
   };
 
-  sMouseData(sInt num)
+  sMouseData(int num)
       : Device(sINPUT2_TYPE_MOUSE, num)
   {
     X = Y = Z = RawX = RawY = Buttons = 0;
@@ -1337,12 +1337,12 @@ public:
     InputThreadLock->Unlock();
   }
 
-  sInt X;
-  sInt Y;
-  sInt Z;
-  sInt RawX;
-  sInt RawY;
-  sInt Buttons;
+  int X;
+  int Y;
+  int Z;
+  int RawX;
+  int RawY;
+  int Buttons;
 
 private:
   sInput2DeviceImpl<sINPUT2_MOUSE_MAX> Device;
@@ -1403,7 +1403,7 @@ Display *sXDisplay()
   return NULL;
 }
 
-void sTriggerEvent(sInt event)
+void sTriggerEvent(int event)
 {
 #if !sCOMMANDLINE
   XClientMessageEvent ev;
@@ -1418,7 +1418,7 @@ void sTriggerEvent(sInt event)
 #endif
 }
 
-void sSetMouse(sInt x, sInt y)
+void sSetMouse(int x, int y)
 {
 #if !sCOMMANDLINE
   XWarpPointer(sXDisplay(), None, sXWndFrontBuffer, 0, 0, 0, 0, x, y);
@@ -1442,7 +1442,7 @@ sU32 sGetKeyQualifier()
   return sKeyQual;
 }
 
-sInt sMakeUnshiftedKey(sInt ascii)
+int sMakeUnshiftedKey(int ascii)
 {
   ascii &= sKEYQ_MASK;
   if (ascii >= 'A' && ascii <= 'Z')
@@ -1472,7 +1472,7 @@ sInt sMakeUnshiftedKey(sInt ascii)
   return ascii;
 }
 
-void sInit(sInt flags, sInt xs, sInt ys)
+void sInit(int flags, int xs, int ys)
 {
   if (sGUIEnabled)
   {
@@ -1566,12 +1566,12 @@ extern void sXClearUpdate();
 extern void sXGetUpdateBoundingRect(sRect &r);
 extern sBool sXUpdateEmpty();
 
-static sInt sXLookupKeySym(KeySym sym)
+static int sXLookupKeySym(KeySym sym)
 {
   struct Mapping
   {
     KeySym Sym;
-    sInt Key;
+    int Key;
   };
   static const Mapping keyMap[] = // sorted by X keysym
       {
@@ -1690,10 +1690,10 @@ static sInt sXLookupKeySym(KeySym sym)
           },
       };
 
-  sInt l = 0, r = sCOUNTOF(keyMap);
+  int l = 0, r = sCOUNTOF(keyMap);
   while (l < r) // binary search
   {
-    sInt x = (l + r) >> 1;
+    int x = (l + r) >> 1;
     if (sym < keyMap[x].Sym)
       r = x;
     else if (sym > keyMap[x].Sym)
@@ -1705,7 +1705,7 @@ static sInt sXLookupKeySym(KeySym sym)
   return 0;
 }
 
-static void sendMouseMove(sInt x, sInt y)
+static void sendMouseMove(int x, int y)
 {
   // (x<<16)|y? *Really*? (Sigh.)
   // WAT?????
@@ -1720,8 +1720,8 @@ static void sXMessageLoop()
   if (sAppPtr && sXWndFrontBuffer)
   {
     sBool done = sFALSE;
-    static const sInt buttonKey[10] = {0, sKEY_LMB, sKEY_MMB, sKEY_RMB, sKEY_WHEELUP, sKEY_WHEELDOWN, 0, 0, sKEY_X1MB, sKEY_X2MB};
-    static const sInt buttonMask[10] = {0, sMouseData::sMB_LEFT, sMouseData::sMB_MIDDLE, sMouseData::sMB_RIGHT, 0, 0, 0, 0, sMouseData::sMB_X1, sMouseData::sMB_X2};
+    static const int buttonKey[10] = {0, sKEY_LMB, sKEY_MMB, sKEY_RMB, sKEY_WHEELUP, sKEY_WHEELDOWN, 0, 0, sKEY_X1MB, sKEY_X2MB};
+    static const int buttonMask[10] = {0, sMouseData::sMB_LEFT, sMouseData::sMB_MIDDLE, sMouseData::sMB_RIGHT, 0, 0, 0, 0, sMouseData::sMB_X1, sMouseData::sMB_X2};
 
     while (!done)
     {
@@ -1796,7 +1796,7 @@ static void sXMessageLoop()
         case ButtonPress:
         case ButtonRelease:
         {
-          sInt b = e.xbutton.button;
+          int b = e.xbutton.button;
           sU32 orm = (e.type == ButtonRelease) ? 0 : ~0u;
 
           sendMouseMove(e.xbutton.x, e.xbutton.y);
@@ -1813,7 +1813,7 @@ static void sXMessageLoop()
         case KeyRelease:
         {
           static XComposeStatus compose[2];
-          sInt isRelease = (e.type == KeyRelease);
+          int isRelease = (e.type == KeyRelease);
           sU32 orm = isRelease ? 0 : ~0u;
           char str[8];
           sChar wch[8];
@@ -1853,12 +1853,12 @@ static void sXMessageLoop()
           if (nch == 1 && wch[0] == 13) // CR to LF
             wch[0] = sKEY_ENTER;
 
-          for (sInt i = 0; i < wch[i]; i++)
+          for (int i = 0; i < wch[i]; i++)
             sInput2SendEvent(sInput2Event(wch[i] | (sKEYQ_BREAK & ~orm)));
 
           if (!wch[0]) // nonprintable
           {
-            sInt k = sXLookupKeySym(sym);
+            int k = sXLookupKeySym(sym);
             if (k)
               sInput2SendEvent(sInput2Event(k | (sKEYQ_BREAK & ~orm)));
           }
@@ -1923,7 +1923,7 @@ static void sXMessageLoop()
 
 class sLinuxJoypad : public sJoypad
 {
-  sInt TimestampOffset;
+  int TimestampOffset;
   sU32 LastTimestamp;
   sString<256> Path;
   
@@ -1933,7 +1933,7 @@ class sLinuxJoypad : public sJoypad
   
   sJoypadData State;
   
-  sInt TranslateTimestamp(sU32 inTimestamp);
+  int TranslateTimestamp(sU32 inTimestamp);
   void Open(const sChar *filename);
   void Close();
   
@@ -1946,12 +1946,12 @@ public:
   sBool IsConnected();
   void GetData(sJoypadData &data);
   void GetName(const sStringDesc &name); 
-  void SetMotor(sInt slow,sInt fast);
+  void SetMotor(int slow,int fast);
 
   void Poll();
 };
 
-sInt sLinuxJoypad::TranslateTimestamp(sU32 inTimestamp)
+int sLinuxJoypad::TranslateTimestamp(sU32 inTimestamp)
 {
   if(FirstEvent)
   {
@@ -1980,7 +1980,7 @@ void sLinuxJoypad::Open(const sChar *filename)
   }
   
   // get device name
-  static const sInt nameLen = 128;
+  static const int nameLen = 128;
   char devname[nameLen];
   if(ioctl(fd,JSIOCGNAME(nameLen-1),devname) < 0)
   {
@@ -2016,9 +2016,9 @@ void sLinuxJoypad::Open(const sChar *filename)
   State.AnalogMask = 0;
   State.PovMask = 0;
   
-  for(sInt i=0;i<nAxis;i++)
+  for(int i=0;i<nAxis;i++)
   {
-    sInt ind = AxisMapping[i];
+    int ind = AxisMapping[i];
     
     if(ind >= ABS_X && ind < ABS_HAT0X) // analog axis with index ind (max 16)
     {
@@ -2027,7 +2027,7 @@ void sLinuxJoypad::Open(const sChar *filename)
     }
     else if(ind >= ABS_HAT0X && ind <= ABS_HAT3Y) // POV hats
     {
-      sInt povIndex = (ind - ABS_HAT0X) / 2; // one POV hat = 2 axes
+      int povIndex = (ind - ABS_HAT0X) / 2; // one POV hat = 2 axes
       State.PovMask |= 1<<povIndex;
     }
     else
@@ -2052,13 +2052,13 @@ void sLinuxJoypad::Close()
 
 void sLinuxJoypad::Event(const js_event &ev)
 {
-  sInt timestamp = TranslateTimestamp(ev.time);
+  int timestamp = TranslateTimestamp(ev.time);
   
   switch(ev.type & ~JS_EVENT_INIT)
   {
   case JS_EVENT_BUTTON: // button pressed/released
     {
-      sInt index = ev.number;
+      int index = ev.number;
       if(index < sCOUNTOF(State.Pressure))
       {
         sU32 mask = 1u << index;
@@ -2081,30 +2081,30 @@ void sLinuxJoypad::Event(const js_event &ev)
     
   case JS_EVENT_AXIS: // axis moved
     {
-      sInt map = AxisMapping[ev.number];
+      int map = AxisMapping[ev.number];
       
       if(map >= ABS_X && map < ABS_HAT0X) // proper analog axis
         State.Analog[map] = sClamp(ev.value+0x8000,0,0xffff);
       else if(map >= ABS_HAT0X && map <= ABS_HAT3Y) // POV hats
       {
-        sInt povIndex = (map - ABS_HAT0X) / 2;
-        sInt axisShift = ~map & 1;
-        sInt val = axisShift ? -ev.value : ev.value;
+        int povIndex = (map - ABS_HAT0X) / 2;
+        int axisShift = ~map & 1;
+        int val = axisShift ? -ev.value : ev.value;
         
-        sInt oldbits = State.Povs >> (4*povIndex);
-        sInt bits = oldbits;
+        int oldbits = State.Povs >> (4*povIndex);
+        int bits = oldbits;
 
         bits &= ~(5 << axisShift); // bit 0+2
         if(val < 0) bits |= 1 << axisShift;
         if(val > 0) bits |= 4 << axisShift;        
         
-        sInt shift = povIndex*4;
+        int shift = povIndex*4;
         State.Povs = (State.Povs & ~(0xf << shift)) | (bits << shift);
         
-        sInt change = bits ^ oldbits;
-        for(sInt j=0;j<4;j++)
+        int change = bits ^ oldbits;
+        for(int j=0;j<4;j++)
         {
-          sInt mask = 1<<j;
+          int mask = 1<<j;
           if(change & mask)
             sQueueInput(sIED_JOYPAD,GetId(),sPAD_POV|(povIndex*4)|j|((bits & mask ) ? 0 : sKEYQ_BREAK),timestamp);
         }
@@ -2157,7 +2157,7 @@ void sLinuxJoypad::GetName(const sStringDesc &name)
   sCopyString(name,Name);
 }
 
-void sLinuxJoypad::SetMotor(sInt slow,sInt fast)
+void sLinuxJoypad::SetMotor(int slow,int fast)
 {
   // don't do anything
 }
@@ -2201,7 +2201,7 @@ static void sInitLinuxJoypad()
   
   if(sLoadDir(joypads,base,L"js*"))
   {
-    for(sInt i=0;i<joypads.GetCount();i++)
+    for(int i=0;i<joypads.GetCount();i++)
     {
       filename = base;
       filename.AddPath(joypads[i].Name);
@@ -2238,11 +2238,11 @@ class sMemoryHeap sDebugHeap;
 class sLibcHeap_ : public sMemoryHandler
 {
 public:
-  void *Alloc(sPtr size, sInt align, sInt flags)
+  void *Alloc(sPtr size, int align, int flags)
   {
     //    sAtomicAdd(&sMemoryUsed, (sDInt)size);
     void *ptr;
-    align = sMax<sInt>(align, sizeof(void *));
+    align = sMax<int>(align, sizeof(void *));
     if (posix_memalign(&ptr, align, size))
       ptr = 0;
 
@@ -2256,7 +2256,7 @@ public:
   }
 } sLibcHeap;
 
-static const sInt DebugHeapSize = 16 * 1024 * 1024;
+static const int DebugHeapSize = 16 * 1024 * 1024;
 
 void sInitMem2(sPtr gfx)
 {
@@ -2267,13 +2267,13 @@ void sInitMem1()
   sMainHeapBase = 0;
   sDebugHeapBase = 0;
 
-  sInt flags = sMemoryInitFlags;
+  int flags = sMemoryInitFlags;
 
   if (flags & sIMF_DEBUG)
   {
     if (flags & sIMF_NORTL)
     {
-      sInt size = DebugHeapSize;
+      int size = DebugHeapSize;
       sDebugHeapBase = (sU8 *)mmap(0, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
       sVERIFY(sDebugHeapBase != (sU8 *)MAP_FAILED);
       sDebugHeap.Init(sDebugHeapBase, size);
@@ -2340,7 +2340,7 @@ int main(int argc, char **argv)
 
   // create a commandline
   commandLine[0] = 0;
-  for (sInt i = 0; i < argc; i++)
+  for (int i = 0; i < argc; i++)
   {
     sChar buffer[2048];
     sLinuxToWide(buffer, argv[i]);
@@ -2387,7 +2387,7 @@ int main(int argc, char **argv)
 
 /****************************************************************************/
 
-sVideoWriter *sCreateVideoWriter(const sChar *filename, const sChar *codec, sF32 fps, sInt xRes, sInt yRes)
+sVideoWriter *sCreateVideoWriter(const sChar *filename, const sChar *codec, sF32 fps, int xRes, int yRes)
 {
   sDPrintF(L"sCreateVideoWriter not implemented on Linux!\n");
   return 0;
@@ -2397,7 +2397,7 @@ sVideoWriter *sCreateVideoWriter(const sChar *filename, const sChar *codec, sF32
 
 void sEnableKeyboard(sBool v) {}
 
-sInt sGetNumInstances()
+int sGetNumInstances()
 {
   sFatal(L"sGetNumInstances not implemented");
   return 1;
@@ -2405,6 +2405,6 @@ sInt sGetNumInstances()
 
 #else
 
-sInt sDummyLink_system_linux;
+int sDummyLink_system_linux;
 
 #endif // linux

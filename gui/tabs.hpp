@@ -23,19 +23,19 @@ class sTabBorderBase : public sWindow     // this is a border!
     sRect Kill;
   };
   sRect Rect;
-  sInt Height;
+  int Height;
   sArray<Info> Rects;
-  sInt HoverTab;
-  sInt HoverKill;
-  sInt ActiveTab;
-  sInt MoveBefore;
-  sInt ScrollTo;
+  int HoverTab;
+  int HoverKill;
+  int ActiveTab;
+  int MoveBefore;
+  int ScrollTo;
 
-  sInt ScrollX0;
-  sInt ScrollX1;
-  sInt ScrollWidth;
-  sInt Scroll;
-  sInt DragScroll;
+  int ScrollX0;
+  int ScrollX1;
+  int ScrollWidth;
+  int Scroll;
+  int DragScroll;
 public:
   sTabBorderBase();
   ~sTabBorderBase();
@@ -46,16 +46,16 @@ public:
   sBool OnKey(sU32 key);
   void OnDrag(const sWindowDrag &dd);
 
-  sInt GetTab();
-  void SetTab(sInt tab);
-  void DelTab(sInt tab);
+  int GetTab();
+  void SetTab(int tab);
+  void DelTab(int tab);
 
   sMessage ChangeMsg;
 
-  virtual sInt GetTabCount()=0;
-  virtual const sChar *GetTabName(sInt n)=0;
-  virtual void DeleteTab(sInt n) {}
-  virtual void MoveTab(sInt from,sInt to) {}
+  virtual int GetTabCount()=0;
+  virtual const sChar *GetTabName(int n)=0;
+  virtual void DeleteTab(int n) {}
+  virtual void MoveTab(int from,int to) {}
 };
 
 
@@ -65,10 +65,10 @@ template <class Type> class sTabBorder : public sTabBorderBase
 public:
   sTabBorder(sArray<Type>&t) { Tabs = &t; }
   void Tag() { sTabBorderBase::Tag(); sNeed(*Tabs); }
-  sInt GetTabCount() { return Tabs ? Tabs->GetCount() : 0; }
-  const sChar *GetTabName(sInt n) { return (*Tabs)[n]->Label; }
-  void DeleteTab(sInt n) { Tabs->RemAtOrder(n); }
-  void MoveTab(sInt from,sInt to) { Type e=(*Tabs)[from]; Tabs->RemAtOrder(from); Tabs->AddBefore(e,to); }
+  int GetTabCount() { return Tabs ? Tabs->GetCount() : 0; }
+  const sChar *GetTabName(int n) { return (*Tabs)[n]->Label; }
+  void DeleteTab(int n) { Tabs->RemAtOrder(n); }
+  void MoveTab(int from,int to) { Type e=(*Tabs)[from]; Tabs->RemAtOrder(from); Tabs->AddBefore(e,to); }
 };
 
 /****************************************************************************/

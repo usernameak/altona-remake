@@ -21,13 +21,13 @@ public:
   NewCode();
   ~NewCode();
 
-  sInt ShaderType;                // sSTF_???
+  int ShaderType;                // sSTF_???
   sU8 *DX9Code;
-  sInt DX9Size;
+  int DX9Size;
   sU8 *DX11Code;
-  sInt DX11Size; 
+  int DX11Size; 
   sU8 *GLSLCode;                  // misused as CG right now
-  sInt GLSLSize; 
+  int GLSLSize; 
 };
 
 class NewShader                   // shader permutations
@@ -37,7 +37,7 @@ public:
   ~NewShader();
 
   sPoolString Name;               // name of shader
-  sInt ShaderType;                // sSTF_PIXEL, sSTF_VERTEX, ...
+  int ShaderType;                // sSTF_PIXEL, sSTF_VERTEX, ...
 
   sPoolString AscSource;          // main sourcecode
   sPoolString GlslSource;         // alternative glsl source
@@ -49,9 +49,9 @@ public:
   NewCode *ByteCode;              // no permutation: this code
 
   NewCode **Permutes;             // with permutation: these codes!
-  sInt PermuteCount;              // size of array
+  int PermuteCount;              // size of array
 
-  sInt CompileFlags;
+  int CompileFlags;
 };
 
 enum ShaderEnum
@@ -109,11 +109,11 @@ public:
   sBool NoStrip;
 
   void _Code(sPoolString &code);
-  void _CodeNoLine(sPoolString &code,sInt lineoffset);
+  void _CodeNoLine(sPoolString &code,int lineoffset);
   void _NewShaderCodeStatement(NewShader *ns);
   void _NewShaderCode(NewMaterial *nm,NewShader *ns);
   void _Material();
-  void _Shader(NewMaterial *nm,sInt ascshaderkind,sInt altonashaderkind);
+  void _Shader(NewMaterial *nm,int ascshaderkind,int altonashaderkind);
   void _Asc();
   void _Include();
   void _Global();

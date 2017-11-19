@@ -642,7 +642,7 @@ typedef int                       sS32;     // for packed arrays
 typedef signed sCONFIG_INT64      sS64;     // use as needed
 typedef float                     sF32;     // basic floatingpoint
 typedef double                    sF64;     // use as needed
-typedef int                       sInt;     // use this most!
+//typedef int                       int;     // use this most!
 typedef unsigned sCONFIG_NATIVEINT sPtr;    // type for pointer
 typedef signed sCONFIG_NATIVEINT  sDInt;    // type for pointer diff
 typedef sCONFIG_UNICODETYPE       sChar;    // type for strings (UNICODE!)
@@ -667,12 +667,12 @@ typedef sCONFIG_SSE               sSSE ;   // 4 x sF32
 #define sMAX_S32   0x7fffffff
 #define sMIN_S32   (-sMAX_S32-1)
 #define sMAX_S64   0x7fffffffffffffff
-#define sMAX_INT   (~(1<<(8*sizeof(sInt)-1)))
+#define sMAX_INT   (~(1<<(8*sizeof(int)-1)))
 #define sMAX_F32   (1E+37)
 #define sMIN_F32   (1E-37)
 
-#define sVARARG(p,i) (((sInt *)(p))[(i)+1])               // don't use varargs at all if possible
-#define sVARARGF(p,i) (*(sF64*)&(((sInt *)(p))[(i)+1]))
+#define sVARARG(p,i) (((int *)(p))[(i)+1])               // don't use varargs at all if possible
+#define sVARARGF(p,i) (*(sF64*)&(((int *)(p))[(i)+1]))
 #define sALLOCSTACK(type,count)  ((type *) sCONFIG_ALLOCA((count)*sizeof(type)))   // this has to be a macro because is MUST be inlined!
 #define sALLOCALIGNEDSTACK(type,count,ba)  ((type *) ((sDInt(sCONFIG_ALLOCA((count)*sizeof(type)+ba-1))+ba-1)&~(ba-1)))   // this has to be a macro because is MUST be inlined!
 #define sMAKE2(a,b) (((b)<<16)|(a))
@@ -765,18 +765,18 @@ template <class Type> sINLINE Type sClamp(Type a,Type min,Type max) {return (a>=
 template <class Type> sINLINE sBool sIsInRangeIncl(Type a,Type min,Type max) {return (min<=a) && (a<=max);}
 template <class Type> sINLINE sBool sIsInRangeExcl(Type a,Type min,Type max) {return (min<=a) && (a<max);}
 template <class Type> sINLINE void sSwap(Type &a,Type &b)           {Type s=a; a=b; b=s;}
-template <class Type> sINLINE Type sAlign(Type a,sInt b)            {typedef sInt check[(sizeof(Type)<=sizeof(sDInt))?1:-1]; return (Type)((((sDInt)a)+b-1)&(~(b-1)));} // doesn't work correctly if sizeof(sDInt)<sizeof(Type)
-sINLINE sS64 sAlign(sS64 a,sInt b)                                  {return ((a+b-1)&(~(b-1)));}
-sINLINE sU64 sAlign(sU64 a,sInt b)                                  {return ((a+b-1)&(~(b-1)));}
+template <class Type> sINLINE Type sAlign(Type a,int b)            {typedef int check[(sizeof(Type)<=sizeof(sDInt))?1:-1]; return (Type)((((sDInt)a)+b-1)&(~(b-1)));} // doesn't work correctly if sizeof(sDInt)<sizeof(Type)
+sINLINE sS64 sAlign(sS64 a,int b)                                  {return ((a+b-1)&(~(b-1)));}
+sINLINE sU64 sAlign(sU64 a,int b)                                  {return ((a+b-1)&(~(b-1)));}
 
 
 template <class Type> sINLINE Type sSquare(Type a)                  {return a*a;}
-sInt sFindLowerPower(sInt x);
-sInt sFindHigherPower(sInt x);
+int sFindLowerPower(int x);
+int sFindHigherPower(int x);
 sU32 sMakeMask(sU32 max);
 sU64 sMakeMask(sU64 max);
-inline sBool sIsPower2(sInt x)                                      {return (x&(x-1)) == 0;}
-inline sInt sDivDown(sInt a,sInt b)                                 {return a>0?a/b:-(-a/b);}
+inline sBool sIsPower2(int x)                                      {return (x&(x-1)) == 0;}
+inline int sDivDown(int a,int b)                                 {return a>0?a/b:-(-a/b);}
 
 template <class Type> sINLINE void sDelete(Type &a)                 {if(a) delete a; a=0;}
 template <class Type> sINLINE void sDeleteArray(Type &a)            {if(a) delete[] a; a=0;}
@@ -799,7 +799,7 @@ inline sU64 sSwapEndian(sU64 a)
 inline void sSwapEndianI(sU32 &a)                                   {a= ((a&0xff000000)>>24)|((a&0x00ff0000)>>8)|((a&0x0000ff00)<<8)|((a&0x000000ff)<<24); }
 inline void sSwapEndianI(sU16 &a)                                   {a= ((a&0xff00)>>8)|((a&0x00ff)<<8); }
 inline void sSwapEndianI(sU64 &a)                                   {a= sSwapEndian(a); }
-inline sInt sSwapEndian(sInt a)                                     {sU32 tmp = *(sU32*)&a; sSwapEndianI(tmp); a = *(sInt*)&tmp; return a;}
+inline int sSwapEndian(int a)                                     {sU32 tmp = *(sU32*)&a; sSwapEndianI(tmp); a = *(int*)&tmp; return a;}
 inline sF32 sSwapEndian(sF32 a)                                     {sU32 tmp = *(sU32*)&a; sSwapEndianI(tmp); a = *(sF32*)&tmp; return a;}
 #if sCONFIG_BE
 inline sU32 sSwapIfBE(sU32 a)                                       {return ((a&0xff000000)>>24)|((a&0x00ff0000)>>8)|((a&0x0000ff00)<<8)|((a&0x000000ff)<<24); }
@@ -808,8 +808,8 @@ inline sU16 sSwapIfBE(sU16 a)                                       {return ((a&
 inline sU16 sSwapIfLE(sU16 a)                                       {return a;}
 inline sU64 sSwapIfBE(sU64 a)                                       {return sU64(sSwapEndian(sU32(a)))<<32 | sU64(sSwapEndian(sU32(a>>32))); }
 inline sU64 sSwapIfLE(sU64 a)                                       {return a;}
-inline sInt sSwapIfBE(sInt a)                                       {return sSwapEndian(a);}
-inline sInt sSwapIfLE(sInt a)                                       {return a;}
+inline int sSwapIfBE(int a)                                       {return sSwapEndian(a);}
+inline int sSwapIfLE(int a)                                       {return a;}
 inline sF32 sSwapIfBE(sF32 a)                                       {return sSwapEndian(a);}
 inline sF32 sSwapIfLE(sF32 a)                                       {return a;}
 
@@ -827,8 +827,8 @@ inline sU16 sSwapIfBE(sU16 a)                                       {return a;}
 inline sU16 sSwapIfLE(sU16 a)                                       {return ((a&0xff00)>>8)|((a&0x00ff)<<8); }
 inline sU64 sSwapIfBE(sU64 a)                                       {return a;}
 inline sU64 sSwapIfLE(sU64 a)                                       {return sU64(sSwapEndian(sU32(a)))<<32 | sU64(sSwapEndian(sU32(a>>32))); }
-inline sInt sSwapIfBE(sInt a)                                       {return a;}
-inline sInt sSwapIfLE(sInt a)                                       {return sSwapEndian(a);}
+inline int sSwapIfBE(int a)                                       {return a;}
+inline int sSwapIfLE(int a)                                       {return sSwapEndian(a);}
 inline sF32 sSwapIfBE(sF32 a)                                       {return a;}
 inline sF32 sSwapIfLE(sF32 a)                                       {return sSwapEndian(a);}
 inline void sUnalignedLittleEndianStore16(sU8 *p,sU16 v)            {*(sU16 *)p = v;}
@@ -846,7 +846,7 @@ inline void sUnalignedLittleEndianLoad64(const sU8 *p,sU64 &v)      {v = *(sU64 
 
 
 // raw cast
-template <typename T, sInt Bytes> struct sSwapHelper;
+template <typename T, int Bytes> struct sSwapHelper;
 template <typename T0, typename T1> struct sRawCastHelper
 {
   sRawCastHelper(T1 v1):V1(v1) { }
@@ -860,7 +860,7 @@ template <typename T0, typename T1> T0 raw_cast(T1 v1) { sRawCastHelper<T0,T1> t
 
 // template endian swapper
 // if this work on all compilers explicit swap permutations can be removed
-template <typename T, sInt S> struct sSwapEndianHelper;
+template <typename T, int S> struct sSwapEndianHelper;
 template <typename T> struct sSwapEndianHelper<T,1> { static T Swap(T a) { return a; } };
 template <typename T> struct sSwapEndianHelper<T,2> { static T Swap(T a) { return raw_cast<T>(sSwapEndian(raw_cast<sU16>(a))); } };
 template <typename T> struct sSwapEndianHelper<T,4> { static T Swap(T a) { return raw_cast<T>(sSwapEndian(raw_cast<sU32>(a))); } };
@@ -885,12 +885,12 @@ template<typename TO,typename FROM>TO &sRawCast(const FROM &src) { void *ptr = (
 
 // int
 
-sInt sMulDiv(sInt a,sInt b,sInt c);
+int sMulDiv(int a,int b,int c);
 sU32 sMulDivU(sU32 a,sU32 b,sU32 c);
-sInt sMulShift(sInt var_a,sInt var_b);
+int sMulShift(int var_a,int var_b);
 sU32 sMulShiftU(sU32 var_a,sU32 var_b);
-sInt sDivShift(sInt var_a,sInt var_b);
-//sInt sDivMod(sInt over,sInt under,sInt &div,sInt &mod); // |over| = div*under+mod
+int sDivShift(int var_a,int var_b);
+//int sDivMod(int over,int under,int &div,int &mod); // |over| = div*under+mod
 
 // float fiddling
 
@@ -900,19 +900,19 @@ sF32 sMaxF(sF32,sF32);                      // specialization for float
 void sDivMod(sF32 over,sF32 under,sF32 &div,sF32 &mod); // |over| = div*under+mod
 sF32 sMod(sF32 over,sF32 under);
 sF32 sAbsMod(sF32 over,sF32 under);         // values below zero will be modded to 0>=x<under as well.
-sInt sAbsMod(sInt over,sInt under);         // values below zero will be modded to 0>=x<under as well.
+int sAbsMod(int over,int under);         // values below zero will be modded to 0>=x<under as well.
 void sSetFloat();                           // set floating point unit into default precision/rounding
 void sFrac(sF32 val,sF32 &frac,sF32 &full); // val = frac+full; 0>=frac>1; full is int
-void sFrac(sF32 val,sF32 &frac,sInt &full);
+void sFrac(sF32 val,sF32 &frac,int &full);
 sF32 sFrac(sF32);
 sF32 sRoundDown(sF32);                      // round towards minus infinity
 sF32 sRoundUp(sF32);                        // round towards plus infinity
 sF32 sRoundZero(sF32);                      // round towards zero
 sF32 sRoundNear(sF32);                      // round towards nearest integer, in case of tie round to nearest even integer
-sInt sRoundDownInt(sF32);
-sInt sRoundUpInt(sF32);
-sInt sRoundZeroInt(sF32);
-sInt sRoundNearInt(sF32);
+int sRoundDownInt(sF32);
+int sRoundUpInt(sF32);
+int sRoundZeroInt(sF32);
+int sRoundNearInt(sF32);
 sF32 sSelectEQ(sF32 a,sF32 b,sF32 t,sF32 f);// if (a==b) then x=t else x=f;
 sF32 sSelectNE(sF32 a,sF32 b,sF32 t,sF32 f);// if (a!=b) then x=t else x=f;
 sF32 sSelectGT(sF32 a,sF32 b,sF32 t,sF32 f);// if (a>=b) then x=t else x=f;
@@ -976,11 +976,11 @@ sINLINE sF32 /*sOBSOLETE*/ sFInvSqrt(sF32 a) { return sRSqrt(a); }
 // arithmetic. Significantly faster than a "real" log2 followed by a float->int
 // conversion on all platforms (even those with Load-Hit-Store penalties).
 // If x is 0 or denormal, -127 is returned.
-sINLINE sInt sFloorLog2(sF32 x) { union { sF32 f; sU32 i; } u; u.f = x; return sInt(((u.i >> 23) & 0xff) - 127); }
+sINLINE int sFloorLog2(sF32 x) { union { sF32 f; sU32 i; } u; u.f = x; return int(((u.i >> 23) & 0xff) - 127); }
 
-//sINLINE sInt sCountBits(sU32 bits) { sInt count = 0; while(bits) { if(bits&1) count++; bits >>=1; } return count; }
+//sINLINE int sCountBits(sU32 bits) { int count = 0; while(bits) { if(bits&1) count++; bits >>=1; } return count; }
 // improved version: clear least significant set bit each iteration
-sINLINE sInt sCountBits(sU32 bits) { sInt count = 0; while(bits) { bits &= bits-1; count++; } return count; }
+sINLINE int sCountBits(sU32 bits) { int count = 0; while(bits) { bits &= bits-1; count++; } return count; }
 
 // Bit interleaving helpers
 sU32 sPart1By1(sU32 x);     // "inserts" a 0 bit between each of the low 16 bits of x
@@ -994,11 +994,11 @@ sINLINE sU32 sEncodeMorton3(sU32 x,sU32 y,sU32 z) { return (sPart1By2(z) << 2) +
 
 sINLINE sU32 sDecodeMorton2X(sU32 index)          { return sCompact1By1(index >> 0); }
 sINLINE sU32 sDecodeMorton2Y(sU32 index)          { return sCompact1By1(index >> 1); }
-sINLINE sU32 sDecodeMorton2(sU32 index,sInt axis) { return sCompact1By1(index >> axis); }
+sINLINE sU32 sDecodeMorton2(sU32 index,int axis) { return sCompact1By1(index >> axis); }
 sINLINE sU32 sDecodeMorton3X(sU32 index)          { return sCompact1By2(index >> 0); }
 sINLINE sU32 sDecodeMorton3Y(sU32 index)          { return sCompact1By2(index >> 1); }
 sINLINE sU32 sDecodeMorton3Z(sU32 index)          { return sCompact1By2(index >> 2); }
-sINLINE sU32 sDecodeMorton3(sU32 index,sInt axis) { return sCompact1By2(index >> axis); }
+sINLINE sU32 sDecodeMorton3(sU32 index,int axis) { return sCompact1By2(index >> axis); }
 
 /****************************************************************************/
 /***                                                                      ***/
@@ -1008,51 +1008,51 @@ sINLINE sU32 sDecodeMorton3(sU32 index,sInt axis) { return sCompact1By2(index >>
 
 // memory
 
-void sSetMem(void *dd,sInt s,sInt c);
-void sCopyMem(void *dd,const void *ss,sInt c);
-void sMoveMem(void *dd,const void *ss,sInt c); // use for overlapping memory regions
-sInt sCmpMem(const void *dd,const void *ss,sInt c);
+void sSetMem(void *dd,int s,int c);
+void sCopyMem(void *dd,const void *ss,int c);
+void sMoveMem(void *dd,const void *ss,int c); // use for overlapping memory regions
+int sCmpMem(const void *dd,const void *ss,int c);
 template <class Type> void sClear(Type &p) { sSetMem(&p,0,sizeof(p)); }
 
 struct sStringDesc                // this is always used as CONST, otherwise it won't work correctly.
 {
   sChar *Buffer;
-  sInt Size;
-  sStringDesc(sChar *b,sInt s) : Buffer(b),Size(s) {}
+  int Size;
+  sStringDesc(sChar *b,int s) : Buffer(b),Size(s) {}
   sStringDesc(const sStringDesc &s) : Buffer(s.Buffer),Size(s.Size) {}
   sStringDesc& operator=(const sStringDesc &s) { Buffer=s.Buffer; Size=s.Size; return*this;}
 };
 
-void sCopyString(sChar *d,const sChar *s,sInt size);  // Copy s to d, size is the destination buffer size (in sChars, not bytes)
+void sCopyString(sChar *d,const sChar *s,int size);  // Copy s to d, size is the destination buffer size (in sChars, not bytes)
 inline void sCopyString(const sStringDesc &d, const sChar *s) { sCopyString(d.Buffer,s,d.Size); }
 
 // use only if API functions don't support unicode
-void sCopyString(sChar8* d, const sChar *s,sInt c);
-void sCopyString(sChar* d, const sChar8* s,sInt c);
+void sCopyString(sChar8* d, const sChar *s,int c);
+void sCopyString(sChar* d, const sChar8* s,int c);
 inline void sCopyString(const sStringDesc &d, const sChar8 *s) { sCopyString(d.Buffer,s,d.Size); }
-void sCopyString(sChar8* d, const sChar8* s,sInt c);
+void sCopyString(sChar8* d, const sChar8* s,int c);
 
 
-void sCopyStringToUTF8(sChar8 *d, const sChar *s, sInt size);   //Encodes the 2byte unicode string into UTF-8 byte array
-void sCopyStringFromUTF8(sChar *d, const sChar8 *s, sInt size); //Decodes the 0 terminated UTF-8 byte array into an 2byte unicode string. 'size' is the size of 'd'. (max. 3 byte utf-8 sequences supported!)
+void sCopyStringToUTF8(sChar8 *d, const sChar *s, int size);   //Encodes the 2byte unicode string into UTF-8 byte array
+void sCopyStringFromUTF8(sChar *d, const sChar8 *s, int size); //Decodes the 0 terminated UTF-8 byte array into an 2byte unicode string. 'size' is the size of 'd'. (max. 3 byte utf-8 sequences supported!)
 
 sChar sUpperChar(sChar c); // returns the uppercase character for c
 sChar sLowerChar(sChar c); // returns the lowercase character for c
 sChar *sMakeUpper(sChar *s); // converts s in place to uppercase and returns s
 sChar *sMakeLower(sChar *s); // converts s in place to lowercase and returns s
 
-sINLINE sInt sGetStringLen(const sChar *s)    { sInt i; for(i=0;s[i];i++) {} return i; }
-void sAppendString(sChar *d,const sChar *s,sInt size);
+sINLINE int sGetStringLen(const sChar *s)    { int i; for(i=0;s[i];i++) {} return i; }
+void sAppendString(sChar *d,const sChar *s,int size);
 inline void sAppendString(const sStringDesc &d,const sChar *s) { sAppendString(d.Buffer,s,d.Size); }
-void sAppendString2(sChar *d,const sChar *s,sInt size,sInt len);
-void sAppendPath(sChar *d,const sChar *s,sInt size);          // append strings, have exactly one '/' between them, handle absolute paths
+void sAppendString2(sChar *d,const sChar *s,int size,int len);
+void sAppendPath(sChar *d,const sChar *s,int size);          // append strings, have exactly one '/' between them, handle absolute paths
 inline void sAppendPath(const sStringDesc &d,const sChar *s) { sAppendPath(d.Buffer,s,d.Size); }
-sInt sCmpString(const sChar *a,const sChar *b);               // normal string compare
-sInt sCmpStringI(const sChar *a,const sChar *b);              // case insensitive 
-sInt sCmpStringP(const sChar *a,const sChar *b);              // filename paths ('/'=='\', case insensitive)
-sInt sCmpStringLen(const sChar *a,const sChar *b,sInt len);   // first characters match
-sInt sCmpStringILen(const sChar *a,const sChar *b,sInt len);
-sInt sCmpStringPLen(const sChar *a,const sChar *b,sInt len);
+int sCmpString(const sChar *a,const sChar *b);               // normal string compare
+int sCmpStringI(const sChar *a,const sChar *b);              // case insensitive 
+int sCmpStringP(const sChar *a,const sChar *b);              // filename paths ('/'=='\', case insensitive)
+int sCmpStringLen(const sChar *a,const sChar *b,int len);   // first characters match
+int sCmpStringILen(const sChar *a,const sChar *b,int len);
+int sCmpStringPLen(const sChar *a,const sChar *b,int len);
 const sChar *sFindFileWithoutPath(const sChar *a);
 sBool sIsAbsolutePath(const sChar *a);
 void sExtractPath(const sChar *a, const sStringDesc &path);
@@ -1060,48 +1060,48 @@ void sExtractPath(const sChar *a, const sStringDesc &path, const sStringDesc &fi
 void sMakeRelativePath(const sStringDesc &path, const sChar *relTo); // make first path relative to second one if possible
 sBool sExtractPathDrive(const sChar *path, const sStringDesc &drive);
 
-sInt sFindString(const sChar *f, const sChar *s); // returns index of first occurrence of s in f or -1
-sInt sFindStringI(const sChar *f, const sChar *s); // returns index of first case insensitive occurrence of s in f or -1
-sInt sFindLastChar(const sChar *f,sInt c);
-sInt sFindFirstChar(const sChar *f,sInt c);
-sInt sFindNthChar(const sChar *f,sInt c, sInt n);
-sInt sFindChar(const sChar *f,sChar character, sInt startPos=0); // returns index of first occurrence of character after startPos
+int sFindString(const sChar *f, const sChar *s); // returns index of first occurrence of s in f or -1
+int sFindStringI(const sChar *f, const sChar *s); // returns index of first case insensitive occurrence of s in f or -1
+int sFindLastChar(const sChar *f,int c);
+int sFindFirstChar(const sChar *f,int c);
+int sFindNthChar(const sChar *f,int c, int n);
+int sFindChar(const sChar *f,sChar character, int startPos=0); // returns index of first occurrence of character after startPos
 const sChar *sFindFileExtension(const sChar *a);              // "ab.cd.ef" -> "ef"
-sBool sExtractFileExtension(const sStringDesc &d, const sChar *a, sInt nr=0);  // "ab.cd.ef" -nr==0-> "ef", "ab.cd.ef" -nr==1-> "cd"
+sBool sExtractFileExtension(const sStringDesc &d, const sChar *a, int nr=0);  // "ab.cd.ef" -nr==0-> "ef", "ab.cd.ef" -nr==1-> "cd"
 sChar *sFindFileExtension(sChar *a);
 sBool sCheckFileExtension(const sChar *name,const sChar *ext); // example: ext = "mp.txt"
 sBool sMatchWildcard(const sChar *wild,const sChar *text,sBool casesensitive=0,sBool pathsensitive=1);    // one recursion per '*'
-sInt sCountChar(const sChar *str,sChar c);                    // useful as sCountChar(text,'\n');
-sInt sFindChoice(const sChar *str,const sChar *choices);
-sBool sFindFlag(const sChar *str,const sChar *choices,sInt &mask_,sInt &value_);
-//sChar *sMakeChoice(sChar * choice, const sChar * choices, sInt index);
-sInt sCountChoice(const sChar *choices);
+int sCountChar(const sChar *str,sChar c);                    // useful as sCountChar(text,'\n');
+int sFindChoice(const sChar *str,const sChar *choices);
+sBool sFindFlag(const sChar *str,const sChar *choices,int &mask_,int &value_);
+//sChar *sMakeChoice(sChar * choice, const sChar * choices, int index);
+int sCountChoice(const sChar *choices);
 sBool sCheckPrefix(const sChar *string,const sChar *prefix);  // ("1234","12") -> true
 sBool sCheckSuffix(const sChar *string,const sChar *suffix);  // ("1234","34") -> true
-sInt sReplaceChar(sChar *string, sChar from, sChar to);
+int sReplaceChar(sChar *string, sChar from, sChar to);
 
-void sReadString(sU32 *&data,sChar *buffer,sInt size);
+void sReadString(sU32 *&data,sChar *buffer,int size);
 inline void sReadString(sU32 *&data,const sStringDesc &desc) { sReadString(data,desc.Buffer,desc.Size); }
 void sWriteString(sU32 *&data,const sChar *buffer);
 
-inline sBool sIsDigit(sInt i) { return (i>='0' && i<='9'); }
-inline sBool sIsLetter(sInt i) { return (i>='a' && i<='z') || (i>='A' && i<='Z') || i=='_'; }
-inline sBool sIsSpace(sInt i) { return i==' ' || i=='\t' || i=='\r' || i=='\n'; }
-inline sBool sIsHex(sInt i) { return (i>='a' && i<='f') || (i>='A' && i<='F') || (i>='0' && i<='9'); }
+inline sBool sIsDigit(int i) { return (i>='0' && i<='9'); }
+inline sBool sIsLetter(int i) { return (i>='a' && i<='z') || (i>='A' && i<='Z') || i=='_'; }
+inline sBool sIsSpace(int i) { return i==' ' || i=='\t' || i=='\r' || i=='\n'; }
+inline sBool sIsHex(int i) { return (i>='a' && i<='f') || (i>='A' && i<='F') || (i>='0' && i<='9'); }
 sBool sIsName(const sChar *);   // c conventions: letter followed by letter or digit
 sU32 sHashString(const sChar *string);
-sU32 sHashString(const sChar *string,sInt len);
-sBool sScanInt(const sChar *&scan,sInt &val);
+sU32 sHashString(const sChar *string,int len);
+sBool sScanInt(const sChar *&scan,int &val);
 #if sCONFIG_64BIT
 sBool sScanInt(const sChar *&scan,sDInt &val);
 #endif
 sBool sScanFloat(const sChar *&scan,sF32 &val);
-sBool sScanHex(const sChar *&scan,sInt &val, sInt maxlen=0);
+sBool sScanHex(const sChar *&scan,int &val, int maxlen=0);
 sBool sScanMatch(const sChar *&scan, const sChar *match);
 sBool sScanGUID(const sChar *&str, struct sGUID &guid);
 inline void sScanSpace(const sChar *&scan) { while(sIsSpace(*scan)) scan++; }
 
-void sMakeChoice(const sStringDesc &,const sChar *choices,sInt index);
+void sMakeChoice(const sStringDesc &,const sChar *choices,int index);
 
 // get a stringdesc which will append to given string
 sStringDesc sGetAppendDesc(const sStringDesc &sd);
@@ -1113,23 +1113,23 @@ sStringDesc sGetAppendDesc(const sStringDesc &sd);
 struct sFloatInfo
 {
   sChar Digits[20];               // zero-terminated digits, without decimal 
-  sInt Exponent;                  // 1.0e0 -> Exponent = 0;
-  sInt NaN;                       // if NaN, this holds all the NaN bits
+  int Exponent;                  // 1.0e0 -> Exponent = 0;
+  int NaN;                       // if NaN, this holds all the NaN bits
   sBool Negative;                 // sign (1 or 0)
   sBool Denormal;                 // denormal detected during float->ascii conversion
   sBool Infinite;                 // infinite (1 or 0)
 
   void PrintE(const sStringDesc &desc); // print number in 1.2345e6 notation
-  void PrintF(const sStringDesc &desc,sInt fractions); // print number in 0.0001234 notation
+  void PrintF(const sStringDesc &desc,int fractions); // print number in 0.0001234 notation
 
   // float -> ascii -> float roundtrips reproduce bitpattern 100% (at min 9 digits)
 
-  void FloatToAscii(sU32 f,sInt digits=9);   
+  void FloatToAscii(sU32 f,int digits=9);   
   sU32 AsciiToFloat();
 
   // double -> ascii -> double roundtips have a maximum error of 2ulp's (at min 17 digits)
 
-  void DoubleToAscii(sU64 f,sInt digits=17); 
+  void DoubleToAscii(sU64 f,int digits=17); 
   sU64 AsciiToDouble();
 };
 
@@ -1141,12 +1141,12 @@ sBool sFormatString(const sStringDesc &,const sChar *format,const sChar **fp); /
 
 struct sFormatStringInfo      // parses %n.mf, like %12.6f 
 {
-  sInt Format;                // f, f
-  sInt Field;                 // n, 12
-  sInt Fraction;              // m, 6 (-1 if not specified)
-  sInt Minus;                 // starts with negative sign -> left aligned
-  sInt Null;                  // starts with null character -> pad with zero
-  sInt Truncate;              // starts with exclamation mark -> truncate output to field length if bigger
+  int Format;                // f, f
+  int Field;                 // n, 12
+  int Fraction;              // m, 6 (-1 if not specified)
+  int Minus;                 // starts with negative sign -> left aligned
+  int Null;                  // starts with null character -> pad with zero
+  int Truncate;              // starts with exclamation mark -> truncate output to field length if bigger
 };
 
 struct sFormatStringBuffer
@@ -1168,13 +1168,13 @@ struct sFormatStringBuffer
 
 sFormatStringBuffer sFormatStringBase(const sStringDesc &buffer,const sChar *format);
 void sFormatStringBaseCtx(sFormatStringBuffer &buf,const sChar *format); // size of buffer is sPRINTBUFFERSIZE
-sFormatStringBuffer& operator% (sFormatStringBuffer &,sInt);
+sFormatStringBuffer& operator% (sFormatStringBuffer &,int);
 sFormatStringBuffer& operator% (sFormatStringBuffer &,sDInt);
 sFormatStringBuffer& operator% (sFormatStringBuffer &,sU32);
 sFormatStringBuffer& operator% (sFormatStringBuffer &,sU64);
 sFormatStringBuffer& operator% (sFormatStringBuffer &,sS64);
 sFormatStringBuffer& operator% (sFormatStringBuffer &,void *);
-//inline sFormatStringBuffer& operator% (sFormatStringBuffer & buf,sU32 v)     { return buf%(sInt)v; }
+//inline sFormatStringBuffer& operator% (sFormatStringBuffer & buf,sU32 v)     { return buf%(int)v; }
 sFormatStringBuffer& operator% (sFormatStringBuffer &,sF32);
 sFormatStringBuffer& operator% (sFormatStringBuffer &,sF64);
 sFormatStringBuffer& operator% (sFormatStringBuffer &,const sChar *);
@@ -1262,7 +1262,7 @@ public:
   sString()                    { Buffer[0] = 0; }
   ~sString()                    { Buffer[0] = 1; }
   sString(const sChar *s)      { if (s) sCopyString(Buffer,s,size); else Buffer[0]=0; }
-  sString(const sChar *s,sInt len) { if (s) sCopyString(Buffer,s,sMin(size,len)); else Buffer[0]=0; }
+  sString(const sChar *s,int len) { if (s) sCopyString(Buffer,s,sMin(size,len)); else Buffer[0]=0; }
   sString(const sString &s)    { sCopyString(Buffer,s.Buffer,size); }
   template<int n> sString(const sString<n> &s) { sCopyString(Buffer,s,size); }
   sString(const sPoolString &s);
@@ -1284,30 +1284,30 @@ public:
   sBool operator<(const sChar *s) const { return sCmpString(Buffer,s)<0; }
   sBool operator<(const sString &s) const { return sCmpString(Buffer,s.Buffer)<0; }
   sBool operator<(const sPoolString &s) const;
-  const sChar &operator[](sInt i) const { return Buffer[i]; }
-  sChar &operator[](sInt i)    { return Buffer[i]; }
-  sInt Count() const           { return sGetStringLen(Buffer); }
+  const sChar &operator[](int i) const { return Buffer[i]; }
+  sChar &operator[](int i)    { return Buffer[i]; }
+  int Count() const           { return sGetStringLen(Buffer); }
   sBool IsEmpty() const        { return Buffer[0]==0; }
-  sInt Size() const            { return size; }
+  int Size() const            { return size; }
   void Clear()                 { Buffer[0]=0; }
 
-  void Init(const sChar *a)    { sInt n = sMin(size-1,sGetStringLen(a)); sCopyMem(Buffer,a,n*sizeof(sChar)); Buffer[n]=0; }
-  void Init(const sChar *a,sInt len) { sInt n = sMin(size-1,len); sCopyMem(Buffer,a,n*sizeof(sChar)); Buffer[n]=0; }
+  void Init(const sChar *a)    { int n = sMin(size-1,sGetStringLen(a)); sCopyMem(Buffer,a,n*sizeof(sChar)); Buffer[n]=0; }
+  void Init(const sChar *a,int len) { int n = sMin(size-1,len); sCopyMem(Buffer,a,n*sizeof(sChar)); Buffer[n]=0; }
   sString &operator+=(const sChar *a) { sAppendString(Buffer,a,size); return *this; }
   void Add(const sChar *a)     { sAppendString(Buffer,a,size); }
-  void Add(const sChar *a,sInt len) { sAppendString2(Buffer,a,size,len); }
+  void Add(const sChar *a,int len) { sAppendString2(Buffer,a,size,len); }
   void Add(const sChar *a,const sChar *b) { sAppendString(Buffer,a,b,size); }
-  void Add(sInt ch) { sInt len = Count(); if(len+1<size) Buffer[len]=(sChar)ch; Buffer[len+1]=0; }
+  void Add(int ch) { int len = Count(); if(len+1<size) Buffer[len]=(sChar)ch; Buffer[len+1]=0; }
   void AddPath(const sChar *a) { sAppendPath(Buffer,a,size); }
 
-  void PadRight(sInt length, sChar c=L' ') { sInt l=Count(); while (l<sMin(length, size)) Buffer[l++]=c; Buffer[l]=0; };
-  void PadLeft(sInt length, sChar c=L' ')  { sInt l=sMin(length,size); if (Count()<l) { sInt o=l-Count(); for (sInt i=l; i>=0; i--) Buffer[i] = ((i-o >= 0) ? Buffer[i-o] : c); } }
-  void StripRight(const sChar * chars=L" \n\t")  { sInt l=Count(); while (l && sFindFirstChar(chars, Buffer[l-1]) >= 0) { Buffer[l-1] = 0; l--; } }
-  void StripLeft(const sChar * chars=L" \n\t")   { sInt s=0; while (sFindFirstChar(chars, Buffer[s]) >= 0) s++; if (s > 0) CutLeft(s); }
+  void PadRight(int length, sChar c=L' ') { int l=Count(); while (l<sMin(length, size)) Buffer[l++]=c; Buffer[l]=0; };
+  void PadLeft(int length, sChar c=L' ')  { int l=sMin(length,size); if (Count()<l) { int o=l-Count(); for (int i=l; i>=0; i--) Buffer[i] = ((i-o >= 0) ? Buffer[i-o] : c); } }
+  void StripRight(const sChar * chars=L" \n\t")  { int l=Count(); while (l && sFindFirstChar(chars, Buffer[l-1]) >= 0) { Buffer[l-1] = 0; l--; } }
+  void StripLeft(const sChar * chars=L" \n\t")   { int s=0; while (sFindFirstChar(chars, Buffer[s]) >= 0) s++; if (s > 0) CutLeft(s); }
   void Strip(const sChar * chars=L" \n\t")       { StripLeft(chars); StripRight(chars); }
-  void CutLeft(sInt length)                { CutRange(0,length); }
-  void CutRight(sInt length)               { if (length>0) Buffer[sMax(0,Count()-length)]=0; }
-  void CutRange(sInt start, sInt length)   { sInt end=start+length; if (end<start) sSwap(end,start); sInt l=Count(); sInt i=sClamp(start,0,l); sInt n=sClamp(end,0,l); while (Buffer[n]) Buffer[i++]=Buffer[n++]; Buffer[i]=0; }
+  void CutLeft(int length)                { CutRange(0,length); }
+  void CutRight(int length)               { if (length>0) Buffer[sMax(0,Count()-length)]=0; }
+  void CutRange(int start, int length)   { int end=start+length; if (end<start) sSwap(end,start); int l=Count(); int i=sClamp(start,0,l); int n=sClamp(end,0,l); while (Buffer[n]) Buffer[i++]=Buffer[n++]; Buffer[i]=0; }
 
   sPRINTING0(PrintF,sFormatStringBuffer buf=sFormatStringBase(sStringDesc(Buffer,size),format);buf,;);
   sPRINTING0(PrintAddF,sFormatStringBuffer buf=sFormatStringBase(sStringDesc(Buffer+sGetStringLen(Buffer),size-sGetStringLen(Buffer)),format);buf,;);
@@ -1319,15 +1319,15 @@ public:
 /***                                                                      ***/
 /****************************************************************************/
 
-sNORETURN void sVerifyFalse(const sChar *file,sInt line);
-sNORETURN void sVerifyFalse2(const sChar *file,sInt line,const sChar *expr,const sChar *desc);
+sNORETURN void sVerifyFalse(const sChar *file,int line);
+sNORETURN void sVerifyFalse2(const sChar *file,int line,const sChar *expr,const sChar *desc);
 
 void sPrint(const sChar *text);
 void sPrintError(const sChar *text);        // colored output
 void sPrintWarning(const sChar *text);      // colored output
 extern void (*sRedirectStdOut)(const sChar *text);  // sPrintF will be send here instead
-void sHexDump(const void *data,sInt bytes); // dumps data as 32bit words
-void sHexByteDump(const void *data,sInt bytes); // dumps data as bytes
+void sHexDump(const void *data,int bytes); // dumps data as 32bit words
+void sHexByteDump(const void *data,int bytes); // dumps data as bytes
 void sEnableLogFilter();
 sBool sCheckLogFilter(const sChar *module);
 
@@ -1483,9 +1483,9 @@ inline sBool sIsInf(sF32 x) { return ((sF32U32(x)>>23)&0xff) == 0xff && (sF32U32
 
 // returns ptr to broken float
 #if sDEBUG
-const sF32 *sCheckFloatArray(const sF32 *ptr, sInt count);
+const sF32 *sCheckFloatArray(const sF32 *ptr, int count);
 #else
-  sINLINE const sF32 *sCheckFloatArray(const sF32 *, sInt ) { return sNULL; }
+  sINLINE const sF32 *sCheckFloatArray(const sF32 *, int ) { return sNULL; }
 #endif
 
 template<typename T>
@@ -1507,8 +1507,8 @@ inline void sCheckFloatsFatal(const T &t, const sChar *message=sNULL)
   if (ptr)
   {
     sString<64> messageDef;
-    sInt index = (sInt)(ptr - src);
-    messageDef.PrintF(L"Inf/NaN in data. (float[%d] at 0x%x (+0x%x) )\n", index, (sPtr)src, index * (sInt)sizeof(sF32));
+    int index = (int)(ptr - src);
+    messageDef.PrintF(L"Inf/NaN in data. (float[%d] at 0x%x (+0x%x) )\n", index, (sPtr)src, index * (int)sizeof(sF32));
     sLogF(L"chkflt", messageDef);
     sFatal(message ? message : (const sChar*)messageDef);
   }
@@ -1585,7 +1585,7 @@ public:
   virtual ~sMemoryHandler();
 
   // allocation
-  virtual void *Alloc(sPtr size,sInt align,sInt flags)=0;   // alloc mem
+  virtual void *Alloc(sPtr size,int align,int flags)=0;   // alloc mem
   virtual sBool Free(void *)=0;   // free mem
   virtual sPtr MemSize(void *) { return 0; } // exact size of allocation
   virtual void Validate() {}      // check integrity of memory lists
@@ -1612,12 +1612,12 @@ public:
 /****************************************************************************/
 
 extern sPtr sMemoryUsed;
-extern sInt sMemoryInitFlags;
+extern int sMemoryInitFlags;
 extern sPtr sMemoryInitSize;
-extern sInt sMemoryInitCount;
+extern int sMemoryInitCount;
 extern sPtr sMemoryInitDebugSize;
 
-#define sINITMEM(f,s) struct sInitMem_ { sInitMem_(sInt flags,sPtr size){ sMemoryInitFlags=flags; sMemoryInitSize=size; }} sInitMem__(f,s); 
+#define sINITMEM(f,s) struct sInitMem_ { sInitMem_(int flags,sPtr size){ sMemoryInitFlags=flags; sMemoryInitSize=size; }} sInitMem__(f,s); 
 #define sINITDEBUGMEM(s) struct sInitDebugMem_ { sInitDebugMem_(sPtr size){ sMemoryInitFlags|=sIMF_DEBUG; sMemoryInitDebugSize=size; }} sInitDebugMem__(s);
 
 void sInitMem0();                 // called automatically to initialize basic heap
@@ -1625,17 +1625,17 @@ void sExitMem0();                 // called automatically to shut down and check
 void sInitMem1();                 // platform dependent implementation
 void sInitMem2(sPtr gfx);         // platform dependent implementation
 void sExitMem1();                 // platform dependent implementation
-void sRegisterMemHandler(sInt slot,sMemoryHandler *);
-void sUnregisterMemHandler(sInt slot);
-sMemoryHandler *sGetMemHandler(sInt slot);
+void sRegisterMemHandler(int slot,sMemoryHandler *);
+void sUnregisterMemHandler(int slot);
+sMemoryHandler *sGetMemHandler(int slot);
 
-void *sAllocMem_(sPtr size,sInt align,sInt flags=0);  // malloc()
+void *sAllocMem_(sPtr size,int align,int flags=0);  // malloc()
 void sFreeMem(void *ptr);         // free()
 sPtr sMemSize(void *ptr);         // returns size of allocated memory
-sBool sIsMemTypeAvailable(sInt);  // check if mem of a certain type is available at all
-sCONFIG_SIZET sGetFreeMem(sInt);  // get free memory for type (0 if not available)
-void sPushMemType(sInt);          // set default memtype (sAMF_DEFAULT)
-void sPopMemType(sInt);           // restore old default memtype. use same argument as in sPushMemType().
+sBool sIsMemTypeAvailable(int);  // check if mem of a certain type is available at all
+sCONFIG_SIZET sGetFreeMem(int);  // get free memory for type (0 if not available)
+void sPushMemType(int);          // set default memtype (sAMF_DEFAULT)
+void sPopMemType(int);           // restore old default memtype. use same argument as in sPushMemType().
 inline void sBeginAlt() { sPushMemType(sAMF_HEAP|sAMF_ALT); }
 inline void sEndAlt() { sPopMemType(sAMF_HEAP|sAMF_ALT); }
 
@@ -1644,14 +1644,14 @@ void sSetInfoForAlloc(void *ptr, const sChar *infostring);
 
 void sMemMark(sBool fatal=sTRUE);  // first call: set memmark. subsequent call: restore memmark
 void sResetMemChecksum();          // reset the checksum for memory management. 
-void sMemMarkPush(sInt id=-1);   // pushes the current memmark on the memmarkstack
+void sMemMarkPush(int id=-1);   // pushes the current memmark on the memmarkstack
 void sMemMarkPop();             // pops a memmark from the stack copies it to the current memmark (but saves the reset-flag)
-sInt sMemMarkGetId();
+int sMemMarkGetId();
 sBool sIsMemMarkSet();
 void sAddMemMarkCallback(void (*cb)(sBool flush,void *user),void *user=0);
 
-void sBreakOnAllocation(sInt n);   // one id for all 
-sInt sGetMemoryAllocId();          // usefull for monitoring allocations per frame
+void sBreakOnAllocation(int n);   // one id for all 
+int sGetMemoryAllocId();          // usefull for monitoring allocations per frame
 void sCheckMem_();                 // check memory lists for inconsistencies 
 void sDumpMemoryMap();             // print a summary of all memory handlers
 void sSetAllocFailTest(sF32 probability); // set probability that allocs from "may fail" heaps fail randomly.
@@ -1678,9 +1678,9 @@ struct sScopeNoMemFailTest_
 
 struct sScopeMem_
 {
-  sInt Flags;
+  int Flags;
 
-  sScopeMem_(sInt flags) { Flags = flags; sPushMemType(flags); }
+  sScopeMem_(int flags) { Flags = flags; sPushMemType(flags); }
   ~sScopeMem_() { sPopMemType(Flags); }
 };
 
@@ -1691,16 +1691,16 @@ struct sScopeMem_
 // memory debugging 
 
 #if sCONFIG_DEBUGMEM
-void sTagMem(const char *file,sInt line);
+void sTagMem(const char *file,int line);
 void sTagMemLast();
 #else
-inline void sTagMem(const char *file,sInt line) {  }
+inline void sTagMem(const char *file,int line) {  }
 inline void sTagMemLast() { }
 #endif
 
 #if sCONFIG_DEBUGMEM
-inline void *sAllocMem_(sPtr size,sInt align,sInt flags,const char *file,sInt line) { sTagMem(file,line); return sAllocMem_(size,align,flags); }
-inline void sCheckMem(const char *file,sInt line) { sTagMem(file,line); sCheckMem_(); }
+inline void *sAllocMem_(sPtr size,int align,int flags,const char *file,int line) { sTagMem(file,line); return sAllocMem_(size,align,flags); }
+inline void sCheckMem(const char *file,int line) { sTagMem(file,line); sCheckMem_(); }
 #define sAllocMem(size,align,flags)   sAllocMem_(size,align,flags,__FILE__,__LINE__)
 #define sCheckMem()                   { sTagMem(__FILE__,__LINE__); sCheckMem_(); }
 #else
@@ -1718,21 +1718,21 @@ inline void sCheckMem(const char *file,sInt line) { sTagMem(file,line); sCheckMe
 #if sCONFIG_DEBUGMEM
 inline void *sCDECL operator new  (sCONFIG_SIZET size)throw() { return sAllocMem_(size,16,0); }
 inline void *sCDECL operator new[](sCONFIG_SIZET size)throw() { return sAllocMem_(size,16,0); }
-inline void *sCDECL operator new  (sCONFIG_SIZET size,sInt flags)throw() { return sAllocMem_(size,16,flags); }
-inline void *sCDECL operator new[](sCONFIG_SIZET size,sInt flags)throw() { return sAllocMem_(size,16,flags); }
+inline void *sCDECL operator new  (sCONFIG_SIZET size,int flags)throw() { return sAllocMem_(size,16,flags); }
+inline void *sCDECL operator new[](sCONFIG_SIZET size,int flags)throw() { return sAllocMem_(size,16,flags); }
 inline void sCDECL operator delete  (void* p)throw() { sFreeMem(p); }
 inline void sCDECL operator delete[](void* p)throw() { sFreeMem(p); }
 inline void * sCDECL operator new  (sCONFIG_SIZET size,const char *file,int line)throw() { sTagMem(file,line); return sAllocMem_(size,16,0); }
 inline void * sCDECL operator new[](sCONFIG_SIZET size,const char *file,int line)throw() { sTagMem(file,line); return sAllocMem_(size,16,0); }
-inline void * sCDECL operator new  (sCONFIG_SIZET size,sInt flags,const char *file,int line)throw() { sTagMem(file,line); return sAllocMem_(size,16,flags); }
-inline void * sCDECL operator new[](sCONFIG_SIZET size,sInt flags,const char *file,int line)throw() { sTagMem(file,line); return sAllocMem_(size,16,flags); }
+inline void * sCDECL operator new  (sCONFIG_SIZET size,int flags,const char *file,int line)throw() { sTagMem(file,line); return sAllocMem_(size,16,flags); }
+inline void * sCDECL operator new[](sCONFIG_SIZET size,int flags,const char *file,int line)throw() { sTagMem(file,line); return sAllocMem_(size,16,flags); }
 inline void sCDECL operator delete  (void *p, const char *, int)throw() { sFreeMem(p); }
 inline void sCDECL operator delete[](void *p, const char *, int)throw() { sFreeMem(p); }
 #else
 inline void *sCDECL operator new  (sCONFIG_SIZET size)throw() { return sAllocMem_(size,16,0); }
 inline void *sCDECL operator new[](sCONFIG_SIZET size)throw() { return sAllocMem_(size,16,0); }
-inline void *sCDECL operator new  (sCONFIG_SIZET size,sInt flags)throw() { return sAllocMem_(size,16,flags); }
-inline void *sCDECL operator new[](sCONFIG_SIZET size,sInt flags)throw() { return sAllocMem_(size,16,flags); }
+inline void *sCDECL operator new  (sCONFIG_SIZET size,int flags)throw() { return sAllocMem_(size,16,flags); }
+inline void *sCDECL operator new[](sCONFIG_SIZET size,int flags)throw() { return sAllocMem_(size,16,flags); }
 inline void sCDECL operator delete  (void* p) { sFreeMem(p); }
 inline void sCDECL operator delete[](void* p) { sFreeMem(p); }
 #endif // sCONFIG_DEBUGMEM
@@ -1776,40 +1776,40 @@ T* sPlacementNew(void *ptr, ARG0 arg0, ARG1 arg1, ARG2 arg2){ return new (ptr) T
 
 void sPartitionMemory(sPtr frame=0,sPtr dma=0,sPtr gfx=0);    // allocate buffers for sAllocFrame and sAllocDma, and partition gpu/cpu memory for unified architectures
 void sFrameMemDoubleBuffer(sBool enable);                     // change frame mem double buffering (useful for multithreading), results in sFlipMem
-void *sAllocFrame(sPtr size,sInt align=16);   // cpu accessable memory, not double buffered
-void *sAllocFrameBegin(sInt max,sInt align);
+void *sAllocFrame(sPtr size,int align=16);   // cpu accessable memory, not double buffered
+void *sAllocFrameBegin(int max,int align);
 void sAllocFrameEnd(void *);
 sBool sIsFrameMem(void *);
 sBool sIsDmaMem(void *);
-void *sAllocDma(sPtr size,sInt align=16);     // gpu accessable memory (cpu is write only), double buffered
-void *sAllocDmaBegin(sInt size, sInt align=16);
+void *sAllocDma(sPtr size,int align=16);     // gpu accessable memory (cpu is write only), double buffered
+void *sAllocDmaBegin(int size, int align=16);
 void sAllocDmaEnd(void *);
 void sFlipMem();                    // perform double buffering of the dma buffers
 
 sU32 sAllocDmaEstimateAvailable (void); // Return an estimate of the available DMA memory.
 sU32 sDMAMemSize(void); 
 
-template <typename T> sINLINE T* sAllocFrameNew(sInt count=1, sInt align=sALLOCFRAMEALIGN)
+template <typename T> sINLINE T* sAllocFrameNew(int count=1, int align=sALLOCFRAMEALIGN)
 {
   void *ptr = sAllocFrame(sizeof(T)*count,align);
   T* tmp = (T*)ptr;
-  for(sInt i=0;i<count;i++)
+  for(int i=0;i<count;i++)
   { sPlacementNew<T>((T*)&tmp[i]);
   }
   return tmp;
 }
-template <typename T> sINLINE void sAllocFrameNew(T *&ptr, sInt count=1, sInt align=sALLOCFRAMEALIGN) 
+template <typename T> sINLINE void sAllocFrameNew(T *&ptr, int count=1, int align=sALLOCFRAMEALIGN) 
 { ptr = sAllocFrameNew<T>(count,align); }
 
 // only raw memory, no constructor called
 
-template <typename T> sINLINE T* sAllocFrameRaw(sInt count=1, sInt align=sALLOCFRAMEALIGN)
+template <typename T> sINLINE T* sAllocFrameRaw(int count=1, int align=sALLOCFRAMEALIGN)
 { void *ptr = sAllocFrame(sizeof(T)*count,align); return (T*)ptr; }
 
-template <typename T> sINLINE void sAllocFrameRaw(T *&ptr, sInt count=1, sInt align=sALLOCFRAMEALIGN)
+template <typename T> sINLINE void sAllocFrameRaw(T *&ptr, int count=1, int align=sALLOCFRAMEALIGN)
 { ptr = sAllocFrameRaw<T>(count,align); }
 
-template <typename T> sINLINE void sAllocFrameBegin(T *&ptr, sInt max, sInt align=sALLOCFRAMEALIGN)
+template <typename T> sINLINE void sAllocFrameBegin(T *&ptr, int max, int align=sALLOCFRAMEALIGN)
 { ptr = (T*)sAllocFrameBegin(sizeof(T)*max,align); }
 
 /****************************************************************************/
@@ -1876,7 +1876,7 @@ template <class Type> struct sBaseRect
   void Div(Type x, Type y) { x0 /= x; y0 /= y; x1 /= x; y1 /= y; }
 };
 
-typedef sBaseRect<sInt> sRect;
+typedef sBaseRect<int> sRect;
 typedef sBaseRect<sF32> sFRect;
 
 sFRect sRectToFRect(const sRect &src);
@@ -1899,8 +1899,8 @@ public:
   sRandom(sU32 seed) { Seed(seed); }
   void Init() { Seed(0); }
   void Seed(sU32 seed);
-  sInt Int(sInt max);
-  sInt Int16() { return Step()&0xffff; }
+  int Int(int max);
+  int Int16() { return Step()&0xffff; }
   sU32 Int32();
   sF32 Float(sF32 max);
   inline sF32 FloatSigned(sF32 max) { return Float(2.0f*max)-max; }
@@ -1917,7 +1917,7 @@ private:
     Period = 397,
   };
   sU32 State[Count];
-  sInt Index;
+  int Index;
 
   sU32 Step();
   void Reload();
@@ -1926,8 +1926,8 @@ public:
   sRandomMT(sU32 seed) { Seed(seed); }
   void Init() { Seed(0); }
   void Seed(sU32 seed);
-  sInt Int(sInt max);
-  sInt Int16() { return Step()&0xffff; }
+  int Int(int max);
+  int Int16() { return Step()&0xffff; }
   sU32 Int32() { return Step(); }
   sF32 Float(sF32 max);
   inline sF32 FloatSigned(sF32 max) { return Float(2.0f*max)-max; }
@@ -1946,8 +1946,8 @@ public:
   sRandomKISS(sU32 seed) { Seed(seed); }
   void Init() { Seed(0); }
   void Seed(sU32 seed);
-  sInt Int(sInt max);
-  sInt Int16() { return Step()&0xffff; }
+  int Int(int max);
+  int Int16() { return Step()&0xffff; }
   sU32 Int32() { return Step(); }
   sF32 Float(sF32 max);
   inline sF32 FloatSigned(sF32 max) { return Float(2.0f*max)-max; }
@@ -1957,54 +1957,54 @@ public:
 
 class sTiming
 {
-  sInt TotalTime;
-  sInt LastTime;
-  sInt FirstFrame;
-  sInt Slices;
-  sInt TimeSlice;
-  sInt Delta;
-  sInt Jitter;
-  sInt Timestamp;
+  int TotalTime;
+  int LastTime;
+  int FirstFrame;
+  int Slices;
+  int TimeSlice;
+  int Delta;
+  int Jitter;
+  int Timestamp;
 
-  sInt History[64];                         // buffer for building average time.
-  sInt HistoryIndex;                        // round-robin pointer to next sample
-  sInt HistoryCount;                        // how many samples have been taken?
-  sInt HistorySkip;                         // don't measure the first few frames
-  sInt HistoryMax;                          // how many fields of the history are used?
+  int History[64];                         // buffer for building average time.
+  int HistoryIndex;                        // round-robin pointer to next sample
+  int HistoryCount;                        // how many samples have been taken?
+  int HistorySkip;                         // don't measure the first few frames
+  int HistoryMax;                          // how many fields of the history are used?
 public:
   sTiming();                                // initialize structures
-  void SetTimeSlice(sInt ts=10);            // set duration of timeslice
-  sInt GetTime() const { return TotalTime; }     // get time of frame, in ms
-  sInt GetDelta() const { return Delta; }        // get time delta from last frame
-  sInt GetSlices() const { return Slices; }      // get number of slices for this frame
-  sInt GetJitter() const { return Jitter; }      // get remaining milliseconds in next slice
-  sInt GetTimeSlice() const { return TimeSlice; }
+  void SetTimeSlice(int ts=10);            // set duration of timeslice
+  int GetTime() const { return TotalTime; }     // get time of frame, in ms
+  int GetDelta() const { return Delta; }        // get time delta from last frame
+  int GetSlices() const { return Slices; }      // get number of slices for this frame
+  int GetJitter() const { return Jitter; }      // get remaining milliseconds in next slice
+  int GetTimeSlice() const { return TimeSlice; }
   sF32 GetAverageDelta() const;                   // averaged milliseconds of last 64 frames
-  void SetHistoryMax(sInt m) { HistoryMax = sMin(m,(sInt)sCOUNTOF(History)); HistoryCount=0; HistoryIndex=0; }
+  void SetHistoryMax(int m) { HistoryMax = sMin(m,(int)sCOUNTOF(History)); HistoryCount=0; HistoryIndex=0; }
   
 
-  void OnFrame(sInt time);                  // call this every frame
+  void OnFrame(int time);                  // call this every frame
   
-  void StartMeasure(sInt time);             // alternative timing interface
-  void StopMeasure(sInt time);
+  void StartMeasure(int time);             // alternative timing interface
+  void StopMeasure(int time);
 
   // timestamp methods
-  void SetTimestamp(sInt time) { Timestamp = time; } 
-  sInt GetTimestamp()          { return Timestamp; } 
-  sInt GetTimestampDelta(sInt time) { return time-Timestamp; }
+  void SetTimestamp(int time) { Timestamp = time; } 
+  int GetTimestamp()          { return Timestamp; } 
+  int GetTimestampDelta(int time) { return time-Timestamp; }
 };
 
 /****************************************************************************/
 
 sU64 sHashStringFNV(const sChar *text);
 
-sU32 sChecksumAdler32(const sU8 *data,sInt size);
-sU32 sChecksumCRC32(const sU8 *data,sInt size);
-sU32 sChecksumRandomByte(const sU8 *data,sInt size);
-sU32 sChecksumMurMur(const sU32 *data,sInt words);
+sU32 sChecksumAdler32(const sU8 *data,int size);
+sU32 sChecksumCRC32(const sU8 *data,int size);
+sU32 sChecksumRandomByte(const sU8 *data,int size);
+sU32 sChecksumMurMur(const sU32 *data,int words);
 
 void sChecksumAdler32Begin();
-void sChecksumAdler32Add(const sU8 *data,sInt size);
+void sChecksumAdler32Add(const sU8 *data,int size);
 template <typename T> sINLINE void sChecksumAdler32Add(const T &data) { sChecksumAdler32Add((const sU8*)&data,sizeof(T)); }
 sU32 sChecksumAdler32End();
 
@@ -2012,20 +2012,20 @@ sU32 sChecksumAdler32End();
 struct sChecksumMD5
 {
 private:
-  inline void f(sU32 &a,sU32 b,sU32 c,sU32 d,sInt k,sInt s,sU32 t,sU32 *data) { a += (d^(b&(c^d))) + data[k] + t;  a = ((a<<s)|(a>>(32-s))) + b; }
-  inline void g(sU32 &a,sU32 b,sU32 c,sU32 d,sInt k,sInt s,sU32 t,sU32 *data) { a += (c^(d&(b^c))) + data[k] + t;  a = ((a<<s)|(a>>(32-s))) + b; }
-  inline void h(sU32 &a,sU32 b,sU32 c,sU32 d,sInt k,sInt s,sU32 t,sU32 *data) { a += (b^c^d)       + data[k] + t;  a = ((a<<s)|(a>>(32-s))) + b; }
-  inline void i(sU32 &a,sU32 b,sU32 c,sU32 d,sInt k,sInt s,sU32 t,sU32 *data) { a += (c^(b|~d))    + data[k] + t;  a = ((a<<s)|(a>>(32-s))) + b; }
+  inline void f(sU32 &a,sU32 b,sU32 c,sU32 d,int k,int s,sU32 t,sU32 *data) { a += (d^(b&(c^d))) + data[k] + t;  a = ((a<<s)|(a>>(32-s))) + b; }
+  inline void g(sU32 &a,sU32 b,sU32 c,sU32 d,int k,int s,sU32 t,sU32 *data) { a += (c^(d&(b^c))) + data[k] + t;  a = ((a<<s)|(a>>(32-s))) + b; }
+  inline void h(sU32 &a,sU32 b,sU32 c,sU32 d,int k,int s,sU32 t,sU32 *data) { a += (b^c^d)       + data[k] + t;  a = ((a<<s)|(a>>(32-s))) + b; }
+  inline void i(sU32 &a,sU32 b,sU32 c,sU32 d,int k,int s,sU32 t,sU32 *data) { a += (c^(b|~d))    + data[k] + t;  a = ((a<<s)|(a>>(32-s))) + b; }
   void Block(const sU8 *data);
 public:
   sU32 Hash[4];
 
   void CalcBegin();
-  sInt CalcAdd(const sU8 *data, sInt size);   // calculate 64 byte blocks, returns consumed bytes
-  void CalcEnd(const sU8 *data, sInt size, sInt sizeall);
+  int CalcAdd(const sU8 *data, int size);   // calculate 64 byte blocks, returns consumed bytes
+  void CalcEnd(const sU8 *data, int size, int sizeall);
 
-  void Calc(const sU8 *data,sInt size);
-  sBool Check(const sU8 *data,sInt size);
+  void Calc(const sU8 *data,int size);
+  sBool Check(const sU8 *data,int size);
   sBool operator== (const sChecksumMD5 &)const;
   sBool operator!= (const sChecksumMD5 &md5)const    { return !(*this==md5); }
 };
@@ -2033,13 +2033,13 @@ public:
 sFormatStringBuffer& operator% (sFormatStringBuffer &f, const sChecksumMD5 &md5);
 /****************************************************************************/
 
-sU32 sScaleColor(sU32 a,sInt scale);          // a*b, scale = 0..0x10000...
-sU32 sScaleColorFast(sU32 a,sInt scale);    // a*scale, scale = 0..0x100
+sU32 sScaleColor(sU32 a,int scale);          // a*b, scale = 0..0x10000...
+sU32 sScaleColorFast(sU32 a,int scale);    // a*scale, scale = 0..0x100
 sU32 sMulColor(sU32 a,sU32 b);              // a*b
 sU32 sAddColor(sU32 a,sU32 b);              // a+b
 sU32 sSubColor(sU32 a,sU32 b);              // a-b
 sU32 sMadColor(sU32 mul1,sU32 mul2,sU32 add); // mul1*mul2+add
-sU32 sFadeColor(sInt fade,sU32 a,sU32 b);   // fade=0..0x10000
+sU32 sFadeColor(int fade,sU32 a,sU32 b);   // fade=0..0x10000
 
 sU32 sColorFade (sU32 a, sU32 b, sF32 f);   // fade=0.0f..1.0f
 sU32 sAlphaFade (sU32 c, sF32 f);           // fade=0.0f..1.0f
@@ -2047,7 +2047,7 @@ sU32 sPMAlphaFade (sU32 c, sF32 f);         // fade=0.0f..1.0f
 sF32 sScaleFade(sF32 a, sF32 b, sF32 f);    // fade=0.0f..1.0f
 
 // a-b, angles=0..c, -count/2 > result > count/2
-sInt sAngleDiff(sInt alpha, sInt beta, sInt count); 
+int sAngleDiff(int alpha, int beta, int count); 
 
 // a-b, angles=0..1, -0.5 > result > 0.5
 sF32 sAngleDiff(sF32 alpha, sF32 beta); 
@@ -2063,13 +2063,13 @@ sF32 sDegreeDiff(sF32 alpha, sF32 beta);
 /***   Application Interface                                              ***/
 /***                                                                      ***/
 /****************************************************************************/
-extern sInt sGetTime();
+extern int sGetTime();
 struct sInput2Event {
-  sInput2Event(sU32 key = 0, sInt instance = 0, sDInt payload = 0, sInt timestamp = sGetTime()) { Key = key; Instance = instance; Payload = payload; Timestamp = timestamp; }
+  sInput2Event(sU32 key = 0, int instance = 0, sDInt payload = 0, int timestamp = sGetTime()) { Key = key; Instance = instance; Payload = payload; Timestamp = timestamp; }
   sU32 Key;          // one of sKEY_*. defines the semantic of Payload
-  sInt Instance;     // zero-based device Instance
+  int Instance;     // zero-based device Instance
   sDInt Payload;     // some value. semantic is defined bei Key
-  sInt Timestamp;    // time when event was generated
+  int Timestamp;    // time when event was generated
 };
 
 class sApp
@@ -2085,8 +2085,8 @@ public:
   virtual void OnPaint3D();
   virtual sBool OnPaint();                // return TRUE to do all render begin/end, prepare/paint in OnPaint and OnPrepareFrame/OnPaint3D are not called
 
-  virtual void OnEvent(sInt id); 
-//  virtual void OnMouse(sInt buttons,sInt x,sInt y);   // obsolete
+  virtual void OnEvent(int id); 
+//  virtual void OnMouse(int buttons,int x,int y);   // obsolete
 //  virtual void OnKey(sU32 key);     // obsolete
 
   virtual void GetCaption(const sStringDesc &sd) { sCopyString(sd,L"sApp"); }
@@ -2107,23 +2107,23 @@ enum sAppEvents
   sAE_USER = 0x1000,
 };
 
-void sSetTimerEvent(sInt time,sBool loop = 1);
-void sTriggerEvent(sInt event=sAE_TRIGGER);
+void sSetTimerEvent(int time,sBool loop = 1);
+void sTriggerEvent(int event=sAE_TRIGGER);
 
 // command line parsing
 void sParseCmdLine(const sChar *cmd,sBool skipcmd=1);
 sBool sAddShellParameter(const sChar *opt, const sChar *val);
 
 // omit the '-', like sGetShellSwitch(L"x");
-const sChar *sGetShellParameter(const sChar *opt,sInt n);
-sInt sGetShellParameterInt(const sChar *opt,sInt n,sInt def);
-sF32 sGetShellParameterFloat(const sChar *opt,sInt n,sF32 def);
-sU32 sGetShellParameterHex(const sChar *opt,sInt n,sU32 def);
+const sChar *sGetShellParameter(const sChar *opt,int n);
+int sGetShellParameterInt(const sChar *opt,int n,int def);
+sF32 sGetShellParameterFloat(const sChar *opt,int n,sF32 def);
+sU32 sGetShellParameterHex(const sChar *opt,int n,sU32 def);
 sBool sGetShellSwitch(const sChar *opt);
 
 // for short and long option, like sGetShellSwitch(L"n",L"-name","dierk2);
 const sChar *sGetShellString(const sChar *optshort,const sChar *optlong,const sChar *def=0);
-sInt sGetShellInt(const sChar *optshort,const sChar *optlong,sInt def=0);
+int sGetShellInt(const sChar *optshort,const sChar *optlong,int def=0);
 
 /****************************************************************************/
 /****************************************************************************/
@@ -2197,7 +2197,7 @@ struct sRemovePtrType<T**> { typedef T Type; };
 #if sALLOW_MEMDEBUG_STACKTRACE
 
 sBool sGetMemTagged();
-void sGetCaller(const sStringDesc &filename, sInt &line);
+void sGetCaller(const sStringDesc &filename, int &line);
 
 #define sTAG_CALLER() \
 { \
@@ -2205,7 +2205,7 @@ void sGetCaller(const sStringDesc &filename, sInt &line);
   if (mlt && !sGetMemTagged()) \
   { \
     sString<255> traceFile=L"*"; \
-    sInt         traceLine; \
+    int         traceLine; \
     sGetCaller(sGetAppendDesc(traceFile), traceLine); \
     sTagMem(mlt->GetPersistentString8(traceFile), traceLine); \
   } \
@@ -2235,30 +2235,30 @@ template <class Type> class sStaticArray
 protected:
 
   Type *Data;
-  sInt Used;
-  sInt Alloc;
+  int Used;
+  int Alloc;
 
 // prepare tracking of array-usage
 #if TRACK_ARRAY_USAGE
-  sInt UsedMaximum;
+  int UsedMaximum;
   void UsageTrackingInit()   { UsedMaximum = Used; }
   void UsageTrackingUpdate() { if (UsedMaximum<Used) UsedMaximum = Used; }
 public:
-  sInt GetMaximumUsed() const { return UsedMaximum; }
+  int GetMaximumUsed() const { return UsedMaximum; }
 #else
   void UsageTrackingInit()   {}
   void UsageTrackingUpdate() {}
 public:
-  sInt GetMaximumUsed() const { return -1; }
+  int GetMaximumUsed() const { return -1; }
 #endif
 protected:
 
-  virtual void ReAlloc(sInt max)          { 
+  virtual void ReAlloc(int max)          { 
                                             if(max>Alloc) 
                                             { 
 #if sDEBUG
                                               if (Data)
-                                                sDPrintF(L"ReAlloc: Alloc=%d, max=%d, sizeof(Type)=%d\n", Alloc, max, sInt(sizeof(Type)));
+                                                sDPrintF(L"ReAlloc: Alloc=%d, max=%d, sizeof(Type)=%d\n", Alloc, max, int(sizeof(Type)));
 #endif
                                               sVERIFY(!Data);
                                               sTAG_CALLER();
@@ -2267,7 +2267,7 @@ protected:
                                             } 
                                           }
 
-  virtual void Grow(sInt add)             { 
+  virtual void Grow(int add)             { 
 #if sDEBUG
                                             if(Used+add>Alloc)
                                               sFatal(L"Overflow! Alloc: %d Used: %d Added: %d\n",Alloc, Used, add);
@@ -2278,29 +2278,29 @@ protected:
 public:
   typedef Type BaseType;
   typedef typename sRemovePtrType<Type>::Type ElementType;
-  typedef sInt Iterator;
+  typedef int Iterator;
 
   //! Construct and allocate some space. The array will be considered empty.
-  explicit sStaticArray(sInt max)       { Data = 0; Used = 0; Alloc = 0; UsageTrackingInit(); sTagMemLast(); ReAlloc(max); }
+  explicit sStaticArray(int max)       { Data = 0; Used = 0; Alloc = 0; UsageTrackingInit(); sTagMemLast(); ReAlloc(max); }
   //! Construct with no space allocated
   sStaticArray()                        { Data = 0; Used = 0; Alloc = 0; UsageTrackingInit(); }
   //! Construct and initialize with preallocated space. The array will be considered empty.
-  sStaticArray(Type *data, sInt max)    { Data = data; Used = 0; Alloc = max; UsageTrackingInit(); }
+  sStaticArray(Type *data, int max)    { Data = data; Used = 0; Alloc = max; UsageTrackingInit(); }
   //! Deallocate memory.
   virtual ~sStaticArray()               { delete[] Data; 
                                           //// generate a message if memory is wasted
                                           //{
-                                          //  sInt mu = GetMaximumUsed();
+                                          //  int mu = GetMaximumUsed();
                                           //  if (mu>0)
                                           //  {
-                                          //    sInt wastedBytes = (GetSize()-mu) * sizeof(BaseType);
+                                          //    int wastedBytes = (GetSize()-mu) * sizeof(BaseType);
                                           //    if (wastedBytes>100*1024)
                                           //      sLogF(L"sys", L"sStaticArray destroyed. %d bytes of mem never used.\n", wastedBytes);
                                           //  }
                                           //}
                                         }
   //! Create a copy of all elements.
-  void Copy(const sStaticArray &a)      { sTAG_CALLER(); Resize(a.GetCount()); for(sInt i=0;i<a.GetCount();i++) Data[i] = a.Data[i]; }
+  void Copy(const sStaticArray &a)      { sTAG_CALLER(); Resize(a.GetCount()); for(int i=0;i<a.GetCount();i++) Data[i] = a.Data[i]; }
   //! Create a copy of all elements.
   sStaticArray(const sStaticArray &a)   { sTAG_CALLER(); Data = 0; Used = 0; Alloc = 0; UsageTrackingInit(); Copy(a); }
   //! Create a copy of all elements.
@@ -2311,9 +2311,9 @@ public:
   virtual void Reset()                  { sDeleteArray(Data); Used = 0; Alloc = 0;}
 
   //! return number of elements used
-  sInt GetCount() const                 { return Used; }
+  int GetCount() const                 { return Used; }
   //! return number of elements allocated (the potential size of the array)
-  sInt GetSize() const                  { return Alloc; }
+  int GetSize() const                  { return Alloc; }
   //! get pointer to the actual array. Be aware that some classes derived from sStaticArray may change this pointer as the array grows
   Type *GetData() const                 { return Data; }
   //! return true if the used counter is zero
@@ -2321,33 +2321,33 @@ public:
   //! return true if potential size is used up. Some classes derived from sStaticArray can grow automatically.
   sBool IsFull() const                  { return Used==Alloc; }
   //! return true if the index provided will index a element.
-  sBool IsIndexValid(sInt p) const      { return ((unsigned) p) < ((unsigned)Used); }
+  sBool IsIndexValid(int p) const      { return ((unsigned) p) < ((unsigned)Used); }
   //! Hints the array to allow grow to at least the specified size.
   //! - sStaticArray can only be initialized once and will not grow automatically
-  void HintSize(sInt max)               { ReAlloc(max); }
-  void HintSize_(sInt max,const char *file,sInt line)  { sTagMem(file,line); ReAlloc(max); }
+  void HintSize(int max)               { ReAlloc(max); }
+  void HintSize_(int max,const char *file,int line)  { sTagMem(file,line); ReAlloc(max); }
 
   //! Set the array count. Grow array if required.
-  Type *Resize(sInt count)              { if (count>Alloc) ReAlloc(count); Used = count; UsageTrackingUpdate(); return Data; }
+  Type *Resize(int count)              { if (count>Alloc) ReAlloc(count); Used = count; UsageTrackingUpdate(); return Data; }
   //! Set the array count to 0 without actually deallocating the memory.
   void Clear()                          { Used = 0; }
 
 //  void Add(const Type &e)               { sVERIFY(&e<Data || &e>=Data+Alloc); Grow(1); Data[Used++]=e; }
 //  Type *Add()                           { Grow(1); return &Data[Used++]; }
   //! Add all elements from another array
-  void Add(const sStaticArray<Type> &a) { Grow(a.Used); for(sInt i=0;i<a.Used;i++) Data[Used++]=a.Data[i]; UsageTrackingUpdate(); }
+  void Add(const sStaticArray<Type> &a) { Grow(a.Used); for(int i=0;i<a.Used;i++) Data[Used++]=a.Data[i]; UsageTrackingUpdate(); }
   //! Advance the Used counter, increasing the array count. The returned pointer points to the first of the new elements
-  Type *AddMany(sInt count)             { Grow(count); Type *r=Data+Used; Used+=count; UsageTrackingUpdate(); return r; }
-  Type *AddManyInit(sInt count, const Type *prototype = sNULL)  { Type *r=AddMany(count); 
-                                                                      if (prototype) for (sInt i=0;i<count;i++) r[i] = *prototype;
-                                                                      else           for (sInt i=0;i<count;i++) r[i] = Type();
+  Type *AddMany(int count)             { Grow(count); Type *r=Data+Used; Used+=count; UsageTrackingUpdate(); return r; }
+  Type *AddManyInit(int count, const Type *prototype = sNULL)  { Type *r=AddMany(count); 
+                                                                      if (prototype) for (int i=0;i<count;i++) r[i] = *prototype;
+                                                                      else           for (int i=0;i<count;i++) r[i] = Type();
                                                                       return r; }  
   Type *AddFull()                       { return AddMany(GetSize()-GetCount()); }
   Type *AddFullInit(const Type *prototype = sNULL) { return AddManyInit(GetSize()-GetCount(), prototype); }
   //! Insert element into array, preserving order (requires copying elements around)
-  void AddBefore(const Type &e,sInt p)  { sVERIFY(&e<Data || &e>=Data+Alloc); sVERIFY(p>=0 && p<=Used); Grow(1); for(sInt i=Used;i>p;i--) Data[i]=Data[i-1]; Data[p]=e; Used++; UsageTrackingUpdate(); }
+  void AddBefore(const Type &e,int p)  { sVERIFY(&e<Data || &e>=Data+Alloc); sVERIFY(p>=0 && p<=Used); Grow(1); for(int i=Used;i>p;i--) Data[i]=Data[i-1]; Data[p]=e; Used++; UsageTrackingUpdate(); }
   //! Insert element into array, preserving order (requires copying elements around)
-  void AddAfter(const Type &e,sInt p)   { sVERIFY(&e<Data || &e>=Data+Alloc); AddBefore(e,p+1); UsageTrackingUpdate(); }
+  void AddAfter(const Type &e,int p)   { sVERIFY(&e<Data || &e>=Data+Alloc); AddBefore(e,p+1); UsageTrackingUpdate(); }
   //! Insert element into array, preserving order (requires copying elements around)
   void AddHead(const Type &e)           { sVERIFY(&e<Data || &e>=Data+Alloc); AddBefore(e,0); UsageTrackingUpdate(); }
   //! Insert element into array, preserving order (which is trivial)
@@ -2356,31 +2356,31 @@ public:
   Type &GetTail() const                 { sVERIFY(!IsEmpty()); return Data[Used-1]; }
 
   //! Removing element, NOT preserving order
-  void RemAt(sInt p)                    { sVERIFY(IsIndexValid(p)); Data[p] = Data[--Used]; }
+  void RemAt(int p)                    { sVERIFY(IsIndexValid(p)); Data[p] = Data[--Used]; }
   //! Removing element, preserving order (requires copying elements around)
-  void RemAtOrder(sInt p)               { sVERIFY(IsIndexValid(p)); Used--; while(p<Used) {Data[p]=Data[p+1]; p++;} }
+  void RemAtOrder(int p)               { sVERIFY(IsIndexValid(p)); Used--; while(p<Used) {Data[p]=Data[p+1]; p++;} }
   //! Removing last element, preserving order (which is trivial)
   Type RemTail()                        { sVERIFY(Used>0); Used--; return Data[Used]; }
   //! Removing element, NOT preserving order (requires a linear search for the element)
-  sBool Rem(const Type e)               { sBool result = sFALSE; for(sInt i=0;i<Used;) if(Data[i]==e) { result = sTRUE; RemAt(i); } else i++; return result; }
+  sBool Rem(const Type e)               { sBool result = sFALSE; for(int i=0;i<Used;) if(Data[i]==e) { result = sTRUE; RemAt(i); } else i++; return result; }
   //! Removing element, preserving order (requires a linear search for the element) (requires copying elements around)
-  sBool RemOrder(const Type e)          { sBool result = sFALSE; for(sInt i=0;i<Used;) if(Data[i]==e) { result = sTRUE; RemAtOrder(i); } else i++; return result; }
+  sBool RemOrder(const Type e)          { sBool result = sFALSE; for(int i=0;i<Used;) if(Data[i]==e) { result = sTRUE; RemAtOrder(i); } else i++; return result; }
 
   //! Indexing
-  sINLINE const Type &operator[](sInt p) const  { sVERIFY(IsIndexValid(p)); return Data[p]; }
+  sINLINE const Type &operator[](int p) const  { sVERIFY(IsIndexValid(p)); return Data[p]; }
   //! Indexing
-  sINLINE Type &operator[](sInt p)              { sVERIFY(IsIndexValid(p)); return Data[p]; }
+  sINLINE Type &operator[](int p)              { sVERIFY(IsIndexValid(p)); return Data[p]; }
 
   //! Swap the whole array with another one. This is quick.
   void Swap(sStaticArray &a)            { sSwap(Data,a.Data); sSwap(Used,a.Used); sSwap(Alloc,a.Alloc); }
   //! Swap two elements of this array
-  void Swap(sInt i,sInt j)              { sSwap(Data[i],Data[j]); }
+  void Swap(int i,int j)              { sSwap(Data[i],Data[j]); }
 
   //! Fisher Yates Shuffle ; works in-place, time complexity: O(n)
-  template <class RandomClass> void Shuffle(RandomClass &rnd_gen) { if (Used==0) return; for (sInt i=Used-1; i>0; i--) Swap(rnd_gen.Int(i+1), i); }
+  template <class RandomClass> void Shuffle(RandomClass &rnd_gen) { if (Used==0) return; for (int i=Used-1; i>0; i--) Swap(rnd_gen.Int(i+1), i); }
 
   // Don't use IndexOf, use sFindIndex instead!
-  sOBSOLETE sInt IndexOf(const Type &e)            { for(sInt i = 0; i < GetCount(); i++) if (Data[i] == e) return i; return -1; }
+  sOBSOLETE int IndexOf(const Type &e)            { for(int i = 0; i < GetCount(); i++) if (Data[i] == e) return i; return -1; }
 };
 
 // remove unused macros
@@ -2404,8 +2404,8 @@ template <class Type,int Max_> class sStackArray : public sStaticArray<Type>
 {
 protected:
 
-  void ReAlloc(sInt max)                { sVERIFY(max<=Max_); }
-  void Grow(sInt add)                   { 
+  void ReAlloc(int max)                { sVERIFY(max<=Max_); }
+  void Grow(int add)                   { 
 #if !sRELEASE
                                             if (sStaticArray<Type>::Used+add>Max_)
                                             {
@@ -2421,7 +2421,7 @@ public:                                 // das ganze rumgescope ist f�r den PS
   typedef typename sRemovePtrType<Type>::Type ElementType;
   enum { SIZE = Max_ };
   sStackArray()                         { sStaticArray<Type>::Data = Storage; sStaticArray<Type>::Used = 0; sStaticArray<Type>::Alloc = Max_; }
-  explicit sStackArray(sInt initcount)  { sStaticArray<Type>::Data = Storage; sStaticArray<Type>::Used = 0; sStaticArray<Type>::Alloc = Max_; sStaticArray<Type>::AddMany(initcount); }
+  explicit sStackArray(int initcount)  { sStaticArray<Type>::Data = Storage; sStaticArray<Type>::Used = 0; sStaticArray<Type>::Alloc = Max_; sStaticArray<Type>::AddMany(initcount); }
   sStackArray(const sStackArray<Type,Max_> &other) { sStaticArray<Type>::Data = Storage; sStaticArray<Type>::Used = 0; sStaticArray<Type>::Alloc = Max_; Copy(other); }
   ~sStackArray()                        { sStaticArray<Type>::Data = 0; }
   void Reset()                          { sStaticArray<Type>::Used = 0; sStaticArray<Type>::Alloc = Max_; }
@@ -2449,11 +2449,11 @@ take some major changes throughout the whole codebase but it's the only clean th
 template <typename T> class sExternalArray : public sStaticArray<T>
 {
 protected:
-  virtual void ReAlloc(sInt max) { sVERIFY(max<=sStaticArray<T>::Alloc); }
+  virtual void ReAlloc(int max) { sVERIFY(max<=sStaticArray<T>::Alloc); }
   virtual void Reset() { sStaticArray<T>::Clear(); }
 public:
   template <sDInt SIZE> sExternalArray(T (&array)[SIZE]) { sStaticArray<T>::Data = array; sStaticArray<T>::Alloc = SIZE; sStaticArray<T>::Used = SIZE; }
-  sExternalArray(T* data, sInt count) { sStaticArray<T>::Data = data; sStaticArray<T>::Alloc = count; sStaticArray<T>::Used = count; }
+  sExternalArray(T* data, int count) { sStaticArray<T>::Data = data; sStaticArray<T>::Alloc = count; sStaticArray<T>::Used = count; }
   virtual ~sExternalArray() { sStaticArray<T>::Data = 0; }
 };
 
@@ -2468,25 +2468,25 @@ public:
 // adapter functions
 
 template <template <typename> class ArrayType,class BaseType> 
-sINLINE BaseType *sGetPtr(ArrayType<BaseType *> &a,sInt i)
+sINLINE BaseType *sGetPtr(ArrayType<BaseType *> &a,int i)
 {
   return a[i];
 }
 
 template <template <typename> class ArrayType,class BaseType> 
-sINLINE BaseType *sGetPtr(ArrayType<BaseType> &a,sInt i)
+sINLINE BaseType *sGetPtr(ArrayType<BaseType> &a,int i)
 {
   return &a[i];
 }
 
 template <template <typename> class ArrayType,class BaseType> 
-sINLINE const BaseType *sGetPtr(const ArrayType<BaseType *> &a,sInt i)
+sINLINE const BaseType *sGetPtr(const ArrayType<BaseType *> &a,int i)
 {
   return a[i];
 }
 
 template <template <typename> class ArrayType,class BaseType> 
-sINLINE const BaseType *sGetPtr(const ArrayType<BaseType> &a,sInt i)
+sINLINE const BaseType *sGetPtr(const ArrayType<BaseType> &a,int i)
 {
   return &a[i];
 }
@@ -2494,25 +2494,25 @@ sINLINE const BaseType *sGetPtr(const ArrayType<BaseType> &a,sInt i)
 // GCC needs these versions for sStackArray<class type,int max>
 
 template <template <typename,int> class ArrayType,class BaseType,int count> 
-sINLINE BaseType *sGetPtr(ArrayType<BaseType *,count> &a,sInt i)
+sINLINE BaseType *sGetPtr(ArrayType<BaseType *,count> &a,int i)
 {
   return a[i];
 }
 
 template <template <typename,int> class ArrayType,class BaseType,int count> 
-sINLINE BaseType *sGetPtr(ArrayType<BaseType,count> &a,sInt i)
+sINLINE BaseType *sGetPtr(ArrayType<BaseType,count> &a,int i)
 {
   return &a[i];
 }
 
 template <template <typename,int> class ArrayType,class BaseType,int count> 
-sINLINE const BaseType *sGetPtr(const ArrayType<BaseType *,count> &a,sInt i)
+sINLINE const BaseType *sGetPtr(const ArrayType<BaseType *,count> &a,int i)
 {
   return a[i];
 }
 
 template <template <typename,int> class ArrayType,class BaseType,int count> 
-sINLINE const BaseType *sGetPtr(const ArrayType<BaseType,count> &a,sInt i)
+sINLINE const BaseType *sGetPtr(const ArrayType<BaseType,count> &a,int i)
 {
   return &a[i];
 }
@@ -2534,7 +2534,7 @@ This macro iterates sStaticArray and it's subclasses
 
 */ /*************************************************************************/
 
-#define sFORALL(l,e) for(sInt _i=0;_i<(l).GetCount()?((e)=sGetPtr((l),_i)),1:0;_i++)
+#define sFORALL(l,e) for(int _i=0;_i<(l).GetCount()?((e)=sGetPtr((l),_i)),1:0;_i++)
 
 /************************************************************************/ /*! 
 
@@ -2549,7 +2549,7 @@ see sFORALL for details
 
 */ /*************************************************************************/
 
-#define sFORALLREVERSE(l,e) for(sInt _i=(l).GetCount()-1;_i>=0?((e)=sGetPtr((l),_i)),1:0;_i--)
+#define sFORALLREVERSE(l,e) for(int _i=(l).GetCount()-1;_i>=0?((e)=sGetPtr((l),_i)),1:0;_i--)
 
 /****************************************************************************/
 /***                                                                      ***/
@@ -2562,9 +2562,9 @@ see sFORALL for details
 template <class ArrayType> 
 void sSortUp(ArrayType &a)
 {
-  sInt max = a.GetCount();
-  for(sInt i=0;i<max-1;i++)
-    for(sInt j=i+1;j<max;j++)
+  int max = a.GetCount();
+  for(int i=0;i<max-1;i++)
+    for(int j=i+1;j<max;j++)
       if(a[i] > a[j])
         sSwap(a[i],a[j]);
 }
@@ -2574,9 +2574,9 @@ void sSortUp(ArrayType &a)
 template <class ArrayType> 
 void sSortDown(ArrayType &a)
 {
-  sInt max = a.GetCount();
-  for(sInt i=0;i<max-1;i++)
-    for(sInt j=i+1;j<max;j++)
+  int max = a.GetCount();
+  for(int i=0;i<max-1;i++)
+    for(int j=i+1;j<max;j++)
       if(a[i] < a[j])
         sSwap(a[i],a[j]);
 }
@@ -2584,11 +2584,11 @@ void sSortDown(ArrayType &a)
 //! sort up using functor (ineffecient but compact)
 //! \ingroup altona_base_types_arrays
 template <class ArrayType, class CmpType> 
-void sCmpSortUp(ArrayType &a, sInt (*cmp) (CmpType, CmpType))
+void sCmpSortUp(ArrayType &a, int (*cmp) (CmpType, CmpType))
 {
-  sInt max = a.GetCount();
-  for(sInt i=0;i<max-1;i++)
-    for(sInt j=i+1;j<max;j++)
+  int max = a.GetCount();
+  for(int i=0;i<max-1;i++)
+    for(int j=i+1;j<max;j++)
       if(cmp(a[i], a[j]) > 0)
         sSwap(a[i],a[j]);
 }
@@ -2596,11 +2596,11 @@ void sCmpSortUp(ArrayType &a, sInt (*cmp) (CmpType, CmpType))
 //! sort down using functor (ineffecient but compact)
 //! \ingroup altona_base_types_arrays
 template <class ArrayType, class CmpType> 
-void sCmpSortDown(ArrayType &a, sInt (*cmp) (CmpType, CmpType))
+void sCmpSortDown(ArrayType &a, int (*cmp) (CmpType, CmpType))
 {
-  sInt max = a.GetCount();
-  for(sInt i=0;i<max-1;i++)
-    for(sInt j=i+1;j<max;j++)
+  int max = a.GetCount();
+  for(int i=0;i<max-1;i++)
+    for(int j=i+1;j<max;j++)
       if(cmp(a[i], a[j]) < 0)
         sSwap(a[i],a[j]);
 }
@@ -2610,9 +2610,9 @@ void sCmpSortDown(ArrayType &a, sInt (*cmp) (CmpType, CmpType))
 template <class ArrayType,class BaseType,class MemberType> 
 void sSortUp(ArrayType &a,MemberType BaseType::*o)
 {
-  sInt max = a.GetCount();
-  for(sInt i=0;i<max-1;i++)
-    for(sInt j=i+1;j<max;j++)
+  int max = a.GetCount();
+  for(int i=0;i<max-1;i++)
+    for(int j=i+1;j<max;j++)
       if(sGetPtr(a,i)->*o > sGetPtr(a,j)->*o)
         sSwap(a[i],a[j]);
 }
@@ -2622,9 +2622,9 @@ void sSortUp(ArrayType &a,MemberType BaseType::*o)
 template <class ArrayType,class BaseType,class MemberType> 
 void sSortDown(ArrayType &a,MemberType BaseType::*o)
 {
-  sInt max = a.GetCount();
-  for(sInt i=0;i<max-1;i++)
-    for(sInt j=i+1;j<max;j++)
+  int max = a.GetCount();
+  for(int i=0;i<max-1;i++)
+    for(int j=i+1;j<max;j++)
       if(sGetPtr(a,i)->*o < sGetPtr(a,j)->*o)
         sSwap(a[i],a[j]);
 }
@@ -2635,15 +2635,15 @@ void sSortDown(ArrayType &a,MemberType BaseType::*o)
 template <class ArrayType> 
 void sHeapSortUp(ArrayType &a)
 {
-  sInt count=a.GetCount();
+  int count=a.GetCount();
 
   // pass 1: heapify (sift up)
-  for (sInt i=1; i<count; i++)
+  for (int i=1; i<count; i++)
   {
-    sInt child=i;
+    int child=i;
     while (child>0)
     {
-      sInt root=(child-1)/2;
+      int root=(child-1)/2;
       if (a[root]<a[child])
       {
         sSwap(a[root],a[child]);
@@ -2658,8 +2658,8 @@ void sHeapSortUp(ArrayType &a)
   while (--count>0)
   {
     sSwap(a[0],a[count]);
-    sInt root=0;
-    sInt child;
+    int root=0;
+    int child;
     while ((child=root*2+1)<count)
     {
       if (child<count-1 && a[child]<a[child+1])
@@ -2682,15 +2682,15 @@ void sHeapSortUp(ArrayType &a)
 template <class ArrayType,class BaseType,class MemberType> 
 void sHeapSortUp(ArrayType &a,MemberType BaseType::*o)
 {
-  sInt count=a.GetCount();
+  int count=a.GetCount();
 
   // pass 1: heapify (sift up)
-  for (sInt i=1; i<count; i++)
+  for (int i=1; i<count; i++)
   {
-    sInt child=i;
+    int child=i;
     while (child>0)
     {
-      sInt root=(child-1)/2;
+      int root=(child-1)/2;
       if (sGetPtr(a,root)->*o < sGetPtr(a,child)->*o)
       {
         sSwap(a[root],a[child]);
@@ -2705,8 +2705,8 @@ void sHeapSortUp(ArrayType &a,MemberType BaseType::*o)
   while (--count>0)
   {    
     sSwap(a[0],a[count]);
-    sInt root=0;
-    sInt child;
+    int root=0;
+    int child;
     while ((child=root*2+1)<count)
     {
       if (child<count-1 && sGetPtr(a,child)->*o < sGetPtr(a,child+1)->*o)
@@ -2723,38 +2723,38 @@ void sHeapSortUp(ArrayType &a,MemberType BaseType::*o)
 }
 
 template <class ArrayType> 
-void sGetSortPermutation(ArrayType &a, sStaticArray<sInt> &perm)
+void sGetSortPermutation(ArrayType &a, sStaticArray<int> &perm)
 {
-  sInt max = a.GetCount();
+  int max = a.GetCount();
   perm.Resize(max);
-  for (sInt i=0; i<max; i++) perm[i]=i;
-  for(sInt i=0;i<max-1;i++)
-    for(sInt j=i+1;j<max;j++)
+  for (int i=0; i<max; i++) perm[i]=i;
+  for(int i=0;i<max-1;i++)
+    for(int j=i+1;j<max;j++)
       if(a[perm[j]] < a[perm[i]])
         sSwap(perm[i],perm[j]);
 }
 
 
 template <class ArrayType, class CmpType> 
-void sGetSortPermutation(ArrayType &a, sInt (*cmp) (CmpType, CmpType), sStaticArray<sInt> &perm)
+void sGetSortPermutation(ArrayType &a, int (*cmp) (CmpType, CmpType), sStaticArray<int> &perm)
 {
-  sInt max = a.GetCount();
+  int max = a.GetCount();
   perm.Resize(max);
-  for (sInt i=0; i<max; i++) perm[i]=i;
-  for(sInt i=0;i<max-1;i++)
-    for(sInt j=i+1;j<max;j++)
+  for (int i=0; i<max; i++) perm[i]=i;
+  for(int i=0;i<max-1;i++)
+    for(int j=i+1;j<max;j++)
       if(cmp(a[perm[i]], a[perm[j]]) > 0)
         sSwap(perm[i],perm[j]);
 }
 
 template <class ArrayType,class BaseType,class MemberType> 
-void sGetSortPermutation(ArrayType &a,MemberType BaseType::*o, sStaticArray<sInt> &perm)
+void sGetSortPermutation(ArrayType &a,MemberType BaseType::*o, sStaticArray<int> &perm)
 {
-  sInt max = a.GetCount();
+  int max = a.GetCount();
   perm.Resize(max);
-  for (sInt i=0; i<max; i++) perm[i]=i;
-  for(sInt i=0;i<max-1;i++)
-    for(sInt j=i+1;j<max;j++)
+  for (int i=0; i<max; i++) perm[i]=i;
+  for(int i=0;i<max-1;i++)
+    for(int j=i+1;j<max;j++)
       if(sGetPtr(a,perm[j])->*o < sGetPtr(a,perm[i])->*o)
         sSwap(perm[i],perm[j]);
 }
@@ -2775,7 +2775,7 @@ void sGetSortPermutation(ArrayType &a,MemberType BaseType::*o, sStaticArray<sInt
 template <class ArrayType,class BaseType,class MemberType> 
 void sRemTrue(ArrayType &a,MemberType BaseType::*o)
 {
-  for(sInt i=0;i<a.GetCount();)
+  for(int i=0;i<a.GetCount();)
   {
     if(sGetPtr(a,i)->*o)
       a.RemAt(i);
@@ -2789,7 +2789,7 @@ void sRemTrue(ArrayType &a,MemberType BaseType::*o)
 template <class ArrayType,class BaseType,class MemberType> 
 void sRemFalse(ArrayType &a,MemberType BaseType::*o)
 {
-  for(sInt i=0;i<a.GetCount();)
+  for(int i=0;i<a.GetCount();)
   {
     if(!(sGetPtr(a,i)->*o))
       a.RemAt(i);
@@ -2803,9 +2803,9 @@ void sRemFalse(ArrayType &a,MemberType BaseType::*o)
 template <class ArrayType,class BaseType,class MemberType> 
 void sRemOrderTrue(ArrayType &a,MemberType BaseType::*o)
 {
-  sInt max = a.GetCount();
-  sInt used = 0;
-  for(sInt i=0;i<max;i++)
+  int max = a.GetCount();
+  int used = 0;
+  for(int i=0;i<max;i++)
     if(!(sGetPtr(a,i)->*o))
       a[used++] = a[i];
   a.Resize(used);
@@ -2816,9 +2816,9 @@ void sRemOrderTrue(ArrayType &a,MemberType BaseType::*o)
 template <class ArrayType,class BaseType,class MemberType> 
 void sRemOrderFalse(ArrayType &a,MemberType BaseType::*o)
 {
-  sInt max = a.GetCount();
-  sInt used = 0;
-  for(sInt i=0;i<max;i++)
+  int max = a.GetCount();
+  int used = 0;
+  for(int i=0;i<max;i++)
     if(sGetPtr(a,i)->*o)
       a[used++] = a[i];
   a.Resize(used);
@@ -2829,7 +2829,7 @@ void sRemOrderFalse(ArrayType &a,MemberType BaseType::*o)
 template <class ArrayType,class BaseType,class MemberType> 
 void sRemEqual(ArrayType &a,MemberType BaseType::*o,const MemberType &e)
 {
-  for(sInt i=0;i<a.GetCount();)
+  for(int i=0;i<a.GetCount();)
   {
     if(sGetPtr(a,i)->*o == e)
       a.RemAt(i);
@@ -2843,7 +2843,7 @@ void sRemEqual(ArrayType &a,MemberType BaseType::*o,const MemberType &e)
 template <class ArrayType,class BaseType,class MemberType> 
 void sDeleteTrue(ArrayType &a,MemberType BaseType::*o)
 {
-  for(sInt i=0;i<a.GetCount();)
+  for(int i=0;i<a.GetCount();)
   {
     if(sGetPtr(a,i)->*o)
     {
@@ -2862,7 +2862,7 @@ void sDeleteTrue(ArrayType &a,MemberType BaseType::*o)
 template <class ArrayType,class BaseType,class MemberType> 
 void sDeleteFalse(ArrayType &a,MemberType BaseType::*o)
 {
-  for(sInt i=0;i<a.GetCount();)
+  for(int i=0;i<a.GetCount();)
   {
     if(!(sGetPtr(a,i)->*o))
     {
@@ -2926,7 +2926,7 @@ const BaseType *sFind(const ArrayType &a,MemberType BaseType::*o,const CompareTy
 
 //! Find first element by comparing a member and return the index.
 template <class ArrayType,class BaseType,class MemberType,class CompareType> 
-sInt sFindIndex(const ArrayType &a,MemberType BaseType::*o,const CompareType i)
+int sFindIndex(const ArrayType &a,MemberType BaseType::*o,const CompareType i)
 {
   const BaseType *e;
   sFORALL(a,e)
@@ -2937,10 +2937,10 @@ sInt sFindIndex(const ArrayType &a,MemberType BaseType::*o,const CompareType i)
 
 //! Continue searching for an element by comparing a member and return the next index.
 template <class ArrayType,class BaseType,class MemberType,class CompareType> 
-sInt sFindNextIndex(const ArrayType &a, sInt index,MemberType BaseType::*o,const CompareType i)
+int sFindNextIndex(const ArrayType &a, int index,MemberType BaseType::*o,const CompareType i)
 {
   const BaseType *e;
-  sInt _i=index+1;
+  int _i=index+1;
   for (; _i<a.GetCount()?(e=sGetPtr((a),_i)),1:0;_i++)
     if(e->*o == i)
       return _i;
@@ -2962,8 +2962,8 @@ const BaseType *sFind(const ArrayType &a,const BaseType &v)
 template <class ArrayType,class BaseType> 
 sBool sFindPtr(const ArrayType &a,const BaseType *v)
 {
-  sInt max = a.GetCount();
-  for (sInt i=0; i<max; i++)
+  int max = a.GetCount();
+  for (int i=0; i<max; i++)
     if(a[i] == v)
       return 1;
   return 0;
@@ -2971,10 +2971,10 @@ sBool sFindPtr(const ArrayType &a,const BaseType *v)
 
 //! Find first element by comparing the whole value and return the index.
 template <class ArrayType,class BaseType> 
-sInt sFindIndex(const ArrayType &a,const BaseType &v)
+int sFindIndex(const ArrayType &a,const BaseType &v)
 {
-  sInt max = a.GetCount();
-  for (sInt i=0; i<max; i++)
+  int max = a.GetCount();
+  for (int i=0; i<max; i++)
     if(a[i] == v)
       return i;
   return -1;
@@ -2982,9 +2982,9 @@ sInt sFindIndex(const ArrayType &a,const BaseType &v)
 
 //! Continue searching for an element by comparing the whole value and return the next index.
 template <class ArrayType,class BaseType> 
-sInt sFindNextIndex(const ArrayType &a, sInt index,const BaseType &v)
+int sFindNextIndex(const ArrayType &a, int index,const BaseType &v)
 {  
-  for (sInt i=index+1; i<a.GetCount(); i++)
+  for (int i=index+1; i<a.GetCount(); i++)
     if(a[i] == v)
       return i;
   return -1;
@@ -2999,11 +2999,11 @@ sBool sContains(const ArrayType &a,const BaseType &v)
 
 
 template <class ArrayType,class BaseType> 
-sInt sFindIndexPtr(const ArrayType &a,const BaseType *v)
+int sFindIndexPtr(const ArrayType &a,const BaseType *v)
 {
   // this can be more efficient implemented using pointerarithmetics
-  sInt max = a.GetCount();
-  for (sInt i=0; i<max; i++)
+  int max = a.GetCount();
+  for (int i=0; i<max; i++)
     if(&a[i] == v)
       return i;
   return -1;
@@ -3011,10 +3011,10 @@ sInt sFindIndexPtr(const ArrayType &a,const BaseType *v)
 
 //! Find first element by comparing a member and return the index.
 template <class ArrayType,class BaseType,class MemberType> 
-sInt sFindIndex(const ArrayType &a, MemberType BaseType::*o, const MemberType v)
+int sFindIndex(const ArrayType &a, MemberType BaseType::*o, const MemberType v)
 {
-  sInt max = a.GetCount();
-  for(sInt i=0;i<max;i++)
+  int max = a.GetCount();
+  for(int i=0;i<max;i++)
       if(sGetPtr(a,i)->*o == v)
         return i;
   return -1;
@@ -3119,8 +3119,8 @@ BaseType *sFindStringP(ArrayType &a,MemberType BaseType::*o,const CompareType i)
 template <template <typename> class ArrayType,class BaseType> 
 void sReverse(ArrayType<BaseType> &a)
 {
-  sInt max = a.GetCount();
-  for(sInt i=0;i<max/2;i++)
+  int max = a.GetCount();
+  for(int i=0;i<max/2;i++)
     a.Swap(i,max-i-1);
 }
 
@@ -3199,9 +3199,9 @@ public:
   //! get last element of list, or the start anchor if the list is empty.
   const Type* GetTail() const      { return GetType(Last.Prev); }
   //! Iterate through the list and return an element.
-  Type* GetSlow(sInt n)            { Type* e=GetHead(); for(;;) { if(IsEnd(e)) return 0; if(n==0) return e; e=GetNext(e); n--; } }
+  Type* GetSlow(int n)            { Type* e=GetHead(); for(;;) { if(IsEnd(e)) return 0; if(n==0) return e; e=GetNext(e); n--; } }
   //! Iterate through the list searching for an element and return its index.
-  sInt GetIndex(Type* e) const     { const Type* h=GetType(First.Next); for(sInt i=0;!IsEnd(h);i++, h=GetNext(h)) if (e==h) return i; return -1; }
+  int GetIndex(Type* e) const     { const Type* h=GetType(First.Next); for(int i=0;!IsEnd(h);i++, h=GetNext(h)) if (e==h) return i; return -1; }
 
   //! Insert at beginning of list.
   void AddHead(Type* e)            { GetNode(e)->Next = First.Next; GetNode(e)->Prev=&First; First.Next->Prev = GetNode(e); First.Next=GetNode(e); }
@@ -3281,8 +3281,8 @@ public:
   Type* GetTail()                  { return GetType(Last.Prev); }
   const Type* GetHead() const      { return GetType(First.Next); }
   const Type* GetTail() const      { return GetType(Last.Prev); }
-  Type* GetSlow(sInt n)            { Type* e=GetHead(); for(;;) { if(IsEnd(e)) return 0; if(n==0) return e; e=GetNext(e); n--; } }
-  sInt GetIndex(Type* e) const     { const Type* h=GetType(First.Next); for(sInt i=0;!IsEnd(h);i++, h=GetNext(h)) if (e==h) return i; return -1; }
+  Type* GetSlow(int n)            { Type* e=GetHead(); for(;;) { if(IsEnd(e)) return 0; if(n==0) return e; e=GetNext(e); n--; } }
+  int GetIndex(Type* e) const     { const Type* h=GetType(First.Next); for(int i=0;!IsEnd(h);i++, h=GetNext(h)) if (e==h) return i; return -1; }
 
   void AddHead(Type* e)            { GetNode(e)->Next = First.Next; GetNode(e)->Prev=&First; First.Next->Prev = GetNode(e); First.Next=GetNode(e); }
   void AddTail(Type* e)            { GetNode(e)->Prev = Last .Prev; GetNode(e)->Next=&Last ; Last .Prev->Next = GetNode(e); Last .Prev=GetNode(e); }
@@ -3343,7 +3343,7 @@ public:
 
   // construction
   sBlob() { Ptr=0; }
-  explicit sBlob(sInt bytes) { Ptr=0; Create(bytes); }
+  explicit sBlob(int bytes) { Ptr=0; Create(bytes); }
   sBlob(const sBlob &blob) { Ptr=blob.Ptr; AddRef(); }
 
   // c++ stuff
@@ -3351,15 +3351,15 @@ public:
   ~sBlob() { Release(); }
 
   // creation/deletion
-  void Create(sInt bytes) { Release(); Ptr = new sU32[(bytes+sizeof(sU32)-1)/sizeof(sU32)+2]; Ptr[0]=bytes; Ptr[1]=1; }
+  void Create(int bytes) { Release(); Ptr = new sU32[(bytes+sizeof(sU32)-1)/sizeof(sU32)+2]; Ptr[0]=bytes; Ptr[1]=1; }
   void Release() { if (Ptr && !--Ptr[1]) { delete[] Ptr; Ptr=0; } }
 
   // resizing (only smaller and memory usage will stay the same)
-  void Resize(sInt newsize) { sVERIFY(Ptr); if (Ptr) { sInt &size=*(sInt*)Ptr; sVERIFY(newsize>=0 && newsize<=size); size=newsize; }}
+  void Resize(int newsize) { sVERIFY(Ptr); if (Ptr) { int &size=*(int*)Ptr; sVERIFY(newsize>=0 && newsize<=size); size=newsize; }}
 
   // data retrieval
   sBool Valid() const { return Ptr!=0; }
-  sInt GetSize() const { sVERIFY(Ptr); if (Ptr) return sInt(Ptr[0]); else return 0; } 
+  int GetSize() const { sVERIFY(Ptr); if (Ptr) return int(Ptr[0]); else return 0; } 
   template <typename T> T * GetPtr() { sVERIFY(Ptr); if (Ptr) return reinterpret_cast<T*>(Ptr+2); else return 0; }
   template <typename T> const T * GetPtr() const { sVERIFY(Ptr); if (Ptr) return reinterpret_cast<const T*>(Ptr+2); else return 0; }
 };
@@ -3381,7 +3381,7 @@ class sMemoryHeap : public sMemoryHandler
 {
 protected:
   sPtr TotalFree;                // amount of memory that SHOULD be free
-  sInt Clear;                     // clear memory on allocation and freeing
+  int Clear;                     // clear memory on allocation and freeing
 
   sDList<sMemoryHeapFreeNode,&sMemoryHeapFreeNode::Node> FreeList;
   sMemoryHeapFreeNode *LastFreeNode;
@@ -3389,16 +3389,16 @@ protected:
 public:
   sMemoryHeap();
   void Init(sU8 *start,sPtr size);
-  void SetDebug(sBool clear,sInt memwall);
+  void SetDebug(sBool clear,int memwall);
 
   sCONFIG_SIZET GetFree();
   sCONFIG_SIZET GetLargestFree();
   sPtr GetUsed();
-  void DumpStats(sInt verbose=0);
+  void DumpStats(int verbose=0);
   sBool IsFree(const void *ptr) const;
   void ClearFree();               // clear free memory. for debugging
 
-  void *Alloc(sPtr bytes,sInt align,sInt reverse=0);
+  void *Alloc(sPtr bytes,int align,int reverse=0);
   sBool Free(void *);
   sPtr MemSize(void *);
   void Validate();
@@ -3432,9 +3432,9 @@ class sGpuHeap : public sMemoryHandler
 {
 protected:
   sGpuHeapUsedNode **HashTable;
-  sInt HashSize;
-  sInt HashMask;
-  sInt HashShift;
+  int HashSize;
+  int HashMask;
+  int HashShift;
   sPtr TotalFree;
 
   sBool Clear;
@@ -3448,16 +3448,16 @@ protected:
 public:
   sGpuHeap();
   ~sGpuHeap();
-  void Init(sU8 *start,sPtr size,sInt maxallocations=0x1000);
+  void Init(sU8 *start,sPtr size,int maxallocations=0x1000);
   void Exit();
 
-  void SetDebug(sBool clear,sInt memwall);
+  void SetDebug(sBool clear,int memwall);
   sCONFIG_SIZET GetFree();
   sCONFIG_SIZET GetLargestFree();
   sPtr GetUsed();
 
   void Validate();
-  void *Alloc(sPtr bytes,sInt align,sInt flags=0);
+  void *Alloc(sPtr bytes,int align,int flags=0);
   sBool Free(void *);
   sPtr MemSize(void *);
   sU32 MakeSnapshot();
@@ -3484,12 +3484,12 @@ class sSimpleMemPool
   sPtr End;
 public:
 
-  sSimpleMemPool(sInt defaultsize = 65536);
-  sSimpleMemPool(sU8 *data,sInt size);
+  sSimpleMemPool(int defaultsize = 65536);
+  sSimpleMemPool(sU8 *data,int size);
   ~sSimpleMemPool();
-  sU8 *Alloc(sInt size,sInt align);
+  sU8 *Alloc(int size,int align);
   void Reset();     // frees all reserved memory after the first default size block
-  template <typename T> T *Alloc(sInt n=1) { return (T*) Alloc(sizeof(T)*n,sALIGNOF(T)); }
+  template <typename T> T *Alloc(int n=1) { return (T*) Alloc(sizeof(T)*n,sALIGNOF(T)); }
 };
 
 
@@ -3513,14 +3513,14 @@ public:
 class sMemoryPool
 {
   sPtr DefaultSize;
-  sInt AllocFlags;
+  int AllocFlags;
   struct sMemoryPoolBuffer
   {
     sU8 *Start;
     sU8 *Current;
     sU8 *End;
     sMemoryPoolBuffer *Next;
-    sMemoryPoolBuffer(sPtr size,sInt flags);
+    sMemoryPoolBuffer(sPtr size,int flags);
     ~sMemoryPoolBuffer();
   };
   sMemoryPoolBuffer *Current;
@@ -3535,9 +3535,9 @@ class sMemoryPool
   sStaticArray<sStackItem> Stack;
 public:
 
-  sMemoryPool(sPtr defaultsize = 65536,sInt allocflags=sAMF_HEAP, sInt maxstacksize=16);
+  sMemoryPool(sPtr defaultsize = 65536,int allocflags=sAMF_HEAP, int maxstacksize=16);
   ~sMemoryPool();
-  sU8 *Alloc(sPtr size,sInt align);
+  sU8 *Alloc(sPtr size,int align);
 
   sPtr BytesAllocated() const;
   sPtr BytesReserved() const;
@@ -3546,9 +3546,9 @@ public:
   void Push();      // pushes the current allocation cfg to internal stack
   void Pop();       // everything allocated after last push is freed
 
-  template <typename T> T *Alloc(sInt n=1) { return (T*) Alloc(sizeof(T)*n,sALIGNOF(T)); }
+  template <typename T> T *Alloc(int n=1) { return (T*) Alloc(sizeof(T)*n,sALIGNOF(T)); }
   sChar *AllocString(const sChar *);
-  sChar *AllocString(const sChar *,sInt len);
+  sChar *AllocString(const sChar *,int len);
 };
 
 /****************************************************************************/
@@ -3557,8 +3557,8 @@ public:
 /***                                                                      ***/
 /****************************************************************************/
 
-sBool sCompES(sU8 *s, sU8 *d, sInt ssize, sInt &dsize, sInt scan);
-sBool sDeCompES(sU8 *s, sU8 *d, sInt ssize, sInt &dsize, sBool verify);
+sBool sCompES(sU8 *s, sU8 *d, int ssize, int &dsize, int scan);
+sBool sDeCompES(sU8 *s, sU8 *d, int ssize, int &dsize, sBool verify);
 
 /****************************************************************************/
 /***                                                                      ***/
@@ -3586,7 +3586,7 @@ protected:
   void _Add(void *hook,void *user);
   void _Rem(void *hook,void *user);
 public:
-  sHooksBase(sInt max=16);
+  sHooksBase(int max=16);
   ~sHooksBase();
 };
 
@@ -3638,25 +3638,25 @@ private:
     Item():Ptr(0),File(0),Size(0),Line(0xffff),Next(0xffff) {}
     sPtr Ptr;
     const sChar8 *File;
-    sInt Size;
+    int Size;
     sU16 Line;
     sU16 Next;
 
-    void Init(sDInt ptr, sInt size, const sChar8 *file, sU16 line, sU16 next);
+    void Init(sDInt ptr, int size, const sChar8 *file, sU16 line, sU16 next);
   };
 
   Item ItemPool[sMEMSEG_DBGINFOMAX];
-  sInt ItemCount;
+  int ItemCount;
   sU16 FreeList;
 public:
 
-  sU16 Add(sU16 id, sPtr ptr, sInt size, const sChar8 *file, sU16 line);
+  sU16 Add(sU16 id, sPtr ptr, int size, const sChar8 *file, sU16 line);
   sU16 Free(sU16 id, sPtr ptr);
   Item *Get(sU16 id);
 
   void FlushDump(sU16 id);
   void StatisticDump(sU16 id=0xffff);   // choose valid id for dumping only selected segment
-  sInt GetAllocSize(sU16 id);
+  int GetAllocSize(sU16 id);
 
   sMemDebugInfo();
   void Init();
@@ -3686,15 +3686,15 @@ public:
     sU16 Line;
     sU8 HeapId;
     sU8 pad;
-    sInt AllocId;
+    int AllocId;
 
-    sInt Duplicates;      // temporary
+    int Duplicates;      // temporary
     sPtr TotalBytes;
 
     sU32 Hash() const { return Line; }
     bool operator==(const LeakCheck &b) const
     { if(Line!=b.Line) return 0; 
-      for(sInt i=0;File[i] || b.File[i];i++) 
+      for(int i=0;File[i] || b.File[i];i++) 
         if(File[i]!=b.File[i]) return 0; 
       return 1; }
 
@@ -3704,28 +3704,28 @@ private:
 
   LeakCheck *LeakData;
 
-  sInt LeakAlloc;
-  sInt LeakUsed;
-  sInt AllocFlags;
+  int LeakAlloc;
+  int LeakUsed;
+  int AllocFlags;
   class sThreadLock *Lock;
 
 public:
   sMemoryLeakTracker1();
 #if sPLATFORM==sPLAT_WINDOWS
-  void Init(sInt listsize=100000,sInt allocflags=sAMF_DEBUG);
+  void Init(int listsize=100000,int allocflags=sAMF_DEBUG);
 #else
-  void Init(sInt listsize=10000,sInt allocflags=sAMF_DEBUG);
+  void Init(int listsize=10000,int allocflags=sAMF_DEBUG);
 #endif
   void Exit();
 
-  void DumpLeaks(const sChar *heapname,sInt minallocid=0);
+  void DumpLeaks(const sChar *heapname,int minallocid=0);
 
-  void AddLeak(void *ptr,sPtr size,const char *file,sInt line,sInt allocid,sInt heapid);
+  void AddLeak(void *ptr,sPtr size,const char *file,int line,int allocid,int heapid);
   void RemLeak(void *ptr);
   sBool HasLeak() const { return LeakUsed!=0; }
-  sInt GetLeakCount() const { return LeakUsed; }
+  int GetLeakCount() const { return LeakUsed; }
 
-  sInt BeginGetLeaks(const LeakCheck *&leaks);
+  int BeginGetLeaks(const LeakCheck *&leaks);
   void EndGetLeaks();
 };
 */
@@ -3738,11 +3738,11 @@ struct sMemoryLeakDesc
   sString<STRINGLEN> String;
 
   sMemoryLeakDesc *NextHash;
-  sInt AllocId;
-  sInt Hash;
-  sInt RefCount;
-  sInt Size[sAMF_MASK+1]; // size per mem type
-  sInt Count[sAMF_MASK+1];
+  int AllocId;
+  int Hash;
+  int RefCount;
+  int Size[sAMF_MASK+1]; // size per mem type
+  int Count[sAMF_MASK+1];
   sDNode Node;
 };
 
@@ -3750,12 +3750,12 @@ struct sMemoryLeakDesc
 struct sMemoryLeakInfo      // combine all leaks at one location
 {
   const sChar8 *File;           // file of location
-  sInt Line;                    // line of location
-  sInt HeapId;                  // heap id of first leak
-  sInt Count;                   // total count
-  sInt AllocId;                 // alloc id of first leak
-  sInt TotalBytes;              // total size
-  sInt FirstSize;               // size of first leak
+  int Line;                    // line of location
+  int HeapId;                  // heap id of first leak
+  int Count;                   // total count
+  int AllocId;                 // alloc id of first leak
+  int TotalBytes;              // total size
+  int FirstSize;               // size of first leak
   sBool ExtendedInfoAvailable;  // some of the contained leaks have extended informations to offer
 };
 
@@ -3772,8 +3772,8 @@ public:
   {
     void *Ptr;
     sPtr Size;
-    sInt AllocId;
-    sInt HeapId;
+    int AllocId;
+    int HeapId;
     sMemoryLeakDesc *Desc;
     Leak *NextHash;
     sDNode Node;
@@ -3781,8 +3781,8 @@ public:
   struct LeakLoc
   {
     const sChar8 *File;
-    sInt Line;
-    sInt HeapId;
+    int Line;
+    int HeapId;
     sDList<Leak,&Leak::Node> Leaks;
     LeakLoc *NextHash;
   };
@@ -3790,17 +3790,17 @@ public:
 
 private: 
 
-  static const sInt LocHashSize=0x0400;
-  static const sInt LeakHashSize=0x4000;
-  static const sInt DescHashSize=0x0100;
+  static const int LocHashSize=0x0400;
+  static const int LeakHashSize=0x4000;
+  static const int DescHashSize=0x0100;
 
   sMemoryPool *Pool;
   LeakLoc *LocHash[LocHashSize];
   Leak *LeakHash[LeakHashSize];
   sMemoryLeakDesc *DescHash[DescHashSize];
 
-  sInt LeakCount;
-  sInt AllocFlags;
+  int LeakCount;
+  int AllocFlags;
   class sThreadLock *Lock;
   sDList<Leak,&Leak::Node> FreeLeaks;
 
@@ -3809,23 +3809,23 @@ private:
 
   sMemoryLeakInformationStrings *InformationStrings;            // linear list of attached informationstrings
 
-  sInt CmpString8(const sChar *a, const sChar8 *b);
+  int CmpString8(const sChar *a, const sChar8 *b);
 
 public:
   sMemoryLeakTracker2();
   ~sMemoryLeakTracker2();
-  void Init2(sInt allocflags=sAMF_DEBUG);
+  void Init2(int allocflags=sAMF_DEBUG);
   void Exit();
 
-  void DumpLeaks(const sChar *message,sInt minallocid=0, sInt heapid=0);
+  void DumpLeaks(const sChar *message,int minallocid=0, int heapid=0);
   
-  void AddLeak(void *ptr,sPtr size,const char *file,sInt line,sInt allocid,sInt heapid, const sChar *desc, sU32 descCRC);
+  void AddLeak(void *ptr,sPtr size,const char *file,int line,int allocid,int heapid, const sChar *desc, sU32 descCRC);
   void RemLeak(void *ptr);
   sBool HasLeak() const { return LeakCount!=0; }
-  sInt GetLeakCount() const { return LeakCount; }
+  int GetLeakCount() const { return LeakCount; }
 
-  void GetLeaks(sStaticArray<sMemoryLeakInfo> &,sInt minallocid);
-  void GetLeakDescriptions(sStaticArray<sMemoryLeakDesc> &, sInt minallocid);  
+  void GetLeaks(sStaticArray<sMemoryLeakInfo> &,int minallocid);
+  void GetLeakDescriptions(sStaticArray<sMemoryLeakDesc> &, int minallocid);  
 
   sChar8 *GetPersistentString8(const sChar *informationString);  // returns an equal string located in the list above
 };
@@ -3891,17 +3891,17 @@ extern "C"
 #pragma intrinsic (memset,memcpy,memcmp,strlen)               // memory intrinsic
 #pragma intrinsic (fabs)                                      // float intrinsic
 
-sINLINE sInt sAbs(sInt i)                                  { return abs(i); }
-sINLINE void sSetMem(void *dd,sInt s,sInt c)               { memset(dd,s,c); }
-sINLINE void sCopyMem(void *dd,const void *ss,sInt c)      { memcpy(dd,ss,c); }
-sINLINE sInt sCmpMem(const void *dd,const void *ss,sInt c) { return (sInt)memcmp(dd,ss,c); }
+sINLINE int sAbs(int i)                                  { return abs(i); }
+sINLINE void sSetMem(void *dd,int s,int c)               { memset(dd,s,c); }
+sINLINE void sCopyMem(void *dd,const void *ss,int c)      { memcpy(dd,ss,c); }
+sINLINE int sCmpMem(const void *dd,const void *ss,int c) { return (int)memcmp(dd,ss,c); }
 
-sINLINE sInt sMulDiv(sInt a,sInt b,sInt c)      { return sInt(__emul(a,b)/c); }
+sINLINE int sMulDiv(int a,int b,int c)      { return int(__emul(a,b)/c); }
 sINLINE sU32 sMulDivU(sU32 a,sU32 b,sU32 c)     { return sU32(__emulu(a,b)/c); }
-sINLINE sInt sMulShift(sInt a,sInt b)           { return sInt(__emul(a,b)>>16); }
+sINLINE int sMulShift(int a,int b)           { return int(__emul(a,b)>>16); }
 sINLINE sU32 sMulShiftU(sU32 a,sU32 b)           { return sU32(__emulu(a,b)>>16); }
 
-sINLINE sInt sDivShift(sInt a,sInt b)           { return sInt((sS64(a)<<16)/b); }
+sINLINE int sDivShift(int a,int b)           { return int((sS64(a)<<16)/b); }
 sINLINE sF32 sAbs(sF32 f)                       { return fabs(f); }
 
 #define sHASINTRINSIC_ABSI
@@ -3982,15 +3982,15 @@ sINLINE sF32 sFRSqrt(sF32 f)                     { return 1.0f/(sF32)sqrt(f); }
 #include <math.h>
 
 
-sINLINE sInt sAbs(sInt i)                                  { return __builtin_abs(i); }
-sINLINE void sSetMem(void *dd,sInt s,sInt c)               { __builtin_memset(dd,s,c); }
-sINLINE void sCopyMem(void *dd,const void *ss,sInt c)      { __builtin_memcpy(dd,ss,c); }
-sINLINE sInt sCmpMem(const void *aa,const void *bb,sInt c) { return __builtin_memcmp(aa,bb,c); }
-sINLINE sInt sMulDiv(sInt a,sInt b,sInt c)      { return sS64(a)*b/c; }
+sINLINE int sAbs(int i)                                  { return __builtin_abs(i); }
+sINLINE void sSetMem(void *dd,int s,int c)               { __builtin_memset(dd,s,c); }
+sINLINE void sCopyMem(void *dd,const void *ss,int c)      { __builtin_memcpy(dd,ss,c); }
+sINLINE int sCmpMem(const void *aa,const void *bb,int c) { return __builtin_memcmp(aa,bb,c); }
+sINLINE int sMulDiv(int a,int b,int c)      { return sS64(a)*b/c; }
 sINLINE sU32 sMulDivU(sU32 a,sU32 b,sU32 c)      { return sU64(a)*b/c; }
-sINLINE sInt sMulShift(sInt a,sInt b)           { return (sS64(a)*b)>>16; }
+sINLINE int sMulShift(int a,int b)           { return (sS64(a)*b)>>16; }
 sINLINE sU32 sMulShiftU(sU32 a,sU32 b)           { return (sU64(a)*b)>>16; }
-sINLINE sInt sDivShift(sInt a,sInt b)           { return (sS64(a)<<16)/b; }
+sINLINE int sDivShift(int a,int b)           { return (sS64(a)<<16)/b; }
 sINLINE sF32 sAbs(sF32 f)                       { return __builtin_fabsf(f); }
 
 #define sHASINTRINSIC_ABSI
@@ -4103,48 +4103,53 @@ struct sPair
 A simple array of bits with a predefined size.
 
 Use this for bitmasks larger than 64 bits. Otherwise, simply use an sU64 
-or sInt.
+or int.
 
 */ /*************************************************************************/
 
 template<int bits>
 class sStaticBitArray
 {
-  static const sInt bytes = (bits+7)/8;
+  static const int bytes = (bits+7)/8;
   sU8 Data[bytes];
 public:
   //! constructor. initalize full array with zero
   sStaticBitArray() { ClearAll(); }
   
   //! set a bit to 1
-  void Set(sInt i)              { sVERIFY(i>=0 && i<bits); Data[i/8] |= 1<<(i&7); }
+  void Set(int i)              { sVERIFY(i>=0 && i<bits); Data[i/8] |= 1<<(i&7); }
   //! clear a bit to 0
-  void Clear(sInt i)            { sVERIFY(i>=0 && i<bits); Data[i/8] &= ~(1<<(i&7)); }
+  void Clear(int i)            { sVERIFY(i>=0 && i<bits); Data[i/8] &= ~(1<<(i&7)); }
   //! set a bit to a value 0 or 1
-  void Assign(sInt i,sInt v)    { sVERIFY(i>=0 && i<bits); if(v) Set(i); else Clear(i); }
+  void Assign(int i,int v)    { sVERIFY(i>=0 && i<bits); if(v) Set(i); else Clear(i); }
   //! get a bit. return 0 or 1
-  sInt Get(sInt i) const        { sVERIFY(i>=0 && i<bits); return (Data[i/8]>>(i&7))&1; }
+  int Get(int i) const        { sVERIFY(i>=0 && i<bits); return (Data[i/8]>>(i&7))&1; }
   //! clear all bits
-  void ClearAll()               { for(sInt i=0;i<bytes;i++) Data[i] = 0x00; }
+  void ClearAll()               { for(int i=0;i<bytes;i++) Data[i] = 0x00; }
   //! set all bits
-  void SetAll()                 { for(sInt i=0;i<bytes;i++) Data[i] = 0xff; }
+  void SetAll()                 { for(int i=0;i<bytes;i++) Data[i] = 0xff; }
 
   //! return the size (in bits) of the array.
-  sInt Size() const             { return bits; }
+  int Size() const             { return bits; }
 
   //! index the bits like an array. read only.
-  sInt operator[](sInt i) const { return Get(i); }
+  int operator[](int i) const { return Get(i); }
 };
 
 struct sHalfFloat // don't try to make a fully featured halffloat class, you don't want to accidentally use it...
 {                 // Seee EEEE EMMM MMMM  MMMm mmmm mmmm mmmm  (32 bit, e-127)
   sU16 Val;       //                      SEEE EEMM MMMM MMMM  (16 bit, e-15)
-  void Set(sF32 f) { sU32 i=sRawCast<sU32,sF32>(f); Val=sU16(((i&0x80000000)>>16)|(((i&0x7f800000)>>13)-(127<<10)+(15<<10))|((i&0x007fe000)>>13)); } // do not care about special cases :-(
+  void Set(sF32 f)
+  {
+    sU32 i = sRawCast<sU32, sF32>(f);
+    Val = sU16(((i & 0x80000000) >> 16) | (((i & 0x7f800000) >> 13) - (127 << 10) + (15 << 10)) | ((i & 0x007fe000) >> 13));
+  } // do not care about special cases :-(
 
   // ...but we want to be able to read halffloats (we do not handle NaN & co)
   sF32 Get() const
-  { const sU32 f = ((Val&0x8000)<<16) | (((Val&0x7c00)+0x1C000)<<13) | ((Val&0x03FF)<<13);
-    return sRawCast<sF32,sU32>(f);
+  {
+    const sU32 f = ((Val & 0x8000) << 16) | (((Val & 0x7c00) + 0x1C000) << 13) | ((Val & 0x03FF) << 13);
+    return sRawCast<sF32, sU32>(f);
   }
 };
 

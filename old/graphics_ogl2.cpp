@@ -41,7 +41,7 @@ static HGLRC GLRC;
 void sInitGfxCommon();
 void sExitGfxCommon();
 
-sInt sEngineHacks;
+int sEngineHacks;
 
 #if sCONFIG_SYSTEM_LINUX
 
@@ -51,12 +51,12 @@ extern Display *sXDisplay();
 extern XVisualInfo *sXVisualInfo;
 extern Visual *sXVisual;
 extern Drawable sXWnd;
-extern sInt sXScreen;
+extern int sXScreen;
 static GLXContext GLXC;
 
 #endif
 
-void GLError(sU32 err,const sChar *file,sInt line,const sChar *system)
+void GLError(sU32 err,const sChar *file,int line,const sChar *system)
 {
   sString<256> buffer;
 
@@ -65,7 +65,7 @@ void GLError(sU32 err,const sChar *file,sInt line,const sChar *system)
   sFatal(buffer);
 }
 #define GLErr(hr) { sBool err=!(hr); if(err) GLError(0,sTXT(__FILE__),__LINE__,L"opengl"); }
-#define GLERR() { sInt err=glGetError(); if(err) GLError(err,sTXT(__FILE__),__LINE__,L"opengl"); }
+#define GLERR() { int err=glGetError(); if(err) GLError(err,sTXT(__FILE__),__LINE__,L"opengl"); }
 
 /****************************************************************************/
 /***                                                                      ***/
@@ -81,21 +81,21 @@ static sScreenMode DXScreenMode;
 struct sGeoBuffer
 {
   GLuint GLName;                  // gl name
-  sInt GLType;                    // GL_ARRAY_BUFFER_ARB or GL_ELEMENT_ARRAY_BUFFER_ARB
-  sInt GLUsage;                   // GL_STATIC_DRAW, ...
+  int GLType;                    // GL_ARRAY_BUFFER_ARB or GL_ELEMENT_ARRAY_BUFFER_ARB
+  int GLUsage;                   // GL_STATIC_DRAW, ...
 
   sGeometryDuration Duration;     // sGD_???
-  sInt Type;                      // 0 = VB, 1 = IB
+  int Type;                      // 0 = VB, 1 = IB
 
-  sInt Alloc;                     // total available bytes
-  sInt Used;                      // alreaedy used bytes
-  sInt Freed;                     // bytes freed. when Freed == Used, then the buffer is empty and may be reset
+  int Alloc;                     // total available bytes
+  int Used;                      // alreaedy used bytes
+  int Freed;                     // bytes freed. when Freed == Used, then the buffer is empty and may be reset
 };
 
 #define sMAX_GEOBUFFER 256
 
 sGeoBuffer sGeoBuffers[sMAX_GEOBUFFER];
-sInt sGeoBufferCount;
+int sGeoBufferCount;
 
 GLuint sFBO = 0;
 
@@ -109,17 +109,17 @@ GLuint sFBO = 0;
 void sVertexFormatHandle::Create()
 {
   sVertexFormatHandle::OGLDecl decl[40];
-  sInt dindex = 0;
+  int dindex = 0;
 
   sClear(decl);
 
-  for(sInt i=0;i<sVF_STREAMMAX;i++)
+  for(int i=0;i<sVF_STREAMMAX;i++)
     VertexSize[i] = 0;
 
-  for(sInt stream=0;stream<sVF_STREAMMAX;stream++)
+  for(int stream=0;stream<sVF_STREAMMAX;stream++)
   {
-    sInt firstvert = 1;
-    sInt i = 0;
+    int firstvert = 1;
+    int i = 0;
     while(Data[i])
     {
       if(((Data[i]&sVF_STREAMMASK)>>sVF_STREAMSHIFT)==(sU32)stream)
@@ -157,7 +157,7 @@ void sVertexFormatHandle::Create()
         default: sVERIFYFALSE;
         }
 
-        sInt bytes = 0;
+        int bytes = 0;
         switch(Data[i]&sVF_TYPEMASK)
         {
         case sVF_F2:  decl[dindex].Type=GL_FLOAT;            decl[dindex].Size=2;   decl[dindex].Normalized=0;   bytes=2*4;   break;
@@ -206,12 +206,12 @@ void sVertexFormatHandle::Destroy()
 /***                                                                      ***/
 /****************************************************************************/
 
-static sGeoBuffer *sFindGeoBuffer(sInt bytes,sInt type,sGeometryDuration duration)
+static sGeoBuffer *sFindGeoBuffer(int bytes,int type,sGeometryDuration duration)
 {
   // find available buffer (don't allocate, just find!)
 
   bytes = sAlign(bytes,128);
-  for(sInt i=0;i<sGeoBufferCount;i++)
+  for(int i=0;i<sGeoBufferCount;i++)
   {
     sGeoBuffer *gb = &sGeoBuffers[i];
     if(gb->Duration==duration && gb->Type==type && gb->Used+bytes<=gb->Alloc)
@@ -294,7 +294,7 @@ void sGeoBufferPart::Clear()
   Count = 0;
 }
 
-void sGeoBufferPart::Init(sInt count,sInt size,sGeometryDuration duration,sInt buffertype)
+void sGeoBufferPart::Init(int count,int size,sGeometryDuration duration,int buffertype)
 {
   Buffer = sFindGeoBuffer(size*count,buffertype,duration);
   Start = Buffer->Used;
@@ -311,7 +311,7 @@ void sGeoBufferPart::Lock(void **ptr)
   *ptr = data;
 }
 
-void sGeoBufferPart::Unlock(sInt count,sInt size)
+void sGeoBufferPart::Unlock(int count,int size)
 {
   if(count!=-1)
     Count = count;
@@ -330,15 +330,15 @@ void sGeometry::Draw()
   sGeometry::Draw(0, 0, 0, 0);
 }
 
-void sGeometry::Draw(sDrawRange *ir,sInt irc,sInt instancecount, sVertexOffset *off/*=0*/)
+void sGeometry::Draw(sDrawRange *ir,int irc,int instancecount, sVertexOffset *off/*=0*/)
 {
   // set vertexformat
   sVERIFY(!off);      // vertex stream offset currently unsupported
 
   sVertexFormatHandle::OGLDecl *decl = Format->GetDecl();
-  sInt stride = 0;
-  sInt start = 0;
-  sInt disablemask = 0;
+  int stride = 0;
+  int start = 0;
+  int disablemask = 0;
 
   if(DebugBreak) sDEBUGBREAK;
   
@@ -365,7 +365,7 @@ void sGeometry::Draw(sDrawRange *ir,sInt irc,sInt instancecount, sVertexOffset *
 
   // figure primitive type
 
-  sInt primtype = 0;
+  int primtype = 0;
   switch(Flags & sGF_PRIMMASK)
   {
   case sGF_TRILIST:
@@ -404,7 +404,7 @@ void sGeometry::Draw(sDrawRange *ir,sInt irc,sInt instancecount, sVertexOffset *
   if(IndexPart.Buffer)
   {
     glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB,IndexPart.Buffer->GLName);
-    const sInt type = (Flags & sGF_INDEX32) ? GL_UNSIGNED_INT : GL_UNSIGNED_SHORT;
+    const int type = (Flags & sGF_INDEX32) ? GL_UNSIGNED_INT : GL_UNSIGNED_SHORT;
     glDrawRangeElements(primtype,0,VertexPart[0].Count-1,IndexPart.Count, 
       type, (void*) sDInt(IndexPart.Start));
   }
@@ -416,7 +416,7 @@ void sGeometry::Draw(sDrawRange *ir,sInt irc,sInt instancecount, sVertexOffset *
 
   // disable and unbind
 
-  for(sInt i=0;i<16;i++)
+  for(int i=0;i<16;i++)
     if(disablemask & (1<<i))
       glDisableVertexAttribArrayARB(i);
 
@@ -447,7 +447,7 @@ sU64 sGetAvailTextureFormats()
   return (1ULL<<sTEX_ARGB8888);
 }
 
-void sTexture2D::Create2(sInt flags)
+void sTexture2D::Create2(int flags)
 {
   GLuint name;
   glGenTextures(1,&name);
@@ -461,12 +461,12 @@ void sTexture2D::Destroy2()
   GLName = 0;
 }
 
-void sTexture2D::BeginLoad(sU8 *&data,sInt &pitch,sInt mipmap)
+void sTexture2D::BeginLoad(sU8 *&data,int &pitch,int mipmap)
 {
   sVERIFY(LoadBuffer==0);
   sVERIFY(mipmap>=0 && mipmap<Mipmaps);
-  sInt xs = SizeX>>mipmap;
-  sInt ys = SizeY>>mipmap;
+  int xs = SizeX>>mipmap;
+  int ys = SizeY>>mipmap;
 
   LoadMipmap = mipmap;
   LoadBuffer = new sU8[BitsPerPixel*xs*ys/8];
@@ -477,10 +477,10 @@ void sTexture2D::BeginLoad(sU8 *&data,sInt &pitch,sInt mipmap)
 void sTexture2D::EndLoad()
 {
   sVERIFY(LoadBuffer!=0);
-  sInt format = 0, channels = 0, type = 0;
+  int format = 0, channels = 0, type = 0;
 
-  sInt xs = SizeX>>LoadMipmap;
-  sInt ys = SizeY>>LoadMipmap;
+  int xs = SizeX>>LoadMipmap;
+  int ys = SizeY>>LoadMipmap;
 
   switch(Flags & sTEX_FORMAT)
   {
@@ -548,7 +548,7 @@ void sTexture2D::EndLoadPalette()
 
 /****************************************************************************/
 
-void sTextureCube::Create2(sInt flags)
+void sTextureCube::Create2(int flags)
 {
   GLuint name;
   glGenTextures(1, &name);
@@ -562,12 +562,12 @@ void sTextureCube::Destroy2()
   GLName = 0;
 }
 
-void sTextureCube::BeginLoad(sTexCubeFace cf, sU8*& data, sInt& pitch, sInt mipmap)
+void sTextureCube::BeginLoad(sTexCubeFace cf, sU8*& data, int& pitch, int mipmap)
 {
   sVERIFY(LoadBuffer == 0);
   sVERIFY(mipmap >= 0 && mipmap < Mipmaps);
-  sInt xs = SizeX >> mipmap;
-  sInt ys = SizeY >> mipmap;
+  int xs = SizeX >> mipmap;
+  int ys = SizeY >> mipmap;
 
   LoadFace = cf;
   LoadMipmap = mipmap;
@@ -579,10 +579,10 @@ void sTextureCube::BeginLoad(sTexCubeFace cf, sU8*& data, sInt& pitch, sInt mipm
 void sTextureCube::EndLoad()
 {
   sVERIFY(LoadBuffer != 0);
-  sInt format = 0, channels = 0, type = 0;
+  int format = 0, channels = 0, type = 0;
 
-  sInt xs = SizeX >> LoadMipmap;
-  sInt ys = SizeY >> LoadMipmap;
+  int xs = SizeX >> LoadMipmap;
+  int ys = SizeY >> LoadMipmap;
 
   switch (Flags & sTEX_FORMAT)
   {
@@ -640,7 +640,7 @@ void sTextureCube::EndLoad()
 
 /****************************************************************************/
 
-void sPackDXT(sU8 *d,sU32 *bmp,sInt xs,sInt ys,sInt format,sBool dither)
+void sPackDXT(sU8 *d,sU32 *bmp,int xs,int ys,int format,sBool dither)
 {
   sVERIFY("sPackDXT not supported with opengl")
 }
@@ -670,7 +670,7 @@ void sMaterial::Prepare(sVertexFormatHandle *format)
   oldps->Release();
 }
 
-void sMaterial::InitVariants(sInt variants)
+void sMaterial::InitVariants(int variants)
 {
 }
 
@@ -678,11 +678,11 @@ void sMaterial::DiscardVariants()
 {
 }
 
-void sMaterial::SetVariant(sInt variants)
+void sMaterial::SetVariant(int variants)
 {
 }
 
-void sMaterial::Set(sCBufferBase **cbuffers,sInt cbcount,sBool additive)
+void sMaterial::Set(sCBufferBase **cbuffers,int cbcount,sBool additive)
 {
   SetStates();
 
@@ -709,7 +709,7 @@ void sMaterial::Set(sCBufferBase **cbuffers,sInt cbcount,sBool additive)
 
   // set constant buffers
 
-  /*for(sInt i=0;i<cbcount;i++)
+  /*for(int i=0;i<cbcount;i++)
   {
     sCBufferBase *cb = cbuffers[i];
     sVERIFY(cb->Slot<sCBUFFER_MAXSLOT*sCBUFFER_SHADERTYPES);
@@ -723,9 +723,9 @@ void sMaterial::Set(sCBufferBase **cbuffers,sInt cbcount,sBool additive)
   sSetCBuffers(cbuffers,cbcount);
 }
 
-static void makeblend(sInt blend,sInt &s,sInt &d,sInt &f)
+static void makeblend(int blend,int &s,int &d,int &f)
 {
-  static const sInt arg[16] = 
+  static const int arg[16] = 
   {
     0,
     GL_ZERO,
@@ -744,7 +744,7 @@ static void makeblend(sInt blend,sInt &s,sInt &d,sInt &f)
     GL_CONSTANT_COLOR,
     GL_ONE_MINUS_CONSTANT_COLOR,
   };
-  static const sInt func[16] =
+  static const int func[16] =
   {
     0,
     GL_FUNC_ADD,
@@ -759,7 +759,7 @@ static void makeblend(sInt blend,sInt &s,sInt &d,sInt &f)
   d = arg[(blend>>16)&15];
 }
 
-void sMaterial::SetStates(sInt variant_ignored)
+void sMaterial::SetStates(int variant_ignored)
 {
   // basic flags
 	glDepthMask((Flags & sMTRL_ZWRITE) != 0);
@@ -807,15 +807,15 @@ void sMaterial::SetStates(sInt variant_ignored)
     glEnable(GL_BLEND);
     if(BlendAlpha==sMB_SAMEASCOLOR)
     {
-      sInt s,d,f;
+      int s,d,f;
       makeblend(BlendColor,s,d,f);
       glBlendEquation(f);
       glBlendFunc(s,d);
     }
     else
     {
-      sInt sc,dc,fc;
-      sInt sa,da,fa;
+      int sc,dc,fc;
+      int sa,da,fa;
       makeblend(BlendColor,sc,dc,fc);
       makeblend(BlendAlpha,sa,da,fa);
       glBlendEquationSeparateEXT(fc,fa);
@@ -841,13 +841,13 @@ void sMaterial::SetStates(sInt variant_ignored)
 
   // textures
 
-  for(sInt i=0;i<sMTRL_MAXTEX;i++)
+  for(int i=0;i<sMTRL_MAXTEX;i++)
   {
     sSetTexture(i,Texture[i]);
 
     if(Texture[i])
     {
-      sInt mipmaps = Texture[i]->Mipmaps>1;
+      int mipmaps = Texture[i]->Mipmaps>1;
       switch(TFlags[i] & sMTF_LEVELMASK)
       {
       case sMTF_LEVEL0:
@@ -905,12 +905,12 @@ sShaderTypeFlag sGetShaderPlatform()
   return sSTF_NVIDIA;
 }
 
-sInt sGetShaderProfile()
+int sGetShaderProfile()
 {
   return sSTF_NVIDIA;
 }
 
-void sSetVSParamImpl(sInt o, sInt count, const sVector4* vsf)
+void sSetVSParamImpl(int o, int count, const sVector4* vsf)
 {
   while(count>0)
   {
@@ -921,12 +921,12 @@ void sSetVSParamImpl(sInt o, sInt count, const sVector4* vsf)
   }
 }
 
-void sSetVSParam(sInt o, sInt count, const sVector4* vsf)
+void sSetVSParam(int o, int count, const sVector4* vsf)
 {
   sSetVSParamImpl(o, count, vsf);
 }
 
-void sSetPSParamImpl(sInt o, sInt count, const sVector4* psf)
+void sSetPSParamImpl(int o, int count, const sVector4* psf)
 {
   while(count>0)
   {
@@ -937,7 +937,7 @@ void sSetPSParamImpl(sInt o, sInt count, const sVector4* psf)
   }
 }
 
-void sSetPSParam(sInt o, sInt count, const sVector4* psf)
+void sSetPSParam(int o, int count, const sVector4* psf)
 {
   sSetPSParamImpl(o,count,psf);
 }
@@ -952,7 +952,7 @@ void sSetPSBool(sU32 bits,sU32 mask)
 
 void sCreateShader2(sShader *shader, sShaderBlob *blob)
 {
-  sInt type;
+  int type;
   GLuint name;
 
   switch(shader->Type&sSTF_KIND)
@@ -970,7 +970,7 @@ void sCreateShader2(sShader *shader, sShaderBlob *blob)
   
   glGenProgramsARB(1,&name);
   glBindProgramARB(type,name);
-  sInt size = blob->Size;
+  int size = blob->Size;
   if(size>0 && blob->Data[size-1]==0)     // there might be a trailing zero
     size--;
 
@@ -1035,7 +1035,7 @@ sCBufferBase::~sCBufferBase()
 /***                                                                      ***/
 /****************************************************************************/
 
-void PreInitGFX(sInt &flags,sInt &xs,sInt &ys)
+void PreInitGFX(int &flags,int &xs,int &ys)
 {
 #if sPLATFORM == sPLAT_WINDOWS
   
@@ -1082,7 +1082,7 @@ void PreInitGFX(sInt &flags,sInt &xs,sInt &ys)
 #endif
 }
 
-void InitGFX(sInt flags,sInt xs,sInt ys)
+void InitGFX(int flags,int xs,int ys)
 {
 #if sPLATFORM == sPLAT_WINDOWS
   PIXELFORMATDESCRIPTOR pfd;
@@ -1146,7 +1146,7 @@ void InitGFX(sInt flags,sInt xs,sInt ys)
   sLogF(L"gfx",L"GL Extensions:\n");
   while(*ext!=0)
   {
-    sInt i=0;
+    int i=0;
     while(*ext==' ') ext++;
     while(*ext!=' ' && *ext!=0)
       Extension[i++] = *ext++;
@@ -1185,7 +1185,7 @@ void ExitGFX()
 #endif
 }
 
-void ResizeGFX(sInt x,sInt y)  // this is called when the windows size changes
+void ResizeGFX(int x,int y)  // this is called when the windows size changes
 {
   if(x && y && (x!=DXScreenMode.ScreenX || y!=DXScreenMode.ScreenY)) 
   {
@@ -1201,12 +1201,12 @@ void ResizeGFX(sInt x,sInt y)  // this is called when the windows size changes
 /***                                                                      ***/
 /****************************************************************************/
 
-sInt sGetDisplayCount()
+int sGetDisplayCount()
 {
   return 1;
 }
 
-void sGetScreenInfo(sScreenInfo &si,sInt flags,sInt display)
+void sGetScreenInfo(sScreenInfo &si,int flags,int display)
 {
   si.Clear();
   si.Resolutions.HintSize(1);
@@ -1270,22 +1270,22 @@ sTexture2D *sGetCurrentBackZBuffer(void)
   return 0;
 }
 
-/*void sSetRendertarget(const sRect *vrp,sInt flags,sU32 clearcolor,sTexture2D **tex,sInt count)
+/*void sSetRendertarget(const sRect *vrp,int flags,sU32 clearcolor,sTexture2D **tex,int count)
 {
   sVERIFY(0);
   
 }
 
-static void sSetRendertargetPrivate(const sRect *vrp,sInt flags,sU32 color)
+static void sSetRendertargetPrivate(const sRect *vrp,int flags,sU32 color)
 {
 }
 
-void sSetRendertarget(const sRect *vrp, sInt clearflags, sU32 clearcolor)
+void sSetRendertarget(const sRect *vrp, int clearflags, sU32 clearcolor)
 {
   sSetRendertarget(vrp,0,clearflags,clearcolor);
 }
 
-void sSetRendertarget(const sRect *vrp,sTexture2D *tex, sInt clearflags, sU32 clearcolor)
+void sSetRendertarget(const sRect *vrp,sTexture2D *tex, int clearflags, sU32 clearcolor)
 {
   sVERIFY(tex==0);
 
@@ -1314,7 +1314,7 @@ void sSetRendertarget(const sRect *vrp,sTexture2D *tex, sInt clearflags, sU32 cl
   glClearColor(col.x,col.y,col.z,col.w);
   glClearDepth(1.0f);
 
-  sInt mode = 0;
+  int mode = 0;
   if(clearflags & sCLEAR_COLOR) mode |= GL_COLOR_BUFFER_BIT;
   if(clearflags & sCLEAR_ZBUFFER) mode |= GL_DEPTH_BUFFER_BIT;
 
@@ -1322,7 +1322,7 @@ void sSetRendertarget(const sRect *vrp,sTexture2D *tex, sInt clearflags, sU32 cl
 
 }
 
-void sSetRendertargetCube(sTextureCube* tex,sTexCubeFace face,sInt cf, sU32 cc)
+void sSetRendertargetCube(sTextureCube* tex,sTexCubeFace face,int cf, sU32 cc)
 {
   sFatal(L"sSetRendertargetCube not implemented!");
 }
@@ -1363,7 +1363,7 @@ void sSetTarget(const sTargetPara &para) {
   glClearColor(para.ClearColor[0].x, para.ClearColor[0].y, para.ClearColor[0].z, para.ClearColor[0].w);
   glClearDepth(1.0f);
 
-  sInt mode = 0;
+  int mode = 0;
   if (para.Flags & sST_CLEARCOLOR)
     mode |= GL_COLOR_BUFFER_BIT;
   if (para.Flags & sST_CLEARDEPTH)
@@ -1377,13 +1377,13 @@ sTexture2D *sGetRTDepthBuffer() {
   return sNULL;
 }
 
-sTexture2D *sGetScreenDepthBuffer(sInt screen)
+sTexture2D *sGetScreenDepthBuffer(int screen)
 {
   //sFatal(L"sGetScreenDepthBuffer is not implemented for OpenGL");
   return sNULL;
 }
 
-sTexture2D *sGetScreenColorBuffer(sInt screen)
+sTexture2D *sGetScreenColorBuffer(int screen)
 {
   //sFatal(L"sGetScreenColorBuffer is not implemented for OpenGL");
   return sNULL;
@@ -1437,7 +1437,7 @@ sBool sRender3DBegin()
   sGFXViewRect.Init(0,0,DXScreenMode.ScreenX,DXScreenMode.ScreenY);
   // reset dynamic buffers
 
-  for(sInt i=0;i<sGeoBufferCount;i++)
+  for(int i=0;i<sGeoBufferCount;i++)
   {
     sGeoBuffer *geo = &sGeoBuffers[i];
     if(geo->Duration==sGD_STREAM || geo->Duration==sGD_FRAME)
@@ -1461,7 +1461,7 @@ sBool sRender3DBegin()
   return 1;
 }
 
-void sSetRenderClipping(sRect *r,sInt count)
+void sSetRenderClipping(sRect *r,int count)
 {
 }
 
@@ -1471,24 +1471,24 @@ void sGetGraphicsStats(sGraphicsStats &stat)
   sLogF(L"gfx",L"sGetGraphicsStats not implemented\n");
 }
 
-sInt sRenderStateTexture(sU32* data, sInt texstage, sU32 tflags)
+int sRenderStateTexture(sU32* data, int texstage, sU32 tflags)
 {
   sLogF(L"gfx",L"sRenderStateTexture not implemented\n");
   return 0;
 }
 
-void sSetRenderStates(const sU32* data, sInt count)
+void sSetRenderStates(const sU32* data, int count)
 {
   sLogF(L"gfx",L"sSetRenderStates not implemented\n");
 }
 
-sInt sRenderStateTexture(sU32* data, sInt texstage, sU32 tflags,sF32 lodbias)
+int sRenderStateTexture(sU32* data, int texstage, sU32 tflags,sF32 lodbias)
 {
   sFatal(L"sRenderStateTexture not implemented!");
   return 0;
 }
 
-void sSetTexture(sInt stage,class sTextureBase *tex)
+void sSetTexture(int stage,class sTextureBase *tex)
 {
   if(tex)
   {
@@ -1567,7 +1567,7 @@ void sGeometry::EndQuadrics()
   sFatal(L"EndQuadrics not implemented!");
 }
 
-void sGeometry::BeginQuad(void **data,sInt count)
+void sGeometry::BeginQuad(void **data,int count)
 {
   sFatal(L"BeginQuad not implemented!");
 }
@@ -1577,7 +1577,7 @@ void sGeometry::EndQuad()
   sFatal(L"EndQuad not implemented!");
 }
 
-void sGeometry::BeginGrid(void **data,sInt xs,sInt ys)
+void sGeometry::BeginGrid(void **data,int xs,int ys)
 {
   sFatal(L"BeginGrid not implemented!");
 }

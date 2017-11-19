@@ -27,7 +27,7 @@
 /****************************************************************************/
 class sCamera
 {
-  sInt LastTime;
+  int LastTime;
 protected:
   enum { INPUT_X, INPUT_Y, INPUT_MBL, INPUT_MBR, INPUT_LX, INPUT_LY, INPUT_RX, INPUT_RY, };
   sInput2Scheme Scheme;
@@ -37,7 +37,7 @@ protected:
 public:
   sCamera();
   virtual ~sCamera();
-  virtual void OnFrame(sInt delta,sViewport &vp)=0;
+  virtual void OnFrame(int delta,sViewport &vp)=0;
   virtual void OnKey(sU32 key);
   virtual void SetMouseControl(sBool mouseControl) { MouseControl = mouseControl; }
   virtual void SetJoypadControl(sBool joypadControl) { JoypadControl = joypadControl; }
@@ -50,13 +50,13 @@ public:
 
 class sTumbleCamera : public sCamera
 {
-  sInt Time;
+  int Time;
 public:
   sTumbleCamera();
 
   sF32 Dist;
   sVector30 Speed;
-  void OnFrame(sInt delta,sViewport &vp);
+  void OnFrame(int delta,sViewport &vp);
 };
 
 /****************************************************************************/
@@ -67,7 +67,7 @@ class sOrbitCamera : public sCamera
   sF32 Dist;
 public:
   sOrbitCamera();
-  void OnFrame(sInt delta,sViewport &vp);
+  void OnFrame(int delta,sViewport &vp);
   void OnDrag(const sMouseData &md);
 };
 
@@ -77,7 +77,7 @@ public:
 
 class sFreeCamera : public sCamera
 {
-  sInt KeyMask;
+  int KeyMask;
   sF32 Moving;
   sF32 AnalogX;
   sF32 AnalogY;
@@ -85,7 +85,7 @@ class sFreeCamera : public sCamera
   void PrintPos();
 public:
   sFreeCamera();
-  void OnFrame(sInt delta,sViewport &vp);
+  void OnFrame(int delta,sViewport &vp);
   void OnKey(sU32 key);
 
   void Stop();
@@ -112,8 +112,8 @@ class sCameraXSI : public sCamera
     XSI_SELECT          = 0x0008,
   };
   
-  sInt KeyMaskCurrent;
-  sInt KeyMaskSticky;
+  int KeyMaskCurrent;
+  int KeyMaskSticky;
   
 
   sF32 DollyStep;
@@ -122,7 +122,7 @@ class sCameraXSI : public sCamera
 
   public:
     sCameraXSI();
-    void OnFrame(sInt delta, sViewport &vp);
+    void OnFrame(int delta, sViewport &vp);
     void OnKey(sU32 key);
     void OnDrag(const sMouseData &md);
     void Init();

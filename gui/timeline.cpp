@@ -33,25 +33,25 @@ sTimerTimeline::~sTimerTimeline()
 
 void sTimerTimeline::OnFrame()
 {
-  sInt t = sGetTime();
+  int t = sGetTime();
   if(Playing || Scratching)
   {
-    sInt oldtime = Time;
+    int oldtime = Time;
     if(!Scratching)
       Time += t-LastTime;
 
     if(LoopEnable)
     {
       sVERIFY(LoopStart <= LoopEnd);
-      sInt loopStartMs = sMulDiv(LoopStart,1000,Speed);
-      sInt loopEndMs = sMulDiv(LoopEnd,1000,Speed);
+      int loopStartMs = sMulDiv(LoopStart,1000,Speed);
+      int loopEndMs = sMulDiv(LoopEnd,1000,Speed);
 
       sBool inloop0 = oldtime>=loopStartMs && oldtime<loopEndMs;
       sBool inloop1 = Time>=loopStartMs && Time<loopEndMs;
 
       if(inloop0 && !inloop1)
       {
-        sInt loopLen = loopEndMs-loopStartMs;
+        int loopLen = loopEndMs-loopStartMs;
         if(!loopLen)
           Time = loopStartMs;
         else
@@ -62,7 +62,7 @@ void sTimerTimeline::OnFrame()
       }
     }
 
-    sInt newbeat = sMin(BeatEnd-1,sMulDiv(Time,Speed,1000));
+    int newbeat = sMin(BeatEnd-1,sMulDiv(Time,Speed,1000));
     if(newbeat!=BeatTime)
     {
       BeatTime = newbeat;
@@ -81,7 +81,7 @@ void sTimerTimeline::AddNotify(sWindow *win)
   win->AddNotify(LoopEnable);
 }
 
-void sTimerTimeline::SetTimeline(sInt end,sInt speed)
+void sTimerTimeline::SetTimeline(int end,int speed)
 {
   sVERIFY(end>0);
   sVERIFY(speed>0);
@@ -92,7 +92,7 @@ void sTimerTimeline::SetTimeline(sInt end,sInt speed)
   sGui->Notify(Speed);
 }
 
-void sTimerTimeline::SetLoop(sInt start,sInt end)
+void sTimerTimeline::SetLoop(int start,int end)
 {
   sVERIFY(start<=end);
   LoopStart = start;
@@ -101,22 +101,22 @@ void sTimerTimeline::SetLoop(sInt start,sInt end)
   sGui->Notify(LoopEnd);
 }
 
-sInt sTimerTimeline::GetEnd()
+int sTimerTimeline::GetEnd()
 {
   return BeatEnd;
 }
 
-sInt sTimerTimeline::GetBeat()
+int sTimerTimeline::GetBeat()
 {
   return BeatTime;
 }
 
-sInt sTimerTimeline::GetSpeed()
+int sTimerTimeline::GetSpeed()
 {
   return Speed;
 }
 
-void sTimerTimeline::GetLoop(sInt &start,sInt &end)
+void sTimerTimeline::GetLoop(int &start,int &end)
 {
   start = LoopStart;
   end = LoopEnd;
@@ -160,7 +160,7 @@ void sTimerTimeline::EnableScratching(sBool scratch)
   Scratching = scratch;
 }
 
-void sTimerTimeline::SeekBeat(sInt beat)
+void sTimerTimeline::SeekBeat(int beat)
 {
   Time = sClamp(sMulDiv(beat,1000,Speed),0,BeatEnd-1);
   OnFrame();
@@ -170,7 +170,7 @@ void sTimerTimeline::SeekBeat(sInt beat)
 /****************************************************************************/
 
 static sMusicTimeline *sMusicTimelinePlayer;
-void sMusicTimelineSoundHandler(sS16 *samples,sInt count)
+void sMusicTimelineSoundHandler(sS16 *samples,int count)
 {
   if(sMusicTimelinePlayer)
     sMusicTimelinePlayer->SoundHandler(samples,count);
@@ -211,7 +211,7 @@ void sMusicTimeline::OnFrame()
 {
   if(Playing || Scratching)
   {
-//    sInt oldtime = Time;
+//    int oldtime = Time;
     if(!Scratching)
       Time = sGetCurrentSample() + MusicSamples - TotalSamples;
 /*
@@ -227,7 +227,7 @@ void sMusicTimeline::OnFrame()
       }
     }
 */
-    sInt newbeat = sMin(BeatEnd-1,sMulDiv(Time,Speed,44100));
+    int newbeat = sMin(BeatEnd-1,sMulDiv(Time,Speed,44100));
     if(newbeat!=BeatTime)
     {
       BeatTime = newbeat;
@@ -245,7 +245,7 @@ void sMusicTimeline::AddNotify(sWindow *win)
   win->AddNotify(LoopEnable);
 }
 
-void sMusicTimeline::SetTimeline(sInt end,sInt speed)
+void sMusicTimeline::SetTimeline(int end,int speed)
 {
   sVERIFY(end>0);
   sVERIFY(speed>0);
@@ -256,7 +256,7 @@ void sMusicTimeline::SetTimeline(sInt end,sInt speed)
   sGui->Notify(Speed);
 }
 
-void sMusicTimeline::SetLoop(sInt start,sInt end)
+void sMusicTimeline::SetLoop(int start,int end)
 {
   sVERIFY(start<=end);
   LoopStart = start;
@@ -265,14 +265,14 @@ void sMusicTimeline::SetLoop(sInt start,sInt end)
   sGui->Notify(LoopEnd);
 }
 
-sInt sMusicTimeline::GetEnd()
+int sMusicTimeline::GetEnd()
 {
   return BeatEnd;
 }
 
-sInt sMusicTimeline::GetBeat()
+int sMusicTimeline::GetBeat()
 {
-  sInt beat;
+  int beat;
   if(Scratching || !Playing)
     beat = sMulDiv(MusicSamples,Speed,44100);
   else
@@ -280,12 +280,12 @@ sInt sMusicTimeline::GetBeat()
   return sClamp(beat,0,BeatEnd-1);
 }
 
-sInt sMusicTimeline::GetSpeed()
+int sMusicTimeline::GetSpeed()
 {
   return Speed;
 }
 
-void sMusicTimeline::GetLoop(sInt &start,sInt &end)
+void sMusicTimeline::GetLoop(int &start,int &end)
 {
   start = LoopStart;
   end = LoopEnd;
@@ -329,13 +329,13 @@ void sMusicTimeline::EnableScratching(sBool scratch)
   Scratching = scratch;
 }
 
-void sMusicTimeline::SeekBeat(sInt beat)
+void sMusicTimeline::SeekBeat(int beat)
 {
   MusicSamples = Time = sClamp(sMulDiv(beat,44100,Speed),0,BeatEnd-1);
   OnFrame();
 }
 
-void sMusicTimeline::SoundHandler(sS16 *samples,sInt count)
+void sMusicTimeline::SoundHandler(sS16 *samples,int count)
 {
   if(Music)
   {
@@ -368,7 +368,7 @@ sTimeTableClip::sTimeTableClip()
   DragStartY = 0;
 }
 
-sTimeTableClip::sTimeTableClip(sInt start,sInt len,sInt line,const sChar *name)
+sTimeTableClip::sTimeTableClip(int start,int len,int line,const sChar *name)
 {
   Name =name;
   Start = start;
@@ -428,9 +428,9 @@ sTimeTableClip *sTimetable::Duplicate(sTimeTableClip *source)
 /****************************************************************************/
 /****************************************************************************/
 
-static sInt AlignUpToTimebase(sInt value,sBool decimal)
+static int AlignUpToTimebase(int value,sBool decimal)
 {
-  sInt v = 1;
+  int v = 1;
 
   if(decimal)
   {
@@ -491,14 +491,14 @@ void sWinTimeline::OnLayout()
 void sWinTimeline::OnPaint2D()
 {
   sRect r;
-  sInt width,y,ytext,x;
-  sInt l0,l1;
+  int width,y,ytext,x;
+  int l0,l1;
 
-  sInt LoopStart;
-  sInt LoopEnd;
-  sInt BeatEnd;
-  sInt BeatTime;
-  sInt LoopEnable;
+  int LoopStart;
+  int LoopEnd;
+  int BeatEnd;
+  int BeatTime;
+  int LoopEnable;
 
   Timeline->GetLoop(LoopStart,LoopEnd);
   BeatTime = Timeline->GetBeat();
@@ -538,34 +538,34 @@ void sWinTimeline::OnPaint2D()
   }
 
   // determine spacing to use
-  static const sInt MinPixelsBetweenBeats = 8; // to make sure it isn't too cluttered
+  static const int MinPixelsBetweenBeats = 8; // to make sure it isn't too cluttered
   
-  sInt numBeats = (BeatEnd + 0xffff) >> 16;
-  sInt minSkip = sMulDiv(MinPixelsBetweenBeats,numBeats,width);
+  int numBeats = (BeatEnd + 0xffff) >> 16;
+  int minSkip = sMulDiv(MinPixelsBetweenBeats,numBeats,width);
 
-  sInt skip = AlignUpToTimebase(minSkip,DecimalTimebase);
-  sInt timeSkip = skip * 0x10000;
+  int skip = AlignUpToTimebase(minSkip,DecimalTimebase);
+  int timeSkip = skip * 0x10000;
 
   // spacing for text labels, calculate x range of tick marks
-  static const sInt MinPixelsBetweenLabels = 100;
+  static const int MinPixelsBetweenLabels = 100;
 
-  sInt minLabelSkip = sMulDiv(MinPixelsBetweenLabels,numBeats/sMax(skip,1),width);
-  sInt labelSkip = AlignUpToTimebase(minLabelSkip,DecimalTimebase);
-  sInt ltSkip = labelSkip * timeSkip; // step in time units between adjacent labels
+  int minLabelSkip = sMulDiv(MinPixelsBetweenLabels,numBeats/sMax(skip,1),width);
+  int labelSkip = AlignUpToTimebase(minLabelSkip,DecimalTimebase);
+  int ltSkip = labelSkip * timeSkip; // step in time units between adjacent labels
 
-  sArray<sInt> labelTickPos;
+  sArray<int> labelTickPos;
   labelTickPos.AddTail(0); // start label is always there
-  for(sInt i=ltSkip;i<BeatEnd;i+=ltSkip)
+  for(int i=ltSkip;i<BeatEnd;i+=ltSkip)
     labelTickPos.AddTail(sMulDiv(i,width,BeatEnd)+Client.x0);
 
   if(labelTickPos.GetCount()>1) labelTickPos.RemTail(); // pop last one
   labelTickPos.AddTail(Client.x0+width); // end label is always there
 
   // draw tick marks
-  sInt y0long = y;
-  sInt y0short = y+5;
+  int y0long = y;
+  int y0short = y+5;
 
-  for(sInt i=0;i<BeatEnd;i+=timeSkip)
+  for(int i=0;i<BeatEnd;i+=timeSkip)
   {
     x = sMulDiv(i,width,BeatEnd)+Client.x0;
     r.x0 = x;
@@ -582,15 +582,15 @@ void sWinTimeline::OnPaint2D()
   // draw text labels
   r.y0 = ytext;
   r.y1 = Client.y1;
-  sInt count = labelTickPos.GetCount();
+  int count = labelTickPos.GetCount();
   sGui->PropFont->SetColor(sGC_TEXT,sGC_BACK);
 
-  for(sInt i=0;i<count;i++)
+  for(int i=0;i<count;i++)
   {
     sString<32> text;
     text.PrintF(L"%d",((i == count-1) ? BeatEnd : i*ltSkip) >> 16);
 
-    sInt align = 0;
+    int align = 0;
 
     if(i == 0) // first one
     {
@@ -625,7 +625,7 @@ void sWinTimeline::OnPaint2D()
 
 void sWinTimeline::CmdStart()
 {
-  sInt ls,le;
+  int ls,le;
   Timeline->GetLoop(ls,le);
   Timeline->EnablePlaying(0);
   Timeline->EnableScratching(0);
@@ -739,8 +739,8 @@ void sWinTimetable::OnCalcSize()
 
 void sWinTimetable::EntryToScreen(const sTimeTableClip *ent,sRect &rect)
 {
-  rect.x0 = Client.x0 + sInt(ent->Start/Zoom);
-  rect.x1 = Client.x0 + sInt((ent->Start+ent->Length)/Zoom);
+  rect.x0 = Client.x0 + int(ent->Start/Zoom);
+  rect.x1 = Client.x0 + int((ent->Start+ent->Length)/Zoom);
   rect.y0 = Client.y0 + Height*ent->Line;
   rect.y1 = rect.y0 + Height;
 }
@@ -761,7 +761,7 @@ void sWinTimetable::OnPaint2D()
 
   sRect2D(Client,sGC_BACK);
 
-  sInt x = Timeline->GetBeat()/Zoom+Client.x0;
+  int x = Timeline->GetBeat()/Zoom+Client.x0;
   sRect2D(x,Client.y0,x+1,Client.y1,sGC_SELECT);
 
   sClipPop();
@@ -814,9 +814,9 @@ void sWinTimetable::DragScratch(const sWindowDrag &dd)
 void sWinTimetable::DragMove(const sWindowDrag &dd)
 {
   sTimeTableClip *te;
-  sInt dx,dy;
-  sInt px,py;
-  sInt update;
+  int dx,dy;
+  int px,py;
+  int update;
   sRect r;
   update = 0;
   switch(dd.Mode)
@@ -841,14 +841,14 @@ void sWinTimetable::DragMove(const sWindowDrag &dd)
     SelectMsg.Post();
     break;
   case sDD_DRAG:
-    dx = sInt(dd.DeltaX*Zoom);
+    dx = int(dd.DeltaX*Zoom);
     dy = sDivDown(dd.DeltaY,Height);
     sFORALL(Timetable->Clips,te)
     {
       if(te->Selected)
       {
-        px = sClamp<sInt>(te->DragStartX+dx,0,Timeline->GetEnd()-1)&~QUANT;
-        py = sClamp<sInt>(te->DragStartY+dy,0,Timetable->MaxLines-1);
+        px = sClamp<int>(te->DragStartX+dx,0,Timeline->GetEnd()-1)&~QUANT;
+        py = sClamp<int>(te->DragStartY+dy,0,Timetable->MaxLines-1);
         if(px!=te->Start || py!=te->Line)
         {
           if ((DragLockFlags&DLF_HORIZONTAL)==0)
@@ -918,7 +918,7 @@ void sWinTimetable::DragWidth(const sWindowDrag &dd)
 {
   sTimeTableClip *te,*hit;
   sRect r;
-  sInt dx,px;
+  int dx,px;
 
   switch(dd.Mode)
   {
@@ -944,12 +944,12 @@ void sWinTimetable::DragWidth(const sWindowDrag &dd)
     }
     break;
   case sDD_DRAG:
-    dx = sInt(dd.DeltaX*Zoom);
+    dx = int(dd.DeltaX*Zoom);
     sFORALL(Timetable->Clips,te)
     {
       if(te->Selected)
       {
-        px = sClamp<sInt>((te->DragStartX+dx)&~QUANT,0x1000,0x1000000);
+        px = sClamp<int>((te->DragStartX+dx)&~QUANT,0x1000,0x1000000);
         if(px!=te->Length)
         {
           te->Length = px;
@@ -1005,7 +1005,7 @@ void sWinTimetable::DragZoom(const sWindowDrag &dd)
     break;
 
   case sDD_DRAG:
-    Zoom = sClamp<sInt>((sInt)sFExp(sFLog(DragZoomX)-dd.DeltaX*0.01f),0x100,0x1000000);
+    Zoom = sClamp<int>((int)sFExp(sFLog(DragZoomX)-dd.DeltaX*0.01f),0x100,0x1000000);
     ScrollX = -(DragStartX/Zoom - DragCenterX/Zoom + dd.StartX-Outer.x0);
     Layout();
     Update();

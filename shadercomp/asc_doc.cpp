@@ -31,9 +31,9 @@ ACType::~ACType()
   sDeleteAll(Externs);
 }
 
-void ACType::SizeOf(sInt &c,sInt &r)
+void ACType::SizeOf(int &c,int &r)
 {
-  sInt cc,rr;
+  int cc,rr;
   ACVar *member;
 
   switch(Type)
@@ -125,12 +125,12 @@ ACFunc::~ACFunc()
 /****************************************************************************/
 /****************************************************************************/
 
-sBool ACDoc::IsValidPermutation(ACPermute *perm,sInt n)
+sBool ACDoc::IsValidPermutation(ACPermute *perm,int n)
 {
   ACPermuteMember *mem;
   ACExpression *ass;
 
-  sInt count = 1<<perm->MaxShift;
+  int count = 1<<perm->MaxShift;
   if(n<0 || n>=count) return 0;
 
   sFORALL(perm->Members,mem)
@@ -155,7 +155,7 @@ sBool ACDoc::IsValidPermutation(ACPermute *perm,sInt n)
 /****************************************************************************/
 /****************************************************************************/
 
-sInt ACDoc::ConstFoldInt(ACExpression *expr)
+int ACDoc::ConstFoldInt(ACExpression *expr)
 {
   switch(expr->Op)
   {
@@ -225,7 +225,7 @@ ACVar *ACDoc::FindVar(sPoolString name)
   ACVar *var;
   if(Function)
   {
-    for(sInt i=Scope;i>=0;i--)
+    for(int i=Scope;i>=0;i--)
     {
       var = sFind(Function->Locals[i],&ACVar::Name,name);
       if(var) return var;
@@ -243,20 +243,20 @@ ACVar *ACDoc::FindVar(sPoolString name)
   }
 }
 
-void ACDoc::AddDefTypes(const sChar *name,sInt type,sBool many)
+void ACDoc::AddDefTypes(const sChar *name,int type,sBool many)
 {
   sString<16> buffer;
   AddDefType(name,type,0,0);
   if(many)
   {
-    for(sInt i=1;i<=4;i++)
+    for(int i=1;i<=4;i++)
     {
       sSPrintF(buffer,L"%s%d",name,i);
       AddDefType(buffer,type,i,1);
     }
-    for(sInt i=1;i<=4;i++)
+    for(int i=1;i<=4;i++)
     {
-      for(sInt j=1;j<=4;j++)
+      for(int j=1;j<=4;j++)
       {
         sSPrintF(buffer,L"%s%dx%d",name,i,j);
         AddDefType(buffer,type,i,j);
@@ -265,7 +265,7 @@ void ACDoc::AddDefTypes(const sChar *name,sInt type,sBool many)
   }
 }
 
-void ACDoc::AddDefType(const sChar *name,sInt kind,sInt row,sInt col)
+void ACDoc::AddDefType(const sChar *name,int kind,int row,int col)
 {
   ACType *type = new ACType;
   type->Name = name;
@@ -282,7 +282,7 @@ void ACDoc::AddDefFunc(const sChar *name)
   Intrinsics.AddTail(func);
 }
 
-ACExpression *ACDoc::NewExpr(sInt op,ACExpression *a,ACExpression *b)
+ACExpression *ACDoc::NewExpr(int op,ACExpression *a,ACExpression *b)
 {
   ACExpression *e = Pool->Alloc<ACExpression>();
   sClear(*e);

@@ -8,16 +8,16 @@
 
 /****************************************************************************/
 
-void sListWindow2Field::PaintField(sStaticListWindow *lw,const sRect &client,sObject *obj,sInt line,sInt select)
+void sListWindow2Field::PaintField(sStaticListWindow *lw,const sRect &client,sObject *obj,int line,int select)
 {
   lw->PaintField(client,select,L"unhandled column");
 }
 
-void sListWindow2Field::EditField(sStaticListWindow *lw,const sRect &rect,sObject *obj,sInt line)
+void sListWindow2Field::EditField(sStaticListWindow *lw,const sRect &rect,sObject *obj,int line)
 {
 }
 
-sInt sListWindow2Field::CompareField(sStaticListWindow *lw,sObject *o0,sObject *o1,sInt line0,sInt line1)
+int sListWindow2Field::CompareField(sStaticListWindow *lw,sObject *o0,sObject *o1,int line0,int line1)
 {
   return -2;    // -2 is special valie for "not handled"
 }
@@ -27,8 +27,8 @@ sInt sListWindow2Field::CompareField(sStaticListWindow *lw,sObject *o0,sObject *
 class sListWindow2Field_Int : public sListWindow2Field
 {
 public:
-  sInt Min;
-  sInt Max;
+  int Min;
+  int Max;
   sF32 Step;
 
   sListWindow2Field_Int() 
@@ -38,17 +38,17 @@ public:
     Step = 0.25f;
   }
 
-  void PaintField(sStaticListWindow *lw,const sRect &client,sObject *obj,sInt line,sInt select)
+  void PaintField(sStaticListWindow *lw,const sRect &client,sObject *obj,int line,int select)
   {
     sString<64> buffer;
-    lw->AddNotify(Ref.Ref<sInt>(obj));
-    sSPrintF(buffer,L"%d",Ref.Ref<sInt>(obj));
+    lw->AddNotify(Ref.Ref<int>(obj));
+    sSPrintF(buffer,L"%d",Ref.Ref<int>(obj));
     lw->PaintField(client,select,buffer);
   }
 
-  void EditField(sStaticListWindow *lw,const sRect &rect,sObject *obj,sInt line)
+  void EditField(sStaticListWindow *lw,const sRect &rect,sObject *obj,int line)
   {
-    sControl *sc = new sIntControl(&Ref.Ref<sInt>(obj),sInt(Min),sInt(Max),Step);
+    sControl *sc = new sIntControl(&Ref.Ref<int>(obj),int(Min),int(Max),Step);
     sc->ChangeMsg = lw->ChangeMsg;
     sc->DoneMsg = lw->DoneMsg;
     sc->Outer = rect;
@@ -57,10 +57,10 @@ public:
     sGui->SetFocus(sc);
   }
 
-  sInt CompareField(sStaticListWindow *lw,sObject *o0,sObject *o1,sInt line0,sInt line1)
+  int CompareField(sStaticListWindow *lw,sObject *o0,sObject *o1,int line0,int line1)
   {
-    sInt i0 = Ref.Ref<sInt>(o0);
-    sInt i1 = Ref.Ref<sInt>(o1);
+    int i0 = Ref.Ref<int>(o0);
+    int i1 = Ref.Ref<int>(o1);
     if(i0<i1) return -1;
     if(i0>i1) return 1;
     return 0;
@@ -81,7 +81,7 @@ public:
     Step = 0.25f;
   }
 
-  void PaintField(sStaticListWindow *lw,const sRect &client,sObject *obj,sInt line,sInt select)
+  void PaintField(sStaticListWindow *lw,const sRect &client,sObject *obj,int line,int select)
   {
     sString<64> buffer;
     lw->AddNotify(Ref.Ref<sF32>(obj));
@@ -89,7 +89,7 @@ public:
     lw->PaintField(client,select,buffer);
   }
 
-  void EditField(sStaticListWindow *lw,const sRect &rect,sObject *obj,sInt line)
+  void EditField(sStaticListWindow *lw,const sRect &rect,sObject *obj,int line)
   {
     sControl *sc = new sFloatControl(&Ref.Ref<sF32>(obj),Min,Max,Step);
     sc->ChangeMsg = lw->ChangeMsg;
@@ -104,7 +104,7 @@ public:
 class sListWindow2Field_String : public sListWindow2Field
 {
 public:
-  void PaintField(sStaticListWindow *lw,const sRect &client,sObject *obj,sInt line,sInt select)
+  void PaintField(sStaticListWindow *lw,const sRect &client,sObject *obj,int line,int select)
   {
     const sChar *str;
     str = &Ref.Ref<sChar>(obj);
@@ -112,7 +112,7 @@ public:
     lw->PaintField(client,select,str);
   }
 
-  void EditField(sStaticListWindow *lw,const sRect &rect,sObject *obj,sInt line)
+  void EditField(sStaticListWindow *lw,const sRect &rect,sObject *obj,int line)
   {
     sControl *sc = new sStringControl(sStringDesc(&Ref.Ref<sChar>(obj),Size));
     sc->ChangeMsg = lw->ChangeMsg;
@@ -123,7 +123,7 @@ public:
     sGui->SetFocus(sc);
   }
 
-  sInt CompareField(sStaticListWindow *lw,sObject *o0,sObject *o1,sInt line0,sInt line1)
+  int CompareField(sStaticListWindow *lw,sObject *o0,sObject *o1,int line0,int line1)
   {
     const sChar *str0 = &Ref.Ref<sChar>(o0);
     const sChar *str1 = &Ref.Ref<sChar>(o1);
@@ -134,13 +134,13 @@ public:
 class sListWindow2Field_PoolString : public sListWindow2Field
 {
 public:
-  void PaintField(sStaticListWindow *lw,const sRect &client,sObject *obj,sInt line,sInt select)
+  void PaintField(sStaticListWindow *lw,const sRect &client,sObject *obj,int line,int select)
   {
     lw->AddNotify(Ref.Ref<sPoolString>(obj));
     lw->PaintField(client,select,Ref.Ref<sPoolString>(obj));
   }
 
-  void EditField(sStaticListWindow *lw,const sRect &rect,sObject *obj,sInt line)
+  void EditField(sStaticListWindow *lw,const sRect &rect,sObject *obj,int line)
   {
     sControl *sc = new sStringControl(&Ref.Ref<sPoolString>(obj));
     sc->ChangeMsg = lw->ChangeMsg;
@@ -151,7 +151,7 @@ public:
     sGui->SetFocus(sc);
   }
 
-  sInt CompareField(sStaticListWindow *lw,sObject *o0,sObject *o1,sInt line0,sInt line1)
+  int CompareField(sStaticListWindow *lw,sObject *o0,sObject *o1,int line0,int line1)
   {
     sPoolString *str0 = &Ref.Ref<sPoolString>(o0);
     sPoolString *str1 = &Ref.Ref<sPoolString>(o1);
@@ -162,25 +162,25 @@ public:
 class sListWindow2Field_Choice : public sListWindow2Field
 {
 public:
-  void PaintField(sStaticListWindow *lw,const sRect &client,sObject *obj,sInt line,sInt select)
+  void PaintField(sStaticListWindow *lw,const sRect &client,sObject *obj,int line,int select)
   {
     sString<64> buffer;
-    lw->AddNotify(Ref.Ref<sInt>(obj));
-    sMakeChoice(buffer,Choices,Ref.Ref<sInt>(obj));
+    lw->AddNotify(Ref.Ref<int>(obj));
+    sMakeChoice(buffer,Choices,Ref.Ref<int>(obj));
     lw->PaintField(client,select,buffer);
   }
 
-  void EditField(sStaticListWindow *lw,const sRect &rect,sObject *obj,sInt line)
+  void EditField(sStaticListWindow *lw,const sRect &rect,sObject *obj,int line)
   {
-    sInt n = sCountChoice(Choices);
+    int n = sCountChoice(Choices);
     if(n==2)
     {
-      Ref.Ref<sInt>(obj) = !Ref.Ref<sInt>(obj);
+      Ref.Ref<int>(obj) = !Ref.Ref<int>(obj);
       lw->Update();
     }
     else if(n>2)
     {
-      sChoiceControl *cc = new sChoiceControl(Choices,&Ref.Ref<sInt>(obj));
+      sChoiceControl *cc = new sChoiceControl(Choices,&Ref.Ref<int>(obj));
       cc->ChangeMsg = lw->ChangeMsg;
       cc->DoneMsg = lw->DoneMsg;
       cc->FakeDropdown(rect.x0,rect.y1);
@@ -189,10 +189,10 @@ public:
     }
   }
 
-  sInt CompareField(sStaticListWindow *lw,sObject *o0,sObject *o1,sInt line0,sInt line1)
+  int CompareField(sStaticListWindow *lw,sObject *o0,sObject *o1,int line0,int line1)
   {
-    sInt i0 = Ref.Ref<sInt>(o0);
-    sInt i1 = Ref.Ref<sInt>(o1);
+    int i0 = Ref.Ref<int>(o0);
+    int i1 = Ref.Ref<int>(o1);
     if(i0<i1) return -1;
     if(i0>i1) return 1;
     return 0;
@@ -202,7 +202,7 @@ public:
 class sListWindow2Field_Color : public sListWindow2Field
 {
 public:
-  void PaintField(sStaticListWindow *lw,const sRect &client,sObject *obj,sInt line,sInt select)
+  void PaintField(sStaticListWindow *lw,const sRect &client,sObject *obj,int line,int select)
   {
     sString<64> buffer;
     lw->AddNotify(Ref.Ref<sU32>(obj));
@@ -210,7 +210,7 @@ public:
     lw->PaintField(client,select,buffer);
   }
 
-  sInt CompareField(sStaticListWindow *lw,sObject *o0,sObject *o1,sInt line0,sInt line1)
+  int CompareField(sStaticListWindow *lw,sObject *o0,sObject *o1,int line0,int line1)
   {
   return 0;
   }
@@ -218,7 +218,7 @@ public:
 
 class sListWindow2Field_Progress : public sListWindow2Field
 {
-  void PaintField(sStaticListWindow *lw,const sRect &client,sObject *obj,sInt line,sInt select)
+  void PaintField(sStaticListWindow *lw,const sRect &client,sObject *obj,int line,int select)
   {
     lw->AddNotify(Ref.Ref<sF32>(obj));
 
@@ -229,7 +229,7 @@ class sListWindow2Field_Progress : public sListWindow2Field
     sRectFrame2D(rc,sGC_TEXT);
     
     rc.Extend(-1);
-    rc.x1 = rc.x0 + sInt(Ref.Ref<sF32>(obj) * (rc.x1 - rc.x0));
+    rc.x1 = rc.x0 + int(Ref.Ref<sF32>(obj) * (rc.x1 - rc.x0));
     sRect2D(rc,sGC_BLUE);
   }
 };
@@ -307,11 +307,11 @@ void sStaticListWindow::AddHeader()
 
 void sStaticListWindow::OnCalcSize()
 {
-  sInt y,yy;
+  int y,yy;
   sObject *obj;
   sListWindowTreeInfo<sObject *> *ti;
   sListWindow2Column *column;
-  sInt max = Columns.GetCount();
+  int max = Columns.GetCount();
   IndentPixels = sGui->PropFont->GetWidth(L"nn");
 
   Height = sGui->PropFont->GetHeight()+2;
@@ -348,13 +348,13 @@ void sStaticListWindow::OnCalcSize()
 
 void sStaticListWindow::OnPaint2D()
 {
-  sInt y,yy;
+  int y,yy;
   sObject *obj;
   sListWindow2Column *column;
   sRect r;
-  sInt line;
-  sInt ys;
-  sInt indent;
+  int line;
+  int ys;
+  int indent;
   sListWindowTreeInfo<sObject *> *ti;
 
   Height = sGui->PropFont->GetHeight()+2;
@@ -368,7 +368,7 @@ void sStaticListWindow::OnPaint2D()
     sFORALL(*Array,obj)
     {
       line = _i;
-      sInt select = GetSelectStatus(line);
+      int select = GetSelectStatus(line);
       indent = 0;
       ti = GetTreeInfo(obj);
       if(ti) 
@@ -429,7 +429,7 @@ void sStaticListWindow::OnPaint2D()
   {
     if(_i+1!=Columns.GetCount())
     {
-      sInt x = Client.x0 + column->Pos;
+      int x = Client.x0 + column->Pos;
       sRect2D(x-1,Client.y0,x,Client.y1,(DragHighlight==_i)?sGC_SELECT:sGC_DRAW);
     }
   }
@@ -451,15 +451,15 @@ void sStaticListWindow::OnDrag(const sWindowDrag &dd)
   if(dd.Mode==sDD_START && dd.Buttons==2 && (ListFlags & sLWF_RIGHTPICK))
   {
     // don't destroy multiple selections
-    sInt count = 0;
-    for(sInt i=0;i<Array->GetCount();i++)
+    int count = 0;
+    for(int i=0;i<Array->GetCount();i++)
       if(GetSelectStatus(i))
         count++;
 
     if(count<2)
     {
-      sInt line;
-      sInt column;
+      int line;
+      int column;
       sRect r;
       if(Hit(dd.MouseX,dd.MouseY,line,column,r))
       {
@@ -472,15 +472,15 @@ void sStaticListWindow::OnDrag(const sWindowDrag &dd)
 
 void sStaticListWindow::Sort(sListWindow2Field *f)
 {
-  sInt max = Array->GetCount();
-  sInt dir = f->SortDir ? -1 : 1;
+  int max = Array->GetCount();
+  int dir = f->SortDir ? -1 : 1;
 
 
-  for(sInt i=0;i<max-1;i++)
+  for(int i=0;i<max-1;i++)
   {
-    for(sInt j=i+1;j<max;j++)
+    for(int j=i+1;j<max;j++)
     {
-      sInt r = OnCompareField(f,(*Array)[i],(*Array)[j],i,j);
+      int r = OnCompareField(f,(*Array)[i],(*Array)[j],i,j);
       if(r==-2)
         r = CompareField(f,(*Array)[i],(*Array)[j],i,j);
       if(r==dir)
@@ -492,7 +492,7 @@ void sStaticListWindow::Sort(sListWindow2Field *f)
 void sStaticListWindow::Sort()
 {
   sListWindow2Field *f;
-  for(sInt i=Fields.GetCount();i>0;i--)
+  for(int i=Fields.GetCount();i>0;i--)
   {
     sFORALL(Fields,f)
       if(f->SortOrder==i)
@@ -500,14 +500,14 @@ void sStaticListWindow::Sort()
   }
 }
 
-void sStaticListWindow::ScrollTo(sInt index)
+void sStaticListWindow::ScrollTo(int index)
 {
-  sInt y,yy;
+  int y,yy;
   sObject *obj;
   sRect r;
-  sInt line;
-  sInt ys;
-  sInt indent;
+  int line;
+  int ys;
+  int indent;
   sListWindow2Column *column;
   sListWindowTreeInfo<sObject *> *ti;
 
@@ -520,7 +520,7 @@ void sStaticListWindow::ScrollTo(sInt index)
     sFORALL(*Array,obj)
     {
       line = _i;
-//      sInt select = GetSelectStatus(line);
+//      int select = GetSelectStatus(line);
       indent = 0;
       ti = GetTreeInfo(obj);
       if(ti) 
@@ -557,29 +557,29 @@ void sStaticListWindow::ScrollTo(sInt index)
 
 void sStaticListWindow::ScrollToItem(sObject *item)
 {
-  sInt index = sFindIndex(*Array,item);
+  int index = sFindIndex(*Array,item);
   if(index != -1)
     ScrollTo(index);
 }
 
 /****************************************************************************/
 
-sInt sStaticListWindow::OnBackColor(sInt line,sInt select,sObject *obj)
+int sStaticListWindow::OnBackColor(int line,int select,sObject *obj)
 {
   return select ? sGC_SELECT : sGC_DOC;
 }
 
-sInt sStaticListWindow::OnCalcFieldHeight(sListWindow2Field *field,sObject *obj)
+int sStaticListWindow::OnCalcFieldHeight(sListWindow2Field *field,sObject *obj)
 {
   return 0;
 }
 
-sBool sStaticListWindow::OnPaintField(const sRect &client,sListWindow2Field *field,sObject *obj,sInt line,sInt select)
+sBool sStaticListWindow::OnPaintField(const sRect &client,sListWindow2Field *field,sObject *obj,int line,int select)
 {
   return 0;
 }
 
-void sStaticListWindow::PaintField(const sRect &client,sListWindow2Field *field,sObject *obj,sInt line,sInt select)
+void sStaticListWindow::PaintField(const sRect &client,sListWindow2Field *field,sObject *obj,int line,int select)
 {
   field->PaintField(this,client,obj,line,select);
 /*
@@ -595,8 +595,8 @@ void sStaticListWindow::PaintField(const sRect &client,sListWindow2Field *field,
   case sLWT_INT:
 //    AddNotify(obj->*(field->IntRef));
 //    sSPrintF(buffer,L"%d",obj->*(field->IntRef));
-    AddNotify(field->Ref.Ref<sInt>(obj));
-    sSPrintF(buffer,L"%d",field->Ref.Ref<sInt>(obj));
+    AddNotify(field->Ref.Ref<int>(obj));
+    sSPrintF(buffer,L"%d",field->Ref.Ref<int>(obj));
     PaintField(client,select,buffer);
     break;
   case sLWT_FLOAT:
@@ -610,8 +610,8 @@ void sStaticListWindow::PaintField(const sRect &client,sListWindow2Field *field,
     PaintField(client,select,buffer);
     break;
   case sLWT_CHOICE:
-    AddNotify(field->Ref.Ref<sInt>(obj));
-    sMakeChoice(buffer,field->Choices,field->Ref.Ref<sInt>(obj));
+    AddNotify(field->Ref.Ref<int>(obj));
+    sMakeChoice(buffer,field->Choices,field->Ref.Ref<int>(obj));
     PaintField(client,select,buffer);
     break;
   case sLWT_POOLSTRING:
@@ -629,7 +629,7 @@ void sStaticListWindow::PaintField(const sRect &client,sListWindow2Field *field,
       sRectFrame2D(rc,sGC_TEXT);
       
       rc.Extend(-1);
-      rc.x1 = rc.x0 + sInt(field->Ref.Ref<sF32>(obj) * (rc.x1 - rc.x0));
+      rc.x1 = rc.x0 + int(field->Ref.Ref<sF32>(obj) * (rc.x1 - rc.x0));
       sRect2D(rc,sGC_BLUE);
     }
     break;
@@ -640,7 +640,7 @@ void sStaticListWindow::PaintField(const sRect &client,sListWindow2Field *field,
 */
 }
 
-void sStaticListWindow::PaintField(const sRect &client,sInt select,const sChar *text)
+void sStaticListWindow::PaintField(const sRect &client,int select,const sChar *text)
 {
   sGui->PropFont->SetColor(sGC_TEXT,BackColor);
   sGui->PropFont->Print(sF2P_OPAQUE|sF2P_SPACE|sF2P_LEFT,client,text);
@@ -648,12 +648,12 @@ void sStaticListWindow::PaintField(const sRect &client,sInt select,const sChar *
 
 /****************************************************************************/
 
-sBool sStaticListWindow::OnEditField(const sRect &rect,sListWindow2Field *field,sObject *,sInt line)
+sBool sStaticListWindow::OnEditField(const sRect &rect,sListWindow2Field *field,sObject *,int line)
 {
   return 0;
 }
 
-void sStaticListWindow::EditField(const sRect &rect,sListWindow2Field *field,sObject *obj,sInt line)
+void sStaticListWindow::EditField(const sRect &rect,sListWindow2Field *field,sObject *obj,int line)
 {
   if(field->Flags & sLWF_EDIT)
     field->EditField(this,rect,obj,line);
@@ -674,7 +674,7 @@ void sStaticListWindow::EditField(const sRect &rect,sListWindow2Field *field,sOb
     break;
 
   case sLWT_INT:
-    sc = new sIntControl(&field->Ref.Ref<sInt>(obj),sInt(field->Min),sInt(field->Max),field->Step);
+    sc = new sIntControl(&field->Ref.Ref<int>(obj),int(field->Min),int(field->Max),field->Step);
     break;
 
   case sLWT_FLOAT:
@@ -683,15 +683,15 @@ void sStaticListWindow::EditField(const sRect &rect,sListWindow2Field *field,sOb
 
   case sLWT_CHOICE:    
     {
-      sInt n = sCountChoice(field->Choices);
+      int n = sCountChoice(field->Choices);
       if(n==2)
       {
-        field->Ref.Ref<sInt>(obj) = !field->Ref.Ref<sInt>(obj);
+        field->Ref.Ref<int>(obj) = !field->Ref.Ref<int>(obj);
         Update();
       }
       else if(n>2)
       {
-        sChoiceControl *cc = new sChoiceControl(field->Choices,&field->Ref.Ref<sInt>(obj));
+        sChoiceControl *cc = new sChoiceControl(field->Choices,&field->Ref.Ref<int>(obj));
         cc->ChangeMsg = ChangeMsg;
         cc->DoneMsg = DoneMsg;
         cc->FakeDropdown(rect.x0,rect.y1);
@@ -715,18 +715,18 @@ void sStaticListWindow::EditField(const sRect &rect,sListWindow2Field *field,sOb
 
 /****************************************************************************/
 
-sInt sStaticListWindow::OnCompareField(sListWindow2Field *field,sObject *o0,sObject *o1,sInt line0,sInt line1)
+int sStaticListWindow::OnCompareField(sListWindow2Field *field,sObject *o0,sObject *o1,int line0,int line1)
 {
   return -2;    // -2 is special valie for "not handled"
 }
 
-sInt sStaticListWindow::CompareField(sListWindow2Field *field,sObject *o0,sObject *o1,sInt line0,sInt line1)
+int sStaticListWindow::CompareField(sListWindow2Field *field,sObject *o0,sObject *o1,int line0,int line1)
 {
   return field->CompareField(this,o0,o1,line0,line1);
   /*
   const sChar *str0,*str1;
   sPoolString p0,p1;
-  sInt i0,i1;
+  int i0,i1;
   sU32 u0,u1;
   sF32 f0,f1;
   switch(field->Type)
@@ -737,8 +737,8 @@ sInt sStaticListWindow::CompareField(sListWindow2Field *field,sObject *o0,sObjec
     return sCmpStringI(str0,str1);
   case sLWT_CHOICE:
   case sLWT_INT:
-    i0 = field->Ref.Ref<sInt>(o0);
-    i1 = field->Ref.Ref<sInt>(o1);
+    i0 = field->Ref.Ref<int>(o0);
+    i1 = field->Ref.Ref<int>(o1);
     if(i0<i1) return -1;
     if(i0>i1) return 1;
     return 0;
@@ -769,14 +769,14 @@ sInt sStaticListWindow::CompareField(sListWindow2Field *field,sObject *o0,sObjec
 
 /****************************************************************************/
 
-void sStaticListWindow::AddField(sListWindow2Field *field,sInt width)
+void sStaticListWindow::AddField(sListWindow2Field *field,int width)
 {
   Fields.AddTail(field);
   if(width)
     AddColumn(field,width);
 }
 
-sListWindow2Field *sStaticListWindow::AddField(const sChar *label,sInt flags,sInt width,sInt id,sInt size)
+sListWindow2Field *sStaticListWindow::AddField(const sChar *label,int flags,int width,int id,int size)
 {
   sListWindow2Field *field;
 
@@ -792,7 +792,7 @@ sListWindow2Field *sStaticListWindow::AddField(const sChar *label,sInt flags,sIn
   return field;
 }
 
-sListWindow2Field *sStaticListWindow::AddField(const sChar *label,sInt flags,sInt width,sMemberPtr<sInt> ref,sInt min,sInt max,sF32 step)
+sListWindow2Field *sStaticListWindow::AddField(const sChar *label,int flags,int width,sMemberPtr<int> ref,int min,int max,sF32 step)
 {
   sListWindow2Field_Int *field;
 
@@ -811,7 +811,7 @@ sListWindow2Field *sStaticListWindow::AddField(const sChar *label,sInt flags,sIn
   return field;
 }
 
-sListWindow2Field *sStaticListWindow::AddFieldChoice(const sChar *label,sInt flags,sInt width,sMemberPtr<sInt> ref,const sChar *choices)
+sListWindow2Field *sStaticListWindow::AddFieldChoice(const sChar *label,int flags,int width,sMemberPtr<int> ref,const sChar *choices)
 {
   sListWindow2Field_Choice *field;
 
@@ -828,7 +828,7 @@ sListWindow2Field *sStaticListWindow::AddFieldChoice(const sChar *label,sInt fla
   return field;
 }
 
-sListWindow2Field *sStaticListWindow::AddFieldProgress(const sChar *label,sInt flags,sInt width,sMemberPtr<sF32> ref)
+sListWindow2Field *sStaticListWindow::AddFieldProgress(const sChar *label,int flags,int width,sMemberPtr<sF32> ref)
 {
   sListWindow2Field_Progress *field;
 
@@ -845,7 +845,7 @@ sListWindow2Field *sStaticListWindow::AddFieldProgress(const sChar *label,sInt f
 }
 
 
-sListWindow2Field *sStaticListWindow::AddField(const sChar *label,sInt flags,sInt width,sMemberPtr<sF32> ref,sF32 min,sF32 max,sF32 step)
+sListWindow2Field *sStaticListWindow::AddField(const sChar *label,int flags,int width,sMemberPtr<sF32> ref,sF32 min,sF32 max,sF32 step)
 {
   sListWindow2Field_Float *field;
 
@@ -864,7 +864,7 @@ sListWindow2Field *sStaticListWindow::AddField(const sChar *label,sInt flags,sIn
   return field;
 }
 
-sListWindow2Field *sStaticListWindow::AddFieldColor(const sChar *label,sInt flags,sInt width,sMemberPtr<sU32> ref)
+sListWindow2Field *sStaticListWindow::AddFieldColor(const sChar *label,int flags,int width,sMemberPtr<sU32> ref)
 {
   sListWindow2Field_Color *field;
 
@@ -882,7 +882,7 @@ sListWindow2Field *sStaticListWindow::AddFieldColor(const sChar *label,sInt flag
 
 
 
-sListWindow2Field *sStaticListWindow::AddField(const sChar *label,sInt flags,sInt width,sMemberPtr<sChar> ref,sInt size)
+sListWindow2Field *sStaticListWindow::AddField(const sChar *label,int flags,int width,sMemberPtr<sChar> ref,int size)
 {
   sListWindow2Field_String *field;
 
@@ -898,7 +898,7 @@ sListWindow2Field *sStaticListWindow::AddField(const sChar *label,sInt flags,sIn
   return field;
 }
 /*
-sListWindow2Field *sStaticListWindow::AddField(const sChar *label,sInt flags,sInt width,const sChar *sObject::*ref)
+sListWindow2Field *sStaticListWindow::AddField(const sChar *label,int flags,int width,const sChar *sObject::*ref)
 {
   sListWindow2Field *field;
 
@@ -915,7 +915,7 @@ sListWindow2Field *sStaticListWindow::AddField(const sChar *label,sInt flags,sIn
   return field;
 }
 */
-sListWindow2Field *sStaticListWindow::AddField(const sChar *label,sInt flags,sInt width,sMemberPtr<sPoolString> ref)
+sListWindow2Field *sStaticListWindow::AddField(const sChar *label,int flags,int width,sMemberPtr<sPoolString> ref)
 {
   sListWindow2Field_PoolString *field;
 
@@ -931,7 +931,7 @@ sListWindow2Field *sStaticListWindow::AddField(const sChar *label,sInt flags,sIn
   return field;
 }
 
-void sStaticListWindow::AddColumn(sListWindow2Field *field,sInt width)
+void sStaticListWindow::AddColumn(sListWindow2Field *field,int width)
 {
   sListWindow2Column *column;
 
@@ -944,9 +944,9 @@ void sStaticListWindow::AddColumn(sListWindow2Field *field,sInt width)
 /****************************************************************************/
 /****************************************************************************/
 
-sBool sStaticListWindow::Hit(sInt mx,sInt my,sInt &line,sInt &col,sRect &rect)
+sBool sStaticListWindow::Hit(int mx,int my,int &line,int &col,sRect &rect)
 {
-  sInt y,yy,l;
+  int y,yy,l;
   sRect r;
   sObject *obj;
   sListWindow2Column *column;
@@ -1007,9 +1007,9 @@ sBool sStaticListWindow::Hit(sInt mx,sInt my,sInt &line,sInt &col,sRect &rect)
   return 0;
 }
 
-sBool sStaticListWindow::MakeRect(sInt line,sInt col,sRect &rect)
+sBool sStaticListWindow::MakeRect(int line,int col,sRect &rect)
 {
-  sInt y,yy,l;
+  int y,yy,l;
   sRect r;
   sObject *obj;
   sListWindow2Column *column;
@@ -1060,7 +1060,7 @@ sBool sStaticListWindow::MakeRect(sInt line,sInt col,sRect &rect)
   return 0;
 }
 
-void sStaticListWindow::HitOpenClose(sInt line)
+void sStaticListWindow::HitOpenClose(int line)
 {
   if(!Array) return;
 
@@ -1075,8 +1075,8 @@ void sStaticListWindow::HitOpenClose(sInt line)
 
 void sStaticListWindow::DragSelectSingle(const sWindowDrag &dd)
 {
-  sInt line,column;
-  sInt hit;
+  int line,column;
+  int hit;
   sRect r;
   switch(dd.Mode)
   {
@@ -1109,10 +1109,10 @@ void sStaticListWindow::DragSelectSingle(const sWindowDrag &dd)
 
 void sStaticListWindow::DragSelectMulti(const sWindowDrag &dd,sDInt mode)
 {
-  sInt line,column;
+  int line,column;
   sRect r;
   if(!Array) return;
-  sInt max = Array->GetCount();
+  int max = Array->GetCount();
 
   switch(mode)
   {
@@ -1158,11 +1158,11 @@ void sStaticListWindow::DragSelectMulti(const sWindowDrag &dd,sDInt mode)
         {
           DragSelectOther = line;
 
-          sInt t0 = DragSelectLine;
-          sInt t1 = line;
+          int t0 = DragSelectLine;
+          int t1 = line;
           if(t0>t1)
             sSwap(t0,t1);
-          for(sInt i=0;i<max;i++)
+          for(int i=0;i<max;i++)
             SetSelectStatus(i,i>=t0 && i<=t1);
         }
       }
@@ -1180,7 +1180,7 @@ void sStaticListWindow::DragSelectMulti(const sWindowDrag &dd,sDInt mode)
     case sDD_START:
       SelectionCopy.Clear();
       SelectionCopy.AddMany(max);
-      for(sInt i=0;i<max;i++)
+      for(int i=0;i<max;i++)
         SelectionCopy[i] = GetSelectStatus(i)?1:0;
 
       if(Hit(dd.MouseX,dd.MouseY,line,column,r))
@@ -1191,11 +1191,11 @@ void sStaticListWindow::DragSelectMulti(const sWindowDrag &dd,sDInt mode)
     case sDD_DRAG:
       if(DragMode == 2 && Hit(dd.MouseX,dd.MouseY,line,column,r))
       {
-        sInt t0 = DragSelectOther;
-        sInt t1 = line;
+        int t0 = DragSelectOther;
+        int t1 = line;
         if(t0>t1)
           sSwap(t0,t1);
-        for(sInt i=0;i<max;i++)
+        for(int i=0;i<max;i++)
           SetSelectStatus(i,(i>=t0 && i<=t1)?!SelectionCopy[i]:SelectionCopy[i]);
       }
       break;
@@ -1206,7 +1206,7 @@ void sStaticListWindow::DragSelectMulti(const sWindowDrag &dd,sDInt mode)
   }
 }
 
-sBool sStaticListWindow::ForceEditField(sInt line,sInt column)
+sBool sStaticListWindow::ForceEditField(int line,int column)
 {
   sRect r;
 
@@ -1225,7 +1225,7 @@ sBool sStaticListWindow::ForceEditField(sInt line,sInt column)
 
 void sStaticListWindow::DragEdit(const sWindowDrag &dd)
 {
-  sInt line,column;
+  int line,column;
   sRect r;
   if(!Array) return;
   switch(dd.Mode)
@@ -1248,9 +1248,9 @@ void sStaticListWindow::DragEdit(const sWindowDrag &dd)
 void sStaticListWindow::AddNew(sObject *newitem)
 {
   if(!Array) return;
-  sInt max = Array->GetCount();
+  int max = Array->GetCount();
   Update();
-  for(sInt i=0;i<max;i++)
+  for(int i=0;i<max;i++)
   {
     if(GetSelectStatus(i))
     {
@@ -1268,14 +1268,14 @@ void sStaticListWindow::AddNew(sObject *newitem)
   SetSelectStatus(max,1);
 }
 
-void sStaticListWindow::OpenFolders(sInt i)
+void sStaticListWindow::OpenFolders(int i)
 {
-  sInt level = GetTreeInfo((*Array)[i])->Level;
+  int level = GetTreeInfo((*Array)[i])->Level;
 
   i--;
   while(i>=0)
   {
-    sInt nl = GetTreeInfo((*Array)[i])->Level;
+    int nl = GetTreeInfo((*Array)[i])->Level;
     if(nl<level)
     {
       GetTreeInfo((*Array)[i])->Flags &= ~sLWTI_CLOSED;
@@ -1291,7 +1291,7 @@ void sStaticListWindow::UpdateTreeInfo()
   sObject *obj;
   sObject *parents[sLW_MAXTREENEST];
   sObject *last;
-  sInt parentlevel;
+  int parentlevel;
   sListWindowTreeInfo<sObject *> *ti,*tip;
 
   if(!Array) return;
@@ -1355,7 +1355,7 @@ void sStaticListWindow::CmdDelete(sDInt mode)
 
   sArray<sObject *> deletelist;
   sObject *obj;
-  sInt firstdelete = -1;
+  int firstdelete = -1;
 
   sFORALL(*Array,obj)
   {
@@ -1379,7 +1379,7 @@ void sStaticListWindow::CmdDelete(sDInt mode)
 
 
   ClearSelectStatus();
-  sInt max = Array->GetCount();
+  int max = Array->GetCount();
   if(firstdelete>=0 && firstdelete<max)
     SetSelectStatus(firstdelete,1);
   else if(max>0)
@@ -1394,7 +1394,7 @@ void sStaticListWindow::CmdSelectAll()
 {
   if(Array)
   {
-    for(sInt i=0;i<Array->GetCount();i++)
+    for(int i=0;i<Array->GetCount();i++)
       SetSelectStatus(i,1);
   }
 }
@@ -1403,13 +1403,13 @@ void sStaticListWindow::CmdSelUp(sDInt extend)
 {
   if(!Array) return;
 
-  sInt page = 1;
+  int page = 1;
   if(extend&2)
     page = sMax(1,Inner.SizeY()/Height-1);
 
-  sInt line = GetLastSelect();
-  sInt max = Array->GetCount();
-  for(sInt i=0;i<page;i++)
+  int line = GetLastSelect();
+  int max = Array->GetCount();
+  for(int i=0;i<page;i++)
   {
     if(line==-1)
       line = 0;
@@ -1430,13 +1430,13 @@ void sStaticListWindow::CmdSelDown(sDInt extend)
 {
   if(!Array) return;
 
-  sInt page = 1;
+  int page = 1;
   if(extend&2)
     page = sMax(1,Inner.SizeY()/Height-1);
 
-  sInt line = GetLastSelect();
-  sInt max = Array->GetCount();
-  for(sInt i=0;i<page;i++)
+  int line = GetLastSelect();
+  int max = Array->GetCount();
+  for(int i=0;i<page;i++)
   {
     if(line==-1)
       line = 0;
@@ -1457,19 +1457,19 @@ void sStaticListWindow::CmdMoveUp(sDInt mode)
 {
   if(!Array) return;
 
-  sInt page = 1;
+  int page = 1;
   if(mode&2)
     page = sMax(1,Inner.SizeY()/Height-1);
 
   sBool post=0;
-  for(sInt i=0;i<page;i++)
+  for(int i=0;i<page;i++)
   {
     if(IsMulti)
     {
-      sInt max = Array->GetCount();
+      int max = Array->GetCount();
       if(!GetSelectStatus(0))
       {
-        for(sInt line=1;line<max;line++)
+        for(int line=1;line<max;line++)
         {
           if(GetSelectStatus(line))
           {
@@ -1481,8 +1481,8 @@ void sStaticListWindow::CmdMoveUp(sDInt mode)
     }
     else
     {
-      sInt line = GetLastSelect();
-      sInt max = Array->GetCount();
+      int line = GetLastSelect();
+      int max = Array->GetCount();
 
       if(line>=1 && line<max)
       {
@@ -1507,18 +1507,18 @@ void sStaticListWindow::CmdMoveDown(sDInt mode)
   if(!Array) return;
 
   sBool post=0;
-  sInt page = 1;
+  int page = 1;
   if(mode&2)
     page = sMax(1,Inner.SizeY()/Height-1);
 
-  for(sInt i=0;i<page;i++)
+  for(int i=0;i<page;i++)
   {
     if(IsMulti)
     {
-      sInt max = Array->GetCount();
+      int max = Array->GetCount();
       if(!GetSelectStatus(max-1))
       {
-        for(sInt line=max-2;line>=0;line--)
+        for(int line=max-2;line>=0;line--)
         {
           if(GetSelectStatus(line))
           {
@@ -1530,8 +1530,8 @@ void sStaticListWindow::CmdMoveDown(sDInt mode)
     }
     else
     {
-      sInt line = GetLastSelect();
-      sInt max = Array->GetCount();
+      int line = GetLastSelect();
+      int max = Array->GetCount();
 
       if(line>=0 && line<max-1)
       {
@@ -1555,11 +1555,11 @@ void sStaticListWindow::CmdMoveLeft()
 {
   if(!Array) return;
 
-  sInt post = 0;
+  int post = 0;
   if(IsMulti)
   {
-    sInt max = Array->GetCount();
-    for(sInt line=0;line<max;line++)
+    int max = Array->GetCount();
+    for(int line=0;line<max;line++)
     {
       if(GetSelectStatus(line))
       {
@@ -1572,8 +1572,8 @@ void sStaticListWindow::CmdMoveLeft()
   }
   else
   {
-    sInt line = GetLastSelect();
-    sInt max = Array->GetCount();
+    int line = GetLastSelect();
+    int max = Array->GetCount();
 
     if(line>=0 && line<max)
     {
@@ -1596,11 +1596,11 @@ void sStaticListWindow::CmdMoveRight()
 {
   if(!Array) return;
 
-  sInt post = 0;
+  int post = 0;
   if(IsMulti)
   {
-    sInt max = Array->GetCount();
-    for(sInt line=0;line<max;line++)
+    int max = Array->GetCount();
+    for(int line=0;line<max;line++)
     {
       if(GetSelectStatus(line))
       {
@@ -1613,8 +1613,8 @@ void sStaticListWindow::CmdMoveRight()
   }
   else
   {
-    sInt line = GetLastSelect();
-    sInt max = Array->GetCount();
+    int line = GetLastSelect();
+    int max = Array->GetCount();
 
     if(line>=0 && line<max)
     {
@@ -1637,8 +1637,8 @@ void sStaticListWindow::CmdOpenClose(sDInt mode)
 {
   if(!Array) return;
 
-  sInt line = GetLastSelect();
-  sInt max = Array->GetCount();
+  int line = GetLastSelect();
+  int max = Array->GetCount();
 
   if(line>=0 && line<max)
   {
@@ -1706,7 +1706,7 @@ void sListWindow2Header::OnPaint2D()
 {
   sListWindow2Column *lc;
   sRect r;
-  sInt x;
+  int x;
 
   sClipPush();
   sClipRect(Parent->Outer);
@@ -1777,14 +1777,14 @@ void sListWindow2Header::OnDrag(const sWindowDrag &dd)
 {
   sListWindow2Column *lc;
 
-  sInt x0 = Client.x0 - Parent->ScrollX;
+  int x0 = Client.x0 - Parent->ScrollX;
 
   switch(dd.Mode)
   {
   case sDD_HOVER:
     DragAbsolute = (sGetKeyQualifier()&sKEYQ_SHIFT) ? 1 : 0;
     MousePointer = sMP_ARROW;
-    for(sInt i=0;i<ListWindow->Columns.GetCount()-1;i++)
+    for(int i=0;i<ListWindow->Columns.GetCount()-1;i++)
     {
       lc = &ListWindow->Columns[i];
       if(dd.MouseX > lc->Pos+x0-2 && dd.MouseX < lc->Pos+x0+2)
@@ -1796,7 +1796,7 @@ void sListWindow2Header::OnDrag(const sWindowDrag &dd)
     break;
 
   case sDD_START:
-    for(sInt i=0;i<ListWindow->Columns.GetCount();i++)
+    for(int i=0;i<ListWindow->Columns.GetCount();i++)
     {
       lc = &ListWindow->Columns[i];
       if(dd.MouseX > lc->Pos+x0-2 && dd.MouseX < lc->Pos+x0+2 && i<ListWindow->Columns.GetCount()-1)
@@ -1842,16 +1842,16 @@ void sListWindow2Header::OnDrag(const sWindowDrag &dd)
     if(DragMode>=0 && DragMode<ListWindow->Columns.GetCount()-1)
     {
       lc = &ListWindow->Columns[DragMode];
-      sInt oldp = lc->Pos;
-      sInt newp = DragStart + dd.MouseX;
-      newp = sClamp<sInt>(newp,2,Client.SizeX()-2+Parent->ScrollX);
+      int oldp = lc->Pos;
+      int newp = DragStart + dd.MouseX;
+      newp = sClamp<int>(newp,2,Client.SizeX()-2+Parent->ScrollX);
       if(oldp!=newp)
       {
         if(!DragAbsolute)       // drag keeping width
         {
           if(DragMode>0)
             newp = sMax(newp,ListWindow->Columns[DragMode-1].Pos+2);
-          for(sInt i=DragMode;i<ListWindow->Columns.GetCount();i++)
+          for(int i=DragMode;i<ListWindow->Columns.GetCount();i++)
             ListWindow->Columns[i].Pos += (newp-oldp);
         }
         else                    // drag only width

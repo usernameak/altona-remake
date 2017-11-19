@@ -19,17 +19,17 @@ class sRenderTargetManager_
   struct Target
   {
     sTextureBase *Texture;
-    sInt SizeX;
-    sInt SizeY;
-    sInt Format;
-    sInt RefCount;
-    sInt Proxy;
+    int SizeX;
+    int SizeY;
+    int Format;
+    int RefCount;
+    int Proxy;
   };
   struct Reference
   {
     void *Ref;
-    sInt SizeX;
-    sInt SizeY;
+    int SizeX;
+    int SizeY;
   };
   sArray<Target> Targets;
   sArray<Reference> Refs;
@@ -41,8 +41,8 @@ class sRenderTargetManager_
   const sRect *Window;
   sTexture2D *ToTexture;
   sTexture2D *ToTextureProxy;
-  sInt ScreenX;
-  sInt ScreenY;
+  int ScreenX;
+  int ScreenY;
   sGeometry *GeoDouble;
 public:
 
@@ -51,12 +51,12 @@ public:
   sRenderTargetManager_();
   ~sRenderTargetManager_();
   void Flush();
-  void ResolutionCheck(void *ref,sInt xs,sInt ys);    // flush if resolution registered for reference changes
+  void ResolutionCheck(void *ref,int xs,int ys);    // flush if resolution registered for reference changes
 
   // primary interface
 
-  sTexture2D *Acquire(sInt x,sInt y,sInt format=sTEX_2D|sTEX_ARGB8888|sTEX_NOMIPMAPS);
-  sTextureCube *AcquireCube(sInt edge,sInt format=sTEX_CUBE|sTEX_ARGB8888|sTEX_NOMIPMAPS);
+  sTexture2D *Acquire(int x,int y,int format=sTEX_2D|sTEX_ARGB8888|sTEX_NOMIPMAPS);
+  sTextureCube *AcquireCube(int edge,int format=sTEX_CUBE|sTEX_ARGB8888|sTEX_NOMIPMAPS);
   sTextureBase *AcquireProxy(sTexture2D *tex);
   void AddRef(sTextureBase *);
   void Release(sTextureBase *);
@@ -67,7 +67,7 @@ public:
   void SetScreen(const sTargetSpec &spec);
   sTexture2D *ReadScreen();                   // grab screen to texture
   sTexture2D *WriteScreen(sBool finish=0);    // queue a texture for write-to-screen. return 0 for direct screen rendering
-  void SetTarget(sTexture2D *tex,sInt clrflags=0,sU32 clrcol=0,sTexture2D *dep=0); // set rendertarget. tex might be 0
+  void SetTarget(sTexture2D *tex,int clrflags=0,sU32 clrcol=0,sTexture2D *dep=0); // set rendertarget. tex might be 0
   void FinishScreen();                                // write back te
 };
 

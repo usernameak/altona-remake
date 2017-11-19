@@ -23,29 +23,29 @@ class sSplitFrame : public sWindow
 protected:
   struct ChildDataStruct
   {
-    sInt StartPos;
-    sInt RelPos;
-    sInt Pos;
-    sInt Align;
+    int StartPos;
+    int RelPos;
+    int Pos;
+    int Align;
   };
   sArray<ChildDataStruct> ChildData;
-  sInt Initialized;
-  sInt Drag;
-  sInt DragStart;
-  sInt Count;
-  sInt OldT;
-  sInt RelT;
+  int Initialized;
+  int Drag;
+  int DragStart;
+  int Count;
+  int OldT;
+  int RelT;
   void MakeChildData();
 public:
   sCLASSNAME(sSplitFrame);
   sSplitFrame();
-  void SplitLayout(sInt w);
-  sInt SplitDrag(const sWindowDrag &dd,sInt mousedelta,sInt mousepos);
-  void Preset(sInt splitter,sInt value,sBool align=0);
-  void PresetPos(sInt splitter,sInt value);
-  void PresetAlign(sInt splitter,sBool align);
-  sInt GetPos(sInt splitter);
-  sInt Knop;
+  void SplitLayout(int w);
+  int SplitDrag(const sWindowDrag &dd,int mousedelta,int mousepos);
+  void Preset(int splitter,int value,sBool align=0);
+  void PresetPos(int splitter,int value);
+  void PresetAlign(int splitter,sBool align);
+  int GetPos(int splitter);
+  int Knop;
   sBool Proportional;
 };
 
@@ -79,17 +79,17 @@ class sMenuFrame : public sWindow
   {
     sMessage Message;
     sU32 Shortcut;
-    sInt Column;
+    int Column;
     sWindow *Window;
   };
-  const static sInt MaxColumn = 34;
+  const static int MaxColumn = 34;
   sArray<Item> Items;
   void CmdPressed(sDInt);
   void CmdPressedNoKill(sDInt);
   void Kill();
 
-  sInt ColumnWidth[MaxColumn];
-  sInt ColumnHeight[MaxColumn];
+  int ColumnWidth[MaxColumn];
+  int ColumnHeight[MaxColumn];
 public:
   sCLASSNAME(sMenuFrame);
   sMenuFrame();
@@ -100,12 +100,12 @@ public:
   void OnLayout();
   void OnPaint2D();
   sBool OnShortcut(sU32 key);
-//  sBool OnCommand(sInt cmd);
+//  sBool OnCommand(int cmd);
 
-  void AddItem(const sChar *name,const sMessage &cmd,sU32 Shortcut,sInt len=-1,sInt column=0,sU32 backcol=0);
-  void AddCheckmark(const sChar *name,const sMessage &cmd,sU32 Shortcut,sInt *refptr,sInt value,sInt len=-1,sInt column=0,sU32 backcol=0,sInt buttonstyle=0);
-  void AddSpacer(sInt column=0);
-  void AddHeader(sPoolString name,sInt column=0);
+  void AddItem(const sChar *name,const sMessage &cmd,sU32 Shortcut,int len=-1,int column=0,sU32 backcol=0);
+  void AddCheckmark(const sChar *name,const sMessage &cmd,sU32 Shortcut,int *refptr,int value,int len=-1,int column=0,sU32 backcol=0,int buttonstyle=0);
+  void AddSpacer(int column=0);
+  void AddHeader(sPoolString name,int column=0);
   void AddChoices(const sChar *choices,const sMessage &msg);
 
   sWindow *SendTo;          // only used to set focus
@@ -129,18 +129,18 @@ enum sLayoutFrameWindowMode
 struct sLayoutFrameWindow
 {
   sLayoutFrameWindowMode Mode;
-  sInt Pos;                       // default position, negative is bottom/left aligned
-  sInt Align;
-  sInt Temp;                      // this is not used. but sWire need it!
+  int Pos;                       // default position, negative is bottom/left aligned
+  int Align;
+  int Temp;                      // this is not used. but sWire need it!
   sWindow *Window;                // if sLFWM_WINDOW
-  sInt Switch;                    // if sLFWM_SWITCH
+  int Switch;                    // if sLFWM_SWITCH
   sPoolString Name;               // optional name, required to switch switch windows
   sArray<sLayoutFrameWindow *> Childs;
   sBool Proportional;
 
   sMessage OnSwitch;
 
-  sLayoutFrameWindow(sLayoutFrameWindowMode mode,sWindow *window=0,sInt pos=0);
+  sLayoutFrameWindow(sLayoutFrameWindowMode mode,sWindow *window=0,int pos=0);
   ~sLayoutFrameWindow();
   void Add(sLayoutFrameWindow *w);
   void Layout(sWindow *win,class sLayoutFrame *root);
@@ -149,9 +149,9 @@ struct sLayoutFrameWindow
 
 class sLayoutFrame : public sWindow
 {
-  sInt CurrentScreen;
-  void SetSubSwitchR(sLayoutFrameWindow *p,sPoolString name,sInt nr);
-  void GetSubSwitchR(sLayoutFrameWindow *p,sPoolString name,sInt &nr);
+  int CurrentScreen;
+  void SetSubSwitchR(sLayoutFrameWindow *p,sPoolString name,int nr);
+  void GetSubSwitchR(sLayoutFrameWindow *p,sPoolString name,int &nr);
 public:
   sCLASSNAME(sLayoutFrame);
   sLayoutFrame();
@@ -161,10 +161,10 @@ public:
   void OnCalcSize();
   void OnLayout();
 */
-  void Switch(sInt screen);
-  sInt GetSwitch() { return CurrentScreen; }
-  void SetSubSwitch(sPoolString name,sInt nr);    // switch window deeper in hirarchy
-  sInt GetSubSwitch(sPoolString name);
+  void Switch(int screen);
+  int GetSwitch() { return CurrentScreen; }
+  void SetSubSwitch(sPoolString name,int nr);    // switch window deeper in hirarchy
+  int GetSubSwitch(sPoolString name);
 
   sArray<sLayoutFrameWindow *> Screens;
   sArray<sWindow *> Windows;
@@ -172,14 +172,14 @@ public:
 
 class sSwitchFrame : public sWindow
 {
-  sInt CurrentScreen;
+  int CurrentScreen;
 public:
   sCLASSNAME(sSwitchFrame);
   sSwitchFrame();
   ~sSwitchFrame();
   void Tag();
-  void Switch(sInt screen);
-  sInt GetSwitch() { return CurrentScreen; }
+  void Switch(int screen);
+  int GetSwitch() { return CurrentScreen; }
 
   sArray<sWindow *> Windows;
 };
@@ -200,7 +200,7 @@ struct sGridFrameLayout           // discribe the content of the grid window!
   sRect GridRect;                 // a gridcell
   sWindow *Window;                // is either a window
   const sChar *Label;             // or a static label string
-  sInt Flags;                     // sGFLF
+  int Flags;                     // sGFLF
 };                                // every child has to be in this array!
 
 class sGridFrame : public sWindow
@@ -218,22 +218,22 @@ public:
   sBool OnKey(sU32 key);
 
   sArray<sGridFrameLayout> Layout;
-  sInt Columns;
-  sInt Height;
+  int Columns;
+  int Height;
 
   void Reset();
-  void AddGrid(sWindow *,sInt x,sInt y,sInt xs,sInt ys=1,sInt flags=0);
-  void AddLabel(const sChar *,sInt x,sInt y,sInt xs,sInt ys=1,sInt flags=0);
+  void AddGrid(sWindow *,int x,int y,int xs,int ys=1,int flags=0);
+  void AddLabel(const sChar *,int x,int y,int xs,int ys=1,int flags=0);
 };
 
 struct sGridFrameHelper
 {
   // configuration
   sGridFrame *Grid;               // link to grid, should be 12 wide
-  sInt LabelWidth;                // width of a label, usually 3
-  sInt ControlWidth;              // width of average control, usually 2
-  sInt WideWidth;                 // width of wide controls, like strings.
-  sInt BoxWidth;                  // width of a box, usually 1
+  int LabelWidth;                // width of a label, usually 3
+  int ControlWidth;              // width of average control, usually 2
+  int WideWidth;                 // width of wide controls, like strings.
+  int BoxWidth;                  // width of a box, usually 1
   sMessage DoneMsg;               // message to add for "done" event
   sMessage ChangeMsg;             // message to add for "change" event
   sBool Static;                   // create controls as static (if possible)
@@ -246,11 +246,11 @@ struct sGridFrameHelper
   sF32 TranslateStep;
 
   // private layut counters
-  sInt Line;                      // current line
-  sInt Left;                      // controls are layouted from left to right
-  sInt Right;                     // boxes are layouted from right to left
-  sInt EmptyLine;                 // a new line has already been started.
-  sInt TieMode;                   // 0=off, 1=first, 2=cont
+  int Line;                      // current line
+  int Left;                      // controls are layouted from left to right
+  int Right;                     // boxes are layouted from right to left
+  int EmptyLine;                 // a new line has already been started.
+  int TieMode;                   // 0=off, 1=first, 2=cont
   sStringControl *TiePrev,*TieFirst;
 
   // general
@@ -262,8 +262,8 @@ struct sGridFrameHelper
   void BeginTied();               // tie together controls so thay can be dragged together with CTRL
   void EndTied();
   void Tie(sStringControl *);      // tie this control, automatically called for INT, FLOAT and BYTE.
-  void SetColumns(sInt left,sInt middle,sInt right);
-  void MaxColumns(sInt left,sInt middle,sInt right);
+  void SetColumns(int left,int middle,int right);
+  void MaxColumns(int left,int middle,int right);
 
   // special controls
   void Label(const sChar *label); // start new line and add label at the left
@@ -271,32 +271,32 @@ struct sGridFrameHelper
   void Group(const sChar *label=0); // begin a new group in new line
   void GroupCont(const sChar *label=0); // begin a new group in current line (rarely used)
   void Textline(const sChar *text=0); // one line of text
-  class sButtonControl *PushButton(const sChar *label,const sMessage &done,sInt layoutflags=0);    // add pushbutton, large one from the left
-  class sButtonControl *Box(const sChar *label,const sMessage &done,sInt layoutflags=0);           // add pushbutton, small one from the right
-  class sButtonControl *BoxToggle(const sChar *label,sInt *x,const sMessage &done,sInt layoutflags=0);           // add pushbutton, small one from the right
-  void BoxFileDialog(const sStringDesc &string,const sChar *text,const sChar *ext,sInt flags=0);
+  class sButtonControl *PushButton(const sChar *label,const sMessage &done,int layoutflags=0);    // add pushbutton, large one from the left
+  class sButtonControl *Box(const sChar *label,const sMessage &done,int layoutflags=0);           // add pushbutton, small one from the right
+  class sButtonControl *BoxToggle(const sChar *label,int *x,const sMessage &done,int layoutflags=0);           // add pushbutton, small one from the right
+  void BoxFileDialog(const sStringDesc &string,const sChar *text,const sChar *ext,int flags=0);
 
   // value controls
-  void Radio(sInt *val,const sChar *choices=L"off|on",sInt width=-1);                 // create radiobuttons from left to right. you may overwrite the width
-  sChoiceControl *Choice(sInt *val,const sChar *choices=L"off|on");             // dropdownlist with choices, or toggle if only two choices
-  sControl *Flags(sInt *val,const sChar *choices=L"off|on");                         // build multiple buttons separated by colon: "*0on|off:*1a|b|c|d:*3bli|bla"
-  sButtonControl *Toggle(sInt *val,const sChar *label);                              // create toggle button
+  void Radio(int *val,const sChar *choices=L"off|on",int width=-1);                 // create radiobuttons from left to right. you may overwrite the width
+  sChoiceControl *Choice(int *val,const sChar *choices=L"off|on");             // dropdownlist with choices, or toggle if only two choices
+  sControl *Flags(int *val,const sChar *choices=L"off|on");                         // build multiple buttons separated by colon: "*0on|off:*1a|b|c|d:*3bli|bla"
+  sButtonControl *Toggle(int *val,const sChar *label);                              // create toggle button
   sButtonControl *Button(const sChar *label,const sMessage &msg);                          // create pushbutton
-  void Flags(sInt *val,const sChar *choices,const sMessage &msg);
-  sStringControl *String(const sStringDesc &string,sInt width=0);
-  sStringControl *String(sPoolString *pool,sInt width=0);
-  sStringControl *String(sTextBuffer *tb,sInt width=0);
-  class sTextWindow *Text(sTextBuffer *tb,sInt lines,sInt width=0);
+  void Flags(int *val,const sChar *choices,const sMessage &msg);
+  sStringControl *String(const sStringDesc &string,int width=0);
+  sStringControl *String(sPoolString *pool,int width=0);
+  sStringControl *String(sTextBuffer *tb,int width=0);
+  class sTextWindow *Text(sTextBuffer *tb,int lines,int width=0);
   sFloatControl *Float(sF32 *val,sF32 min,sF32 max,sF32 step=0.25f,sF32 *colptr=0);
-  sIntControl *Int(sInt *val,sInt min,sInt max,sF32 step=0.25f,sInt *colptr=0,const sChar *format=0);
-  sByteControl *Byte(sU8 *val,sInt min,sInt max,sF32 step=0.25f,sU8 *colptr=0);
-  sWordControl *Word(sU16 *val,sInt min,sInt max,sF32 step=0.25f,sU16 *colptr=0);
+  sIntControl *Int(int *val,int min,int max,sF32 step=0.25f,int *colptr=0,const sChar *format=0);
+  sByteControl *Byte(sU8 *val,int min,int max,sF32 step=0.25f,sU8 *colptr=0);
+  sWordControl *Word(sU16 *val,int min,int max,sF32 step=0.25f,sU16 *colptr=0);
   void Color(sU32 *,const sChar *config);
   void ColorF(sF32 *,const sChar *config);
   void ColorPick(sU32 *,const sChar *config,sObject *tagref);
   void ColorPickF(sF32 *,const sChar *config,sObject *tagref);
   class sColorGradientControl *Gradient(class sColorGradient *,sBool alpha);
-  void Bitmask(sU8 *x,sInt width = 1);
+  void Bitmask(sU8 *x,int width = 1);
 
   // complex composites
 
@@ -307,32 +307,32 @@ struct sGridFrameHelper
 
   // add your own control
 
-  void Control(sControl *con,sInt width=-1);
-  void Custom(sWindow *con,sInt width=-1,sInt height=1);
+  void Control(sControl *con,int width=-1);
+  void Custom(sWindow *con,int width=-1,int height=1);
 };
 
 
 struct sGridFrameTemplate
 {
-  sInt Type;                      // sGFT_???
-  sInt Flags;                     // sGFF_???
+  int Type;                      // sGFT_???
+  int Flags;                     // sGFF_???
   const sChar *Label;             // Label 
   const sChar *Choices;           // RADIO,CHOICE,FLAGS: choices ; COLOR,COLORF: rgb or rgba
-  sInt Offset;                    // byte-offset to value 
-  sInt Count;                     // INT,FLOAT,BYTE: number of controls ; STRING: number of chars
+  int Offset;                    // byte-offset to value 
+  int Count;                     // INT,FLOAT,BYTE: number of controls ; STRING: number of chars
   sF32 Min;                       // INT,FLOAT,BYTE: minimum value
   sF32 Max;                       // INT,FLOAT,BYTE: maximum value
   sF32 Step;                      // INT,FLOAT,BYTE: step for dragging
-  sInt ConditionOffset;           // if((obj[offset] & mask) == value)
-  sInt ConditionMask;
-  sInt ConditionValue;
+  int ConditionOffset;           // if((obj[offset] & mask) == value)
+  int ConditionMask;
+  int ConditionValue;
   sMessage Message;               // BOX,PUSHBUTTON: message to send when pressed
 
   void Init();
   sBool Condition(void *obj_);
   void Add(sGridFrameHelper &gh,void *obj_,const sMessage &changemsg,const sMessage &relayoutmsg);
-  sGridFrameTemplate *HideCond(sInt offset,sInt mask,sInt value);
-  sGridFrameTemplate *HideCondNot(sInt offset,sInt mask,sInt value);
+  sGridFrameTemplate *HideCond(int offset,int mask,int value);
+  sGridFrameTemplate *HideCondNot(int offset,int mask,int value);
 
   // special controls
   sGridFrameTemplate *InitLabel (const sChar *label);
@@ -341,15 +341,15 @@ struct sGridFrameTemplate
   sGridFrameTemplate *InitBox   (const sChar *label,const sMessage &done);
 
   // value controls
-  sGridFrameTemplate *InitRadio (const sChar *label,sInt offset,const sChar *choices=L"off|on");
-  sGridFrameTemplate *InitChoice(const sChar *label,sInt offset,const sChar *choices=L"off|on");
-  sGridFrameTemplate *InitFlags (const sChar *label,sInt offset,const sChar *choices=L"off|on");
-  sGridFrameTemplate *InitString(const sChar *label,sInt offset,sInt count);
-  sGridFrameTemplate *InitFloat (const sChar *label,sInt offset,sInt count,sF32 min,sF32 max,sF32 step=0.25f);
-  sGridFrameTemplate *InitInt   (const sChar *label,sInt offset,sInt count,sInt min,sInt max,sF32 step=0.25f);
-  sGridFrameTemplate *InitByte  (const sChar *label,sInt offset,sInt count,sInt min,sInt max,sF32 step=0.25f);
-  sGridFrameTemplate *InitColor (const sChar *label,sInt offset,const sChar *config);
-  sGridFrameTemplate *InitColorF(const sChar *label,sInt offset,const sChar *config);
+  sGridFrameTemplate *InitRadio (const sChar *label,int offset,const sChar *choices=L"off|on");
+  sGridFrameTemplate *InitChoice(const sChar *label,int offset,const sChar *choices=L"off|on");
+  sGridFrameTemplate *InitFlags (const sChar *label,int offset,const sChar *choices=L"off|on");
+  sGridFrameTemplate *InitString(const sChar *label,int offset,int count);
+  sGridFrameTemplate *InitFloat (const sChar *label,int offset,int count,sF32 min,sF32 max,sF32 step=0.25f);
+  sGridFrameTemplate *InitInt   (const sChar *label,int offset,int count,int min,int max,sF32 step=0.25f);
+  sGridFrameTemplate *InitByte  (const sChar *label,int offset,int count,int min,int max,sF32 step=0.25f);
+  sGridFrameTemplate *InitColor (const sChar *label,int offset,const sChar *config);
+  sGridFrameTemplate *InitColorF(const sChar *label,int offset,const sChar *config);
 };
 
 enum sGridFrameTemplateFlags

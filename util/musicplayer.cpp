@@ -102,7 +102,7 @@ sBool sMusicPlayer::Load(const sChar *name)
   return sFALSE;
 }
 
-sBool sMusicPlayer::Load(sU8 *data,sInt size)
+sBool sMusicPlayer::Load(sU8 *data,int size)
 {
   if(StreamDelete)
     delete[] Stream;
@@ -113,14 +113,14 @@ sBool sMusicPlayer::Load(sU8 *data,sInt size)
   return sTRUE;
 }
 
-void sMusicPlayer::AllocRewind(sInt bytes)
+void sMusicPlayer::AllocRewind(int bytes)
 {
   RewindSize = bytes/4;
   RewindBuffer = new sS16[bytes/2];
   RewindPos = 0;
 }
 
-sBool sMusicPlayer::Start(sInt songnr)
+sBool sMusicPlayer::Start(int songnr)
 {
   if(Status!=0)
   {
@@ -138,7 +138,7 @@ void sMusicPlayer::Stop()
     Status = 1;
 }
 
-static void sMusicPlayerSoundHandler(sS16 *samples,sInt count)
+static void sMusicPlayerSoundHandler(sS16 *samples,int count)
 {
   if(sMusicPlayerPtr)
     sMusicPlayerPtr->Handler(samples,count,0x100);
@@ -151,11 +151,11 @@ void sMusicPlayer::InstallHandler()
   sSetSoundHandler(44100,sMusicPlayerSoundHandler,44100);
 }
 
-sBool sMusicPlayer::Handler(sS16 *buffer,sInt samples,sInt vol)
+sBool sMusicPlayer::Handler(sS16 *buffer,int samples,int vol)
 {
-  sInt diff,size;
-  sInt result;
-  sInt i;
+  int diff,size;
+  int result;
+  int i;
 
   result = 1;
   if(Status==3)

@@ -96,7 +96,7 @@ void sThinBorder::OnPaint2D()
 /***                                                                      ***/
 /****************************************************************************/
 
-sSpaceBorder::sSpaceBorder(sInt pen)
+sSpaceBorder::sSpaceBorder(int pen)
 {
   Pen = pen;
 }
@@ -150,7 +150,7 @@ void sToolBorder::OnCalcSize()
 
 void sToolBorder::OnLayout()
 {
-  sInt y0,y1;
+  int y0,y1;
 
   if(Bottom)
   {
@@ -170,10 +170,10 @@ void sToolBorder::OnLayout()
   OnLayout(y0,y1);
 }
 
-void sToolBorder::OnLayout(sInt y0,sInt y1)
+void sToolBorder::OnLayout(int y0,int y1)
 {
   sWindow *w;
-  sInt xl, xr;
+  int xl, xr;
 
   xl = Client.x0;
   xr = Client.x1;
@@ -285,7 +285,7 @@ void sScrollBorder::OnLayout()
   if(Parent->Flags & sWF_SCROLLX)
   {
     sWindow *w;
-    sInt x;
+    int x;
 
     x = ButtonX.x0;
     sFORALL(Childs,w)
@@ -302,12 +302,12 @@ void sScrollBorder::OnLayout()
   }
 }
 
-sBool sScrollBorder::CalcKnop(sInt &a,sInt &b,sInt client,sInt inner,sInt button,sInt scroll)
+sBool sScrollBorder::CalcKnop(int &a,int &b,int client,int inner,int button,int scroll)
 {
-  sInt w = client - inner;
+  int w = client - inner;
   if(w>0)
   {
-    sInt k = sMulDiv(inner,button,client);
+    int k = sMulDiv(inner,button,client);
     if(k<KnopMin) k=sMin(KnopMin,button);
     a = sMulDiv(scroll,button-k,w);
     b = a+k;
@@ -323,7 +323,7 @@ sBool sScrollBorder::CalcKnop(sInt &a,sInt &b,sInt client,sInt inner,sInt button
 
 void sScrollBorder::OnPaint2D()
 {
-  sInt a,b;
+  int a,b;
   sRect r;
 
   if((Parent->Flags & sWF_SCROLLY) && (Parent->Flags & sWF_SCROLLY))
@@ -334,7 +334,7 @@ void sScrollBorder::OnPaint2D()
   if(Parent->Flags & sWF_SCROLLX)
   {
     r = ButtonX;
-    sInt color=(DragMode&1)?sGC_LOW2:sGC_LOW;
+    int color=(DragMode&1)?sGC_LOW2:sGC_LOW;
     if(r.SizeX()>4)
     {
       sGui->RectHL(r);
@@ -365,7 +365,7 @@ void sScrollBorder::OnPaint2D()
   if(Parent->Flags & sWF_SCROLLY)
   {
     r = ButtonY;
-    sInt color=(DragMode&2)?sGC_LOW2:sGC_LOW;
+    int color=(DragMode&2)?sGC_LOW2:sGC_LOW;
     if(r.SizeY()>4)
     {
       sGui->RectHL(r);
@@ -398,8 +398,8 @@ void sScrollBorder::OnPaint2D()
 
 void sScrollBorder::OnDrag(const sWindowDrag &dd)
 {
-  sInt speed = (sGetKeyQualifier()&sKEYQ_SHIFT) ? 8 : 1;
-  sInt a,b;
+  int speed = (sGetKeyQualifier()&sKEYQ_SHIFT) ? 8 : 1;
+  int a,b;
   sBool update = 0;
 
   switch(dd.Mode)
@@ -410,9 +410,9 @@ void sScrollBorder::OnDrag(const sWindowDrag &dd)
     DragMode = 0;
     if(ButtonX.Hit(dd.MouseX,dd.MouseY))
     {
-      sInt client = Parent->Client.SizeX();
-      sInt inner = Parent->Inner.SizeX();
-      sInt button = ButtonX.SizeX()-2;
+      int client = Parent->Client.SizeX();
+      int inner = Parent->Inner.SizeX();
+      int button = ButtonX.SizeX()-2;
       CalcKnop(a,b,client,inner,button,Parent->ScrollX);
       if(dd.MouseX<Client.x0+a)
         Parent->ScrollX -= inner;
@@ -424,9 +424,9 @@ void sScrollBorder::OnDrag(const sWindowDrag &dd)
     }
     if(ButtonY.Hit(dd.MouseX,dd.MouseY))
     {
-      sInt client = Parent->Client.SizeY();
-      sInt inner = Parent->Inner.SizeY();
-      sInt button = ButtonY.SizeY()-2;
+      int client = Parent->Client.SizeY();
+      int inner = Parent->Inner.SizeY();
+      int button = ButtonY.SizeY()-2;
       CalcKnop(a,b,client,inner,button,Parent->ScrollY);
       if(dd.MouseY<Client.y0+a)
         Parent->ScrollY -= inner;
@@ -445,9 +445,9 @@ void sScrollBorder::OnDrag(const sWindowDrag &dd)
   case sDD_DRAG:
     if(DragMode & 1)
     {
-      sInt client = Parent->Client.SizeX();
-      sInt inner = Parent->Inner.SizeX();
-      sInt button = ButtonX.SizeX()-2;
+      int client = Parent->Client.SizeX();
+      int inner = Parent->Inner.SizeX();
+      int button = ButtonX.SizeX()-2;
       if(button>2 && client>inner)
       {
         CalcKnop(a,b,client,inner,button,Parent->ScrollX);
@@ -457,9 +457,9 @@ void sScrollBorder::OnDrag(const sWindowDrag &dd)
     }
     if(DragMode & 2)
     {
-      sInt client = Parent->Client.SizeY();
-      sInt inner = Parent->Inner.SizeY();
-      sInt button = ButtonY.SizeY()-2;
+      int client = Parent->Client.SizeY();
+      int inner = Parent->Inner.SizeY();
+      int button = ButtonY.SizeY()-2;
 
       if(button>2 && client>inner)
       {
@@ -513,7 +513,7 @@ sStatusBorder::~sStatusBorder()
     sDelete(item->Buffer.Buffer);
 }
 
-void sStatusBorder::AddTab(sInt width,sInt maxstring)
+void sStatusBorder::AddTab(int width,int maxstring)
 {
   sStatusBorderItem *item = Items.AddMany(1);
   item->Width = width;
@@ -523,7 +523,7 @@ void sStatusBorder::AddTab(sInt width,sInt maxstring)
   item->Color = 0;
 }
 
-void sStatusBorder::Print(sInt tab,const sChar *string,sInt len,sU32 color)
+void sStatusBorder::Print(int tab,const sChar *string,int len,sU32 color)
 {
   if(sCmpString(Items[tab].Buffer.Buffer,string)!=0)
   {
@@ -536,12 +536,12 @@ void sStatusBorder::Print(sInt tab,const sChar *string,sInt len,sU32 color)
   }
 }
 
-void sStatusBorder::SetColor(sInt tab,sU32 col)
+void sStatusBorder::SetColor(int tab,sU32 col)
 {
   Items[tab].Color = col;
 }
 
-void sStatusBorder::Progress(sInt tab,sInt value,sInt max)
+void sStatusBorder::Progress(int tab,int value,int max)
 {
   Items[tab].ProgressMax = max;
   Items[tab].ProgressValue = sClamp(value,0,max);
@@ -557,16 +557,16 @@ void sStatusBorder::OnCalcSize()
 void sStatusBorder::OnLayout()
 {
   sStatusBorderItem *item;
-  sInt max = Items.GetCount()-1;
-  sInt min = 0;
+  int max = Items.GetCount()-1;
+  int min = 0;
 
   Client = Parent->Inner;
   Parent->Inner.y1 -= Height;
   Client.y0 = Parent->Inner.y1;
 
 
-  sInt x0 = Client.x0;
-  sInt x1 = Client.x1;
+  int x0 = Client.x0;
+  int x1 = Client.x1;
   if(max>=min)
   {
     while(min<=max)                 // left aligned
@@ -587,7 +587,7 @@ void sStatusBorder::OnLayout()
       Items[min].Client.x0 = x1;
       max--;
     }
-    for(sInt i=0;i<=max-min;i++)      // centered
+    for(int i=0;i<=max-min;i++)      // centered
     {
       Items[i+min].Client.x0 = x0 + (x1-x0) *  i    / (max-min+1);
       Items[i+min].Client.x1 = x0 + (x1-x0) * (i+1) / (max-min+1);
@@ -612,7 +612,7 @@ void sStatusBorder::OnPaint2D()
   {
     sRect r = item->Client;
 
-    sInt gc = sGC_BACK;
+    int gc = sGC_BACK;
     if(item->Color)
     {
       sSetColor2D(sGC_MAX,item->Color);

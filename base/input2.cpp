@@ -29,14 +29,14 @@ sInput2Scheme::~sInput2Scheme()
 
 /****************************************************************************/
 
-void sInput2Scheme::Init(sInt capacity)
+void sInput2Scheme::Init(int capacity)
 {
   sVERIFY2(Bindings.GetSize() == 0, L"sInput2Scheme::Init(): already initialized");
   Bindings.HintSize(capacity);
   Bindings.AddManyInit(capacity, sNULL);
   RetriggerTime.HintSize(capacity);
   RetriggerTime.AddMany(capacity);
-  for (sInt i=0; i<capacity; i++)
+  for (int i=0; i<capacity; i++)
     RetriggerTime[i] = -1;
   RetriggerRate.HintSize(capacity);
   RetriggerRate.AddManyInit(capacity, 0);
@@ -48,10 +48,10 @@ void sInput2Scheme::Init(sInt capacity)
 
 /****************************************************************************/
 
-void sInput2Scheme::OnGameStep(sInt delta)
+void sInput2Scheme::OnGameStep(int delta)
 {
   // update retrigger timers
-  for (sInt i=0; i<Bindings.GetCount(); i++) {
+  for (int i=0; i<Bindings.GetCount(); i++) {
     if (RetriggerRate[i] && RetriggerTime[i] == 0 && RetriggerPressed[i])
       RetriggerTime[i] = RetriggerRate[i];
 
@@ -78,7 +78,7 @@ void sInput2Scheme::OnGameStep(sInt delta)
 
 /****************************************************************************/
 
-void sInput2Scheme::Bind(sInt id, const sInput2Key& key)
+void sInput2Scheme::Bind(int id, const sInput2Key& key)
 {
   sVERIFY2(id >= 0 && id < Bindings.GetSize(), L"sInput2Scheme::Bind(): id out of range specified with sInput2Scheme::Init()");
   // silently ignore keys with null-devices. this may happen a lot when binding to controllers that are not available on the current platform
@@ -100,14 +100,14 @@ void sInput2Scheme::Bind(sInt id, const sInput2Key& key)
 
 /****************************************************************************/
 
-void sInput2Scheme::Bind(sInt id, const sInput2Device* device, sInt keyId, sF32 thresholdAnalog, sF32 thresholdDigitalLo, sF32 thresholdDigitalHi)
+void sInput2Scheme::Bind(int id, const sInput2Device* device, int keyId, sF32 thresholdAnalog, sF32 thresholdDigitalLo, sF32 thresholdDigitalHi)
 {
   Bind(id, sInput2Key(device, keyId, thresholdAnalog, thresholdDigitalLo, thresholdDigitalHi));
 }
 
 /****************************************************************************/
 
-void sInput2Scheme::Bind(sInt id, sInput2Key* key)
+void sInput2Scheme::Bind(int id, sInput2Key* key)
 {
   if(!key || !key->Device)
     return;
@@ -127,7 +127,7 @@ void sInput2Scheme::Bind(sInt id, sInput2Key* key)
 
 /****************************************************************************/
 
-void sInput2Scheme::SetRetrigger(sInt id, sInt rate, sInt delay)
+void sInput2Scheme::SetRetrigger(int id, int rate, int delay)
 {
   sVERIFY2(id >= 0 && id < Bindings.GetSize(), L"sInput2Scheme::SetRetrigger(): id out of range specified with sInput2Scheme::Init()");
   RetriggerRate[id]   =   sMax(rate,  0);
@@ -136,7 +136,7 @@ void sInput2Scheme::SetRetrigger(sInt id, sInt rate, sInt delay)
 
 /****************************************************************************/
 
-void sInput2Scheme::SetRetriggerPermanent(sInt id, sInt rate, sInt delay)
+void sInput2Scheme::SetRetriggerPermanent(int id, int rate, int delay)
 {
   sVERIFY2(id >= 0 && id < Bindings.GetSize(), L"sInput2Scheme::SetRetriggerPermanent(): id out of range specified with sInput2Scheme::Init()");
   RetriggerRate[id]   =   sMax(rate,  0);
@@ -146,7 +146,7 @@ void sInput2Scheme::SetRetriggerPermanent(sInt id, sInt rate, sInt delay)
 
 /****************************************************************************/
 
-void sInput2Scheme::Unbind(sInt id)
+void sInput2Scheme::Unbind(int id)
 {
   sVERIFY2(id >= 0 && id < Bindings.GetSize(), L"sInput2Scheme::Unbind(): id out of range specified with sInput2Scheme::Init()");
 
@@ -165,9 +165,9 @@ void sInput2Scheme::Unbind(sInt id)
 
 /****************************************************************************/
 
-sInt sInput2Scheme::GetTimestamp() const
+int sInput2Scheme::GetTimestamp() const
 {
-  sInt timestamp = 0;
+  int timestamp = 0;
   for (int i=0; i<Bindings.GetCount(); i++) {
     sInput2Key* key = Bindings[i];
     if (!key)
@@ -183,7 +183,7 @@ sInt sInput2Scheme::GetTimestamp() const
 
 /****************************************************************************/
 
-sBool sInput2Scheme::Hold(sInt id) const
+sBool sInput2Scheme::Hold(int id) const
 {
   sVERIFY2(id >= 0 && id < Bindings.GetSize(), L"sInput2Scheme::Hold(): id out of range specified with sInput2Scheme::Init()");
 
@@ -201,11 +201,11 @@ sBool sInput2Scheme::Hold(sInt id) const
 }
 
 /****************************************************************************/
-sInt sInput2Scheme::Pressed(sInt id) const
+int sInput2Scheme::Pressed(int id) const
 {
   sVERIFY2(id >= 0 && id < Bindings.GetSize(), L"sInput2Scheme::Pressed(): id out of range specified with sInput2Scheme::Init()");
 
-  sInt value = 0;
+  int value = 0;
   sF32 valuePositive = 0;
   sF32 valueNegative = 0;
   sF32 analog;
@@ -235,11 +235,11 @@ sInt sInput2Scheme::Pressed(sInt id) const
 
 /****************************************************************************/
 
-sInt sInput2Scheme::Released(sInt id) const
+int sInput2Scheme::Released(int id) const
 {
   sVERIFY2(id >= 0 && id < Bindings.GetSize(), L"sInput2Scheme::Released(): id out of range specified with sInput2Scheme::Init()");
 
-  sInt value = 0;
+  int value = 0;
   sInput2Key* key = Bindings[id];
   if (!key)
     return value;
@@ -252,7 +252,7 @@ sInt sInput2Scheme::Released(sInt id) const
 
 /****************************************************************************/
 
-sF32 sInput2Scheme::Analog(sInt id) const
+sF32 sInput2Scheme::Analog(int id) const
 {
   sVERIFY2(id >= 0 && id < Bindings.GetSize(), L"sInput2Scheme::Analog(): id out of range specified with sInput2Scheme::Init()");
 
@@ -275,7 +275,7 @@ sF32 sInput2Scheme::Analog(sInt id) const
 
 /****************************************************************************/
 
-sF32 sInput2Scheme::Relative(sInt id) const
+sF32 sInput2Scheme::Relative(int id) const
 {
   sVERIFY2(id >= 0 && id < Bindings.GetSize(), L"sInput2Scheme::Relative(): id out of range specified with sInput2Scheme::Init()");
 
@@ -294,7 +294,7 @@ sF32 sInput2Scheme::Relative(sInt id) const
 
 /****************************************************************************/
 
-sVector2 sInput2Scheme::Coords(sInt id) const
+sVector2 sInput2Scheme::Coords(int id) const
 {
   sVERIFY2(id >= 0 && id < Bindings.GetSize(), L"sInput2Scheme::Coords(): id out of range specified with sInput2Scheme::Init()");
 
@@ -319,7 +319,7 @@ sVector2 sInput2Scheme::Coords(sInt id) const
 
 /****************************************************************************/
 
-sVector31 sInput2Scheme::Position(sInt id) const
+sVector31 sInput2Scheme::Position(int id) const
 {
   sVERIFY2(id >= 0 && id < Bindings.GetSize(), L"sInput2Scheme::Position(): id out of range specified with sInput2Scheme::Init()");
 
@@ -344,7 +344,7 @@ sVector31 sInput2Scheme::Position(sInt id) const
 
 /****************************************************************************/
 
-sVector30 sInput2Scheme::Normal(sInt id) const
+sVector30 sInput2Scheme::Normal(int id) const
 {
   sVERIFY2(id >= 0 && id < Bindings.GetSize(), L"sInput2Scheme::Normal(): id out of range specified with sInput2Scheme::Init()");
 
@@ -369,7 +369,7 @@ sVector30 sInput2Scheme::Normal(sInt id) const
 
 /****************************************************************************/
 
-sQuaternion sInput2Scheme::Quaternion(sInt id) const
+sQuaternion sInput2Scheme::Quaternion(int id) const
 {
   sVERIFY2(id >= 0 && id < Bindings.GetSize(), L"sInput2Scheme::Quaternion(): id out of range specified with sInput2Scheme::Init()");
 
@@ -407,7 +407,7 @@ sQuaternion sInput2Scheme::Quaternion(sInt id) const
 
 /****************************************************************************/
 
-sVector4 sInput2Scheme::Vector4(sInt id) const
+sVector4 sInput2Scheme::Vector4(int id) const
 {
   sVERIFY2(id >= 0 && id < Bindings.GetSize(), L"sInput2Scheme::Vector4(): id out of range specified with sInput2Scheme::Init()");
 
@@ -432,7 +432,7 @@ sVector4 sInput2Scheme::Vector4(sInt id) const
 
 /****************************************************************************/
 
-const sInput2Device* sInput2Scheme::GetDevice(sInt id) const
+const sInput2Device* sInput2Scheme::GetDevice(int id) const
 {
   sVERIFY2(id >= 0 && id < Bindings.GetSize(), L"sInput2Scheme::GetDevice(): id out of range specified with sInput2Scheme::Init()");
   const sInput2Device* device = sNULL;
@@ -469,7 +469,7 @@ sInput2Mapping::~sInput2Mapping()
 
 /****************************************************************************/
 
-void sInput2Mapping::Init(sInt maxPlayers, sInt maxKeys) 
+void sInput2Mapping::Init(int maxPlayers, int maxKeys) 
 { 
   MaxPlayers = maxPlayers; 
   MaxKeys = maxKeys; 
@@ -487,11 +487,11 @@ void sInput2Mapping::Clear()
 
 /****************************************************************************/
 
-void sInput2Mapping::Rem(sInt player, sInt logicalKey)
+void sInput2Mapping::Rem(int player, int logicalKey)
 {
   sVERIFY2(player >= 0 && player < MaxPlayers, L"sInput2Mapping::Clear(): player number out of range specified with sInput2Mapping::Init()");
   sVERIFY2(logicalKey >= 0 && logicalKey < MaxKeys, L"sInput2Mapping::Clear(): logical key number out of range specified with sInput2Mapping::Init()");
-  sInt index = logicalKey * MaxPlayers + player;
+  int index = logicalKey * MaxPlayers + player;
   sInput2Key* k = Mapping[index];
   if (k) {
     sInput2Key* key = k->Next;
@@ -507,12 +507,12 @@ void sInput2Mapping::Rem(sInt player, sInt logicalKey)
 
 /****************************************************************************/
 
-void sInput2Mapping::Add(sInt player, sInt logicalKey, sInput2Key key)
+void sInput2Mapping::Add(int player, int logicalKey, sInput2Key key)
 {
   sVERIFY2(player >= 0 && player < MaxPlayers, L"sInput2Mapping::Set(): player number out of range specified with sInput2Mapping::Init()");
   sVERIFY2(logicalKey >= 0 && logicalKey < MaxKeys, L"sInput2Mapping::Set(): logical key number out of range specified with sInput2Mapping::Init()");
 
-  sInt index = logicalKey * MaxPlayers + player;
+  int index = logicalKey * MaxPlayers + player;
   if (!key.Device)
     return;
 
@@ -532,14 +532,14 @@ void sInput2Mapping::Add(sInt player, sInt logicalKey, sInput2Key key)
 
 /****************************************************************************/
 
-void sInput2Mapping::Add(sInt player, sInt logicalKey, const sInput2Device* device, sInt key, sF32 ThresholdAnalog, sF32 ThresholdDigital)
+void sInput2Mapping::Add(int player, int logicalKey, const sInput2Device* device, int key, sF32 ThresholdAnalog, sF32 ThresholdDigital)
 {
   Add(logicalKey, player, sInput2Key(device, key, ThresholdAnalog, ThresholdDigital));
 }
 
 /****************************************************************************/
 
-sInput2Key* sInput2Mapping::Get(sInt player, sInt logicalKey) 
+sInput2Key* sInput2Mapping::Get(int player, int logicalKey) 
 { 
   sVERIFY2(player >= 0 && player < MaxPlayers, L"sInput2Mapping::Get(): player number out of range specified with sInput2Mapping::Init()");
   sVERIFY2(logicalKey >= 0 && logicalKey < MaxKeys, L"sInput2Mapping::Get(): logical key number out of range specified with sInput2Mapping::Init()");

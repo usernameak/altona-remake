@@ -32,7 +32,7 @@ public:
   virtual sBool HasInput()=0;
   virtual sBool GetInput(sMidiEvent &e)=0;
   virtual void Output(sU8 dev,sU8 stat,sU8 val1,sU8 val2)=0;
-  virtual const sChar *GetDeviceName(sBool out,sInt dev)=0;
+  virtual const sChar *GetDeviceName(sBool out,int dev)=0;
 
   void Output(sMidiEvent &e) { Output(e.Device,e.Status,e.Value1,e.Value2); }
   sMessage InputMsg;

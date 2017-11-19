@@ -75,10 +75,10 @@ enum
 /***                                                                      ***/
 /****************************************************************************/
 
-// Finds real roots (=Nullstellen) of at² + bt + c, puts them into t,
+// Finds real roots (=Nullstellen) of atï¿½ + bt + c, puts them into t,
 // and returns how many there are. Not very fast, but handles all
 // degenerate cases and is quite accurate.
-sInt sSolveQuadratic(sF32 t[],sF32 a,sF32 b,sF32 c);
+int sSolveQuadratic(sF32 t[],sF32 a,sF32 b,sF32 c);
 
 /****************************************************************************/
 /***                                                                      ***/
@@ -97,7 +97,7 @@ typedef sF64 (*sIntegrand)(sF64 x,void *user);
 //
 // Warning: This implementation is not necessarily safe to use with
 // certain periodic functions; it may severaly underestimate the error sometimes.
-sF64 sRombergIntegral(sIntegrand f,void *user,sF64 a,sF64 b,sInt maxOrder,sF64 maxError);
+sF64 sRombergIntegral(sIntegrand f,void *user,sF64 a,sF64 b,int maxOrder,sF64 maxError);
 
 /****************************************************************************/
 /***                                                                      ***/
@@ -128,8 +128,8 @@ public:
   sOBSOLETE void UnitSlow()                       { sF32 e=sRSqrt(x*x+y*y); x*=e; y*=e; }   // UnitPrecise sounds better the UnitSlow
   void UnitFast()                                 { sF32 e=sFRSqrt(x*x+y*y); x*=e; y*=e; }
 
-  sF32 &operator[](sInt i)                        { return (&x)[i]; }
-  const sF32 &operator[](sInt i) const            { return (&x)[i]; }
+  sF32 &operator[](int i)                        { return (&x)[i]; }
+  const sF32 &operator[](int i) const            { return (&x)[i]; }
 
   sF32 Length() const                             { return (sF32)sFSqrt(x*x+y*y); }
   sF32 LengthPrecise() const                      { return (sF32)sSqrt(x*x+y*y); }  
@@ -165,8 +165,8 @@ public:
   template <class RND> void InitRandom(RND &r)            { do { x=r.Float(2)-1; y=r.Float(2)-1; z=r.Float(2)-1; } while(x*x+y*y+z*z>1); }
   inline void Neg()                                       { x = -x; y = -y, z = -z; }
 
-  inline sF32 &operator[](sInt i)                   { return (&x)[i]; }
-  inline const sF32 &operator[](sInt i) const       { return (&x)[i]; }
+  inline sF32 &operator[](int i)                   { return (&x)[i]; }
+  inline const sF32 &operator[](int i) const       { return (&x)[i]; }
   inline sBool operator==(sVector31Arg v)const	    { return x==v.x && y==v.y && z==v.z; }
   inline sBool operator!=(sVector31Arg v)const	    { return x!=v.x || y!=v.y || z!=v.z; }
 };
@@ -210,15 +210,15 @@ public:
   // Returns vector normalised (<1,0,0> when length<<1)
   inline sVector30 GetUnit() const                  { sVector30 n = *this; n.Unit(); return n; }
   inline void Neg()                                 { x = -x; y = -y, z = -z; }
-  inline sInt MaxAxisAbs() const                    { sF32 ax = sFAbs(x); sF32 ay = sFAbs(y); sF32 az = sFAbs(z); return (ax>ay) ? ((ax>az) ? 0 : 2) : ((ay>az) ? 1 : 2); }
+  inline int MaxAxisAbs() const                    { sF32 ax = sFAbs(x); sF32 ay = sFAbs(y); sF32 az = sFAbs(z); return (ax>ay) ? ((ax>az) ? 0 : 2) : ((ay>az) ? 1 : 2); }
   // Componentwise reciprocal (useful for e.g. ray-plane or ray-box tests)
   void Reciprocal(sVector30Arg a)                 { x = 1.0f / a.x; y = 1.0f / a.y; z = 1.0f / a.z; }
 
   // Componentwise reciprocal that never divides by zero (1/0 returns 0)
   void ReciprocalKeepZero(sVector30Arg a)         { x = a.x ? (1.0f / a.x) : 0.0f; y = a.y ? (1.0f / a.y) : 0.0f; z = a.z ? (1.0f / a.z) : 0.0f; }
   
-  inline sF32 &operator[](sInt i)                 { return (&x)[i]; }
-  inline const sF32 &operator[](sInt i) const     { return (&x)[i]; }
+  inline sF32 &operator[](int i)                 { return (&x)[i]; }
+  inline const sF32 &operator[](int i) const     { return (&x)[i]; }
   inline sBool operator==(sVector30Arg v)const	  { return x==v.x && y==v.y && z==v.z; }
   inline sBool operator!=(sVector30Arg v)const	  { return x!=v.x || y!=v.y || z!=v.z; }
 };
@@ -258,8 +258,8 @@ public:
   void Unit4();
   void Unit4Precise();
 
-  inline sF32 &operator[](sInt i)                 { return (&x)[i]; }
-  inline const sF32 &operator[](sInt i) const     { return (&x)[i]; }
+  inline sF32 &operator[](int i)                 { return (&x)[i]; }
+  inline const sF32 &operator[](int i) const     { return (&x)[i]; }
 
   sBool operator==(sVector4Arg v)const;
   inline sBool operator!=(sVector4Arg v)const     { return x!=v.x||y!=v.y||z!=v.z; }
@@ -406,8 +406,8 @@ public:
   inline sF32 GetNorm() const { return sSqrt(GetNormSq()); }
   inline sF32 GetNormSq() const { return r*r + i*i + j*j + k*k; }
 
-  inline sF32 &operator[](sInt i)                 { return (&r)[i]; }
-  inline const sF32 &operator[](sInt i) const     { return (&r)[i]; }
+  inline sF32 &operator[](int i)                 { return (&r)[i]; }
+  inline const sF32 &operator[](int i) const     { return (&r)[i]; }
 };
 
 sQuaternion operator* (sQuaternionArg a,sQuaternionArg b);
@@ -468,7 +468,7 @@ public:
   void EulerXYZ(sVector30Arg xyz) { EulerXYZ(xyz.x, xyz.y, xyz.z); }
   void FindEulerXYZ(sF32 &x,sF32 &y,sF32 &z) const;
   void FindEulerXYZ2(sF32 &x,sF32 &y,sF32 &z) const;
-  void CubeFace(sInt face);         // set up camera matrix for rendering to cube face
+  void CubeFace(int face);         // set up camera matrix for rendering to cube face
   void Look(sVector30Arg v);
   void Look(sVector30Arg dir, sVector30Arg up);  // this is wrong. is it used anywhere? -> (it is not wrong but less stable, and currently used a lot)
   void LookPrecise(sVector30Arg v);
@@ -557,8 +557,8 @@ public:
 
   void Perspective(sF32 left, sF32 right, sF32 top, sF32 bottom, sF32 front, sF32 back);
 
-  sVector4 &operator[](sInt a)                          { return (&i)[a]; }
-  sVector4Arg operator[](sInt a) const                  { return (&i)[a]; }
+  sVector4 &operator[](int a)                          { return (&i)[a]; }
+  sVector4Arg operator[](int a) const                  { return (&i)[a]; }
 };
 
 inline sMatrix34::sMatrix34(const sMatrix44 &m) : i(sVector30(m.i)),j(sVector30(m.j)),k(sVector30(m.k)),l(sVector31(m.l)) {}
@@ -713,7 +713,7 @@ public:
   sBool IntersectsMovingBoxInv(const sAABBox &box,sVector30Arg invV,sF32 tMin,sF32 tMax) const;
   sF32 DistanceToSq(sVector31Arg p) const;
   sF32 DistanceTo(sVector31Arg p) const { return sFSqrt(DistanceToSq(p)); }
-  sInt Classify(sVector30Arg n, sF32 d);
+  int Classify(sVector30Arg n, sF32 d);
 
   sAABBox &operator*=(const sMatrix34 &m);
   sBool operator==(const sAABBox& b)const { return Min==b.Min&&Max==b.Max; }
@@ -787,7 +787,7 @@ public:
   sBool HitSphere(sF32 *dist, sVector31Arg center, sF32 radius) const;
   sBool HitAABB(sF32 &min, sF32 &max, const sVector31& bbmin,const sVector31& bbmax)const;
   sBool HitBilinearPatch(sF32 &dist,const sVector31 &p00,const sVector31 &p01,const sVector31 &p10,const sVector31 &p11,sF32 *uOut,sF32 *vOut) const;
-  sInt IntersectPlane(sF32 &t, sVector4Arg plane)const;  // 0 not intersection, 1 normal intersection, 2 ray in plane
+  int IntersectPlane(sF32 &t, sVector4Arg plane)const;  // 0 not intersection, 1 normal intersection, 2 ray in plane
 
   // warning: (out)dist is NOT ACCURATE, but about in the area of where it should be.
   //sBool HitCappedCylinder(sVector31Arg cylstart, sVector31Arg cylend, sF32 radius, sF32 *dist=0) const; 
@@ -839,21 +839,21 @@ public:
   void Init(const sMatrix44 &mat,sF32 xMin,sF32 xMax,sF32 yMin,sF32 yMax,sF32 zMin,sF32 zMax);
 
   // Full tri-state clipping test (inside, intersecting, outside)
-  sInt IsInside(const sAABBoxC &b) const;   // sTEST_???
+  int IsInside(const sAABBoxC &b) const;   // sTEST_???
   
-  sINLINE sInt IsInside(const sAABBox &b) const // slower than above variant
+  sINLINE int IsInside(const sAABBox &b) const // slower than above variant
   {
     sAABBoxC box;
     box.Init(b);
     return IsInside(box);
   }
 
-  sInt IsInside(const sOBBox &b) const; // more work than for AABBs!
+  int IsInside(const sOBBox &b) const; // more work than for AABBs!
 
   // Just the rejection test (fully outside yes/no)
   sINLINE sBool IsOutside(const sAABBoxC &b) const
   {
-    for(sInt i=0;i<6;i++)
+    for(int i=0;i<6;i++)
     {
       sF32 m = b.Center ^ Planes[i];
       sF32 n = b.Radius ^ AbsPlanes[i];
@@ -1058,7 +1058,7 @@ inline sF32 sSmoothStep(sF32 min, sF32 max, sF32 x) { return sSmoothStep((x-min)
 /***                                                                      ***/
 /****************************************************************************/
 
-void sMakeDamp(sInt timeslice,sF32 damp,sF32 &d,sF32 &f);
+void sMakeDamp(int timeslice,sF32 damp,sF32 &d,sF32 &f);
 
 /****************************************************************************/
 /***                                                                      ***/
@@ -1085,8 +1085,8 @@ struct sFilter2Pole
   void High(sF32 f,sF32 reso);    // reso = 0 .. 1 (1 is dangerous!)
 
   sF32 Filter(sFilter2PoleTemp &temp,sF32);
-  void Filter(sFilter2PoleTemp &temp,sF32 *in,sF32 *out,sInt count);
-  void FilterStereo(sFilter2PoleTemp *temp,sF32 *in,sF32 *out,sInt count);
+  void Filter(sFilter2PoleTemp &temp,sF32 *in,sF32 *out,int count);
+  void FilterStereo(sFilter2PoleTemp *temp,sF32 *in,sF32 *out,int count);
 };
 
 
@@ -1096,19 +1096,19 @@ struct sFilter2Pole
 /***                                                                      ***/
 /****************************************************************************/
 
-// x,y = 8:16 (größere zahlen loopen)
+// x,y = 8:16 (grï¿½ï¿½ere zahlen loopen)
 
-sF32 sPerlin2D(sInt x,sInt y,sInt mask=255,sInt seed=0);  
-sF32 sPerlin3D(sInt x,sInt y,sInt z,sInt mask=255,sInt seed=0);  
-void sPerlinDerive3D(sInt x,sInt y,sInt z,sInt mask,sInt seed,sF32 &value,sVector30 &dir);
+sF32 sPerlin2D(int x,int y,int mask=255,int seed=0);  
+sF32 sPerlin3D(int x,int y,int z,int mask=255,int seed=0);  
+void sPerlinDerive3D(int x,int y,int z,int mask,int seed,sF32 &value,sVector30 &dir);
 
-// x,y = 0..256 (größere zahlen loopen)
+// x,y = 0..256 (grï¿½ï¿½ere zahlen loopen)
 // mode = 0: x
 // mode = 1: abs(x)
 // mode = 2: sin(x*sPI)
 // mode = 3: sin(abs(x)*sPI)
 
-sF32 sPerlin2D(sF32 x,sF32 y,sInt octaves=1,sF32 falloff=1.0f,sInt mode=0,sInt seed=0);
+sF32 sPerlin2D(sF32 x,sF32 y,int octaves=1,sF32 falloff=1.0f,int mode=0,int seed=0);
 
 /****************************************************************************/
 /***                                                                      ***/
@@ -1122,7 +1122,7 @@ sBool sGetIntersection(sVector2Arg u1, sVector2Arg u2, const sFRect &rect, sF32 
 // check two line segments for intersection, returns 0 : no intersection, 1 : intersection, 2 : coincident lines with overlapping segments
 // line segment0 : [ls0,ls0+ld0], line segment1 : [ls1,ls1+ld1]
 // intersection point ls0+dist0*ld0 resp. ls1+dist1*ld1, coincident lines with intersecting segment [ls0+dist0*ld0,ls0+dist1*ld0]
-sInt sGetLineSegmentIntersection(sF32 &dist0, sF32 &dist1, sVector2Arg ls0, sVector2Arg ld0, sVector2Arg ls1, sVector2Arg ld1);
+int sGetLineSegmentIntersection(sF32 &dist0, sF32 &dist1, sVector2Arg ls0, sVector2Arg ld0, sVector2Arg ls1, sVector2Arg ld1);
 
 /****************************************************************************/
 /***                                                                      ***/
@@ -1165,7 +1165,7 @@ template <class RndClass> class MarkovRandom
 {
 public:
   MarkovRandom(
-    sInt elements /*!< [in] defines the range of generated values (0 .. elements-1) */, 
+    int elements /*!< [in] defines the range of generated values (0 .. elements-1) */, 
     sU32 seed /*!< [in] internal random generator seed */)
   {
     Rnd.Seed(seed);
@@ -1183,29 +1183,29 @@ public:
   //! Reset the history/probabilities to initial state.
   void Reset()
   {
-    for (sInt i=0; i<Probabilities.GetCount(); i++) Probabilities[i]=1;
+    for (int i=0; i<Probabilities.GetCount(); i++) Probabilities[i]=1;
   }
 
   //! Get the next value. Will be different from the previous value and in the range [0..elements-1].
-  sInt GetNextRandom()
+  int GetNextRandom()
   {
     // if we have an empty result range, just return zero (which is formally incorrect, but shouldn't be a problem)
     if (Probabilities.GetCount()==0) return 0;
 
     // prepare summed up temp
     Temp[0]=Probabilities[0];
-    for (sInt i=1; i<Temp.GetCount(); i++) Temp[i] = Temp[i-1] + Probabilities[i];
+    for (int i=1; i<Temp.GetCount(); i++) Temp[i] = Temp[i-1] + Probabilities[i];
 
     // generate random index
-    sInt sum = Temp[Temp.GetCount()-1];
-    sInt r = Rnd.Int(sMax(sum,1));
+    int sum = Temp[Temp.GetCount()-1];
+    int r = Rnd.Int(sMax(sum,1));
 
     // find weighted element
-    sInt idx=0;
+    int idx=0;
     while ( (idx<Temp.GetCount()) && (Temp[idx]<=r) ) idx++;
 
     // apply 'history' info to Probabilities for next run
-    for (sInt i=0; i<Probabilities.GetCount(); i++)
+    for (int i=0; i<Probabilities.GetCount(); i++)
     {
       if (i==idx)
       {
@@ -1219,8 +1219,8 @@ public:
   }
 
 protected:
-  sStaticArray<sInt> Probabilities;
-  sStaticArray<sInt> Temp;
+  sStaticArray<int> Probabilities;
+  sStaticArray<int> Temp;
   RndClass Rnd;
 };
 

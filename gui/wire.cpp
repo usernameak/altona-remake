@@ -89,7 +89,7 @@ struct CommandBase
 {
   sPoolString Symbol;             // how it is called
   sPoolString Text;             // name for user
-  sInt Type;                    // Command Type
+  int Type;                    // Command Type
   sMessage Message;
 
   virtual void AddMenu(struct Shortcut *) {}
@@ -135,7 +135,7 @@ struct CommandTool : public CommandBase
 
 struct CommandChoice : public CommandBase
 {
-  sInt *Ptr;
+  int *Ptr;
   sPoolString Choices;
   void AddMenu(struct Shortcut *);
 };
@@ -144,7 +144,7 @@ struct Parameter                // parameter for a form
 {
   sPoolString Symbol;             // symbol name
   sPoolString Text;             // user name
-  sInt Type;                    // sWPT_???
+  int Type;                    // sWPT_???
   sDInt Offset;                 // offset in form
   sF32 Min,Max,Step;            // for int and float
   sPoolString Choices;          // for choices
@@ -164,7 +164,7 @@ struct FormInstance             // an instance
 struct SetInfo
 {
   sPoolString Symbol;
-  sInt Mask;
+  int Mask;
 };
 
 struct Form              // there may be multiple windows of same kind!
@@ -205,9 +205,9 @@ struct Shortcut                 // some kind of key binding
   FormInstance *Instance;       // with whom. may be 0
   Form *Class;                  // class to bind to. must be set
   sU32 Key;                     // key to press (may be 0)
-  sInt Qual;                    // zus�tzliche wire qualifier
-  sInt Hit;                     // for drags, when QUAL_HIT is set
-  sInt Sets;                    // swithc between command sets, 0 = all sets
+  int Qual;                    // zus�tzliche wire qualifier
+  int Hit;                     // for drags, when QUAL_HIT is set
+  int Sets;                    // swithc between command sets, 0 = all sets
   CommandTool *Tool;            // use only when tool is active!
 
   Shortcut() 
@@ -228,30 +228,30 @@ struct RawShortcut
 {
   sPoolString Form;
   sPoolString InstanceName;
-  sInt InstanceIndex;
+  int InstanceIndex;
   sPoolString Command;
   sPoolString Label;
   sPoolString Tool;
   sU32 Key;
-  sInt KeyQual;
-  sInt KeyHit;
-  sInt Sets;
+  int KeyQual;
+  int KeyHit;
+  int Sets;
 };
 
 struct Screen                   // register screens
 {
   sPoolString Name;             // name in user interface
-  sInt Index;                   // index in LayoutScreen
+  int Index;                   // index in LayoutScreen
 };
 
 struct Layout                   // a part of the screen layout tree
 {
   sArray<Layout *> Childs;      // hirarchy
   Form *Window;          // link to window (class)
-  sInt Index;                   // link to window (index)
-  sInt Position;                // position when the window was last layouted, -1 when it was never layouted
+  int Index;                   // link to window (index)
+  int Position;                // position when the window was last layouted, -1 when it was never layouted
   sBool Align;                  // TRUE when window is right/bottom aligned
-  sInt InitialPosition;         // position for initial layout, negative for position relative to right/bottom, 0 for normal layout.
+  int InitialPosition;         // position for initial layout, negative for position relative to right/bottom, 0 for normal layout.
 };
 
 /****************************************************************************/
@@ -284,9 +284,9 @@ void CommandTool::AddMenu(Shortcut *sc)
 void CommandContext::AddMenu(Shortcut *dummy)
 {
   Shortcut *sc;
-  sInt hastools = 0;
-  sInt other = 0;
-  sInt sets = -1;
+  int hastools = 0;
+  int other = 0;
+  int sets = -1;
   if(Context->IsWindow && Context->Instances.GetCount()==1)
     sets = ((sWindow *)Context->Instances[0].Object)->WireSets;
   sFORALL(Context->Shortcuts,sc)
@@ -308,7 +308,7 @@ void CommandContext::AddMenu(Shortcut *dummy)
   }
   if(hastools)
   {
-    sInt column = 0;
+    int column = 0;
     if(hastools>4 && other>3)
       column = 1;
     else
@@ -338,7 +338,7 @@ void CommandCallback::AddMenu(Shortcut *sc)
 void CommandChoice::AddMenu(Shortcut *sc)
 {
   sString<256> choice;
-  sInt max = sCountChoice(Choices);
+  int max = sCountChoice(Choices);
 
   if(max==2 && sCmpStringLen(Choices,L"-|",2)==0)
   {
@@ -347,7 +347,7 @@ void CommandChoice::AddMenu(Shortcut *sc)
   }
   else
   {
-    for(sInt i=0;i<max;i++)
+    for(int i=0;i<max;i++)
     {
       sMakeChoice(choice,Choices,i);
       if(!choice.IsEmpty())
@@ -362,8 +362,8 @@ void CommandChoice::AddMenu(Shortcut *sc)
 class sLayoutFrameSize : public sLayoutFrame
 {
 public:
-  sInt MaxSizeY;
-  sInt MinSizeY;
+  int MaxSizeY;
+  int MinSizeY;
 
   sCLASSNAME(sLayoutFrameSize);
   void OnCalcSize(); 
@@ -509,7 +509,7 @@ Form *sWireMasterWindow::FindClass(sPoolString name)
   return wc;
 }
 
-sWindow *sWireMasterWindow::FindWindow(sPoolString name,sInt index)
+sWindow *sWireMasterWindow::FindWindow(sPoolString name,int index)
 {
   Form *wc;
 
@@ -609,7 +609,7 @@ void sWireMasterWindow::AddCallback(const sChar *classname,const sChar *cmdname,
   wc->Commands.AddTail(cmd);
 }
 
-void sWireMasterWindow::AddChoice(const sChar *classname,const sChar *cmdname,const sMessage &msg,sInt *ptr,const sChar *choices)
+void sWireMasterWindow::AddChoice(const sChar *classname,const sChar *cmdname,const sMessage &msg,int *ptr,const sChar *choices)
 {
   Form *wc;
   CommandChoice *cmd;
@@ -625,7 +625,7 @@ void sWireMasterWindow::AddChoice(const sChar *classname,const sChar *cmdname,co
   wc->Commands.AddTail(cmd);
 }
 
-void sWireMasterWindow::AddPara1(const sChar *classname,const sChar *commandname,const sMessage &msg,sInt type,sDInt offset,const sChar *choices,sF32 min,sF32 max,sF32 step)
+void sWireMasterWindow::AddPara1(const sChar *classname,const sChar *commandname,const sMessage &msg,int type,sDInt offset,const sChar *choices,sF32 min,sF32 max,sF32 step)
 {
   Form *wc;
   Parameter *para;
@@ -666,7 +666,7 @@ void sWireMasterWindow::OverrideCmd(const sChar *classname,const sChar *cmdname,
 void sWireMasterWindow::ProcessText(const sChar8 *text,const sChar *reffilename)
 {
   sChar *copy;
-  sInt len;
+  int len;
 
   len = 0;
   while(text[len]) len++;
@@ -791,13 +791,13 @@ void sWireMasterWindow::CmdSwitchScreen(sDInt screen)
   DoLayout();
 }
 
-void sWireMasterWindow::SetSubSwitch(sPoolString name,sInt nr)
+void sWireMasterWindow::SetSubSwitch(sPoolString name,int nr)
 {
   LayoutFrame->SetSubSwitch(name,nr);
   DoLayout();
 }
 
-sInt sWireMasterWindow::GetSubSwitch(sPoolString name)
+int sWireMasterWindow::GetSubSwitch(sPoolString name)
 {
   return LayoutFrame->GetSubSwitch(name);
 }
@@ -834,7 +834,7 @@ void sWireMasterWindow::CmdMakeMenu(CommandMenu *menu)
   sWire->CurrentMenu = new sMenuFrame();
   sWire->CurrentMenu->AddBorder(new sThickBorder);
   
-  sInt sets = sGui->GetFocus()->WireSets;
+  int sets = sGui->GetFocus()->WireSets;
 
   sFORALL(menu->Items,sc)
     if(sets & sc->Sets)
@@ -896,7 +896,7 @@ sBool sWireMasterWindow::IsGlobal(sU32 m)
   return (m & QUAL_GLOBAL) || (m & QualScope); 
 }
 
-void sWireMasterWindow::SwitchScope(sInt scope) 
+void sWireMasterWindow::SwitchScope(int scope) 
 {
   QualScope = QUAL_SCOPE0<<scope; 
 }
@@ -1025,7 +1025,7 @@ sBool sWireMasterWindow::HandleKey(sWindow *win,sU32 key)
   return 0;
 }
 
-sBool sWireMasterWindow::HandleCommand(sWindow *win,sInt cmd)
+sBool sWireMasterWindow::HandleCommand(sWindow *win,int cmd)
 {
   FormInstance *inst = 0;
   switch(cmd)
@@ -1045,7 +1045,7 @@ sBool sWireMasterWindow::HandleCommand(sWindow *win,sInt cmd)
 }
 
 
-sBool sWireMasterWindow::HandleDrag(sWindow *win,const sWindowDrag &dd,sInt hit)
+sBool sWireMasterWindow::HandleDrag(sWindow *win,const sWindowDrag &dd,int hit)
 {
   Form *wc;
   FormInstance *inst;
@@ -1115,7 +1115,7 @@ sBool sWireMasterWindow::HandleDrag(sWindow *win,const sWindowDrag &dd,sInt hit)
   }
 
 
-  sInt result = DragMessage.IsValid();
+  int result = DragMessage.IsValid();
 
   if(dd.Mode!=sDD_HOVER)          // hover messages have to be handled directly...
   {
@@ -1192,13 +1192,13 @@ void sWireMasterWindow::Help(sWindow *window)
 {
   sMenuFrame *mf;
   Shortcut *sc,*tool;
-  sInt hastools = 0;
-  sInt hasaction = 0;
-  sInt hasdrag = 0;
-  sInt hascursor = 0;
-  sInt hasextra[3] = {0,0,0};
-//  sInt other = 0;
-  sInt sets = -1;
+  int hastools = 0;
+  int hasaction = 0;
+  int hasdrag = 0;
+  int hascursor = 0;
+  int hasextra[3] = {0,0,0};
+//  int other = 0;
+  int sets = -1;
   FormInstance *fi;
   Form *form;
   sArray<Shortcut *> tools;
@@ -1263,7 +1263,7 @@ void sWireMasterWindow::Help(sWindow *window)
       if(sc->Qual & QUAL_MISS)   qual |= 0x02000000;
       if(sc->Qual & QUAL_DOUBLE) qual |= 0x04000000;
 
-      sInt col = 0;
+      int col = 0;
       if((sc->Key&sKEYQ_MASK)>=KEY_LMB && (sc->Key&sKEYQ_MASK)<=KEY_X5)
         col = 20;
       else if(sc->Qual & QUAL_CURSOR)
@@ -1346,7 +1346,7 @@ FormInstance *sWireMasterWindow::_FormName(sBool window)
   Form *form=0;
   FormInstance *inst=0;
   sPoolString fname,iname;
-  sInt index = -1;
+  int index = -1;
 
   Scan->ScanName(fname);
   form = sFind(Classes,&Form::Symbol,fname);
@@ -1387,7 +1387,7 @@ FormInstance *sWireMasterWindow::_FormName(sBool window)
   return inst;
 }
 
-void sWireMasterWindow::_Key(sU32 &key,sInt &qual,sInt &hit)
+void sWireMasterWindow::_Key(sU32 &key,int &qual,int &hit)
 {
   key = 0;
   qual = 0;
@@ -1936,7 +1936,7 @@ CommandBase *sWireMasterWindow::_Command(Form *wc)
       }
       else
       {
-        sInt i = Scan->ScanInt();
+        int i = Scan->ScanInt();
         if(i<0 || i>=form->Instances.GetCount())
           Scan->Error(L"instance index out of bounds");
         else
@@ -2033,11 +2033,11 @@ void sWireMasterWindow::_Add(RawShortcut &sc)
 }
 
 
-Shortcut *sWireMasterWindow::MakeShortcut(Form *wc,sInt type,RawShortcut &raw)
+Shortcut *sWireMasterWindow::MakeShortcut(Form *wc,int type,RawShortcut &raw)
 {
 //  sU32 key = 0;
-//  sInt qual = 0;
-//  sInt hit = 0;
+//  int qual = 0;
+//  int hit = 0;
   CommandBase *cmd = 0;
   FormInstance *inst = 0;
   Form *form = wc;
@@ -2139,7 +2139,7 @@ void sWireMasterWindow::_Sets(sArray<Form *> &windows)
 
   if(Scan->IfToken('('))     // use sets
   {
-    sInt mask = 0;
+    int mask = 0;
     do
     {
       Scan->ScanName(name);
@@ -2163,7 +2163,7 @@ void sWireMasterWindow::_Sets(sArray<Form *> &windows)
   {
     sArray<SetInfo> set;
     set.HintSize(16);
-    sInt mask = 1;
+    int mask = 1;
 
     do
     {
@@ -2181,7 +2181,7 @@ void sWireMasterWindow::_Sets(sArray<Form *> &windows)
   }
 }
 
-void sWireMasterWindow::_WindowCmd(sArray<Form *> &windows,sInt sets)
+void sWireMasterWindow::_WindowCmd(sArray<Form *> &windows,int sets)
 {
   RawShortcut raw;
   Shortcut *sc;
@@ -2249,8 +2249,8 @@ void sWireMasterWindow::_WindowCmd(sArray<Form *> &windows,sInt sets)
   {
     CommandMenu *menu = _Menu(windows[0]);
     sU32 key;
-    sInt qual;
-    sInt hit;
+    int qual;
+    int hit;
 
     _Key(key,qual,hit);
     Scan->Match(';');

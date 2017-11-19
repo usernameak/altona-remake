@@ -136,7 +136,7 @@ void WinCube::Paint(sViewport &view,const sTargetSpec &spec)
   Env.LightDir[2].Init(0,0,1);
 
   Timer.OnFrame(sGetTime());
-//  sInt time = Timer.GetTime();
+//  int time = Timer.GetTime();
 
   sCBuffer<sSimpleMaterialEnvPara> cb;
   cb.Data->Set(view,Env);

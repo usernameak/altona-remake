@@ -24,7 +24,7 @@ class sColorGradient : public sObject
 public:
   sArray<sColorGradientKey> Keys;
   sF32 Gamma;
-  sInt Flags;
+  int Flags;
 
   void AddKey(sF32 time,sU32 col);
   void AddKey(sF32 time,const sVector4 &col);
@@ -46,7 +46,7 @@ public:
 class sColorGradientControl : public sControl
 {
   sImage *Bar;
-  sInt AlphaEnable;
+  int AlphaEnable;
 public:
   sCLASSNAME_NONEW(sColorGradientControl);
   sColorGradientControl(sColorGradient *,sBool alpha);
@@ -80,11 +80,11 @@ class sColorPickerWindow : public sWindow
   sRect WarpRect;
   sRect PaletteRect;
 
-  sInt DragMode;
+  int DragMode;
   sObject *TagRef;
   sBool AlphaEnable;
   sColorGradient *Gradient;
-  sInt DragKey;
+  int DragKey;
   sF32 DragStart;
 
   sImage *PickImage;
@@ -97,7 +97,7 @@ class sColorPickerWindow : public sWindow
   sRect PaletteBoxes[32];
 
   void MakeGui();
-  void SelectKey(sInt nr);
+  void SelectKey(int nr);
 public:
   sCLASSNAME(sColorPickerWindow);
   sColorPickerWindow();

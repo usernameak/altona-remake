@@ -18,21 +18,21 @@
 
 namespace sPerfMon
 {
-  static const sInt MAX_NESTING=8;
+  static const int MAX_NESTING=8;
 
   static sBool Inited=sFALSE;
 
-  static sInt MaxThreads;
-  static sInt MaxEvents;
-  static sInt MaxValues;
-  static sInt MaxSwitches;
+  static int MaxThreads;
+  static int MaxEvents;
+  static int MaxValues;
+  static int MaxSwitches;
   static sBool Active;
   static sBool Show=sFALSE;
   static sU64  StartTime;
   static sU64  MaxTime=1000000/30;
   static sU64  FrameTime=1000000/60;
 
-  static sInt NumThreads;
+  static int NumThreads;
   static sThreadContext **ThreadList;
 
   enum
@@ -42,8 +42,8 @@ namespace sPerfMon
     SHOW_SWITCHES=-2,
     SHOW_OFF=-1,
   };
-  static sInt  ShowDetails=SHOW_OFF;
-  static sInt  CurSwitch=-1;
+  static int  ShowDetails=SHOW_OFF;
+  static int  CurSwitch=-1;
 
   static sPainter *Painter;
 
@@ -54,13 +54,13 @@ namespace sPerfMon
   struct Value
   {
     const sChar *Name;
-    const sInt *Ptr;
-    sInt Group;
-    sInt Min;
-    sInt Max;
+    const int *Ptr;
+    int Group;
+    int Min;
+    int Max;
   } *Values;
-  sInt *ValueMap;
-  sInt NumValues;
+  int *ValueMap;
+  int NumValues;
   sBool ValuesSorted;
 
   /****************************************************************************/
@@ -69,9 +69,9 @@ namespace sPerfMon
   {
     const sChar *Name;
     const sChar *Choice;
-    sInt *Ptr;
+    int *Ptr;
   } *Switches;
-  sInt NumSwitches;
+  int NumSwitches;
 
   /****************************************************************************/
 
@@ -87,7 +87,7 @@ namespace sPerfMon
   struct Event
   {
     sU64  Time;
-    sInt  Level;
+    int  Level;
     ThreadEvent Ev;
   };
 
@@ -95,19 +95,19 @@ namespace sPerfMon
   struct Thread
   {
     Event *Events;
-    sInt NumEvents;
+    int NumEvents;
 
-    sInt Level;
+    int Level;
     ThreadEvent Stack[MAX_NESTING];
 
-    sInt MuteCount;
+    int MuteCount;
   };
 
   sU8  *Memory;
  
   /****************************************************************************/
 
-  static sU8 *Alloc(sInt size)
+  static sU8 *Alloc(int size)
   {
     sU8 *ptr=0;
 
@@ -130,11 +130,11 @@ namespace sPerfMon
 
   void PreInit()
   {
-    sInt tlmem=MaxThreads*sizeof(sThreadContext*);
-    sInt vmapmem=MaxValues*sizeof(sInt);
-    sInt valuemem=MaxValues*sizeof(Value);
-    sInt switchmem=MaxSwitches*sizeof(Switch);
-    sInt memneeded=tlmem+vmapmem+valuemem+switchmem;
+    int tlmem=MaxThreads*sizeof(sThreadContext*);
+    int vmapmem=MaxValues*sizeof(int);
+    int valuemem=MaxValues*sizeof(Value);
+    int switchmem=MaxSwitches*sizeof(Switch);
+    int memneeded=tlmem+vmapmem+valuemem+switchmem;
 
     Memory=Alloc(memneeded);
     if (!Memory)
@@ -151,7 +151,7 @@ namespace sPerfMon
 
     NumValues=0;
     ValuesSorted=0;
-    ValueMap = (sInt*)mem; mem+=vmapmem;
+    ValueMap = (int*)mem; mem+=vmapmem;
     Values = (Value*)mem; mem+=valuemem;
 
     NumSwitches=0;
@@ -191,7 +191,7 @@ namespace sPerfMon
       sDelete(Painter);
       sDelete(Lock);
 
-      for (sInt i=0; i<NumThreads; i++)
+      for (int i=0; i<NumThreads; i++)
       {
         Thread *t=(Thread*)ThreadList[i]->PerfData;
         delete[] t->Events;
@@ -208,7 +208,7 @@ namespace sPerfMon
   void BeginFrame(void *user)
   {
     Lock->Lock();
-    for (sInt i=0; i<NumThreads; i++)
+    for (int i=0; i<NumThreads; i++)
     {
       sThreadContext *tc=ThreadList[i];
       Thread *t=(Thread*)(tc->PerfData);
@@ -247,7 +247,7 @@ namespace sPerfMon
     sU64 time = sGetTimeUS()-StartTime;
 
     // add end to all threads
-    for (sInt i=0; i<NumThreads; i++)
+    for (int i=0; i<NumThreads; i++)
     {
       Thread *t=(Thread*)ThreadList[i]->PerfData;
       const sChar *tname=ThreadList[i]->ThreadName;
@@ -267,7 +267,7 @@ namespace sPerfMon
 
     sSetTarget(sTargetPara(sST_CLEARNONE,0,0));
 
-    sInt sx, sy;
+    int sx, sy;
     sF32 asp, sax, say;
 
     sGetScreenSize(sx,sy);
@@ -292,11 +292,11 @@ namespace sPerfMon
     y+=height/2;
 
     sF32 tw=0;
-    for (sInt i=0; i<NumThreads; i++)
+    for (int i=0; i<NumThreads; i++)
       tw=sMax(tw,Painter->GetWidth(0,ThreadList[i]->ThreadName));
     tw+=10;
      
-    for (sInt i=NumThreads-1; i>=0; i--)
+    for (int i=NumThreads-1; i>=0; i--)
     {
       Thread *t=(Thread*)ThreadList[i]->PerfData;
       const sChar *tname=ThreadList[i]->ThreadName;
@@ -318,12 +318,12 @@ namespace sPerfMon
       r.Extend(-1);
 
       sU64 rxs=(sU64)r.SizeX();
-      for (sInt i=0; i<t->NumEvents-1; i++)
+      for (int i=0; i<t->NumEvents-1; i++)
       {
         Event &e1=t->Events[i];
         Event &e2=t->Events[i+1];
-        sInt x1=sInt(rxs*e1.Time/MaxTime+r.x0);
-        sInt x2=sInt(rxs*e2.Time/MaxTime+r.x0);
+        int x1=int(rxs*e1.Time/MaxTime+r.x0);
+        int x2=int(rxs*e2.Time/MaxTime+r.x0);
         Painter->Box(x1,r.y0,x2,r.y1,e1.Ev.Color|0xff000000);
       }
 
@@ -332,7 +332,7 @@ namespace sPerfMon
 
     if (ShowDetails>=0)
     {
-      static const sInt MAXLINES=20;
+      static const int MAXLINES=20;
 
       Thread *t=(Thread*)ThreadList[ShowDetails]->PerfData;
       const sChar *tname=ThreadList[ShowDetails]->ThreadName;
@@ -341,12 +341,12 @@ namespace sPerfMon
       ThreadEvent *LineEv[MAXLINES];
       sU64 LineTime[MAXLINES];
       sU32 LineCount[MAXLINES];
-      sInt nLines=0;
+      int nLines=0;
       
       sF32 basey=barsy-theight*1.5f;
 
       tw=0;
-      for (sInt i=0; i<t->NumEvents-1; i++)
+      for (int i=0; i<t->NumEvents-1; i++)
       {
         Event &e=t->Events[i];
         if (e.Ev.Color)
@@ -365,13 +365,13 @@ namespace sPerfMon
 //      sU64 rxs=r.SizeX();
       sF32 r2=right-Painter->GetWidth(0,L" (1234) 12345");
       sU64 rxs=(sU64)(r2-(left+tw));
-      for (sInt i=0; i<t->NumEvents-1; i++)
+      for (int i=0; i<t->NumEvents-1; i++)
       {
         Event &e1=t->Events[i];
 
         if (e1.Ev.Color && (e1.Ev.Name || e1.Ev.Name8))
         {
-          sInt line=0;
+          int line=0;
           for (; line<nLines; line++)
             if (e1.Ev==*LineEv[line])
               break;
@@ -402,7 +402,7 @@ namespace sPerfMon
           }
 
           Event *e2=0L;
-          for (sInt j=i+1; j<t->NumEvents; j++)
+          for (int j=i+1; j<t->NumEvents; j++)
           {
             e2=&t->Events[j];
             if (e2->Level<=e1.Level || (e1.Ev.Name && !sCmpString(e1.Ev.Name,L"???")))
@@ -413,13 +413,13 @@ namespace sPerfMon
           if (!i || e1.Level>=t->Events[i-1].Level) LineCount[line]++;
           
           y=basey-line*1.5*theight;
-          sInt x1=sInt(rxs*e1.Time/MaxTime+left+tw);
-          sInt x2=sInt(rxs*e2->Time/MaxTime+left+tw);
+          int x1=int(rxs*e1.Time/MaxTime+left+tw);
+          int x2=int(rxs*e2->Time/MaxTime+left+tw);
           Painter->Box(x1,y,x2,y+theight,e1.Ev.Color|0xff000000);
         }
       }
 
-      for (sInt i=0; i<nLines; i++)
+      for (int i=0; i<nLines; i++)
       {
         y=basey-i*1.5*theight;
         name.PrintF(L" (%4d)%6d",LineCount[i],LineTime[i]);
@@ -433,16 +433,16 @@ namespace sPerfMon
     }
     else if (ShowDetails==SHOW_SWITCHES)
     {
-      //static const sInt MAXLINES=20;
+      //static const int MAXLINES=20;
       sF32 basey=barsy;
 
       sF32 tw=0;
-      for (sInt i=0; i<NumSwitches; i++)
+      for (int i=0; i<NumSwitches; i++)
         tw=sMax(tw,Painter->GetWidth(0,Switches[i].Name));
       tw+=30;
 
       sF32 y=basey-1.5f*theight;
-      for (sInt i=0; i<NumSwitches; i++)
+      for (int i=0; i<NumSwitches; i++)
       {
         Switch &s=Switches[i];
 
@@ -461,8 +461,8 @@ namespace sPerfMon
         sString<128> line;
         sString<64> ch;
 
-        sInt nc=sCountChoice(s.Choice);
-        for (sInt j=0; j<nc; j++)
+        int nc=sCountChoice(s.Choice);
+        for (int j=0; j<nc; j++)
         {
           sMakeChoice(ch,s.Choice,j);
           if (j==*s.Ptr)
@@ -484,21 +484,21 @@ namespace sPerfMon
     // paint values
     if (!ValuesSorted)
     {
-      for (sInt i=0; i<NumValues; i++) ValueMap[i]=i;
-      for (sInt i=0; i<NumValues; i++) for (sInt j=i+1; j<NumValues; j++)
+      for (int i=0; i<NumValues; i++) ValueMap[i]=i;
+      for (int i=0; i<NumValues; i++) for (int j=i+1; j<NumValues; j++)
         if (Values[ValueMap[i]].Group>Values[ValueMap[j]].Group)
           sSwap(ValueMap[i],ValueMap[j]);
       ValuesSorted=sTRUE;
     }
 
     sF32 maxy=(sy-sy*say)/2;
-    sInt curgroup=0;
+    int curgroup=0;
     height=18;
     sF32 width=110;
     sF32 x=sx;
     sF32 groupy=0;
     y=sy;
-    for (sInt i=0; i<NumValues; i++)
+    for (int i=0; i<NumValues; i++)
     {
       Value &v=Values[ValueMap[i]];
       y+=height+height/2;
@@ -519,8 +519,8 @@ namespace sPerfMon
       r.Extend(-1);
       Painter->Box(r,0xff000000);
       r.Extend(-1);
-      sInt range=v.Max-v.Min;
-      sInt val=*v.Ptr;
+      int range=v.Max-v.Min;
+      int val=*v.Ptr;
       if (val<v.Min)
       {
         sF32 w=sMin((v.Min-val)*(width-4)/sF32(range),width-4);
@@ -586,7 +586,7 @@ sBool sSendPerfMonInput(const sInput2Event &ie)
     else
     {
       Switch &s=Switches[CurSwitch];
-      sInt nc=sCountChoice(s.Choice);
+      int nc=sCountChoice(s.Choice);
       *s.Ptr=sClamp(*s.Ptr-1,0,nc-1);
     }
     return sTRUE;
@@ -600,7 +600,7 @@ sBool sSendPerfMonInput(const sInput2Event &ie)
     else
     {
       Switch &s=Switches[CurSwitch];
-      sInt nc=sCountChoice(s.Choice);
+      int nc=sCountChoice(s.Choice);
       *s.Ptr=sClamp(*s.Ptr+1,0,nc-1);
     }
     return sTRUE;
@@ -676,12 +676,12 @@ void sPerfRemThread(sThreadContext *ctx)
   delete t;
   ctx->PerfData=0;
 
-  for (sInt i=0; i<NumThreads; i++)
+  for (int i=0; i<NumThreads; i++)
   {
     if (ThreadList[i]==ctx)
     {
       --NumThreads;
-      for (sInt j=i; j<NumThreads; j++)
+      for (int j=i; j<NumThreads; j++)
         ThreadList[j]=ThreadList[j+1];
 
       if (ShowDetails>=NumThreads) ShowDetails--;
@@ -827,13 +827,13 @@ void sPerfMuteLeave(sThreadContext *tid)
 /***                                                                      ***/
 /****************************************************************************/
 
-void sPerfAddValue(const sChar *name, const sInt *ptr, sInt min, sInt max, sInt group)
+void sPerfAddValue(const sChar *name, const int *ptr, int min, int max, int group)
 {
   if (!sPerfMon::Inited) return;
   Lock->Lock();
 
   sVERIFY(NumValues<MaxValues);
-  sInt id=NumValues++;
+  int id=NumValues++;
   Value &v=Values[id];
   v.Name=name;
   v.Group=group;
@@ -844,21 +844,21 @@ void sPerfAddValue(const sChar *name, const sInt *ptr, sInt min, sInt max, sInt 
   Lock->Unlock();
 }
 
-void sPerfRemValue(const sInt *ptr)
+void sPerfRemValue(const int *ptr)
 {
   if (!sPerfMon::Inited) return;
   Lock->Lock();
-  for (sInt i=0; i<NumValues; i++) if (Values[i].Ptr==ptr)
+  for (int i=0; i<NumValues; i++) if (Values[i].Ptr==ptr)
   {
     NumValues--;
-    for (sInt j=i; j<NumValues; j++)
+    for (int j=i; j<NumValues; j++)
       Values[j]=Values[j+1];
     break;
   } 
   Lock->Unlock();
 }
 
-void sPerfIntGetValue(sInt index, const sChar *&name, sInt &value, sBool &groupstart)
+void sPerfIntGetValue(int index, const sChar *&name, int &value, sBool &groupstart)
 {
   Lock->Lock();
   name=0;
@@ -881,7 +881,7 @@ void sPerfIntGetValue(sInt index, const sChar *&name, sInt &value, sBool &groups
 
 /****************************************************************************/
 
-void sPerfAddSwitch(const sChar *name, const sChar *choice, sInt *ptr)
+void sPerfAddSwitch(const sChar *name, const sChar *choice, int *ptr)
 {
   if (!sPerfMon::Inited) return;
   Lock->Lock();
@@ -893,21 +893,21 @@ void sPerfAddSwitch(const sChar *name, const sChar *choice, sInt *ptr)
   Lock->Unlock();
 }
 
-void sPerfRemSwitch(sInt *ptr)
+void sPerfRemSwitch(int *ptr)
 {
   if (!sPerfMon::Inited) return;
   Lock->Lock();
-  for (sInt i=0; i<NumSwitches; i++) if (Switches[i].Ptr==ptr)
+  for (int i=0; i<NumSwitches; i++) if (Switches[i].Ptr==ptr)
   {
     NumSwitches--;
-    for (sInt j=i; j<NumSwitches; j++)
+    for (int j=i; j<NumSwitches; j++)
       Switches[j]=Switches[j+1];
     break;
   } 
   Lock->Unlock();
 }
 
-void sPerfIntGetSwitch(sInt index, const sChar *&name, const sChar *&choice, sInt &value)
+void sPerfIntGetSwitch(int index, const sChar *&name, const sChar *&choice, int &value)
 {
   Lock->Lock();
   name=0;
@@ -927,10 +927,10 @@ void sPerfIntGetSwitch(sInt index, const sChar *&name, const sChar *&choice, sIn
   Lock->Unlock();
 }
 
-void sPerfIntSetSwitch(const sChar *name, sInt newvalue)
+void sPerfIntSetSwitch(const sChar *name, int newvalue)
 {
   Lock->Lock();
-  for (sInt i=0; i<NumSwitches; i++)
+  for (int i=0; i<NumSwitches; i++)
     if (!sCmpString(name,Switches[i].Name))
     {
       *Switches[i].Ptr=sClamp(newvalue,0,sCountChoice(Switches[i].Choice));
@@ -941,7 +941,7 @@ void sPerfIntSetSwitch(const sChar *name, sInt newvalue)
 
 /****************************************************************************/
 
-void sAddPerfMon(sInt maxThreads, sInt maxEvents, sInt maxValues, sInt maxSwitches)
+void sAddPerfMon(int maxThreads, int maxEvents, int maxValues, int maxSwitches)
 {
   sPerfMon::MaxThreads=maxThreads;
   sPerfMon::MaxEvents=maxEvents;

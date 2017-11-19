@@ -10,7 +10,7 @@
 
 static sU32 StatSpin;
 static sU32 StatLock;
-static sInt SpinDummy=1;
+static int SpinDummy=1;
 
 /****************************************************************************/
 /***                                                                      ***/
@@ -34,7 +34,7 @@ static void sExitSts()
 
 void sAddSched()
 {
-  static sInt once=1;
+  static int once=1;
   if(once)
   {
     once = 0;
@@ -54,9 +54,9 @@ void sSpin()
   // and don't do to many memory accesses!
 
   volatile int SpinDummy2 = SpinDummy;
-  sInt x = SpinDummy2;
+  int x = SpinDummy2;
 
-  for(sInt i=0;i<100;i++)
+  for(int i=0;i<100;i++)
     x = (x>>31 | x<<1) ^ i;
 
   SpinDummy2 = x;
@@ -74,7 +74,7 @@ void sStsLock::Lock()
     return;
   sAtomicInc(&StatLock);
 
-  sInt n = 0;
+  int n = 0;
   for(;;)
   {
     sAtomicDec(&Count);
@@ -116,7 +116,7 @@ void sStsThreadFunc(class sThread *thread, void *_user)
     user->Running = 1;
     user->Lock->Unlock();
 */
-    sInt fails = 0;
+    int fails = 0;
     while(user->Manager->Running==1 && user->Manager->ActiveWorkloadCount>0)
     {
       if(user->Execute())
@@ -145,7 +145,7 @@ void sStsThreadFunc(class sThread *thread, void *_user)
 
 /****************************************************************************/
 
-sStsThread::sStsThread(sStsManager *m,sInt index,sInt taskcount,sBool thread)
+sStsThread::sStsThread(sStsManager *m,int index,int taskcount,sBool thread)
 {
   Manager = m;
   Index = index;
@@ -190,7 +190,7 @@ void sStsThread::AddTask(sStsTask *task)
     sAtomicInc(&wl->TasksRunning);
     Lock->Unlock();
 //    sDPrintF(L"queue full\n");
-    for(sInt i=task->Start;i<task->End;i++)
+    for(int i=task->Start;i<task->End;i++)
       (*task->Code)(Manager,this,i,1,task->Data);
     sAtomicDec(&wl->TasksRunning);
   }
@@ -206,12 +206,12 @@ void sStsThread::AddTask(sStsTask *task)
 
 void sStsThread::DecreaseSync(sStsTask *t)
 {
-  for(sInt i=0;i<t->SyncCount;i++)
+  for(int i=0;i<t->SyncCount;i++)
   {
     sStsSync *s = t->Syncs[i];
     if(s)
     {
-      sInt n = sAtomicDec(&s->Count);
+      int n = sAtomicDec(&s->Count);
       if(n==0 && s->ContinueTask)
         AddTask(s->ContinueTask);
     }
@@ -225,12 +225,12 @@ sBool sStsThread::Execute()
   // grab next task
 
   sBool fail = 1;
-  sInt start=0;
-  sInt end=0;
+  int start=0;
+  int end=0;
   void *data=0;
   sStsCode code=0;
   sStsTask *killtask = 0;
-  sInt count = 0;
+  int count = 0;
   sStsQueue *qu = 0;
   sBool TryDeleteWorkload = 0;
   WorkloadReadLock.Lock();
@@ -293,7 +293,7 @@ retry:
         wl0->Mode = sSWM_FINISHED;
         wl0->SpinCount = StatSpin; StatSpin = 0;
         wl0->FailedLockCount = StatLock; StatLock = 0;
-        for(sInt i=0;i<wl0->ThreadCount;i++)
+        for(int i=0;i<wl0->ThreadCount;i++)
           wl0->ExeCount += wl0->Queues[i]->ExeCount;
         goto retry;
       }
@@ -329,14 +329,14 @@ sStsWorkload::sStsWorkload(sStsManager *mng)
 {
   Manager = mng;
 
-  const sInt memory = mng->ConfigPoolMem;
+  const int memory = mng->ConfigPoolMem;
   Mem = new sU8[memory];
   MemUsed = sPtr(Mem);
   MemEnd = MemUsed+memory;
 
   ThreadCount = mng->GetThreadCount();
   Queues = new sStsQueue *[ThreadCount];
-  for(sInt i=0;i<ThreadCount;i++)
+  for(int i=0;i<ThreadCount;i++)
   {
     Queues[i] = new sStsQueue;
     Queues[i]->Tasks = new sStsTask*[mng->ConfigMaxTasks];
@@ -353,7 +353,7 @@ sStsWorkload::sStsWorkload(sStsManager *mng)
 
 sStsWorkload::~sStsWorkload()
 {
-  for(sInt i=0;i<ThreadCount;i++)
+  for(int i=0;i<ThreadCount;i++)
   {
     delete[] Queues[i]->Tasks;
     delete Queues[i];
@@ -362,7 +362,7 @@ sStsWorkload::~sStsWorkload()
   delete[] Mem;
 }
 
-sU8 *sStsWorkload::AllocBytes(sInt bytes)
+sU8 *sStsWorkload::AllocBytes(int bytes)
 {
   bytes = sAlign(bytes,4);
   sPtr r = sAtomicAdd(&MemUsed,bytes);
@@ -374,7 +374,7 @@ sU8 *sStsWorkload::AllocBytes(sInt bytes)
 
 /****************************************************************************/
 
-sStsTask *sStsWorkload::NewTask(sStsCode code,void* data,sInt subtasks,sInt syncs)
+sStsTask *sStsWorkload::NewTask(sStsCode code,void* data,int subtasks,int syncs)
 {
   sStsTask *task = Alloc<sStsTask>(1);
   task->Code = code;
@@ -389,7 +389,7 @@ sStsTask *sStsWorkload::NewTask(sStsCode code,void* data,sInt subtasks,sInt sync
   if(syncs>0)
   {
     task->Syncs = Alloc<sStsSync *>(syncs);
-    for(sInt i=0;i<syncs;i++)
+    for(int i=0;i<syncs;i++)
       task->Syncs[i] = 0;
   }
   return task;
@@ -414,7 +414,7 @@ const sChar *sStsWorkload::PrintStat()
 /***                                                                      ***/
 /****************************************************************************/
 
-sStsManager::sStsManager(sInt memory,sInt taskqueuelength,sInt maxcore)
+sStsManager::sStsManager(int memory,int taskqueuelength,int maxcore)
 {
   Running = 0;
   TotalTasksLeft = 0;
@@ -435,7 +435,7 @@ sStsManager::sStsManager(sInt memory,sInt taskqueuelength,sInt maxcore)
 
   ThreadBits = sFindHigherPower(ThreadCount);
   Threads = new sStsThread *[ThreadCount];
-  for(sInt i=0;i<ThreadCount;i++)
+  for(int i=0;i<ThreadCount;i++)
     Threads[i] = new sStsThread(this,i,taskqueuelength,i>0);
 
   Start();
@@ -448,7 +448,7 @@ sStsManager::~sStsManager()
   sVERIFY(ActiveWorkloads.IsEmpty());
   sDeleteAll(FreeWorkloads);
 //  delete[] Mem;
-  for(sInt i=0;i<ThreadCount;i++)
+  for(int i=0;i<ThreadCount;i++)
     delete Threads[i];
   delete[] Threads;
   delete sSchedMon;
@@ -479,7 +479,7 @@ sStsWorkload *sStsManager::BeginWorkload()
 
 void sStsManager::StartWorkload(sStsWorkload *wl)
 {
-  for(sInt i=0;i<wl->ThreadCount;i++)
+  for(int i=0;i<wl->ThreadCount;i++)
   {
     sStsQueue *qu = wl->Queues[i];
 
@@ -492,7 +492,7 @@ void sStsManager::StartWorkload(sStsWorkload *wl)
   WorkloadWriteLock();
   ActiveWorkloads.AddTail(wl);
   WorkloadWriteUnlock();
-  for(sInt i=1;i<ThreadCount;i++)
+  for(int i=1;i<ThreadCount;i++)
     Threads[i]->Event->Signal();
 }
 
@@ -500,7 +500,7 @@ void sStsManager::SyncWorkload(sStsWorkload *wl)
 {
   while(wl->Mode==sSWM_RUNNING)
   {
-    sInt failcount = 0;
+    int failcount = 0;
     if(Threads[0]->Execute())
     {
       failcount++;
@@ -551,7 +551,7 @@ sStsSync *sStsManager::NewSync()
 */
 void sStsManager::AddSync(sStsTask *t,sStsSync *s)
 {
-  for(sInt i=0;i<t->SyncCount;i++)
+  for(int i=0;i<t->SyncCount;i++)
   {
     if(t->Syncs[i]==0)
     {
@@ -572,7 +572,7 @@ void sStsManager::Start()
 
   sVERIFY(!Running);
 /*
-  for(sInt i=0;i<ThreadCount;i++)
+  for(int i=0;i<ThreadCount;i++)
   {
     Threads[i]->Lock->Lock();
     sVERIFY(Threads[i]->Running==0);
@@ -582,13 +582,13 @@ void sStsManager::Start()
 
   // distribute initial load for a smooth start
 
-//  for(sInt i=1;i<ThreadCount;i++)
+//  for(int i=1;i<ThreadCount;i++)
 //    StealTasks(i);
 
   // run! but not thread[0]
 
   Running = 1;
-  for(sInt i=1;i<ThreadCount;i++)
+  for(int i=1;i<ThreadCount;i++)
     Threads[i]->Event->Signal();
 }
 
@@ -599,7 +599,7 @@ void sStsManager::StartSingle()
 
   sVERIFY(!Running);
 /*
-  for(sInt i=0;i<ThreadCount;i++)
+  for(int i=0;i<ThreadCount;i++)
   {
     Threads[i]->Lock->Lock();
     sVERIFY(Threads[i]->Running==0);
@@ -608,7 +608,7 @@ void sStsManager::StartSingle()
 */
   // do as if all other threads have finished
 /*
-  for(sInt i=0;i<ThreadCount;i++)
+  for(int i=0;i<ThreadCount;i++)
   {
     Threads[i]->Lock->Lock();
     Threads[i]->Running=2;
@@ -645,7 +645,7 @@ void sStsManager::Finish()
   for(;;)
   {
     ok = 1;
-    for(sInt i=1;i<ThreadCount;i++)
+    for(int i=1;i<ThreadCount;i++)
     {
       if(Threads[i]->Running!=2)
         ok = 0;
@@ -663,7 +663,7 @@ void sStsManager::Finish()
 
   // check if it's really safe
 /*
-  for(sInt i=0;i<ThreadCount;i++)
+  for(int i=0;i<ThreadCount;i++)
   {
     Threads[i]->Lock->Lock();
     sVERIFY(Threads[i]->Running==2);
@@ -674,7 +674,7 @@ void sStsManager::Finish()
 
   // release threads
 /*
-  for(sInt i=0;i<ThreadCount;i++)
+  for(int i=0;i<ThreadCount;i++)
   {
     Threads[i]->Running=0;
   }
@@ -693,7 +693,7 @@ void sStsManager::Sync(sStsSync *sync)
 
 /****************************************************************************/
 /*
-sU8 *sStsManager::AllocBytes(sInt bytes)
+sU8 *sStsManager::AllocBytes(int bytes)
 {
   bytes = sAlign(bytes,4);
   sPtr r = sAtomicAdd(&MemUsed,bytes);
@@ -703,23 +703,23 @@ sU8 *sStsManager::AllocBytes(sInt bytes)
   return (sU8 *)sPtr(r-bytes);
 }
 */
-sBool sStsManager::StealTasks(sInt to)
+sBool sStsManager::StealTasks(int to)
 {
-  sInt bestt=-1;
-  sInt bestn=0;
+  int bestt=-1;
+  int bestn=0;
   sStsWorkload *bestwl;
 
   sStsWorkload *wl;
   Threads[to]->WorkloadReadLock.Lock();
   sFORALL_LIST(ActiveWorkloads,wl)
   {
-    for(sInt i=0;i<ThreadBits;i++)  // test a few carefully selected threads, find the best
+    for(int i=0;i<ThreadBits;i++)  // test a few carefully selected threads, find the best
     {
-      sInt t = to^(1<<i);
+      int t = to^(1<<i);
       if(t<ThreadCount)
       {
         sStsQueue *qu = wl->Queues[t];
-        sInt n = qu->SubTaskCount;
+        int n = qu->SubTaskCount;
         sVERIFY(n>=0);
         if(n>bestn && qu->DontSteal==0)
         {
@@ -732,10 +732,10 @@ sBool sStsManager::StealTasks(sInt to)
 
     if(bestn==0)                    // nothing found. try harder, check everyone!
     {
-      for(sInt i=0;i<ThreadCount;i++)
+      for(int i=0;i<ThreadCount;i++)
       {
         sStsQueue *qu = wl->Queues[i];
-        sInt n = qu->SubTaskCount;
+        int n = qu->SubTaskCount;
         sVERIFY(n>=0);
         if(n>bestn && qu->DontSteal==0)
         {
@@ -784,7 +784,7 @@ sBool sStsManager::StealTasks(sInt to)
 */
   // get a task for real
 
-  sInt n = qu->TaskCount;
+  int n = qu->TaskCount;
   sAtomicInc(&wl->StealCount);
 
   if(n>3 && qu->DontSteal==0)               // lots of tasks, be careless
@@ -792,9 +792,9 @@ sBool sStsManager::StealTasks(sInt to)
     // remove tasks, copy them to buffer
 
     n = sMin(n/2,qt->TaskMax - qt->TaskCount);
-    sInt subtasks = 0;
+    int subtasks = 0;
     sStsTask **list = sALLOCSTACK(sStsTask *,n);
-    for(sInt i=0;i<n;i++)
+    for(int i=0;i<n;i++)
     {
       list[i] = qu->Tasks[qu->TaskCount-n+i];
       subtasks += list[i]->End - list[i]->Start;
@@ -809,7 +809,7 @@ sBool sStsManager::StealTasks(sInt to)
 
     Threads[to]->Lock->Lock();
     sVERIFY(qt->TaskCount + n <= qt->TaskMax);
-    for(sInt i=0;i<n;i++)
+    for(int i=0;i<n;i++)
       qt->Tasks[qt->TaskCount + i] = list[i];
     qt->TaskCount += n;
     qt->SubTaskCount += subtasks;
@@ -822,8 +822,8 @@ sBool sStsManager::StealTasks(sInt to)
     sStsTask  *task = qu->Tasks[n-1];
     if(task->End-task->Start>1)   // we have subtasks! split range
     {
-      sInt d = (task->End-task->Start)/2;
-      sInt m = task->End - d;
+      int d = (task->End-task->Start)/2;
+      int m = task->End - d;
       sStsTask *nt = wl->NewTask(task->Code,task->Data,0,task->SyncCount);
       nt->Granularity = task->Granularity;
       nt->EndGame = task->EndGame;
@@ -832,7 +832,7 @@ sBool sStsManager::StealTasks(sInt to)
       task->End = m;
       if(n==1) qu->DontSteal = task->End-task->Start <= task->EndGame;
 
-      for(sInt i=0;i<task->SyncCount;i++)
+      for(int i=0;i<task->SyncCount;i++)
       {
         nt->Syncs[i] = task->Syncs[i];
         sAtomicInc(&nt->Syncs[i]->Count);
@@ -881,13 +881,13 @@ sBool sStsManager::StealTasks(sInt to)
 
 void sStsManager::WorkloadWriteLock()
 {
-  for(sInt i=0;i<ThreadCount;i++)
+  for(int i=0;i<ThreadCount;i++)
     Threads[i]->WorkloadReadLock.Lock();
 }
 void sStsManager::WorkloadWriteUnlock()
 {
   ActiveWorkloadCount = ActiveWorkloads.GetCount();
-  for(sInt i=ThreadCount-1;i>=0;i--)
+  for(int i=ThreadCount-1;i>=0;i--)
     Threads[i]->WorkloadReadLock.Unlock();
 }
 
@@ -903,15 +903,15 @@ sStsPerfMon::sStsPerfMon()
   DataCount = 0x40000;
   CountMask = DataCount-1;
 
-  Counters = new sInt *[ThreadCount];
-  OldCounters = new sInt *[ThreadCount];
+  Counters = new int *[ThreadCount];
+  OldCounters = new int *[ThreadCount];
   Datas = new Entry *[ThreadCount];
   OldDatas = new Entry *[ThreadCount];
   Rects = new sRect[ThreadCount];
-  for(sInt i=0;i<ThreadCount;i++)
+  for(int i=0;i<ThreadCount;i++)
   {
-    Counters[i] = new sInt;
-    OldCounters[i] = new sInt;
+    Counters[i] = new int;
+    OldCounters[i] = new int;
     Datas[i] = new Entry[DataCount];
     OldDatas[i] = new Entry[DataCount];
   }
@@ -931,7 +931,7 @@ sStsPerfMon::sStsPerfMon()
 
 sStsPerfMon::~sStsPerfMon()
 {
-  for(sInt i=0;i<ThreadCount;i++)
+  for(int i=0;i<ThreadCount;i++)
   {
     delete Counters[i];
     delete OldCounters[i];
@@ -952,7 +952,7 @@ sStsPerfMon::~sStsPerfMon()
 
 void sStsPerfMon::FlipFrame()
 {
-  sInt **c = Counters;
+  int **c = Counters;
   Entry **d = Datas;
 
   Enable = 0;
@@ -961,12 +961,12 @@ void sStsPerfMon::FlipFrame()
   if(sGetKeyQualifier() & sKEYQ_CTRL)
   {
     TimeStart = sGetTimeStamp();
-    for(sInt i=0;i<ThreadCount;i++)
+    for(int i=0;i<ThreadCount;i++)
       *(Counters[i]) = 0;
   }
   else
   {
-    for(sInt i=0;i<ThreadCount;i++)
+    for(int i=0;i<ThreadCount;i++)
       *(OldCounters[i]) = 0;
 
     sReadBarrier();
@@ -1016,11 +1016,11 @@ void sStsPerfMon::BoxEnd()
 
 void sStsPerfMon::Paint(const sTargetSpec &ts)
 {
-  sInt sx,sy;
+  int sx,sy;
   sx = ts.Window.SizeX();
   sy = ts.Window.SizeY();
   sU32 colorstack[16];
-  sInt colorindex;
+  int colorindex;
   sViewport View;
 
   // prepare
@@ -1038,7 +1038,7 @@ void sStsPerfMon::Paint(const sTargetSpec &ts)
 
   // paint
 
-  for(sInt i=0;i<ThreadCount;i++)
+  for(int i=0;i<ThreadCount;i++)
   {
     Rects[i].x0 = 10;
     Rects[i].x1 = sx-10;
@@ -1046,24 +1046,24 @@ void sStsPerfMon::Paint(const sTargetSpec &ts)
     Rects[i].y0 = Rects[i].y1 - 9;
   }
 
-  for(sInt i=0;i<ThreadCount;i++)
+  for(int i=0;i<ThreadCount;i++)
   {
     sClear(colorstack);
     colorindex = 0;
     Box(Rects[i].x0-1,Rects[i].y0-1,Rects[i].x0+((OldEnd-OldStart)>>Scale)+1,Rects[i].y1+1,0xff202020);
-    sInt max = *OldCounters[i];
+    int max = *OldCounters[i];
     if(max<DataCount)
     {
       Entry *d = OldDatas[i];
-      sInt pos0 = Rects[i].x0;
-      sInt col0 = 0;
+      int pos0 = Rects[i].x0;
+      int col0 = 0;
       colorstack[colorindex&15] = 0;
       sF32 y0 = Rects[i].y0;
       sF32 y1 = Rects[i].y1;
 
-      for(sInt j=0;j<max;j++)
+      for(int j=0;j<max;j++)
       {
-        sInt pos1 = (d[j].Timestamp>>(Scale))+Rects[i].x0;
+        int pos1 = (d[j].Timestamp>>(Scale))+Rects[i].x0;
         sU32 col1 = d[j].Color;
         if(col1)
           colorstack[(++colorindex)&15] = col1;

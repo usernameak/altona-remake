@@ -18,8 +18,8 @@
 #include "base/windows.hpp"
 #include "base/serialize.hpp"
 
-sInt sGFXRendertargetX=0;
-sInt sGFXRendertargetY=0;
+int sGFXRendertargetX=0;
+int sGFXRendertargetY=0;
 sF32 sGFXRendertargetAspect=1.0;
 sALIGNED(sRect, sGFXViewRect, 16);
 
@@ -49,7 +49,7 @@ sU64 CurrentCBsMask[sCBUFFER_SHADERTYPES] = { 0 };
 /****************************************************************************/
 // externs
 
-extern sInt sSystemFlags;
+extern int sSystemFlags;
 void sCreateShader2(sShader *shader, sShaderBlob *code);
 void sDeleteShader2(sShader *shader);
 
@@ -174,7 +174,7 @@ void sDbgPaintWireFrame(sBool enable)
 /***                                                                      ***/
 /****************************************************************************/
 
-void sSetScreenResolution(sInt xs,sInt ys)
+void sSetScreenResolution(int xs,int ys)
 {
   sScreenMode sm;
   sGetScreenMode(sm);
@@ -185,7 +185,7 @@ void sSetScreenResolution(sInt xs,sInt ys)
   sSetScreenMode(sm);
 }
 
-void sSetScreenResolution(sInt xs,sInt ys, sF32 aspectRatio)
+void sSetScreenResolution(int xs,int ys, sF32 aspectRatio)
 {
   sScreenMode sm;
   sGetScreenMode(sm);
@@ -197,7 +197,7 @@ void sSetScreenResolution(sInt xs,sInt ys, sF32 aspectRatio)
   sSetScreenMode(sm);
 }
 
-void sGetScreenSize(sInt &xs,sInt &ys)
+void sGetScreenSize(int &xs,int &ys)
 {
   sScreenMode sm;
   sGetScreenMode(sm);
@@ -222,22 +222,22 @@ sF32 sGetScreenAspect()
   return sm.Aspect;
 }
 
-void sEnlargeZBufferRT(sInt x,sInt y)
+void sEnlargeZBufferRT(int x,int y)
 {
   sScreenMode sm;
   sGetScreenMode(sm);
 
   if(x>sm.RTZBufferX || y>sm.RTZBufferY)
   {
-    sInt nx = sMax(sm.RTZBufferX,x);
-    sInt ny = sMax(sm.RTZBufferY,y);
+    int nx = sMax(sm.RTZBufferX,x);
+    int ny = sMax(sm.RTZBufferY,y);
     sLogF(L"gfx",L"zbufferrt enlarged, this is very bad. %dx%d -> %dx%d\n",sm.RTZBufferX,sm.RTZBufferY,nx,ny);
     sCreateZBufferRT(nx,ny);
   }
 }
 
 #if sRENDERER!=sRENDER_DX9
-void sCreateZBufferRT(sInt xs,sInt ys)
+void sCreateZBufferRT(int xs,int ys)
 {
   sScreenMode sm;
   sGetScreenMode(sm);
@@ -277,7 +277,7 @@ void sSetFullscreen(sBool enable)
   sSetScreenMode(sm);
 }
 
-void sGetScreenResolution(sInt &xs, sInt &ys)
+void sGetScreenResolution(int &xs, int &ys)
 {
   sGetScreenSize(xs,ys);
 }
@@ -290,7 +290,7 @@ void sGetScreenResolution(sInt &xs, sInt &ys)
 
 template <class streamer> void Serialize_(streamer &);
 
-void sShaderBlob::SetNext(sInt type)
+void sShaderBlob::SetNext(int type)
 {
   sVERIFY(Type != sSTF_NONE);
   sShaderBlob *blob=(sShaderBlob*)(Data+sAlign(Size,4));
@@ -307,7 +307,7 @@ sShaderBlob *sShaderBlob::Next()
   return 0;
 }
 
-sShaderBlob *sShaderBlob::Get(sInt type)
+sShaderBlob *sShaderBlob::Get(int type)
 {
   sShaderBlob *blob = this;
   while(blob && blob->Type!=type)
@@ -315,7 +315,7 @@ sShaderBlob *sShaderBlob::Get(sInt type)
   return blob;
 }
 
-sShaderBlob *sShaderBlob::GetAny(sInt kind, sInt platform)
+sShaderBlob *sShaderBlob::GetAny(int kind, int platform)
 {
   sShaderBlob *blob = this;
   while(blob && (blob->Type&0xff00)!=((kind|platform)&0xff00))
@@ -323,9 +323,9 @@ sShaderBlob *sShaderBlob::GetAny(sInt kind, sInt platform)
   return blob;
 }
 
-void sSerializeShaderBlob(sU8 *data, sInt &size, sReader &s)
+void sSerializeShaderBlob(sU8 *data, int &size, sReader &s)
 {
-  sInt readsize=0;
+  int readsize=0;
   s | readsize;
   sVERIFY(!(size&3));
   sVERIFY(readsize<size);
@@ -347,7 +347,7 @@ void sSerializeShaderBlob(sU8 *data, sInt &size, sReader &s)
   }
 }
 
-void sSerializeShaderBlob(const sU8 *data, sInt size, sWriter &s)
+void sSerializeShaderBlob(const sU8 *data, int size, sWriter &s)
 {
   s | size;
   sShaderBlob *blob = 0;
@@ -380,7 +380,7 @@ void sExitShaders()
   sDelete(Shaders);
 }
 
-sShader *sCreateShaderRaw(sInt type,const sU8 *code,sInt bytes)
+sShader *sCreateShaderRaw(int type,const sU8 *code,int bytes)
 {
   sVERIFY(type & sSTF_PLATFORM);        // no more automatic setting of shader platform!
 //  type |= sGetShaderPlatform();
@@ -396,14 +396,14 @@ sShader *sCreateShaderRaw(sInt type,const sU8 *code,sInt bytes)
   sChecksumAdler32Add((sU8*)&header,8);
   sChecksumAdler32Add(code,bytes);
   sU8 tmp0 = 0;
-  sInt tmp1 = sSTF_NONE;
-  for(sInt i=bytes&3;(bytes+i)&3;i++)
+  int tmp1 = sSTF_NONE;
+  for(int i=bytes&3;(bytes+i)&3;i++)
     sChecksumAdler32Add(&tmp0,1);
   sChecksumAdler32Add((sU8*)&tmp1,4);
 
   hash = sChecksumAdler32End();
 
-  sInt cmpbytes = ((bytes+3)&~3)+12;
+  int cmpbytes = ((bytes+3)&~3)+12;
   sFORALL_LIST(*Shaders,sh)
   {
     if(type==sh->Type && hash==sh->Hash && cmpbytes==sh->Size)
@@ -421,7 +421,7 @@ sShader *sCreateShaderRaw(sInt type,const sU8 *code,sInt bytes)
   return new sShader(type,code,bytes,hash,sTRUE);
 }
 
-sShader *sCreateShader(sInt type,const sU8 *code,sInt bytes)
+sShader *sCreateShader(int type,const sU8 *code,int bytes)
 {
   sVERIFY(type & sSTF_PLATFORM);        // no more automatic setting of shader platform!
   sU32 hash;
@@ -454,7 +454,7 @@ sShader *sShader::Bind(sVertexFormatHandle *vformat, sShader *pshader)
   return this;
 }
 
-sShader::sShader(sInt type,const sU8 *data,sInt length,sU32 hash,sBool raw/*=sFALSE*/)
+sShader::sShader(int type,const sU8 *data,int length,sU32 hash,sBool raw/*=sFALSE*/)
 {
   Temp = -1;
 #if sRENDERER == sRENDER_DX9
@@ -470,7 +470,7 @@ sShader::sShader(sInt type,const sU8 *data,sInt length,sU32 hash,sBool raw/*=sFA
 
   if(raw)
   {
-    sInt blen = ((length+3)&~3)+12;
+    int blen = ((length+3)&~3)+12;
     Data = new sU8[blen];
     sShaderBlob *blob = (sShaderBlob*)Data;
     blob->Type = type;
@@ -482,7 +482,7 @@ sShader::sShader(sInt type,const sU8 *data,sInt length,sU32 hash,sBool raw/*=sFA
     UseCount = 1;
 
     sCopyMem(blob->Data,data,length);
-    for(sInt i=length&3;(length+i)&3;i++)
+    for(int i=length&3;(length+i)&3;i++)
       blob->Data[length+i] = 0;
     blob = (sShaderBlob*)(blob->Data+((length+3)&~3));
     blob->Type = sSTF_NONE;
@@ -531,12 +531,12 @@ void sShader::Release()
   }
 }
 
-sBool sShader::CheckKind(sInt type)
+sBool sShader::CheckKind(int type)
 {
   return (type&sSTF_KIND)==(Type&sSTF_KIND);
 }
 
-const sU8 *sShader::GetCode(sInt &bytes)
+const sU8 *sShader::GetCode(int &bytes)
 {
   bytes = Size;
   return Data;
@@ -556,12 +556,12 @@ void sAddRefShader(sShader * sh)
   sh->AddRef();
 }
 
-sBool sCheckShader(sShader * sh,sInt type)
+sBool sCheckShader(sShader * sh,int type)
 {
   return sh->CheckKind(type);
 }
 
-const sU8 *sGetShaderCode(sShader * sh,sInt &bytes)
+const sU8 *sGetShaderCode(sShader * sh,int &bytes)
 {
   return sh->GetCode(bytes);
 }
@@ -578,12 +578,12 @@ void sAddRefPS(sShader * psh)
   psh->AddRef();
 }
 
-sShader * sCreateVS(const sU32 *data,sInt count)
+sShader * sCreateVS(const sU32 *data,int count)
 {
   return sCreateShader(sSTF_VERTEX,(const sU8 *) data,count*4);
 }
 
-sShader * sCreatePS(const sU32 *data,sInt count)
+sShader * sCreatePS(const sU32 *data,int count)
 {
   return sCreateShader(sSTF_PIXEL,(const sU8 *) data,count*4);
 }
@@ -619,7 +619,7 @@ sBool sValidPS(sShader * psh)
 #define MAXVFHASH 64
 
 
-const sInt sVertexFormatTypeSizes[]=
+const int sVertexFormatTypeSizes[]=
 {
   0,  // invalid
   8,  // sVF_F2
@@ -642,11 +642,11 @@ sVertexFormatHandle *sCreateVertexFormat(const sU32 *disc)
 {
   sScopeMem(sAMF_HEAP);   // vertex formats are global objects and need to be allocated on heap
  
-  sInt count;
+  int count;
   sVertexFormatHandle *handle;
   sU32 data[32];
-  sInt hash;
-  static const sInt defaulttypes[32] = 
+  int hash;
+  static const int defaulttypes[32] = 
   {
     0,sVF_F3,sVF_F3,sVF_F4,
     sVF_C4,sVF_C4,0,0,
@@ -692,7 +692,7 @@ sVertexFormatHandle *sCreateVertexFormat(const sU32 *disc)
   handle->Streams = 1;
   handle->IsMemMarkSet = sIsMemMarkSet();
 
-  for(sInt i=0;i<sVF_STREAMMAX;i++)
+  for(int i=0;i<sVF_STREAMMAX;i++)
     handle->VertexSize[i] = 0;
   handle->Next = 0;
   sCopyMem(handle->Data,data,count*4);
@@ -721,7 +721,7 @@ void sFlushVertexFormat(sBool flush,void *user)
   {
     sVertexFormatHandle *handle,*next;
     sLogF(L"gfx",L"flushing vertex format handles\n");
-    for(sInt i=0;i<MAXVFHASH;i++)
+    for(int i=0;i<MAXVFHASH;i++)
     {
       handle = VertexFormatHashTable[i];
       VertexFormatHashTable[i] = 0;
@@ -772,7 +772,7 @@ void sStreamVertexFormat(sReader &s,sVertexFormatHandle *&vhandle)
 void sDestroyAllVertexFormats()
 {
   sVertexFormatHandle *h,*n;
-  for(sInt i=0;i<MAXVFHASH;i++)
+  for(int i=0;i<MAXVFHASH;i++)
   {
     h = VertexFormatHashTable[i];
     while(h)
@@ -789,10 +789,10 @@ void sDestroyAllVertexFormats()
   sClear(VertexFormatHashTable);
 }
 
-sInt sVertexFormatHandle::GetOffset(sInt semantic_and_format)
+int sVertexFormatHandle::GetOffset(int semantic_and_format)
 {
-  sInt offset = 0;
-  sInt i = 0;
+  int offset = 0;
+  int i = 0;
   const sU32 *data = GetDesc();
   while(data[i])
   {
@@ -823,7 +823,7 @@ sInt sVertexFormatHandle::GetOffset(sInt semantic_and_format)
   return -1;
 }
 
-sInt sVertexFormatHandle::GetDataType(sInt semantic)const
+int sVertexFormatHandle::GetDataType(int semantic)const
 {
   semantic &= sVF_USEMASK;
   const sU32 *desc = Data;
@@ -832,7 +832,7 @@ sInt sVertexFormatHandle::GetDataType(sInt semantic)const
     sU32 tmp = *desc++;
     if((tmp&sVF_USEMASK)==(sU32)semantic)
     {
-      return sInt(tmp&sVF_TYPEMASK);
+      return int(tmp&sVF_TYPEMASK);
     }
   }
   sFatal(L"semantic %02x not available",semantic);
@@ -857,7 +857,7 @@ sGeometryDrawInfo::sGeometryDrawInfo()
   Indirect = 0;
 }
 
-sGeometryDrawInfo::sGeometryDrawInfo(sDrawRange *ir,sInt irc,sInt instancecount, sVertexOffset *off)
+sGeometryDrawInfo::sGeometryDrawInfo(sDrawRange *ir,int irc,int instancecount, sVertexOffset *off)
 {
   Flags = 0;
   BlendFactor = 0;
@@ -886,7 +886,7 @@ sGeometryDrawInfo::sGeometryDrawInfo(sDrawRange *ir,sInt irc,sInt instancecount,
   if(off)
   {
     Flags |= sGDI_VertexOffset;
-    for(sInt i=0;i<sVF_STREAMMAX;i++)
+    for(int i=0;i<sVF_STREAMMAX;i++)
       VertexOffset[i] = off->VOff[i];
   }
   else
@@ -910,7 +910,7 @@ sGeometry::sGeometry()
   InitPrivate();
 }
 
-sGeometry::sGeometry(sInt flags,sVertexFormatHandle *hnd)
+sGeometry::sGeometry(int flags,sVertexFormatHandle *hnd)
 {
   Flags = 0;
   Format = 0;
@@ -936,7 +936,7 @@ sGeometry::~sGeometry()
 
 void sGeometry::Clear()
 {
-  for(sInt i=0;i<sVF_STREAMMAX;i++)
+  for(int i=0;i<sVF_STREAMMAX;i++)
     VertexPart[i].Clear();
   IndexPart.Clear();
 }
@@ -947,12 +947,12 @@ void sGeometry::ExitPrivate() {}
 
 void sGeometry::Serialize(sReader &s)
 {
-  sInt version = s.Header(sSerId::sGeometry,1);
+  int version = s.Header(sSerId::sGeometry,1);
   if(version>0)
   {
-    sInt vc,ic;
-    sInt vs,is;
-    sInt flags;
+    int vc,ic;
+    int vs,is;
+    int flags;
     sU32 *ip=0;
     sU32 *vp=0;
     sVertexFormatHandle *vhandle;
@@ -979,7 +979,7 @@ void sGeometry::Serialize(sReader &s)
 
 #if sRENDERER==sRENDER_OGL2 || sRENDERER==sRENDER_BLANK
 
-void sGeometry::Init(sInt flags,sVertexFormatHandle *form)
+void sGeometry::Init(int flags,sVertexFormatHandle *form)
 {
   sVERIFY(!(flags&sGF_CPU_MEM));
   Flags = flags;
@@ -993,7 +993,7 @@ void sGeometry::Init(sInt flags,sVertexFormatHandle *form)
   }
 }
 
-void sGeometry::BeginLoadIB(sInt ic,sGeometryDuration duration,void **ip)
+void sGeometry::BeginLoadIB(int ic,sGeometryDuration duration,void **ip)
 {
   sVERIFY(IndexSize>0)
   IndexPart.Clear();
@@ -1005,24 +1005,24 @@ void sGeometry::BeginLoadIB(sInt ic,sGeometryDuration duration,void **ip)
   IndexPart.Lock(ip);
 }
 
-void sGeometry::EndLoadIB(sInt ic)
+void sGeometry::EndLoadIB(int ic)
 {
   IndexPart.Unlock(ic,IndexSize);
 }
 
-void sGeometry::BeginLoadVB(sInt vc,sGeometryDuration duration,void **vp,sInt stream)
+void sGeometry::BeginLoadVB(int vc,sGeometryDuration duration,void **vp,int stream)
 {
   VertexPart[stream].Clear();
   VertexPart[stream].Init(vc,Format->GetSize(stream),duration,0);
   VertexPart[stream].Lock(vp);
 }
 
-void sGeometry::EndLoadVB(sInt vc,sInt stream)
+void sGeometry::EndLoadVB(int vc,int stream)
 {
   VertexPart[stream].Unlock(vc,Format->GetSize(stream));
 }
 
-void sGeometry::BeginLoad(sVertexFormatHandle *vf,sInt flags,sGeometryDuration duration,sInt vc,sInt ic,void **vp,void **ip)
+void sGeometry::BeginLoad(sVertexFormatHandle *vf,int flags,sGeometryDuration duration,int vc,int ic,void **vp,void **ip)
 {
   Init(flags,vf);
   BeginLoadVB(vc,duration,vp,0);
@@ -1032,7 +1032,7 @@ void sGeometry::BeginLoad(sVertexFormatHandle *vf,sInt flags,sGeometryDuration d
     IndexPart.Clear();
 }
 
-void sGeometry::EndLoad(sInt vc,sInt ic)
+void sGeometry::EndLoad(int vc,int ic)
 {
   VertexPart[0].Unlock(vc,Format->GetSize(0));
   if(IndexPart.Buffer)
@@ -1041,7 +1041,7 @@ void sGeometry::EndLoad(sInt vc,sInt ic)
 
 // obsolete
 
-void sGeometry::BeginLoad(sInt vc,sInt ic,sInt flags,sVertexFormatHandle *vf,void **vp,void **ip)
+void sGeometry::BeginLoad(int vc,int ic,int flags,sVertexFormatHandle *vf,void **vp,void **ip)
 {
   if(!(flags & sGF_INDEX32))
     flags |= sGF_INDEX16;
@@ -1108,7 +1108,7 @@ void sGeometry::LoadCube(sU32 c0,sF32 sx,sF32 sy,sF32 sz,sGeometryDuration gd)
   sz = sz*0.5f;
     
   BeginLoadVB(24,gd,&fp);
-  for(sInt i=0;i<24;i++)
+  for(int i=0;i<24;i++)
   {
     desc = GetFormat()->GetDesc();
     while(*desc!=sVF_END)
@@ -1173,7 +1173,7 @@ void sGeometry::LoadCube(sU32 c0,sF32 sx,sF32 sy,sF32 sz,sGeometryDuration gd)
   {
     sU16 *ip;
     BeginLoadIB(6*6,gd,&ip);
-    for(sInt i=0;i<6;i++)
+    for(int i=0;i<6;i++)
       sQuad(ip,i*4,0,1,2,3);
     EndLoadIB();
   }
@@ -1181,7 +1181,7 @@ void sGeometry::LoadCube(sU32 c0,sF32 sx,sF32 sy,sF32 sz,sGeometryDuration gd)
   {
     sU32 *ip;
     BeginLoadIB(6*6,gd,&ip);
-    for(sInt i=0;i<6;i++)
+    for(int i=0;i<6;i++)
       sQuad(ip,i*4,0,1,2,3);
     EndLoadIB();
   }
@@ -1191,16 +1191,16 @@ void sGeometry::LoadCube(sU32 c0,sF32 sx,sF32 sy,sF32 sz,sGeometryDuration gd)
   }
 }
 
-void sGeometry::LoadTorus(sInt tx,sInt ty,sF32 ro,sF32 ri,sGeometryDuration gd,sU32 c0)
+void sGeometry::LoadTorus(int tx,int ty,sF32 ro,sF32 ri,sGeometryDuration gd,sU32 c0)
 {
   sF32 *fp;
   const sU32 *desc;
 
   BeginLoadVB((tx+1)*(ty+1),gd,&fp);
-  for(sInt y=0;y<ty+1;y++)
+  for(int y=0;y<ty+1;y++)
   {
     sF32 fy = y*sPI2F/ty;
-    for(sInt x=0;x<tx+1;x++)
+    for(int x=0;x<tx+1;x++)
     {
       sF32 fx = x*sPI2F/tx;
 
@@ -1298,8 +1298,8 @@ void sGeometry::LoadTorus(sInt tx,sInt ty,sF32 ro,sF32 ri,sGeometryDuration gd,s
   {
     sU16 *ip;
     BeginLoadIB(tx*ty*6,gd,&ip);
-    for(sInt y=0;y<ty;y++)
-      for(sInt x=0;x<tx;x++)
+    for(int y=0;y<ty;y++)
+      for(int x=0;x<tx;x++)
         sQuad(ip,0, 
           (y+0)*(tx+1) + (x+0),
           (y+0)*(tx+1) + (x+1),
@@ -1311,8 +1311,8 @@ void sGeometry::LoadTorus(sInt tx,sInt ty,sF32 ro,sF32 ri,sGeometryDuration gd,s
   {
     sU32 *ip;
     BeginLoadIB(tx*ty*6,gd,&ip);
-    for(sInt y=0;y<ty;y++)
-      for(sInt x=0;x<tx;x++)
+    for(int y=0;y<ty;y++)
+      for(int x=0;x<tx;x++)
         sQuad(ip,0, 
           (y+0)*(tx+1) + (x+0),
           (y+0)*(tx+1) + (x+1),
@@ -1332,14 +1332,14 @@ void sGeometry::LoadTorus(sInt tx,sInt ty,sF32 ro,sF32 ri,sGeometryDuration gd,s
 /***                                                                      ***/
 /****************************************************************************/
 
-sInt sReadTextureSkipLevels(sInt skiplevels)
+int sReadTextureSkipLevels(int skiplevels)
 {
   return 0;
 }
 
 /****************************************************************************/
 
-sInt sGetBitsPerPixel(sInt format)
+int sGetBitsPerPixel(int format)
 {
 
   switch(format&sTEX_FORMAT)
@@ -1404,7 +1404,7 @@ sInt sGetBitsPerPixel(sInt format)
 
 /****************************************************************************/
 
-sBool sIsBlockCompression(sInt texflags)
+sBool sIsBlockCompression(int texflags)
 {
   switch(texflags&sTEX_FORMAT)
   {
@@ -1424,15 +1424,15 @@ sBool sIsBlockCompression(sInt texflags)
 sU32 sAYCoCgtoARGB(sU32 val);
 sU32 sARGBtoAYCoCg(sU32 val)
 {
-  sInt a = (val>>24)&0xff;
-  sInt r = (val>>16)&0xff;
-  sInt g = (val>>8 )&0xff;
-  sInt b = (val    )&0xff;
+  int a = (val>>24)&0xff;
+  int r = (val>>16)&0xff;
+  int g = (val>>8 )&0xff;
+  int b = (val    )&0xff;
 
-  sInt Co = r-b;
-  sInt t = b+(Co>>1);
-  sInt Cg = g-t;
-  sInt Y = t+(Cg>>1);
+  int Co = r-b;
+  int t = b+(Co>>1);
+  int Cg = g-t;
+  int Y = t+(Cg>>1);
   Y = sClamp(Y,0,255);
   Co = sClamp(Co,0,255);
   Cg = sClamp(Cg,0,255);
@@ -1443,15 +1443,15 @@ sU32 sARGBtoAYCoCg(sU32 val)
 
 sU32 sAYCoCgtoARGB(sU32 val)
 {
-  sInt a = (val>>24)&0xff;
-  sInt Y =  (val>>16)&0xff;
-  sInt Co = (val>>8 )&0xff;
-  sInt Cg = (val    )&0xff;
+  int a = (val>>24)&0xff;
+  int Y =  (val>>16)&0xff;
+  int Co = (val>>8 )&0xff;
+  int Cg = (val    )&0xff;
 
-  sInt t = Y-(Cg>>1);
-  sInt g = Cg+t;
-  sInt b = t-(Co>>1);
-  sInt r = Co+b;
+  int t = Y-(Cg>>1);
+  int g = Cg+t;
+  int b = t-(Co>>1);
+  int r = Co+b;
 
   r = sClamp(r,0,255);
   g = sClamp(g,0,255);
@@ -1519,7 +1519,7 @@ sTexture2D::sTexture2D()
 #endif
 }
 
-sTexture2D::sTexture2D(sInt xs,sInt ys,sU32 flags,sInt mipmaps)
+sTexture2D::sTexture2D(int xs,int ys,sU32 flags,int mipmaps)
 {
   Flags = sTEX_2D;
   Init(xs,ys,flags|sTEX_2D,mipmaps);
@@ -1543,13 +1543,13 @@ void sTexture2D::Clear()
   BitsPerPixel = 0;
 }
 
-void sTexture2D::ReInit(sInt xs, sInt ys, sInt flags,sInt mipmaps)
+void sTexture2D::ReInit(int xs, int ys, int flags,int mipmaps)
 {
   // modify parameters 
   if(flags & sTEX_SCREENSIZE)
     sFatal(L"can not reinit a texture with sTEX_SCREENSIZE");
 
-  sInt realmip = 0;
+  int realmip = 0;
   if(mipmaps==0) mipmaps=32;
   while(realmip<mipmaps && xs>=(1<<realmip) && ys>=(1<<realmip))
     realmip++;
@@ -1565,9 +1565,9 @@ void sTexture2D::ReInit(sInt xs, sInt ys, sInt flags,sInt mipmaps)
 }
 
 
-void sTexture2D::Init(sInt xs, sInt ys, sInt flags,sInt mipmaps, sBool force/*=sFALSE*/)
+void sTexture2D::Init(int xs, int ys, int flags,int mipmaps, sBool force/*=sFALSE*/)
 {
-  sInt realmip;
+  int realmip;
   sVERIFY(LoadBuffer==0);
 
   // use screen size
@@ -1585,7 +1585,7 @@ void sTexture2D::Init(sInt xs, sInt ys, sInt flags,sInt mipmaps, sBool force/*=s
   // calculate "real" mipmap count
 
   realmip = 0;
-  sInt shift=0;
+  int shift=0;
   switch(flags&sTEX_FORMAT)
   { case sTEX_DXT1:
     case sTEX_DXT1A:
@@ -1632,10 +1632,10 @@ void sTexture2D::LoadAllMipmaps(sU8 *source)
 {
   sU8 *dest;
   sU8 *p;
-  sInt pitch_source,pitch_dest;
-  sInt xs,ys;
-  sInt blockSize;
-  sInt level;
+  int pitch_source,pitch_dest;
+  int xs,ys;
+  int blockSize;
+  int level;
 
   xs = SizeX;
   ys = SizeY;
@@ -1667,7 +1667,7 @@ void sTexture2D::LoadAllMipmaps(sU8 *source)
     BeginLoad(dest,pitch_dest,level);
 
     sVERIFYRELEASE(pitch_source<=pitch_dest);
-    for(sInt y=0;y<ys;y++)
+    for(int y=0;y<ys;y++)
     {
       sCopyMem(dest,p,pitch_source);
       dest += pitch_dest;
@@ -1696,7 +1696,7 @@ sTextureCube::sTextureCube()
   SizeXY = 0;
 }
 
-sTextureCube::sTextureCube(sInt dim, sInt flags,sInt mipmaps/*=0*/)
+sTextureCube::sTextureCube(int dim, int flags,int mipmaps/*=0*/)
 {
   Flags = sTEX_CUBE;
   SizeXY = 0;
@@ -1710,9 +1710,9 @@ sTextureCube::~sTextureCube()
 
 /****************************************************************************/
 
-void sTextureCube::Init(sInt dim, sInt flags, sInt mipmaps/*=0*/, sBool force/*=sFALSE*/)
+void sTextureCube::Init(int dim, int flags, int mipmaps/*=0*/, sBool force/*=sFALSE*/)
 {
-  sInt realmip;
+  int realmip;
   sVERIFY(LoadBuffer==0);
 
   // calculate "real" mipmap count
@@ -1765,10 +1765,10 @@ void sTextureCube::LoadAllMipmaps(sU8 *data)
 {
   sU8 *dest;
   sU8 *p;
-  sInt pitch_source,pitch_dest;
-  sInt level;
+  int pitch_source,pitch_dest;
+  int level;
 
-  sInt initsize = SizeXY;
+  int initsize = SizeXY;
   pitch_source = BitsPerPixel*initsize/8;
   switch(Flags & sTEX_FORMAT)
   {
@@ -1787,19 +1787,19 @@ void sTextureCube::LoadAllMipmaps(sU8 *data)
   }
   p = data;
 
-  sInt pitch_init = pitch_source;
+  int pitch_init = pitch_source;
 
-  for(sInt f=0;f<6;f++)
+  for(int f=0;f<6;f++)
   {
     level = 0;
-    sInt size = initsize;
+    int size = initsize;
     pitch_source = pitch_init;
 
     for(;;)
     {
       // copy mipmap
       BeginLoad(sTexCubeFace(f),dest,pitch_dest,level);
-      for(sInt y=0;y<size;y++)
+      for(int y=0;y<size;y++)
       {
         sCopyMem(dest,p,pitch_source);
         dest += pitch_dest;
@@ -1838,7 +1838,7 @@ sTextureProxy::~sTextureProxy()
   Disconnect();
 }
 
-void sTextureProxy::GetSize(sInt &xs,sInt &ys,sInt &zs)
+void sTextureProxy::GetSize(int &xs,int &ys,int &zs)
 {
   if(Link)
   {
@@ -1907,9 +1907,9 @@ void sTextureProxy::Disconnect2()
 /***                                                                      ***/
 /****************************************************************************/
 
-sInt sConvertOldUvFlags(sInt flags)
+int sConvertOldUvFlags(int flags)
 {
-  sInt tmp = (flags&~0xf0);
+  int tmp = (flags&~0xf0);
 
   switch(flags&0xf0)
   {
@@ -1929,7 +1929,7 @@ sInt sConvertOldUvFlags(sInt flags)
 
 sMaterialEnv::sMaterialEnv()
 {
-  for(sInt i=0;i<sMTRLENV_LIGHTS;i++)
+  for(int i=0;i<sMTRLENV_LIGHTS;i++)
   {
     LightDir[i].Init(0,0,0);
     LightColor[i] = 0;
@@ -1975,7 +1975,7 @@ sMaterialRS::sMaterialRS()
   AlphaRef = 10;
   sClear(pad);
   StencilMask = 255;
-  for(sInt i=0;i<sMTRL_MAXTEX;i++)
+  for(int i=0;i<sMTRL_MAXTEX;i++)
   {
     TFlags[i] = 0;
     LodBias[i] = 0.0f;
@@ -2002,7 +2002,7 @@ sBool sMaterialRS::operator==(const sMaterialRS& rs)const
     return sFALSE;
   if(AlphaRef!=rs.AlphaRef)
     return sFALSE;
-  for(sInt i=0;i<sMTRL_MAXTEX;i++)
+  for(int i=0;i<sMTRL_MAXTEX;i++)
   {
     if(TFlags[i]!=rs.TFlags[i])
       return sFALSE;
@@ -2031,8 +2031,8 @@ template <class streamer> static inline void SerializeMaterialRSOld(sMaterialRS 
 
 template <class streamer> static inline void SerializeMaterialRS(sMaterialRS &rs, streamer &s)
 {
-  sInt version = 2;
-  sInt texcount = sMTRL_MAXTEX; 
+  int version = 2;
+  int texcount = sMTRL_MAXTEX; 
   s | version;
   if (version>=2)
     s | texcount;
@@ -2040,7 +2040,7 @@ template <class streamer> static inline void SerializeMaterialRS(sMaterialRS &rs
     texcount=16;  // old format always had 16 texture slots
   s.U32(rs.Flags);
   s.ArrayU8(rs.FuncFlags,4);
-  s.ArrayU32(rs.TFlags,sMin<sInt>(texcount,sMTRL_MAXTEX));
+  s.ArrayU32(rs.TFlags,sMin<int>(texcount,sMTRL_MAXTEX));
   if (texcount>sMTRL_MAXTEX) 
     s.Skip((texcount-sMTRL_MAXTEX)*sizeof(sU32));
   s.U32(rs.BlendColor);
@@ -2051,7 +2051,7 @@ template <class streamer> static inline void SerializeMaterialRS(sMaterialRS &rs
   s.U32(rs.StencilRef);
   s.U32(rs.StencilMask);
   s.U32(rs.AlphaRef);
-  s.ArrayF32(rs.LodBias,sMin<sInt>(texcount,sMTRL_MAXTEX));
+  s.ArrayF32(rs.LodBias,sMin<int>(texcount,sMTRL_MAXTEX));
   if (texcount>sMTRL_MAXTEX) 
     s.Skip((texcount-sMTRL_MAXTEX)*sizeof(sF32));
 };
@@ -2105,11 +2105,11 @@ sMaterial::sMaterial()
   States = 0;
 #endif
 #if sRENDERER==sRENDER_DX9 || sRENDERER==sRENDER_DX11
-  for(sInt i=0;i<sMTRL_MAXTEX;i++)
+  for(int i=0;i<sMTRL_MAXTEX;i++)
     TBind[i] = i | sMTB_PS;
 #endif
 
-  for(sInt i=0;i<sMTRL_MAXTEX;i++)
+  for(int i=0;i<sMTRL_MAXTEX;i++)
   {
     Texture[i] = 0;
     TFlags[i] = 0;
@@ -2132,7 +2132,7 @@ sMaterial::~sMaterial()
 #if sRENDERER==sRENDER_DX9
   if(States)
   {
-    for(sInt i=0;i<StateVariants;i++)
+    for(int i=0;i<StateVariants;i++)
       delete[] States[i];
     delete[] States;
     delete[] StateCount;
@@ -2152,24 +2152,24 @@ void sMaterial::CopyBaseFrom(const sMaterial *src)
 {
   sVERIFY(src->GetVariantCount()<=1);   // variants are not copied, so don't use CopyBaseFrom with
                                         // materials having multiple variants
-  for(sInt i=0;i<sMTRL_MAXTEX;i++)
+  for(int i=0;i<sMTRL_MAXTEX;i++)
     Texture[i] = src->Texture[i];
   NameId = src->NameId;
   Flags = src->Flags;
-  for(sInt i=0;i<sCOUNTOF(FuncFlags);i++)
+  for(int i=0;i<sCOUNTOF(FuncFlags);i++)
     FuncFlags[i] = src->FuncFlags[i];
-  for(sInt i=0;i<sMTRL_MAXTEX;i++)
+  for(int i=0;i<sMTRL_MAXTEX;i++)
     TFlags[i] = src->TFlags[i];
   BlendColor = src->BlendColor;
   BlendAlpha = src->BlendAlpha;
   BlendFactor = src->BlendFactor;
-  for(sInt i=0;i<sCOUNTOF(StencilOps);i++)
+  for(int i=0;i<sCOUNTOF(StencilOps);i++)
     StencilOps[i] = src->StencilOps[i];
   StencilRef = src->StencilRef;
   StencilMask = src->StencilMask;
   AlphaRef = src->AlphaRef;
 #if sRENDERER==sRENDER_DX9 || sRENDERER==sRENDER_DX11
-  for(sInt i=0;i<sMTRL_MAXTEX;i++)
+  for(int i=0;i<sMTRL_MAXTEX;i++)
     TBind[i] = src->TBind[i];
 #endif
 
@@ -2177,13 +2177,13 @@ void sMaterial::CopyBaseFrom(const sMaterial *src)
 
   //// copy variants: sMaterial::Prepare after CopyBaseFrom ignore changed states because of existing variants
   //// so use the old variants ignoring CopyBaseFrom code
-  //for(sInt i=0;i<sMTRL_MAXTEX;i++)
+  //for(int i=0;i<sMTRL_MAXTEX;i++)
   //  Texture[i] = src->Texture[i];
   //NameId = src->NameId;
 
-  //sInt vcount = src->GetVariantCount();
+  //int vcount = src->GetVariantCount();
   //InitVariants(vcount);
-  //for(sInt i=0;i<vcount;i++)
+  //for(int i=0;i<vcount;i++)
   //  SetVariantRS(i,src->GetVariantRS(i));
   //*(sMaterialRS*)&Flags = *(sMaterialRS*)&src->Flags;
 }
@@ -2192,7 +2192,7 @@ void sMaterial::CopyBaseFrom(const sMaterial *src)
 
 #if sRENDERER==sRENDER_DX9
 
-void sMaterial::InitVariants(sInt max)
+void sMaterial::InitVariants(int max)
 {
 
   if(StateVariants==max && States)
@@ -2200,7 +2200,7 @@ void sMaterial::InitVariants(sInt max)
   if(States)          // it happens that this is initialised twice
   {
     sLogF(L"gfx",L"material variants initialized twice\n");
-    for(sInt i=0;i<StateVariants;i++)
+    for(int i=0;i<StateVariants;i++)
       sDeleteArray(States[i]);
     sDeleteArray(VariantFlags);
     sDeleteArray(States);
@@ -2211,8 +2211,8 @@ void sMaterial::InitVariants(sInt max)
   VariantFlags = new sMaterialRS[max];
 
   States = new sU32 *[max];
-  StateCount = new sInt[max];
-  for(sInt i=0;i<max;i++)
+  StateCount = new int[max];
+  for(int i=0;i<max;i++)
   {
     States[i] = 0;
     StateCount[i] = 0;
@@ -2225,7 +2225,7 @@ void sMaterial::DiscardVariants()
 
   if(States)
   {
-    for(sInt i=0;i<StateVariants;i++)
+    for(int i=0;i<StateVariants;i++)
       sDeleteArray(States[i]);
     sDeleteArray(VariantFlags);
     sDeleteArray(States);
@@ -2236,7 +2236,7 @@ void sMaterial::DiscardVariants()
 }
 
 /*#if sRENDERER!=sRENDER_OGL2
-void sMaterial::AllocStates(const sU32 *data,sInt count,sInt var)
+void sMaterial::AllocStates(const sU32 *data,int count,int var)
 {
   sVERIFY(var<StateVariants);
   sVERIFY(States[var]==0);
@@ -2246,7 +2246,7 @@ void sMaterial::AllocStates(const sU32 *data,sInt count,sInt var)
   sCopyMem(States[var],data,count*8);
 }
 
-void sMaterial::SetVariant(sInt var)
+void sMaterial::SetVariant(int var)
 {
   sVERIFY(var>=0 && var<StateVariants);
 
@@ -2260,7 +2260,7 @@ void sMaterial::SetVariant(sInt var)
 }
 #endif*/
 
-void sMaterial::SetVariantRS(sInt var, const sMaterialRS &rs)
+void sMaterial::SetVariantRS(int var, const sMaterialRS &rs)
 {
   sMaterialRS temp;
   temp = *(sMaterialRS*)&Flags;
@@ -2269,7 +2269,7 @@ void sMaterial::SetVariantRS(sInt var, const sMaterialRS &rs)
   *(sMaterialRS*)&Flags = temp;
 }
 
-sMaterialRS &sMaterial::GetVariantRS(sInt var) const
+sMaterialRS &sMaterial::GetVariantRS(int var) const
 {
   sVERIFY(var>=0 && var<StateVariants);
   return VariantFlags[var];
@@ -2418,7 +2418,7 @@ void sViewport::UpdateModelMatrix(const sMatrix34 &mat)
   Prepare(sVUF_MODEL);
 }
 
-void sViewport::Prepare(sInt update)
+void sViewport::Prepare(int update)
 {
   if(update&(sVUF_PROJ|sVUF_WINDOW))
   {
@@ -2581,13 +2581,13 @@ void sViewport::Prepare(sInt update)
   }
 }
 
-sBool sViewport::Transform(const sVector31 &p,sInt &ix,sInt &iy) const
+sBool sViewport::Transform(const sVector31 &p,int &ix,int &iy) const
 {
   sVector4 s = p * ModelScreen;
   if(s.z>0)
   {
-    ix = sInt(((s.x/s.w)*0.5f+0.5f) * TargetSizeX) - Target.x0;
-    iy = sInt((0.5f-(s.y/s.w)*0.5f) * TargetSizeY) - Target.y0; 
+    ix = int(((s.x/s.w)*0.5f+0.5f) * TargetSizeX) - Target.x0;
+    iy = int((0.5f-(s.y/s.w)*0.5f) * TargetSizeY) - Target.y0; 
     return 1;
   }
   else
@@ -2616,7 +2616,7 @@ sBool sViewport::Transform(const sVector31 &p,sF32 &ix,sF32 &iy) const
   return 0;
 }
 
-void sViewport::MakeRayPixel(sInt ix,sInt iy,sRay &ray) const
+void sViewport::MakeRayPixel(int ix,int iy,sRay &ray) const
 {
   sF32 mx = (ix-Target.x0) / sF32(Target.SizeX());
   sF32 my = (iy-Target.y0) / sF32(Target.SizeY());
@@ -2634,7 +2634,7 @@ void sViewport::MakeRay(sF32 mx,sF32 my,sRay &ray) const
   ray.Dir.Unit();
 }
 
-sInt sViewport::Visible(const sAABBox &box, sF32 clipnear, sF32 clipfar) const
+int sViewport::Visible(const sAABBox &box, sF32 clipnear, sF32 clipfar) const
 {
   register const sMatrix34 &mv=ModelView;
   register const sF32 zx=ZoomX;
@@ -2650,7 +2650,7 @@ sInt sViewport::Visible(const sAABBox &box, sF32 clipnear, sF32 clipfar) const
   register sU32 amask = ~0;
   register sU32 omask = 0;
 #if 0   // better for some consoles...
-  for(sInt i=0;i<8;i++)
+  for(int i=0;i<8;i++)
   {
     register const sVector30 t = r[(i&1)][0]+r[(i&2)>>1][1]+r[(i&4)>>2][2];
     register sU32 clip=0;
@@ -2669,7 +2669,7 @@ sInt sViewport::Visible(const sAABBox &box, sF32 clipnear, sF32 clipfar) const
 
 #else 
 
-  for(sInt i=0;i<8;i++)
+  for(int i=0;i<8;i++)
   {
     register const sVector30 t = r[(i&1)][0]+r[(i&2)>>1][1]+r[(i&4)>>2][2];
     register const sU32 clip = ((t.x> t.z)?0x01:((t.x<-t.z)?0x4:0))|
@@ -2685,12 +2685,12 @@ sInt sViewport::Visible(const sAABBox &box, sF32 clipnear, sF32 clipfar) const
 }
 
 
-sInt sViewport::VisibleDist(const sAABBox &box,sF32 &dist) const
+int sViewport::VisibleDist(const sAABBox &box,sF32 &dist) const
 {
   sMatrix34 r[2];
   sVector30 v[8];
   sVector30 t;
-  sInt i;
+  int i;
   sU32 clip,amask,omask;
 
   r[0] = ModelView;
@@ -2754,12 +2754,12 @@ sInt sViewport::VisibleDist(const sAABBox &box,sF32 &dist) const
   return 1;                       // part in
 }
 
-sInt sViewport::VisibleDist2(const sAABBox &box,sF32 &near, sF32 &far) const
+int sViewport::VisibleDist2(const sAABBox &box,sF32 &near, sF32 &far) const
 {
   sMatrix34 r[2];
   sVector30 v[8];
   sVector30 t;
-  sInt i;
+  int i;
   sU32 clip,amask,omask;
 
   r[0] = ModelView;
@@ -2833,7 +2833,7 @@ sBool sViewport::Get2DBounds(const sAABBox &box,sFRect &bounds) const
   return Get2DBounds(points,8,bounds);
 }
 
-sBool sViewport::Get2DBounds(const sVector31 points[],sInt count,sFRect &bounds) const
+sBool sViewport::Get2DBounds(const sVector31 points[],int count,sFRect &bounds) const
 {
   // Based on "Calculating Screen Coverage", Chapter 6 from "Jim Blinn's Corner:
   // Notation, Notation, Notation", Morgan-Kaufman Publishers, 2003
@@ -2845,7 +2845,7 @@ sBool sViewport::Get2DBounds(const sVector31 points[],sInt count,sFRect &bounds)
   sBool anyVisible = sFALSE;
 
   // pass 1: project all points
-  for(sInt i=0;i<count;i++)
+  for(int i=0;i<count;i++)
   {
     sVector4 p(sDontInitialize);
     proj[i] = p = points[i] * ModelScreen;
@@ -2897,7 +2897,7 @@ sBool sViewport::Get2DBounds(const sVector31 points[],sInt count,sFRect &bounds)
   }
 
   // pass 2: process clipped points
-  for(sInt i=0;i<count;i++)
+  for(int i=0;i<count;i++)
   {
     const sVector4 &p = proj[i];
     if((outcodes[i] & 1) && (p.x - xMin*p.w < 0.0f))  xMin = -1.0f;
@@ -2912,7 +2912,7 @@ sBool sViewport::Get2DBounds(const sVector31 points[],sInt count,sFRect &bounds)
 
 /****************************************************************************/
 
-void sGetRendertargetSize(sInt &dx,sInt &dy)
+void sGetRendertargetSize(int &dx,int &dy)
 {
   dx = sGFXViewRect.SizeX();//DXRendertargetX;
   dy = sGFXViewRect.SizeY();//DXRendertargetY;
@@ -2923,7 +2923,7 @@ sF32 sGetRendertargetAspect()
   return sGFXRendertargetAspect*sGFXRendertargetY*sF32(sGFXViewRect.SizeX())/(sF32(sGFXViewRect.SizeY())*sGFXRendertargetX);
 }
 
-sBool sIsFormatDXT(sInt format)
+sBool sIsFormatDXT(int format)
 {
   switch(format & sTEX_FORMAT)
   {
@@ -2975,20 +2975,20 @@ void sClearCurrentCBuffers()
 // this fails, when previous constantbuffers overlap with current ones.
 // simple solution: whenever 
 
-void sSetCBuffers(sCBufferBase **cbuffers,sInt cbcount)
+void sSetCBuffers(sCBufferBase **cbuffers,int cbcount)
 {
-  for(sInt i=0;i<cbcount;i++)
+  for(int i=0;i<cbcount;i++)
   {
     sCBufferBase *cb = cbuffers[i];
-    sInt type = cb->Slot>>5;
+    int type = cb->Slot>>5;
 
     if(CurrentCBs[cb->Slot]==cb) // possible cache hit. check range overlap
     {
-      sInt mask = CurrentCBsMask[type];
+      int mask = CurrentCBsMask[type];
       mask &= ~CurrentCBsSlotMask[cb->Slot]; // mask = all regs that are used by OTHER slots.
       if(mask & cb->Mask)       // possible range overlap. take no risks. flush all (for this shader)
       {
-        for(sInt i=0;i<sCBUFFER_MAXSLOT;i++)
+        for(int i=0;i<sCBUFFER_MAXSLOT;i++)
         {
           CurrentCBs[i+type*sCBUFFER_MAXSLOT] = 0;
           CurrentCBsSlotMask[i+type*sCBUFFER_MAXSLOT] = 0;
@@ -3031,12 +3031,12 @@ void sSetCBuffers(sCBufferBase **cbuffers,sInt cbcount)
 
 #else
 
-void sSetCBuffers(sCBufferBase **cbuffers,sInt cbcount)
+void sSetCBuffers(sCBufferBase **cbuffers,int cbcount)
 {
   static const sChar *typenam[] = { L"VS",L"PS",L"GS" };
 
   // set constant buffers
-  for(sInt j=0;j<cbcount;j++)
+  for(int j=0;j<cbcount;j++)
   {
 //    setcbuffercount++;
     sCBufferBase *cb = cbuffers[j];
@@ -3045,14 +3045,14 @@ void sSetCBuffers(sCBufferBase **cbuffers,sInt cbcount)
       sVERIFY(cb->Slot<sCBUFFER_MAXSLOT*sCBUFFER_SHADERTYPES);
       if(cb != CurrentCBs[cb->Slot])
       {
-        sInt type = cb->Slot>>5;
+        int type = cb->Slot>>5;
         CurrentCBsMask[type] &= ~CurrentCBsSlotMask[cb->Slot];
         if(CurrentCBsMask[type]&cb->Mask)
         {
           // handle register collision
           CurrentCBsSlotMask[cb->Slot] = 0;    // prevent detection with itself
           sBool unhandled = 1;
-          for(sInt k=type*sCBUFFER_MAXSLOT;k<(type+1)*sCBUFFER_MAXSLOT;k++)
+          for(int k=type*sCBUFFER_MAXSLOT;k<(type+1)*sCBUFFER_MAXSLOT;k++)
           {
             if(cb->Mask & CurrentCBsSlotMask[k])
             {
@@ -3096,7 +3096,7 @@ void sCBufferBase::Modify()
     CurrentCBs[Slot] = 0;
 }
 
-void sCBufferBase::SetCfg(sInt slot, sInt start, sInt count)
+void sCBufferBase::SetCfg(int slot, int start, int count)
 {
   sU64 msk = ((sU64(1)<<(sClamp((RegCount+3)/4-32,0,32)))-1)<<32;
   msk |= (sU64(1)<<(sClamp((RegCount+3)/4,0,32)))-1;
@@ -3104,7 +3104,7 @@ void sCBufferBase::SetCfg(sInt slot, sInt start, sInt count)
   SetCfg(slot,start,count,msk);
 }
 
-void sCBufferBase::SetCfg(sInt slot, sInt start, sInt count, sU64 mask)
+void sCBufferBase::SetCfg(int slot, int start, int count, sU64 mask)
 {
   Slot = slot;
   RegStart = start;
@@ -3119,7 +3119,7 @@ void sCBufferBase::SetCfg(sInt slot, sInt start, sInt count, sU64 mask)
 
 #if sRENDERER != sRENDER_DX11 && sRENDERER != sRENDER_OGLES2 && sRENDERER != sRENDER_OGL2
 
-sCBufferBase *sGetCurrentCBuffer(sInt slot)
+sCBufferBase *sGetCurrentCBuffer(int slot)
 { sVERIFY(slot<sCBUFFER_MAXSLOT*sCBUFFER_SHADERTYPES);
   return CurrentCBs[slot];
 }
@@ -3135,7 +3135,7 @@ sCBufferBase *sGetCurrentCBuffer(sInt slot)
 namespace rygdxt
 {
   // for implicit init...
-  static sInt Inited=0;
+  static int Inited=0;
 
   // Couple of tables...
   static sU8 Expand5[32];
@@ -3147,13 +3147,13 @@ namespace rygdxt
 
   /**************************************************************************/
 
-  static sInt Mul8Bit(sInt a,sInt b)
+  static int Mul8Bit(int a,int b)
   {
-    sInt t = a*b + 128;
+    int t = a*b + 128;
     return (t + (t >> 8)) >> 8;
   }
 
-  static sInt SquaredDist(sU8 a,sU8 b)
+  static int SquaredDist(sU8 a,sU8 b)
   {
     return sSquare(a-b);
   }
@@ -3172,9 +3172,9 @@ namespace rygdxt
 
     void From16Bit(sU16 v)
     {
-      sInt rv = (v & 0xf800) >> 11;
-      sInt gv = (v & 0x07e0) >>  5;
-      sInt bv = (v & 0x001f) >>  0;
+      int rv = (v & 0xf800) >> 11;
+      int gv = (v & 0x07e0) >>  5;
+      int bv = (v & 0x001f) >>  0;
 
       p.a = 0;
       p.r = Expand5[rv];
@@ -3187,7 +3187,7 @@ namespace rygdxt
       return (Mul8Bit(p.r,31) << 11) + (Mul8Bit(p.g,63) << 5) + Mul8Bit(p.b,31);
     }
 
-    void LerpRGB(const Pixel &p1,const Pixel &p2,sInt f)
+    void LerpRGB(const Pixel &p1,const Pixel &p2,int f)
     {
       p.r = p1.p.r + Mul8Bit(p2.p.r - p1.p.r,f);
       p.g = p1.p.g + Mul8Bit(p2.p.g - p1.p.g,f);
@@ -3197,19 +3197,19 @@ namespace rygdxt
 
   /****************************************************************************/
 
-  static void PrepareOptTable(sU8 *Table,const sU8 *expand,sInt size)
+  static void PrepareOptTable(sU8 *Table,const sU8 *expand,int size)
   {
-    for(sInt i=0;i<256;i++)
+    for(int i=0;i<256;i++)
     {
-      sInt bestErr = 256;
+      int bestErr = 256;
 
-      for(sInt min=0;min<size;min++)
+      for(int min=0;min<size;min++)
       {
-        for(sInt max=0;max<size;max++)
+        for(int max=0;max<size;max++)
         {
-          sInt mine = expand[min];
-          sInt maxe = expand[max];
-          sInt err;
+          int mine = expand[min];
+          int maxe = expand[max];
+          int err;
 
           err = sAbs(maxe + Mul8Bit(mine-maxe,0x55) - i);
 
@@ -3238,10 +3238,10 @@ namespace rygdxt
   // (Floyd-Steinberg)
   static void DitherBlock(Pixel *dest,const Pixel *block)
   {
-    sInt err[8],*ep1 = err,*ep2 = err+4;
+    int err[8],*ep1 = err,*ep2 = err+4;
 
     // process channels seperately
-    for(sInt ch=0;ch<3;ch++)
+    for(int ch=0;ch<3;ch++)
     {
       sU8 *bp = (sU8 *) block;
       sU8 *dp = (sU8 *) dest;
@@ -3256,7 +3256,7 @@ namespace rygdxt
 #endif     
       sSetMem(err,0,sizeof(err));
 
-      for(sInt y=0;y<4;y++)
+      for(int y=0;y<4;y++)
       {
         // pixel 0
         dp[ 0] = quant[bp[ 0] + ((3*ep2[1] + 5*ep2[0]) >> 4)];
@@ -3283,59 +3283,59 @@ namespace rygdxt
   }
 
   // The color matching function (returns error metric)
-  static sInt MatchColorsBlock(const Pixel *block,const Pixel *color,sU32 &outMask,sBool dither)
+  static int MatchColorsBlock(const Pixel *block,const Pixel *color,sU32 &outMask,sBool dither)
   {
     sU32 mask = 0;
-    sInt dirr = color[0].p.r - color[1].p.r;
-    sInt dirg = color[0].p.g - color[1].p.g;
-    sInt dirb = color[0].p.b - color[1].p.b;
+    int dirr = color[0].p.r - color[1].p.r;
+    int dirg = color[0].p.g - color[1].p.g;
+    int dirb = color[0].p.b - color[1].p.b;
 
-    sInt dots[16];
-    for(sInt i=0;i<16;i++)
+    int dots[16];
+    for(int i=0;i<16;i++)
       dots[i] = block[i].p.r*dirr + block[i].p.g*dirg + block[i].p.b*dirb;
 
-    sInt stops[4];
-    for(sInt i=0;i<4;i++)
+    int stops[4];
+    for(int i=0;i<4;i++)
       stops[i] = color[i].p.r*dirr + color[i].p.g*dirg + color[i].p.b*dirb;
     
-    sInt c0Point = (stops[1] + stops[3]) >> 1;
-    sInt halfPoint = (stops[3] + stops[2]) >> 1;
-    sInt c3Point = (stops[2] + stops[0]) >> 1;
+    int c0Point = (stops[1] + stops[3]) >> 1;
+    int halfPoint = (stops[3] + stops[2]) >> 1;
+    int c3Point = (stops[2] + stops[0]) >> 1;
 
-    sInt error = 0;
+    int error = 0;
 
     if(!dither)
     {
       // the version without dithering is straightforward
-      for(sInt i=15;i>=0;i--)
+      for(int i=15;i>=0;i--)
       {
         mask <<= 2;
-        sInt dot = dots[i];
+        int dot = dots[i];
 
         if(dot < halfPoint)
           mask |= (dot < c0Point) ? 1 : 3;
         else
           mask |= (dot < c3Point) ? 2 : 0;
 
-        sInt j = mask&3;
+        int j = mask&3;
         error += SquaredDist(block[i].p.r,color[j].p.r) + SquaredDist(block[i].p.g,color[j].p.g) + SquaredDist(block[i].p.b,color[j].p.b);
       }
     }
     else
     {
       // with floyd-steinberg dithering (see above)
-      sInt err[8],*ep1 = err,*ep2 = err+4;
-      sInt *dp = dots;
+      int err[8],*ep1 = err,*ep2 = err+4;
+      int *dp = dots;
 
       c0Point <<= 4;
       halfPoint <<= 4;
       c3Point <<= 4;
-      for(sInt i=0;i<8;i++)
+      for(int i=0;i<8;i++)
         err[i] = 0;
 
-      for(sInt y=0;y<4;y++)
+      for(int y=0;y<4;y++)
       {
-        sInt dot,lmask,step;
+        int dot,lmask,step;
 
         // pixel 0
         dot = (dp[0] << 4) + (3*ep2[1] + 5*ep2[0]);
@@ -3384,9 +3384,9 @@ namespace rygdxt
       }
 
       // calc errors
-      for(sInt i=0;i<16;i++)
+      for(int i=0;i<16;i++)
       {
-        sInt j = (mask >> (2*i)) & 3;
+        int j = (mask >> (2*i)) & 3;
         error += SquaredDist(block[i].p.r,color[j].p.r) + SquaredDist(block[i].p.g,color[j].p.g) + SquaredDist(block[i].p.b,color[j].p.b);
       }
     }
@@ -3398,22 +3398,22 @@ namespace rygdxt
   // The color optimization function. (Clever code, part 1)
   static void OptimizeColorsBlock(const Pixel *block,sU16 &max16,sU16 &min16)
   {
-    static const sInt nIterPower = 4;
+    static const int nIterPower = 4;
 
     // determine color distribution
-    sInt mu[3],min[3],max[3];
+    int mu[3],min[3],max[3];
 
-    for(sInt ch=0;ch<3;ch++)
+    for(int ch=0;ch<3;ch++)
     {
       const sU8 *bp = ((const sU8 *) block) + ch;
-      sInt muv,minv,maxv;
+      int muv,minv,maxv;
 
       muv = minv = maxv = bp[0];
-      for(sInt i=4;i<64;i+=4)
+      for(int i=4;i<64;i+=4)
       {
         muv += bp[i];
-        minv = sMin<sInt>(minv,bp[i]);
-        maxv = sMax<sInt>(maxv,bp[i]);
+        minv = sMin<int>(minv,bp[i]);
+        maxv = sMax<int>(maxv,bp[i]);
       }
 
       mu[ch] = (muv + 8) >> 4;
@@ -3422,15 +3422,15 @@ namespace rygdxt
     }
 
     // determine covariance matrix
-    sInt cov[6];
-    for(sInt i=0;i<6;i++)
+    int cov[6];
+    for(int i=0;i<6;i++)
       cov[i] = 0;
 
-    for(sInt i=0;i<16;i++)
+    for(int i=0;i<16;i++)
     {
-      sInt r = block[i].p.r - mu[2];
-      sInt g = block[i].p.g - mu[1];
-      sInt b = block[i].p.b - mu[0];
+      int r = block[i].p.r - mu[2];
+      int g = block[i].p.g - mu[1];
+      int b = block[i].p.b - mu[0];
 
       cov[0] += r*r;
       cov[1] += r*g;
@@ -3442,14 +3442,14 @@ namespace rygdxt
 
     // convert covariance matrix to float, find principal axis via power iter
     sF32 covf[6],vfr,vfg,vfb;
-    for(sInt i=0;i<6;i++)
+    for(int i=0;i<6;i++)
       covf[i] = cov[i] / 255.0f;
 
     vfr = max[2] - min[2];
     vfg = max[1] - min[1];
     vfb = max[0] - min[0];
 
-    for(sInt iter=0;iter<nIterPower;iter++)
+    for(int iter=0;iter<nIterPower;iter++)
     {
       sF32 r = vfr*covf[0] + vfg*covf[1] + vfb*covf[2];
       sF32 g = vfr*covf[1] + vfg*covf[3] + vfb*covf[4];
@@ -3461,7 +3461,7 @@ namespace rygdxt
     }
 
     sF32 magn = sMax(sMax(sFAbs(vfr),sFAbs(vfg)),sFAbs(vfb));
-    sInt v_r,v_g,v_b;
+    int v_r,v_g,v_b;
 
     if(magn < 4.0f) // too small, default to luminance
     {
@@ -3472,20 +3472,20 @@ namespace rygdxt
     else
     {
       magn = 512.0f / magn;
-      v_r = sInt(vfr * magn);
-      v_g = sInt(vfg * magn);
-      v_b = sInt(vfb * magn);
+      v_r = int(vfr * magn);
+      v_g = int(vfg * magn);
+      v_b = int(vfb * magn);
     }
 
     // Pick colors at extreme points
     Pixel minp, maxp;
-    sInt mind, maxd;
+    int mind, maxd;
 
     minp = maxp = block[0];
     mind = maxd = block[0].p.r*v_r + block[0].p.g*v_g + block[0].p.b*v_b;
-    for(sInt i=1;i<16;i++)
+    for(int i=1;i<16;i++)
     {
-      sInt dot = block[i].p.r*v_r + block[i].p.g*v_g + block[i].p.b*v_b;
+      int dot = block[i].p.r*v_r + block[i].p.g*v_g + block[i].p.b*v_b;
 
       if(dot < mind)
       {
@@ -3510,8 +3510,8 @@ namespace rygdxt
   // (By solving a least squares system via normal equations+Cramer's rule)
   static sBool RefineBlock(const Pixel *block,sU16 &max16,sU16 &min16,sU32 mask)
   {
-    static const sInt w1Tab[4] = { 3,0,2,1 };
-    static const sInt prods[4] = { 0x090000,0x000900,0x040102,0x010402 };
+    static const int w1Tab[4] = { 3,0,2,1 };
+    static const int prods[4] = { 0x090000,0x000900,0x040102,0x010402 };
     // ^some magic to save a lot of multiplies in the accumulating loop...
 
     sU16 oldMin = min16;
@@ -3519,11 +3519,11 @@ namespace rygdxt
 
     if((mask ^ (mask << 2)) < 4) // just one index => degenerate system
     {
-      sInt r,g,b;
+      int r,g,b;
 
       // calc average color
       r = g = b = 8; // rounding factor
-      for(sInt i=0;i<16;i++)
+      for(int i=0;i<16;i++)
       {
         r += block[i].p.r;
         g += block[i].p.g;
@@ -3540,20 +3540,20 @@ namespace rygdxt
     }
     else
     {
-      sInt akku = 0;
-      sInt At1_r,At1_g,At1_b;
-      sInt At2_r,At2_g,At2_b;
+      int akku = 0;
+      int At1_r,At1_g,At1_b;
+      int At2_r,At2_g,At2_b;
       sU32 cm = mask;
 
       At1_r = At1_g = At1_b = 0;
       At2_r = At2_g = At2_b = 0;
-      for(sInt i=0;i<16;i++,cm>>=2)
+      for(int i=0;i<16;i++,cm>>=2)
       {
-        sInt step = cm&3;
-        sInt w1 = w1Tab[step];
-        sInt r = block[i].p.r;
-        sInt g = block[i].p.g;
-        sInt b = block[i].p.b;
+        int step = cm&3;
+        int w1 = w1Tab[step];
+        int r = block[i].p.r;
+        int g = block[i].p.g;
+        int b = block[i].p.b;
 
         akku    += prods[step];
         At1_r   += w1*r;
@@ -3569,37 +3569,37 @@ namespace rygdxt
       At2_b = 3*At2_b - At1_b;
 
       // extract solutions (this system is always regular, thanks to the check above)
-      sInt xx = akku >> 16;
-      sInt yy = (akku >> 8) & 0xff;
-      sInt xy = (akku >> 0) & 0xff;
+      int xx = akku >> 16;
+      int yy = (akku >> 8) & 0xff;
+      int xy = (akku >> 0) & 0xff;
 
       sF32 frb = 3.0f * 31.0f / 255.0f / (xx*yy - xy*xy);
       sF32 fg = frb * 63.0f / 31.0f;
 
       // solve.
-      max16 =   sClamp<sInt>(sInt((At1_r*yy - At2_r*xy)*frb+0.5f),0,31) << 11;
-      max16 |=  sClamp<sInt>(sInt((At1_g*yy - At2_g*xy)*fg +0.5f),0,63) << 5;
-      max16 |=  sClamp<sInt>(sInt((At1_b*yy - At2_b*xy)*frb+0.5f),0,31) << 0;
+      max16 =   sClamp<int>(int((At1_r*yy - At2_r*xy)*frb+0.5f),0,31) << 11;
+      max16 |=  sClamp<int>(int((At1_g*yy - At2_g*xy)*fg +0.5f),0,63) << 5;
+      max16 |=  sClamp<int>(int((At1_b*yy - At2_b*xy)*frb+0.5f),0,31) << 0;
 
-      min16 =   sClamp<sInt>(sInt((At2_r*xx - At1_r*xy)*frb+0.5f),0,31) << 11;
-      min16 |=  sClamp<sInt>(sInt((At2_g*xx - At1_g*xy)*fg +0.5f),0,63) << 5;
-      min16 |=  sClamp<sInt>(sInt((At2_b*xx - At1_b*xy)*frb+0.5f),0,31) << 0;
+      min16 =   sClamp<int>(int((At2_r*xx - At1_r*xy)*frb+0.5f),0,31) << 11;
+      min16 |=  sClamp<int>(int((At2_g*xx - At1_g*xy)*fg +0.5f),0,63) << 5;
+      min16 |=  sClamp<int>(int((At2_b*xx - At1_b*xy)*frb+0.5f),0,31) << 0;
     }
 
     return oldMin != min16 || oldMax != max16;
   }
 
   // Color block compression
-  static void CompressColorBlock(sU8 *dest,const sU32 *src,sInt qualityDither)
+  static void CompressColorBlock(sU8 *dest,const sU32 *src,int qualityDither)
   {
-    sInt quality = qualityDither & 0x3f;
+    int quality = qualityDither & 0x3f;
     sBool dither = (qualityDither & 0x80) != 0;
 
     const Pixel *block = (const Pixel *) src;
     Pixel dblock[16],color[4];
 
     // check if block is constant
-    sInt i=1;
+    int i=1;
     while(i<16 && block[i].v == block[0].v)
       i++;
 
@@ -3616,18 +3616,18 @@ namespace rygdxt
       // first step: pca+map along principal axis
       OptimizeColorsBlock(dither ? dblock : block,max16,min16);
       EvalColors(color,max16,min16);
-      sInt error = MatchColorsBlock(block,color,mask,dither);
+      int error = MatchColorsBlock(block,color,mask,dither);
 
       // second step: refine, take it if error improves
       sU16 tryMax16 = max16;
       sU16 tryMin16 = min16;
       sU32 tryMask = mask;
-      for(sInt j=0;j<(quality ? 3 : 1);j++)
+      for(int j=0;j<(quality ? 3 : 1);j++)
       {
         if(RefineBlock(dither ? dblock : block,tryMax16,tryMin16,tryMask))
         {
           EvalColors(color,tryMax16,tryMin16);
-          sInt tryErr = MatchColorsBlock(block,color,tryMask,dither);
+          int tryErr = MatchColorsBlock(block,color,tryMask,dither);
 
           if(tryErr < error) // i'll take it!
           {
@@ -3643,9 +3643,9 @@ namespace rygdxt
     }
     else // constant color
     {
-      sInt r = block[0].p.r;
-      sInt g = block[0].p.g;
-      sInt b = block[0].p.b;
+      int r = block[0].p.r;
+      int g = block[0].p.g;
+      int b = block[0].p.b;
 
       mask  = 0xaaaaaaaa;
       max16 = (OMatch5[r][0]<<11) | (OMatch6[g][0]<<5) | OMatch5[b][0];
@@ -3665,18 +3665,18 @@ namespace rygdxt
   }
 
   // Alpha block compression (this is easy for a change)
-  static void CompressAlphaBlock(sU8 *dest,const sU32 *src,sInt quality)
+  static void CompressAlphaBlock(sU8 *dest,const sU32 *src,int quality)
   {
     const Pixel *block = (const Pixel *) src;
 
     // find min/max color
-    sInt min,max;
+    int min,max;
     min = max = block[0].p.a;
 
-    for(sInt i=1;i<16;i++)
+    for(int i=1;i<16;i++)
     {
-      min = sMin<sInt>(min,block[i].p.a);
-      max = sMax<sInt>(max,block[i].p.a);
+      min = sMin<int>(min,block[i].p.a);
+      max = sMax<int>(max,block[i].p.a);
     }
 
     // encode them
@@ -3684,16 +3684,16 @@ namespace rygdxt
     *dest++ = min;
 
     // determine bias and emit color indices
-    sInt dist = max-min;
-    sInt bias = min*7 - (dist >> 1);
-    sInt dist4 = dist*4;
-    sInt dist2 = dist*2;
-    sInt bits = 0,mask=0;
+    int dist = max-min;
+    int bias = min*7 - (dist >> 1);
+    int dist4 = dist*4;
+    int dist2 = dist*2;
+    int bits = 0,mask=0;
     
-    for(sInt i=0;i<16;i++)
+    for(int i=0;i<16;i++)
     {
-      sInt a = block[i].p.a*7 - bias;
-      sInt ind,t;
+      int a = block[i].p.a*7 - bias;
+      int ind,t;
 
       // select index (hooray for bit magic)
       t = (dist4 - a) >> 31;  ind =  t & 4; a -= dist4 & t;
@@ -3719,20 +3719,20 @@ namespace rygdxt
 
 using namespace rygdxt;
 
-void sCompressDXTBlock(sU8 *dest,const sU32 *src,sBool alpha,sInt quality)
+void sCompressDXTBlock(sU8 *dest,const sU32 *src,sBool alpha,int quality)
 {
   // generate tables for the first time
   if(!Inited)
   {
-    for(sInt i=0;i<32;i++)
+    for(int i=0;i<32;i++)
       Expand5[i] = (i<<3)|(i>>2);
 
-    for(sInt i=0;i<64;i++)
+    for(int i=0;i<64;i++)
       Expand6[i] = (i<<2)|(i>>4);
 
-    for(sInt i=0;i<256+16;i++)
+    for(int i=0;i<256+16;i++)
     {
-      sInt v = sClamp(i-8,0,255);
+      int v = sClamp(i-8,0,255);
       QuantRBTab[i] = Expand5[Mul8Bit(v,31)];
       QuantGTab[i] = Expand6[Mul8Bit(v,63)];
     }
@@ -3754,29 +3754,29 @@ void sCompressDXTBlock(sU8 *dest,const sU32 *src,sBool alpha,sInt quality)
   CompressColorBlock(dest,src,quality);
 }
 
-void sFastPackDXT(sU8 *d,sU32 *bmp,sInt xs,sInt ys,sInt format,sInt quality)
+void sFastPackDXT(sU8 *d,sU32 *bmp,int xs,int ys,int format,int quality)
 {
-  sInt xb=(xs+3)/4;
-  sInt yb=(ys+3)/4;
+  int xb=(xs+3)/4;
+  int yb=(ys+3)/4;
   sU32 block[16];
 
-  for (sInt y=0; y<yb; y++)
+  for (int y=0; y<yb; y++)
   {
-    for (sInt x=0; x<xb; x++)
+    for (int x=0; x<xb; x++)
     {
       if(x != (xb-1) && y != (yb-1))
       {
-        for (sInt yy=0; yy<4; yy++)
-          for (sInt xx=0; xx<4; xx++)
+        for (int yy=0; yy<4; yy++)
+          for (int xx=0; xx<4; xx++)
             block[4*yy+xx]=bmp[xs*yy+xx];
       }
       else
       {
-        sInt xm = (xs&3) ? (xs&3) : 4;
-        sInt ym = (ys&3) ? (ys&3) : 4;
+        int xm = (xs&3) ? (xs&3) : 4;
+        int ym = (ys&3) ? (ys&3) : 4;
 
-        for (sInt yy=0; yy<4; yy++)
-          for (sInt xx=0; xx<4; xx++)
+        for (int yy=0; yy<4; yy++)
+          for (int xx=0; xx<4; xx++)
             block[4*yy+xx]=bmp[xs*(yy%ym)+(xx%xm)];
       }
 
@@ -3791,13 +3791,13 @@ void sFastPackDXT(sU8 *d,sU32 *bmp,sInt xs,sInt ys,sInt format,sInt quality)
         d+=16;
         break;
       case sTEX_DXT5N:
-        for(sInt i=0;i<16;i++)
+        for(int i=0;i<16;i++)
           block[i] = (block[i] & 0x0000ff00) | ((block[i] & 0x00ff0000) << 8);
         sCompressDXTBlock(d,block,sTRUE,quality);
         d+=16;
         break;
       case sTEX_DXT5_AYCOCG:
-        for(sInt i=0;i<16;i++)
+        for(int i=0;i<16;i++)
           block[i] = sARGBtoAYCoCg(block[i]);
         sCompressDXTBlock(d,block,sTRUE,quality);
         d+=16;
@@ -3833,7 +3833,7 @@ sTargetSpec::sTargetSpec(sTexture2D *tex,sTexture2D *depth)
   Init(tex,depth);
 }
 
-sTargetSpec::sTargetSpec(sTextureCube *tex,sTexture2D *depth,sInt face)
+sTargetSpec::sTargetSpec(sTextureCube *tex,sTexture2D *depth,int face)
 {
   Init(tex,depth,face);
 }
@@ -3857,7 +3857,7 @@ void sTargetSpec::Init(sTexture2D *color,sTexture2D *depth)
   {
     Color = color;
     Depth = depth;
-    sInt z;
+    int z;
     Color->GetSize(Window.x1,Window.y1,z);
     Aspect = sF32(Window.x1)/sF32(Window.y1);
   }
@@ -3871,7 +3871,7 @@ void sTargetSpec::Init(sTexture2D *color,sTexture2D *depth)
   Cubeface = -1;
 }
 
-void sTargetSpec::Init(sTextureCube *color,sTexture2D *depth,sInt face)
+void sTargetSpec::Init(sTextureCube *color,sTexture2D *depth,int face)
 {
   Color = color;
   Depth = depth;
@@ -3886,24 +3886,24 @@ sTargetPara::sTargetPara()
   Init();
 }
 
-sTargetPara::sTargetPara(sInt flags,sU32 clearcol,const sRect *window)
+sTargetPara::sTargetPara(int flags,sU32 clearcol,const sRect *window)
 {
   Init(flags,clearcol,window);
 }
 
-sTargetPara::sTargetPara(sInt flags,sU32 clearcol,const sRect *window,sTextureBase *colorbuffer,sTextureBase *depthbuffer)
+sTargetPara::sTargetPara(int flags,sU32 clearcol,const sRect *window,sTextureBase *colorbuffer,sTextureBase *depthbuffer)
 {
   Init(flags,clearcol,window,colorbuffer,depthbuffer);
 }
 
 
-sTargetPara::sTargetPara(sInt flags,sU32 clearcol,const sTargetSpec &spec)
+sTargetPara::sTargetPara(int flags,sU32 clearcol,const sTargetSpec &spec)
 {
   Init();
   Init(flags,clearcol,spec);
 }
 
-void sTargetPara::SetTarget(sInt i, sTextureBase *tex, sU32 clearcol)
+void sTargetPara::SetTarget(int i, sTextureBase *tex, sU32 clearcol)
 {
   sVERIFY(i>=0&&i<sCOUNTOF(Target));
   Target[i] = tex;
@@ -3913,7 +3913,7 @@ void sTargetPara::SetTarget(sInt i, sTextureBase *tex, sU32 clearcol)
 void sTargetPara::Init()
 {
   Flags = 0;
-  for(sInt i=0;i<sCOUNTOF(ClearColor);i++)
+  for(int i=0;i<sCOUNTOF(ClearColor);i++)
     ClearColor[i].Init(0,0,0,0);
   ClearZ = 1.0f;
   Cubeface = -1;
@@ -3924,17 +3924,17 @@ void sTargetPara::Init()
   Window.Init(0,0,0,0);
 }
 
-void sTargetPara::Init(sInt flags,sU32 clearcol,const sRect *window)
+void sTargetPara::Init(int flags,sU32 clearcol,const sRect *window)
 {
   Init(flags,clearcol,window,sGetScreenColorBuffer(),sGetScreenDepthBuffer());
   if(!window)
     Aspect = sGetScreenAspect();
 }
 
-void sTargetPara::Init(sInt flags,sU32 clearcol,const sRect *window,sTextureBase *colorbuffer,sTextureBase *depthbuffer)
+void sTargetPara::Init(int flags,sU32 clearcol,const sRect *window,sTextureBase *colorbuffer,sTextureBase *depthbuffer)
 {
   Flags = flags;
-  for(sInt i=0;i<sCOUNTOF(ClearColor);i++)
+  for(int i=0;i<sCOUNTOF(ClearColor);i++)
     ClearColor[i].InitColor(clearcol);
   ClearZ = 1.0f;
   Cubeface = -1;
@@ -3962,7 +3962,7 @@ void sTargetPara::Init(sInt flags,sU32 clearcol,const sRect *window,sTextureBase
     Aspect=1;
 }
 
-void sTargetPara::Init(sInt flags,sU32 clearcol,const sTargetSpec &spec)
+void sTargetPara::Init(int flags,sU32 clearcol,const sTargetSpec &spec)
 {
   if(spec.Window.IsEmpty())
     Init(flags,clearcol,0,spec.Color,spec.Depth);
@@ -3983,7 +3983,7 @@ bool sTargetPara::operator==(sTargetPara *para)
       para->Mipmap == Mipmap &&
       para->Depth == Depth)
   {
-    for (sInt i = 0; i < 4; i++)
+    for (int i = 0; i < 4; i++)
     {
       if (para->Target[i] != Target[i])
         return false;
@@ -4006,9 +4006,9 @@ sCopyTexturePara::sCopyTexturePara()
   DestCubeface = -1;
 }
 
-sCopyTexturePara::sCopyTexturePara(sInt flags,sTextureBase *d,sTextureBase *s)
+sCopyTexturePara::sCopyTexturePara(int flags,sTextureBase *d,sTextureBase *s)
 {
-  sInt z;
+  int z;
 
   Flags = flags;
   Source = s;
@@ -4034,9 +4034,9 @@ sCopyTexturePara::sCopyTexturePara(sInt flags,sTextureBase *d,sTextureBase *s)
 
 #if RENDERTARGET_OLD_TO_NEW
 
-void sSetRendertarget(const sRect *vrp,sInt flags,sU32 clearcolor)
+void sSetRendertarget(const sRect *vrp,int flags,sU32 clearcolor)
 {
-  sInt newflags = 0;
+  int newflags = 0;
   if(flags & sCLEAR_COLOR) newflags |= sST_CLEARCOLOR;
   if(flags & sCLEAR_ZBUFFER) newflags |= sST_CLEARDEPTH;
 
@@ -4044,9 +4044,9 @@ void sSetRendertarget(const sRect *vrp,sInt flags,sU32 clearcolor)
   sSetTarget(para);
 }
 
-void sSetRendertarget(const sRect *vrp, sTexture2D *tex,sInt flags,sU32 clearcolor)
+void sSetRendertarget(const sRect *vrp, sTexture2D *tex,int flags,sU32 clearcolor)
 {
-  sInt newflags = 0;
+  int newflags = 0;
   if(flags & sCLEAR_COLOR) newflags |= sST_CLEARCOLOR;
   if(flags & sCLEAR_ZBUFFER) newflags |= sST_CLEARDEPTH;
 
@@ -4073,15 +4073,15 @@ void sSetRendertarget(const sRect *vrp, sTexture2D *tex,sInt flags,sU32 clearcol
   sSetTarget(para);
 }
 
-void sSetRendertarget(const sRect *vrp,sInt flags,sU32 clearcolor,sTexture2D **tex,sInt count)
+void sSetRendertarget(const sRect *vrp,int flags,sU32 clearcolor,sTexture2D **tex,int count)
 {
-  sInt newflags = 0;
+  int newflags = 0;
   if(flags & sCLEAR_COLOR) newflags |= sST_CLEARCOLOR;
   if(flags & sCLEAR_ZBUFFER) newflags |= sST_CLEARDEPTH;
 
   sTargetPara para;
   para.Flags = newflags;
-  for(sInt i=0;i<count;i++)
+  for(int i=0;i<count;i++)
   {
     para.ClearColor[i].InitColor(clearcolor);
     para.Target[i] = tex[i];
@@ -4115,9 +4115,9 @@ void sSetRendertarget(const sRect *vrp,sInt flags,sU32 clearcolor,sTexture2D **t
   sSetTarget(para);
 }
 
-void sSetRendertargetCube(sTextureCube* tex, sTexCubeFace cf, sInt flags,sU32 clearcolor)
+void sSetRendertargetCube(sTextureCube* tex, sTexCubeFace cf, int flags,sU32 clearcolor)
 {
-  sInt newflags = 0;
+  int newflags = 0;
   if(flags & sCLEAR_COLOR) newflags |= sST_CLEARCOLOR;
   if(flags & sCLEAR_ZBUFFER) newflags |= sST_CLEARDEPTH;
 
@@ -4144,11 +4144,11 @@ void sSetRendertargetCube(sTextureCube* tex, sTexCubeFace cf, sInt flags,sU32 cl
 
 sINLINE sTexture2D *sGetCurrentBackBuffer() { return sGetScreenColorBuffer(); }
 sINLINE sTexture2D *sGetCurrentBackZBuffer() { return sGetScreenDepthBuffer(); }
-sINLINE void sEnlargeRTDepthBuffer(sInt x, sInt y) { sEnlargeZBufferRT(x,y); }
+sINLINE void sEnlargeRTDepthBuffer(int x, int y) { sEnlargeZBufferRT(x,y); }
 
 void sGrabScreen(class sTexture2D *tex, sGrabFilterFlags filter, const sRect *dst, const sRect *src)
 {
-  sInt flags = 0;
+  int flags = 0;
   if(filter==sGFF_LINEAR)
     flags = sCT_FILTER;
 
@@ -4176,7 +4176,7 @@ void sSetTarget(const sTargetPara &para)
   const sRect *r=0;
   if(!para.Window.IsEmpty())
     r = &para.Window;
-  sInt oldflags = 0;
+  int oldflags = 0;
   if(para.Flags & sST_CLEARCOLOR) oldflags |= sCLEAR_COLOR;
   if(para.Flags & sST_CLEARDEPTH) oldflags |= sCLEAR_ZBUFFER;
   if(para.Flags & sST_NOMSAA    ) oldflags |= sRTF_NO_MULTISAMPLING;
@@ -4201,7 +4201,7 @@ void sSetTarget(const sTargetPara &para)
   else
   {
     sBool differentCols = sFALSE;
-    sInt n = 0;
+    int n = 0;
     while(n<4 && para.Target[n])
     {
       if(para.ClearColor[n] != para.ClearColor[0]) differentCols = sTRUE;
@@ -4210,7 +4210,7 @@ void sSetTarget(const sTargetPara &para)
 
     if(differentCols) // need to clear each rendertarget individually...
     {
-      for(sInt i=0;i<n;i++)
+      for(int i=0;i<n;i++)
         sSetRendertarget(r,(sTexture2D*)para.Target[i],sCLEAR_COLOR|sRTZBUF_NONE,para.ClearColor[i].GetColor());
 
       oldflags &= ~sCLEAR_COLOR;
@@ -4247,10 +4247,10 @@ void sCopyTexture(const sCopyTexturePara &para)
   }
 }
 
-sTexture2D *sGetScreenColorBuffer(sInt screeen)  { return sGetCurrentBackBuffer(); }
-sTexture2D *sGetScreenDepthBuffer(sInt screeen)  { return sGetCurrentBackZBuffer(); }
+sTexture2D *sGetScreenColorBuffer(int screeen)  { return sGetCurrentBackBuffer(); }
+sTexture2D *sGetScreenDepthBuffer(int screeen)  { return sGetCurrentBackZBuffer(); }
 sTexture2D *sGetRTDepthBuffer()                  { static sTexture2D dummy; return &dummy; }  // we need to return dummy texture to correctly handle no zbuffer case
-void sEnlargeRTDepthBuffer(sInt x, sInt y)       { sEnlargeZBufferRT(x,y); }
+void sEnlargeRTDepthBuffer(int x, int y)       { sEnlargeZBufferRT(x,y); }
 
 #endif
 

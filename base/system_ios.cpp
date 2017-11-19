@@ -21,15 +21,15 @@
 
 //#include "gltest.h"
 
-static const sInt DebugHeapSize = 16*1024*1024;
+static const int DebugHeapSize = 16*1024*1024;
 
 void sInitThread();
 void sExitThread();
-void PreInitGFX(sInt &flags,sInt &xs,sInt &ys);
-void InitGFX(sInt flags,sInt xs,sInt ys);
+void PreInitGFX(int &flags,int &xs,int &ys);
+void InitGFX(int flags,int xs,int ys);
 void ExitGFX();
 
-static sInt IOS_TimeMs;
+static int IOS_TimeMs;
 static sU64 IOS_TimeUs;
 
 IOS_TouchData IOS_Touches[IOS_MaxTouches];
@@ -79,12 +79,12 @@ void IOSRender(int ms,unsigned long long us)
   }
   
   sDPrintF(L"touch");
-  for(sInt i=0;i<IOS_TouchCount;i++)
+  for(int i=0;i<IOS_TouchCount;i++)
     sDPrintF(L" | %3d %3d %1d",IOS_Touches[i].x,IOS_Touches[i].y,IOS_Touches[i].c);
   sDPrintF(L"\n");
 }
 
-void sInit(sInt flags,sInt xs,sInt ys)
+void sInit(int flags,int xs,int ys)
 {
   PreInitGFX(flags,xs,ys);
   InitGFX(flags,xs,ys);
@@ -104,7 +104,7 @@ void sSetWindowName(const sChar *name)
 void sDPrint(const sChar *str)
 {
   char buffer[1024];
-  sInt i=0;
+  int i=0;
   while(*str)
   {
     while(*str && i<1023)
@@ -117,7 +117,7 @@ void sDPrint(const sChar *str)
 void sPrint(const sChar *str)
 {
   char buffer[1024];
-  sInt i=0;
+  int i=0;
   while(*str)
   {
     while(*str && i<1023)
@@ -134,7 +134,7 @@ void sFatalImpl(const sChar *str)
   exit(1);
 }
 
-void sTriggerEvent(sInt e)
+void sTriggerEvent(int e)
 {
 }
 
@@ -152,11 +152,11 @@ class sMemoryHeap sDebugHeap;
 class sLibcHeap_ : public sMemoryHandler
 {
 public:
-  void *Alloc(sPtr size,sInt align,sInt flags)
+  void *Alloc(sPtr size,int align,int flags)
   {
     //    sAtomicAdd(&sMemoryUsed, (sDInt)size);
     void *ptr;
-//    align = sMax<sInt>(align,sizeof(void*));
+//    align = sMax<int>(align,sizeof(void*));
 //    sVERIFY(align<=4);
     ptr = malloc(size);
     
@@ -180,13 +180,13 @@ void sInitMem1()
   sMainHeapBase = 0;
   sDebugHeapBase = 0;
   
-  sInt flags = sMemoryInitFlags;
+  int flags = sMemoryInitFlags;
   
   if(flags & sIMF_DEBUG)
   {
     if (flags & sIMF_NORTL)
     {
-      sInt size = DebugHeapSize;
+      int size = DebugHeapSize;
       sDebugHeapBase = (sU8 *) malloc(size);
       sVERIFY(sDebugHeapBase);
       sDebugHeap.Init(sDebugHeapBase,size);
@@ -237,7 +237,7 @@ sThread *sGetCurrentThread()
   return (sThread *) pthread_getspecific(sThreadKey);
 }
 /*
-sInt sGetCurrentThreadId()
+int sGetCurrentThreadId()
 {
   return pthread_self();
 }
@@ -258,12 +258,12 @@ sThreadContext *sGetThreadContext()
 
 /****************************************************************************/
 
-void sSleep(sInt ms)
+void sSleep(int ms)
 {
   usleep(ms*1000); //uSleep need microseconds
 }
 
-sInt sGetCPUCount()
+int sGetCPUCount()
 {
   return 1;// 	sysconf(_SC_NPROCESSORS_CONF);
 }
@@ -294,7 +294,7 @@ void * sSTDCALL sThreadTrunk_pthread(void *ptr)
 
 /****************************************************************************/
 
-sThread::sThread(void (*code)(sThread *,void *),sInt pri,sInt stacksize,void *userdata, sInt flags/*=0*/)
+sThread::sThread(void (*code)(sThread *,void *),int pri,int stacksize,void *userdata, int flags/*=0*/)
 {
   sVERIFY(sizeof(pthread_t)==sCONFIG_PTHREAD_T_SIZE);
   
@@ -422,7 +422,7 @@ sThreadEvent::~sThreadEvent()
 {
 }
 
-sBool sThreadEvent::Wait(sInt timeout)
+sBool sThreadEvent::Wait(int timeout)
 {
   if(ManualReset) // manual reset
   {
@@ -434,7 +434,7 @@ sBool sThreadEvent::Wait(sInt timeout)
       return sTRUE;
     }
     
-    sInt start = sGetTime();
+    int start = sGetTime();
     sU32 tDiff;
     sBool okay = sFALSE;
     do
@@ -459,7 +459,7 @@ sBool sThreadEvent::Wait(sInt timeout)
       return sTRUE;
     }
     
-    sInt start = sGetTime();
+    int start = sGetTime();
     sU32 tDiff,gotit;
     do
     {
@@ -497,18 +497,18 @@ sU64 sGetTimeUS()
   return IOS_TimeUs;
 }
 
-sInt sGetTime()
+int sGetTime()
 {
   return IOS_TimeMs;
 }
 
-sInt sGetJoypadCount()
+int sGetJoypadCount()
 {
   sFatal(L"not implemented");
   return 0;
 }
 
-sJoypad *sGetJoypad(sInt id)
+sJoypad *sGetJoypad(int id)
 {
   sFatal(L"not implemented");
   return 0;
@@ -548,7 +548,7 @@ sBool sCopyFile(const sChar *source,const sChar *dest,sBool failifexists)
 { sFatal(L"not implemented"); return 0; }
 sBool sRenameFile(const sChar *source,const sChar *dest, sBool overwrite)
 { sFatal(L"not implemented"); return 0; }
-sBool sFindFile(sChar *foundname, sInt foundnamesize, const sChar *path,const sChar *pattern)
+sBool sFindFile(sChar *foundname, int foundnamesize, const sChar *path,const sChar *pattern)
 { sFatal(L"not implemented"); return 0; }
 sBool sLoadDir(sArray<sDirEntry> &list,const sChar *path,const sChar *pattern)
 { sFatal(L"not implemented"); return 0; }
