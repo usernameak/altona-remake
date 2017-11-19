@@ -20,17 +20,17 @@ class sBitWriter
 {
   sFile *File;
 
-  sU8 *Buffer;
-  sU8 *BufferPtr,*BufferEnd;
-  sU32 BitBuffer;
+  uint8_t *Buffer;
+  uint8_t *BufferPtr,*BufferEnd;
+  uint32_t BitBuffer;
   int BitsLeft;
 
-  sDInt Written;
+  ptrdiff_t Written;
   sBool Error;
 
   void FlushBuffer(sBool finish=sFALSE);
 
-  sINLINE void PutByte(sU8 byte)
+  sINLINE void PutByte(uint8_t byte)
   {
     if(BufferPtr == BufferEnd)
       FlushBuffer();
@@ -43,13 +43,13 @@ public:
   sBitWriter();
   ~sBitWriter();
 
-  void Start(sU8 *outBuffer,sDInt bufferSize);  // write to memory
+  void Start(uint8_t *outBuffer,ptrdiff_t bufferSize);  // write to memory
   void Start(sFile *outFile);                   // write to file
-  sDInt Finish(); // returns number of bytes written
+  ptrdiff_t Finish(); // returns number of bytes written
 
   sBool IsOk() const { return !Error; }
 
-  sINLINE void PutBits(sU32 bits,int count) // never write more than 24 bits at once!
+  sINLINE void PutBits(uint32_t bits,int count) // never write more than 24 bits at once!
   {
 #if sCONFIG_BUILD_DEBUG // yes, not sDEBUG - only check in actual debug builds.
     sVERIFY(count <= 24);
@@ -61,7 +61,7 @@ public:
 
     while(BitsLeft <= 24)
     {
-      PutByte((sU8) (BitBuffer >> 24));
+      PutByte((uint8_t) (BitBuffer >> 24));
       BitBuffer <<= 8;
       BitsLeft += 8;
     }
@@ -75,11 +75,11 @@ class sBitReader
   friend class sLocalBitReader;
 
   sFile *File;
-  sS64 FileSize;
+  int64_t FileSize;
 
-  sU8 *Buffer;
-  sU8 *BufferPtr,*BufferEnd;
-  sU32 BitBuffer;
+  uint8_t *Buffer;
+  uint8_t *BufferPtr,*BufferEnd;
+  uint32_t BitBuffer;
   int BitsLeft;
 
   int ExtraBytes;
@@ -87,7 +87,7 @@ class sBitReader
 
   void RefillBuffer();
 
-  sINLINE sU8 GetByte()
+  sINLINE uint8_t GetByte()
   {
     if(BufferPtr == BufferEnd)
       RefillBuffer();
@@ -99,7 +99,7 @@ public:
   sBitReader();
   ~sBitReader();
 
-  void Start(const sU8 *buffer,sDInt size);   // read from memory
+  void Start(const uint8_t *buffer,ptrdiff_t size);   // read from memory
   void Start(sFile *file);                    // read from file
   sBool Finish();
 
@@ -122,11 +122,11 @@ public:
   }
 
   // In case of error, PeekBits/GetBits always pad with zero bits - design your codes accordingly!
-  sINLINE sU32 PeekBits(int count)   { return BitBuffer >> (32 - count); }
-  sINLINE sS32 PeekBitsS(int count)  { return sS32(BitBuffer) >> (32 - count); }
+  sINLINE uint32_t PeekBits(int count)   { return BitBuffer >> (32 - count); }
+  sINLINE int32_t PeekBitsS(int count)  { return int32_t(BitBuffer) >> (32 - count); }
 
-  sINLINE sU32 GetBits(int count)    { sU32 r = PeekBits(count); SkipBits(count); return r; }
-  sINLINE sS32 GetBitsS(int count)   { sS32 r = PeekBitsS(count); SkipBits(count); return r; }
+  sINLINE uint32_t GetBits(int count)    { uint32_t r = PeekBits(count); SkipBits(count); return r; }
+  sINLINE int32_t GetBitsS(int count)   { int32_t r = PeekBitsS(count); SkipBits(count); return r; }
 };
 
 // sLocalBitReader is the same as sBitReader; use for "local" copies in inner loops, only
@@ -135,11 +135,11 @@ public:
 class sLocalBitReader
 {
   sBitReader &Parent;
-  sU8 *BufferPtr,*BufferEnd;
-  sU32 BitBuffer;
+  uint8_t *BufferPtr,*BufferEnd;
+  uint32_t BitBuffer;
   int BitsLeft;
 
-  sINLINE sU8 GetByte()
+  sINLINE uint8_t GetByte()
   {
     if(BufferPtr == BufferEnd)
     {
@@ -185,11 +185,11 @@ public:
   }
 
   // In case of error, PeekBits/GetBits always pad with zero bits - design your codes accordingly!
-  sINLINE sU32 PeekBits(int count)   { return BitBuffer >> (32 - count); }
-  sINLINE sS32 PeekBitsS(int count)  { return sS32(BitBuffer) >> (32 - count); }
+  sINLINE uint32_t PeekBits(int count)   { return BitBuffer >> (32 - count); }
+  sINLINE int32_t PeekBitsS(int count)  { return int32_t(BitBuffer) >> (32 - count); }
 
-  sINLINE sU32 GetBits(int count)    { sU32 r = PeekBits(count); SkipBits(count); return r; }
-  sINLINE sS32 GetBitsS(int count)   { sS32 r = PeekBitsS(count); SkipBits(count); return r; }
+  sINLINE uint32_t GetBits(int count)    { uint32_t r = PeekBits(count); SkipBits(count); return r; }
+  sINLINE int32_t GetBitsS(int count)   { int32_t r = PeekBitsS(count); SkipBits(count); return r; }
 };
 
 /****************************************************************************/
@@ -200,13 +200,13 @@ public:
 
 // Input:   List of frequencies for <count> symbols (0=unused).
 // Output:  Length of huffman code for each symbol; all lengths are <=maxLen.
-void sBuildHuffmanCodeLens(int *lens,const sU32 *freq,int count,int maxLen);
+void sBuildHuffmanCodeLens(int *lens,const uint32_t *freq,int count,int maxLen);
 
 // Turns the lengths from sBuildHuffmanCodeLens into the actual codes (for encoding).
-void sBuildHuffmanCodeValues(sU32 *codes,const int *lens,int count);
+void sBuildHuffmanCodeValues(uint32_t *codes,const int *lens,int count);
 
 // Full service
-void sBuildHuffmanCodes(sU32 *codes,int *lens,const sU32 *freq,int count,int maxLen);
+void sBuildHuffmanCodes(uint32_t *codes,int *lens,const uint32_t *freq,int count,int maxLen);
 
 // Encode huffman code lengths (when you need to store them)
 sBool sWriteHuffmanCodeLens(sBitWriter &writer,const int *lens,int count);
@@ -218,10 +218,10 @@ class sFastHuffmanDecoder
 {
   static const int FastBits = 8; // MUST be <16!
 
-  sU16 FastPath[1<<FastBits];
-  sU32 MaxCode[26];
+  uint16_t FastPath[1<<FastBits];
+  uint32_t MaxCode[26];
   int Delta[25];
-  sU16 *CodeMap;
+  uint16_t *CodeMap;
 
 public:
   sFastHuffmanDecoder();
@@ -236,8 +236,8 @@ public:
 
   sINLINE int DecodeSymbol(sLocalBitReader &reader)
   {
-    sU32 peek = reader.PeekBits(FastBits);
-    sU16 fast = FastPath[peek];
+    uint32_t peek = reader.PeekBits(FastBits);
+    uint16_t fast = FastPath[peek];
 
     if(fast & 0xf000) // valid entry
     {

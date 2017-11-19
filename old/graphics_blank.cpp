@@ -40,15 +40,15 @@ extern HWND sHWND;
 extern HDC sGDIDC;
 #endif
 
-static sU8 *DummyBuffer;
-static sDInt DummySize;
+static uint8_t *DummyBuffer;
+static ptrdiff_t DummySize;
 
-static sU8 *GrowDummyBuffer(int newsize)
+static uint8_t *GrowDummyBuffer(int newsize)
 {
   if(DummySize<newsize)
   {
     delete[] DummyBuffer;
-    DummyBuffer = new sU8[newsize];
+    DummyBuffer = new uint8_t[newsize];
     DummySize = newsize;
   }
   return DummyBuffer;
@@ -261,7 +261,7 @@ void sOccQuery::Poll()
 /***                                                                      ***/
 /****************************************************************************/
 
-sU64 sGetAvailTextureFormats()
+uint64_t sGetAvailTextureFormats()
 {
   return ~0;
 }
@@ -281,7 +281,7 @@ void sTexture2D::Destroy2()
 {
 }
 
-void sTexture2D::BeginLoad(sU8 *&data,int &pitch,int mipmap)
+void sTexture2D::BeginLoad(uint8_t *&data,int &pitch,int mipmap)
 {
   int xs = SizeX;
   int ys = SizeY;
@@ -310,7 +310,7 @@ void sTexture2D::BeginLoad(sU8 *&data,int &pitch,int mipmap)
   data = GrowDummyBuffer(pitch*ys);
 }
 
-void sTexture2D::BeginLoadPartial(const sRect &rect,sU8 *&data,int &pitch,int mipmap)
+void sTexture2D::BeginLoadPartial(const sRect &rect,uint8_t *&data,int &pitch,int mipmap)
 {
   BeginLoad(data,pitch,mipmap);
 }
@@ -343,7 +343,7 @@ void sTextureCube::Destroy2()
 {
 }
 
-void sTextureCube::BeginLoad(sTexCubeFace cf, sU8*& data, int& pitch, int mipmap)
+void sTextureCube::BeginLoad(sTexCubeFace cf, uint8_t*& data, int& pitch, int mipmap)
 {
   data = GrowDummyBuffer(BitsPerPixel*SizeXY);
   pitch = 0;
@@ -365,7 +365,7 @@ void sTextureProxy::Disconnect2()
 
 /****************************************************************************/
 
-void sPackDXT(sU8 *d,sU32 *bmp,int xs,int ys,int format,sBool dither)
+void sPackDXT(uint8_t *d,uint32_t *bmp,int xs,int ys,int format,sBool dither)
 {
   sFastPackDXT(d,bmp,xs,ys,format & sTEX_FORMAT,1 | (dither ? 0x80 : 0));
 }
@@ -432,11 +432,11 @@ void sSetPSParam(int o, int count, const sVector4* psf)
 {
 }
 
-void sSetVSBool(sU32 bits,sU32 mask)
+void sSetVSBool(uint32_t bits,uint32_t mask)
 {
 }
 
-void sSetPSBool(sU32 bits,sU32 mask)
+void sSetPSBool(uint32_t bits,uint32_t mask)
 {
 }
 
@@ -459,7 +459,7 @@ sBool sSetOversizeScreen(int xs,int ys,int fsaa,sBool mayfail)
   return sFALSE;
 }
 
-void sGetScreenSafeArea(sF32 &xs, sF32 &ys)
+void sGetScreenSafeArea(float &xs, float &ys)
 {
 #if sCONFIG_BUILD_DEBUG || sCONFIG_BUILD_DEBUGFAST
   xs = 0.95f;
@@ -480,14 +480,14 @@ void PreInitGFX(int &flags,int &xs,int &ys)
     if(flags & sISF_REFRAST)      DXScreenMode.Flags |= sSM_REFRAST;
     DXScreenMode.ScreenX = xs;
     DXScreenMode.ScreenY = ys;
-    DXScreenMode.Aspect = sF32(DXScreenMode.ScreenX) / sF32(DXScreenMode.ScreenY);
+    DXScreenMode.Aspect = float(DXScreenMode.ScreenX) / float(DXScreenMode.ScreenY);
   }
   else
   {
     xs = DXScreenMode.ScreenX;
     ys = DXScreenMode.ScreenY;
     if(DXScreenMode.Aspect==0)
-      DXScreenMode.Aspect = sF32(DXScreenMode.ScreenX) / sF32(DXScreenMode.ScreenY);
+      DXScreenMode.Aspect = float(DXScreenMode.ScreenX) / float(DXScreenMode.ScreenY);
   }
 }
 
@@ -496,7 +496,7 @@ void InitGFX(int flags,int xs,int ys)
   GrowDummyBuffer(1024);
   DXScreenMode.ScreenX = xs;
   DXScreenMode.ScreenY = ys;
-  DXScreenMode.Aspect = sF32(DXScreenMode.ScreenX) / sF32(DXScreenMode.ScreenY);
+  DXScreenMode.Aspect = float(DXScreenMode.ScreenX) / float(DXScreenMode.ScreenY);
   sInitGfxCommon();
 }
 
@@ -539,7 +539,7 @@ void sGetScreenInfo(sScreenInfo &si,int flags,int display)
   si.RefreshRates[0] = 60;
   si.AspectRatios[0].x = 4;
   si.AspectRatios[0].y = 3;
-  si.CurrentAspect = sF32(DXScreenMode.ScreenX)/DXScreenMode.ScreenY;
+  si.CurrentAspect = float(DXScreenMode.ScreenX)/DXScreenMode.ScreenY;
   si.CurrentXSize = DXScreenMode.ScreenX;
   si.CurrentYSize = DXScreenMode.ScreenY;
 }
@@ -569,19 +569,19 @@ void sSetScreen(sTexture2D *, sGrabFilterFlags filter, const sRect *dst, const s
 {
 }
 
-void sSetRendertarget(const sRect *vrp, int clearflags, sU32 clearcolor)
+void sSetRendertarget(const sRect *vrp, int clearflags, uint32_t clearcolor)
 {
 }
 
-void sSetRendertarget(const sRect *vrp,sTexture2D *tex, int flags, sU32 clearcolor)
+void sSetRendertarget(const sRect *vrp,sTexture2D *tex, int flags, uint32_t clearcolor)
 {
 }
 
-void sSetRendertarget(const sRect *vrp,int flags,sU32 clearcolor,sTexture2D **tex,int count)
+void sSetRendertarget(const sRect *vrp,int flags,uint32_t clearcolor,sTexture2D **tex,int count)
 {
 }
 
-void sSetRendertargetCube(sTextureCube*,sTexCubeFace,int cf, sU32 cc)
+void sSetRendertargetCube(sTextureCube*,sTexCubeFace,int cf, uint32_t cc)
 {
 }
 
@@ -589,7 +589,7 @@ sTexture2D *sGetCurrentFrontBuffer() { return 0; }
 sTexture2D *sGetCurrentBackBuffer() { return 0; }
 sTexture2D *sGetCurrentBackZBuffer() { return 0; }
 
-void sBeginSaveRT(const sU8 *&data, sS32 &pitch, enum sTextureFlags &flags)
+void sBeginSaveRT(const uint8_t *&data, int32_t &pitch, enum sTextureFlags &flags)
 {
   sVERIFYFALSE;
 }
@@ -598,7 +598,7 @@ void sEndSaveRT()
 {
 }
 
-void sBeginReadTexture(const sU8*& data, sS32& pitch, enum sTextureFlags& flags,sTexture2D *tex)
+void sBeginReadTexture(const uint8_t*& data, int32_t& pitch, enum sTextureFlags& flags,sTexture2D *tex)
 {
   sVERIFYFALSE;
 }
@@ -647,11 +647,11 @@ void sSetTexture(int stage,class sTextureBase *tex)
 {
 }
 
-void sSetRenderStates(const sU32 *data, int count)
+void sSetRenderStates(const uint32_t *data, int count)
 {
 }
 
-int sRenderStateTexture(sU32 *data, int texstage, sU32 tflags,sF32 lodbias)
+int sRenderStateTexture(uint32_t *data, int texstage, uint32_t tflags,float lodbias)
 {
   return 0;
 }
@@ -665,11 +665,11 @@ void sGetGraphicsStats(sGraphicsStats &stat)
   sClear(stat);
 }
 
-void sSetDesiredFrameRate(sF32 rate)
+void sSetDesiredFrameRate(float rate)
 {
 }
 
-void sSetScreenGamma(sF32 gamma)
+void sSetScreenGamma(float gamma)
 {
 }
 

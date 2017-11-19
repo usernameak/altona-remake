@@ -41,7 +41,7 @@ sADDSUBSYSTEM(Math,0x18,sInitMath,0);
 /****************************************************************************/
 
 // Find real roots (=Nullstellen) of at� + bt + c.
-int sSolveQuadratic(sF32 t[],sF32 a,sF32 b,sF32 c)
+int sSolveQuadratic(float t[],float a,float b,float c)
 {
   if(a == 0.0f) // yes, exact compares everywhere!
   {
@@ -52,10 +52,10 @@ int sSolveQuadratic(sF32 t[],sF32 a,sF32 b,sF32 c)
     return 1;
   }
 
-  sF32 discr = b*b - 4.0f*a*c;
+  float discr = b*b - 4.0f*a*c;
   if(discr > 0.0f)
   {
-    sF32 x = -0.5f * (b + (b >= 0.0f ? 1.0f : -1.0f) * sSqrt(discr));
+    float x = -0.5f * (b + (b >= 0.0f ? 1.0f : -1.0f) * sSqrt(discr));
     t[0] = x / a;
     t[1] = c / x;
     return 2;
@@ -72,9 +72,9 @@ int sSolveQuadratic(sF32 t[],sF32 a,sF32 b,sF32 c)
 /****************************************************************************/
 /****************************************************************************/
 
-sF64 sRombergIntegral(sIntegrand f_,void *user,sF64 a,sF64 b,int maxOrder,sF64 maxError)
+double sRombergIntegral(sIntegrand f_,void *user,double a,double b,int maxOrder,double maxError)
 {
-  sF64 t[20];
+  double t[20];
   sVERIFY(0 < maxOrder && maxOrder <= 20);
   sVERIFY(a <= b);
   
@@ -82,8 +82,8 @@ sF64 sRombergIntegral(sIntegrand f_,void *user,sF64 a,sF64 b,int maxOrder,sF64 m
     return 0.0f;
 
   // first order: trapezoid rule over whole interval
-  sF64 result;
-  sF64 h = b-a;
+  double result;
+  double h = b-a;
   t[0] = result = 0.5 * h * (f_(a,user) + f_(b,user));
   
   // successively higher orders
@@ -91,27 +91,27 @@ sF64 sRombergIntegral(sIntegrand f_,void *user,sF64 a,sF64 b,int maxOrder,sF64 m
   for(int n=1; i<maxOrder; i++, n *= 2, h *= 0.5)
   {
     // trapezoid rule for next-higher order
-    sF64 sum = 0.0;
+    double sum = 0.0;
     for(int j=0; j<n; j++)
       sum += f_(a + h*(j + 0.5),user);
     
     sum = 0.5 * (t[0] + h * sum);
     
     // richardson extrapolation
-    sF64 lastIn = t[0];
-    sF64 lastOut = sum;
-    sF64 ff = 4.0;
+    double lastIn = t[0];
+    double lastOut = sum;
+    double ff = 4.0;
     t[0] = sum;
     
     for(int j=1; j<=i; j++, ff *= 4.0)
     {
-      sF64 in = t[j];
+      double in = t[j];
       t[j] = lastOut = (ff * lastOut - lastIn) / (ff - 1.0);
       lastIn = in;
     }
     
     // (relative) error estimation
-    sF64 errorEst = result ? (t[i] - result) / result : 0.0;
+    double errorEst = result ? (t[i] - result) / result : 0.0;
     result = t[i];
 
     if(-maxError < errorEst && errorEst < maxError) // don't ask.
@@ -128,14 +128,14 @@ sF64 sRombergIntegral(sIntegrand f_,void *user,sF64 a,sF64 b,int maxOrder,sF64 m
 /****************************************************************************/
 /****************************************************************************/
 
-void sVector30::InitColor(sU32 col)
+void sVector30::InitColor(uint32_t col)
 {
   x = ((col&0x00ff0000)>>16)/255.0f;
   y = ((col&0x0000ff00)>> 8)/255.0f;
   z = ((col&0x000000ff)    )/255.0f;
 }
 
-void sVector30::InitColor(sU32 col,sF32 amp)
+void sVector30::InitColor(uint32_t col,float amp)
 {
   InitColor(col);
   x *= amp;
@@ -143,9 +143,9 @@ void sVector30::InitColor(sU32 col,sF32 amp)
   z *= amp;
 }
 
-sU32 sVector30::GetColor() const
+uint32_t sVector30::GetColor() const
 {
-  sU32 col;
+  uint32_t col;
 
   col = (sClamp<int>(int(x*255+0.5f),0,255)<<16)
       | (sClamp<int>(int(y*255+0.5f),0,255)<< 8)
@@ -162,7 +162,7 @@ void sVector30::Cross(sVector30Arg a,sVector30Arg b)
                    ,a.x*b.y-a.y*b.x);
 }
 
-void sMatrix34::Fade(sF32 f,const sMatrix34 &mat0,const sMatrix34 &mat1)
+void sMatrix34::Fade(float f,const sMatrix34 &mat0,const sMatrix34 &mat1)
 {
   i.Fade(f,mat0.i,mat1.i);
   j.Fade(f,mat0.j,mat1.j);
@@ -170,7 +170,7 @@ void sMatrix34::Fade(sF32 f,const sMatrix34 &mat0,const sMatrix34 &mat1)
   l.Fade(f,mat0.l,mat1.l);
 }
 
-void sMatrix34::FadeOrthonormal(sF32 f,const sMatrix34 &mat0,const sMatrix34 &mat1)
+void sMatrix34::FadeOrthonormal(float f,const sMatrix34 &mat0,const sMatrix34 &mat1)
 {
   i.Fade(f,mat0.i,mat1.i);
   k.Fade(f,mat0.k,mat1.k);
@@ -181,7 +181,7 @@ void sMatrix34::FadeOrthonormal(sF32 f,const sMatrix34 &mat0,const sMatrix34 &ma
   i.Cross(j,k);
 }
 
-void sMatrix34::FadeOrthonormalPrecise(sF32 f,const sMatrix34 &mat0,const sMatrix34 &mat1)
+void sMatrix34::FadeOrthonormalPrecise(float f,const sMatrix34 &mat0,const sMatrix34 &mat1)
 {
   i.Fade(f,mat0.i,mat1.i);
   k.Fade(f,mat0.k,mat1.k);
@@ -195,11 +195,11 @@ void sMatrix34::FadeOrthonormalPrecise(sF32 f,const sMatrix34 &mat0,const sMatri
 /****************************************************************************/
 // Angle(): get the angle between two vectors (this and a)
 /****************************************************************************/
-sF32 sVector30::Angle(sVector30Arg a) const
+float sVector30::Angle(sVector30Arg a) const
 {
-  sF32 s = x*a.x+y*a.y+z*a.z;
-  sF32 n1 = x*x+y*y+z*z;
-  sF32 n2 = a.x*a.x+a.y*a.y+a.z*a.z;
+  float s = x*a.x+y*a.y+z*a.z;
+  float n1 = x*x+y*y+z*z;
+  float n2 = a.x*a.x+a.y*a.y+a.z*a.z;
   return sFACos(sClamp(s*sFRSqrt(n1*n2), -1.0f, 1.0f));
 };
 
@@ -212,14 +212,14 @@ void sVector30::Rotate(const sMatrix34 &m,sVector30Arg v)
 
 void sVector30::Unit()
 {
-  sF32 e = 1.0f*x*x + 1.0f*y*y + 1.0f*z*z;
+  float e = 1.0f*x*x + 1.0f*y*y + 1.0f*z*z;
 
   if(e>1e-12f)
   {
     e=sFRSqrt(e);
-    x = sF32(e*x);
-    y = sF32(e*y);
-    z = sF32(e*z);
+    x = float(e*x);
+    y = float(e*y);
+    z = float(e*z);
   }
   else
   {
@@ -231,14 +231,14 @@ void sVector30::Unit()
 
 void sVector30::UnitPrecise()
 {
-  sF32 e = 1.0f*x*x + 1.0f*y*y + 1.0f*z*z;
+  float e = 1.0f*x*x + 1.0f*y*y + 1.0f*z*z;
 
   if(e>1e-12f)
   {
     e=sRSqrt(e);
-    x = sF32(e*x);
-    y = sF32(e*y);
-    z = sF32(e*z);
+    x = float(e*x);
+    y = float(e*y);
+    z = float(e*z);
   }
   else
   {
@@ -248,14 +248,14 @@ void sVector30::UnitPrecise()
 
 /****************************************************************************/
 
-void sVector31::InitColor(sU32 col)
+void sVector31::InitColor(uint32_t col)
 {
   x = ((col&0x00ff0000)>>16)/255.0f;
   y = ((col&0x0000ff00)>> 8)/255.0f;
   z = ((col&0x000000ff)    )/255.0f;
 }
 
-void sVector31::InitColor(sU32 col,sF32 amp)
+void sVector31::InitColor(uint32_t col,float amp)
 {
   InitColor(col);
   x *= amp;
@@ -263,9 +263,9 @@ void sVector31::InitColor(sU32 col,sF32 amp)
   z *= amp;
 }
 
-sU32 sVector31::GetColor() const
+uint32_t sVector31::GetColor() const
 {
-  sU32 col;
+  uint32_t col;
 
   col = (sClamp<int>(int(x*255+0.5f),0,255)<<16)
       | (sClamp<int>(int(y*255+0.5f),0,255)<< 8)
@@ -277,7 +277,7 @@ sU32 sVector31::GetColor() const
 
 /****************************************************************************/
 
-void sVector4::InitColor(sU32 col)
+void sVector4::InitColor(uint32_t col)
 {
   x = ((col&0x00ff0000)>>16)/255.0f;
   y = ((col&0x0000ff00)>> 8)/255.0f;
@@ -285,7 +285,7 @@ void sVector4::InitColor(sU32 col)
   w = ((col&0xff000000)>>24)/255.0f;
 }
 
-void sVector4::InitColor(sU32 col,sF32 amp)
+void sVector4::InitColor(uint32_t col,float amp)
 {
   InitColor(col);
   x *= amp;
@@ -294,9 +294,9 @@ void sVector4::InitColor(sU32 col,sF32 amp)
   w *= amp;
 }
 
-sU32 sVector4::GetColor() const
+uint32_t sVector4::GetColor() const
 {
-  sU32 col;
+  uint32_t col;
 
   col = (sClamp<int>(int(x*255+0.5f),0,255)<<16)
       | (sClamp<int>(int(y*255+0.5f),0,255)<< 8)
@@ -306,7 +306,7 @@ sU32 sVector4::GetColor() const
   return col;
 }
 
-void sVector4::InitMRGB8(sU32 col)
+void sVector4::InitMRGB8(uint32_t col)
 {
   w = ((col&0xff000000)>>24)+1.0f;
   x = w*((col&0x00ff0000)>>16)/255.0f;
@@ -315,18 +315,18 @@ void sVector4::InitMRGB8(sU32 col)
   w = 1.0f;
 }
 
-sU32 sVector4::GetMRGB8() const
+uint32_t sVector4::GetMRGB8() const
 {
-  sF32 max = sFFloor(sMax(sMax(x,y),z))+1.0f;
+  float max = sFFloor(sMax(sMax(x,y),z))+1.0f;
 
-  sU32 col =  (sClamp<int>(int(x/max*255),0,255)<<16)
+  uint32_t col =  (sClamp<int>(int(x/max*255),0,255)<<16)
             | (sClamp<int>(int(y/max*255),0,255)<< 8)
             | (sClamp<int>(int(z/max*255),0,255)    )
             | (sClamp<int>(int(max-1.0f),0,255)<<24);
   return col;
 }
 
-void sVector4::InitMRGB16(sU64 col)
+void sVector4::InitMRGB16(uint64_t col)
 {
   w =   ((col>>48)&0xffff)+1.0f;
   x = w*((col>>32)&0xffff)/65536.0f;
@@ -335,14 +335,14 @@ void sVector4::InitMRGB16(sU64 col)
   w = 1.0f;
 }
 
-sU64 sVector4::GetMRGB16() const
+uint64_t sVector4::GetMRGB16() const
 {
-  sF32 max = sFFloor(sMax(sMax(x,y),z))+1.0f;
+  float max = sFFloor(sMax(sMax(x,y),z))+1.0f;
 
-  sU64 col =  (sClamp<sS64>(sS64(x/max*65536.0f),0,65536)<<32)
-            | (sClamp<sS64>(sS64(y/max*65536.0f),0,65536)<<16)
-            | (sClamp<sS64>(sS64(z/max*65536.0f),0,65536)    )
-            | (sClamp<sS64>(sS64(max-1.0f),0,65536)<<48);
+  uint64_t col =  (sClamp<int64_t>(int64_t(x/max*65536.0f),0,65536)<<32)
+            | (sClamp<int64_t>(int64_t(y/max*65536.0f),0,65536)<<16)
+            | (sClamp<int64_t>(int64_t(z/max*65536.0f),0,65536)    )
+            | (sClamp<int64_t>(int64_t(max-1.0f),0,65536)<<48);
   return col;
 }
 
@@ -376,15 +376,15 @@ sBool sVector4::operator==(sVector4Arg v) const
 
 void sVector4::Unit4Precise()
 {
-  sF32 e = 1.0f*x*x + 1.0f*y*y + 1.0f*z*z + 1.0f*w*w;
+  float e = 1.0f*x*x + 1.0f*y*y + 1.0f*z*z + 1.0f*w*w;
 
   if(e>1e-12f)
   {
     e=sRSqrt(e);
-    x = sF32(e*x);
-    y = sF32(e*y);
-    z = sF32(e*z);
-    w = sF32(e*w);
+    x = float(e*x);
+    y = float(e*y);
+    z = float(e*z);
+    w = float(e*w);
   }
   else
   {
@@ -394,15 +394,15 @@ void sVector4::Unit4Precise()
 
 void sVector4::Unit4()
 {
-  sF32 e = 1.0f*x*x + 1.0f*y*y + 1.0f*z*z + 1.0f*w*w;
+  float e = 1.0f*x*x + 1.0f*y*y + 1.0f*z*z + 1.0f*w*w;
 
   if(e>1e-12f)
   {
     e=sFRSqrt(e);
-    x = sF32(e*x);
-    y = sF32(e*y);
-    z = sF32(e*z);
-    w = sF32(e*w);
+    x = float(e*x);
+    y = float(e*y);
+    z = float(e*z);
+    w = float(e*w);
   }
   else
   {
@@ -432,15 +432,15 @@ void sMatrix34::Init()
   l.Init(0,0,0);
 }
 
-void sMatrix34::Euler(sF32 x,sF32 y,sF32 z)
+void sMatrix34::Euler(float x,float y,float z)
 {
   EulerXYZ(x,y,z); // it's the same!
 }
 
-void sMatrix34::EulerXYZ(sF32 x,sF32 y,sF32 z)
+void sMatrix34::EulerXYZ(float x,float y,float z)
 {
-  sF32 sx,sy,sz;
-  sF32 cx,cy,cz;
+  float sx,sy,sz;
+  float cx,cy,cz;
 
   sFSinCos(x,sx,cx);
   sFSinCos(y,sy,cy);
@@ -458,10 +458,10 @@ void sMatrix34::EulerXYZ(sF32 x,sF32 y,sF32 z)
 }
 
 
-void sMatrix34::FindEulerXYZ(sF32 &x,sF32 &y,sF32 &z) const
+void sMatrix34::FindEulerXYZ(float &x,float &y,float &z) const
 {
-  sF32 rx,ry,rz;
-  sF32 sy = -i.z;
+  float rx,ry,rz;
+  float sy = -i.z;
 
   if(sy >= 0.99999f) // ry very close to 90� (singular)
   {
@@ -477,7 +477,7 @@ void sMatrix34::FindEulerXYZ(sF32 &x,sF32 &y,sF32 &z) const
   }
   else
   {
-    sF32 cy = sFSqrt(j.z*j.z + k.z*k.z);  // this can be positive or negative!
+    float cy = sFSqrt(j.z*j.z + k.z*k.z);  // this can be positive or negative!
     ry = sATan2(sy,cy);
     rz = sATan2(i.y,i.x);
     rx = sATan2(j.z,k.z);
@@ -491,10 +491,10 @@ void sMatrix34::FindEulerXYZ(sF32 &x,sF32 &y,sF32 &z) const
 // this chooses a minimal z rotation. this is the better choice for interactive cameras
 // cy can be positive or negative! that is where the problem comes from.
 
-void sMatrix34::FindEulerXYZ2(sF32 &x,sF32 &y,sF32 &z) const
+void sMatrix34::FindEulerXYZ2(float &x,float &y,float &z) const
 {
-  sF32 rx,ry,rz;
-  sF32 sy = -i.z;
+  float rx,ry,rz;
+  float sy = -i.z;
 
   if(sy >= 0.99999f) // ry very close to 90� (singular)
   {
@@ -510,9 +510,9 @@ void sMatrix34::FindEulerXYZ2(sF32 &x,sF32 &y,sF32 &z) const
   }
   else
   {
-    sF32 rzp = sATan2(i.y,i.x);
-    sF32 rzn = sATan2(-i.y,-i.x);
-    sF32 cy = sFSqrt(j.z*j.z + k.z*k.z);    // evil square root that has two possible outcomes!
+    float rzp = sATan2(i.y,i.x);
+    float rzn = sATan2(-i.y,-i.x);
+    float cy = sFSqrt(j.z*j.z + k.z*k.z);    // evil square root that has two possible outcomes!
 //    if(i.y>=0)
     if(sFAbs(rzp)<sFAbs(rzn))               // CHAOS: ask dierk before changing!
     {
@@ -536,7 +536,7 @@ void sMatrix34::FindEulerXYZ2(sF32 &x,sF32 &y,sF32 &z) const
 
 void sMatrix34::CubeFace(int n)
 {
-  static const sF32 dir[6][3] =
+  static const float dir[6][3] =
   {
     { 1, 0, 0},       // sTCF_POSX
     {-1, 0, 0},       // sTCF_NEGX
@@ -545,7 +545,7 @@ void sMatrix34::CubeFace(int n)
     { 0, 0, 1},       // sTCF_POSZ
     { 0, 0,-1},       // sTCF_NEGZ
   };
-  static const sF32 up[6][3] =
+  static const float up[6][3] =
   {
     { 0, 1, 0},      // sTCF_POSX
     { 0, 1, 0},      // sTCF_NEGX
@@ -642,16 +642,16 @@ void sMatrix34::LookAt(sVector31Arg dest, sVector31Arg pos, sVector30Arg up)
 }
 
 
-void sMatrix34::RotateAxis(sVector30Arg v,sF32 a)
+void sMatrix34::RotateAxis(sVector30Arg v,float a)
 {
   sVector30 u;
-  sF32 as,ac;
+  float as,ac;
 
   u = v;
   u.Unit();
 
-  ac = sF32(sFCos(a));
-  as = sF32(sFSin(a));
+  ac = float(sFCos(a));
+  as = float(sFSin(a));
 
   i.x = (1-u.x*u.x)*ac + u.x*u.x + 0;
   i.y = ( -u.x*u.y)*ac + u.x*u.y - u.z*as;
@@ -697,7 +697,7 @@ void sMatrix34::TransR()
 
 void sMatrix34::InvertOrthogonal()
 {
-  sF32 x,y,z;
+  float x,y,z;
 
   x = sFInvSqrt(i^i);
   y = sFInvSqrt(j^j);
@@ -713,7 +713,7 @@ void sMatrix34::InvertOrthogonal()
   l = sVector31(sVector30(-l)*(*this));
 }
 
-sF32 sMatrix34::Determinant3x3() const
+float sMatrix34::Determinant3x3() const
 {
   return (i.x*j.y*k.z + i.y*j.z*k.x + i.z*j.x*k.y)
        - (i.z*j.y*k.x + i.x*j.z*k.y + i.y*j.x*k.z);
@@ -735,7 +735,7 @@ sBool sMatrix34::Invert3()
   inv.k.y = i.y*k.x - i.x*k.y;
   inv.k.z = i.x*j.y - i.y*j.x;
 
-  sF32 det = i.x*inv.i.x + i.y*inv.j.x + i.z*inv.k.x;
+  float det = i.x*inv.i.x + i.y*inv.j.x + i.z*inv.k.x;
   if (sFAbs(det)<sEPSILON) return sFALSE;
   det=1.0f/det;
   i=inv.i*det;
@@ -763,17 +763,17 @@ void sMatrix34::Orthonormalize ()
 
 void sMatrix34::Init(sQuaternionArg q, sVector31Arg p)
 {
-  sF32 xx = 2.0f*q.i*q.i;
-  sF32 xy = 2.0f*q.i*q.j;
-  sF32 xz = 2.0f*q.i*q.k;
+  float xx = 2.0f*q.i*q.i;
+  float xy = 2.0f*q.i*q.j;
+  float xz = 2.0f*q.i*q.k;
 
-  sF32 yy = 2.0f*q.j*q.j;
-  sF32 yz = 2.0f*q.j*q.k;
-  sF32 zz = 2.0f*q.k*q.k;
+  float yy = 2.0f*q.j*q.j;
+  float yz = 2.0f*q.j*q.k;
+  float zz = 2.0f*q.k*q.k;
 
-  sF32 xw = 2.0f*q.i*q.r;
-  sF32 yw = 2.0f*q.j*q.r;
-  sF32 zw = 2.0f*q.k*q.r;
+  float xw = 2.0f*q.i*q.r;
+  float yw = 2.0f*q.j*q.r;
+  float zw = 2.0f*q.k*q.r;
 
   i.x = 1.0f - (yy + zz);
   j.x =        (xy + zw);
@@ -792,17 +792,17 @@ void sMatrix34::Init(sQuaternionArg q, sVector31Arg p)
 
 void sMatrix34::Init(sQuaternionArg q)
 {
-  sF32 xx = 2.0f*q.i*q.i;
-  sF32 xy = 2.0f*q.i*q.j;
-  sF32 xz = 2.0f*q.i*q.k;
+  float xx = 2.0f*q.i*q.i;
+  float xy = 2.0f*q.i*q.j;
+  float xz = 2.0f*q.i*q.k;
 
-  sF32 yy = 2.0f*q.j*q.j;
-  sF32 yz = 2.0f*q.j*q.k;
-  sF32 zz = 2.0f*q.k*q.k;
+  float yy = 2.0f*q.j*q.j;
+  float yz = 2.0f*q.j*q.k;
+  float zz = 2.0f*q.k*q.k;
 
-  sF32 xw = 2.0f*q.i*q.r;
-  sF32 yw = 2.0f*q.j*q.r;
-  sF32 zw = 2.0f*q.k*q.r;
+  float xw = 2.0f*q.i*q.r;
+  float yw = 2.0f*q.j*q.r;
+  float zw = 2.0f*q.k*q.r;
 
   i.x = 1.0f - (yy + zz);
   j.x =        (xy + zw);
@@ -819,7 +819,7 @@ void sMatrix34::Init(sQuaternionArg q)
   l.Init(0,0,0);
 }
 
-void sMatrix34::Scale(sF32 x, sF32 y, sF32 z)
+void sMatrix34::Scale(float x, float y, float z)
 {
   i.x *= x;
   i.y *= x;
@@ -872,7 +872,7 @@ void sMatrix34::RotateAroundPivot(sQuaternionArg rot,sVector31Arg pivot)
   l = pivot - (sVector30(pivot) * *this);
 }
 
-void sMatrix34::RotateAroundPivot(sVector30Arg axis,sF32 angle,sVector31Arg pivot)
+void sMatrix34::RotateAroundPivot(sVector30Arg axis,float angle,sVector31Arg pivot)
 {
   // same as above, with axis-angle rotation
   RotateAxis(axis,angle);
@@ -927,7 +927,7 @@ void sMatrix34CM::ConvertTo(sMatrix34& s)const
   s.l.z = z.w;
 }
 
-sF32 sMatrix34CM::Determinant3x3() const
+float sMatrix34CM::Determinant3x3() const
 {
   return (x.x*y.y*z.z + y.x*z.y*x.z + z.x*x.y*y.z)
        - (z.x*y.y*x.z + x.x*z.y*y.z + y.x*x.y*z.z);
@@ -976,7 +976,7 @@ void sMatrix44::Trans4(const sMatrix44 &mat)
   l.w = mat.l.w;
 }
 
-void sMatrix44::Scale(sF32 x, sF32 y, sF32 z)
+void sMatrix44::Scale(float x, float y, float z)
 {
   i.x *= x;
   j.y *= y;
@@ -1005,7 +1005,7 @@ sBool sMatrix44::operator==(const sMatrix44 &mat) const
 
 void sMatrix44::Invert(const sMatrix44 &a)
 {
-  sF32 idet = 1.0f/a.Determinant();
+  float idet = 1.0f/a.Determinant();
 
   i.x = (a.j.z*a.k.w*a.l.y - a.j.w*a.k.z*a.l.y + a.j.w*a.k.y*a.l.z - a.j.y*a.k.w*a.l.z - a.j.z*a.k.y*a.l.w + a.j.y*a.k.z*a.l.w)*idet;
   i.y = (a.i.w*a.k.z*a.l.y - a.i.z*a.k.w*a.l.y - a.i.w*a.k.y*a.l.z + a.i.y*a.k.w*a.l.z + a.i.z*a.k.y*a.l.w - a.i.y*a.k.z*a.l.w)*idet;
@@ -1026,7 +1026,7 @@ void sMatrix44::Invert(const sMatrix44 &a)
 }
 
 
-sF32 sMatrix44::Determinant() const
+float sMatrix44::Determinant() const
 {
   return i.w*j.z*k.y*l.x - i.z*j.w*k.y*l.x - i.w*j.y*k.z*l.x + i.y*j.w*k.z*l.x
        + i.z*j.y*k.w*l.x - i.y*j.z*k.w*l.x - i.w*j.z*k.x*l.y + i.z*j.w*k.x*l.y
@@ -1036,19 +1036,19 @@ sF32 sMatrix44::Determinant() const
        + i.z*j.x*k.y*l.w - i.x*j.z*k.y*l.w - i.y*j.x*k.z*l.w + i.x*j.y*k.z*l.w;
 }
 
-void sMatrix44::Perspective(sF32 left, sF32 right, sF32 top, sF32 bottom, sF32 front, sF32 back)
+void sMatrix44::Perspective(float left, float right, float top, float bottom, float front, float back)
 {
   // see D3DXMatrixPerspectiveOffCenterLH
 
-  sF32 xx = 2.0f * front / (right - left);
-  sF32 yy = 2.0f * front / (top - bottom);
-  sF32 xz = (left + right) / (left - right);
-  sF32 yz = (top + bottom) / (bottom - top);
+  float xx = 2.0f * front / (right - left);
+  float yy = 2.0f * front / (top - bottom);
+  float xz = (left + right) / (left - right);
+  float yz = (top + bottom) / (bottom - top);
 
-  sF32 zz = back / (back - front);
-  sF32 zw = front*back / (front - back);
+  float zz = back / (back - front);
+  float zw = front*back / (front - back);
   
-  sF32 wz = 1.0f;
+  float wz = 1.0f;
 
   i.x = xx;
   i.y = 0.0f;
@@ -1154,7 +1154,7 @@ sMatrix34CM operator* (const sMatrix34CM &a,const sMatrix34CM &b)
 
 /****************************************************************************/
 
-sMatrix34 operator* (const sMatrix34 &a,sF32 b)
+sMatrix34 operator* (const sMatrix34 &a,float b)
 {
   sMatrix34 res;
   res.i=a.i*b;
@@ -1164,7 +1164,7 @@ sMatrix34 operator* (const sMatrix34 &a,sF32 b)
   return res;
 }
 
-sMatrix44 operator* (const sMatrix44 &a,sF32 b)
+sMatrix44 operator* (const sMatrix44 &a,float b)
 {
   sMatrix44 res;
   res.i=a.i*b;
@@ -1174,7 +1174,7 @@ sMatrix44 operator* (const sMatrix44 &a,sF32 b)
   return res;
 }
 
-sMatrix34& operator *= (sMatrix34 &a, sF32 b)
+sMatrix34& operator *= (sMatrix34 &a, float b)
 {
   a.i*=b;
   a.j*=b;
@@ -1183,7 +1183,7 @@ sMatrix34& operator *= (sMatrix34 &a, sF32 b)
   return a;
 }
 
-sMatrix44& operator *= (sMatrix44 &a, sF32 b)
+sMatrix44& operator *= (sMatrix44 &a, float b)
 {
   a.i*=b;
   a.j*=b;
@@ -1593,19 +1593,19 @@ sFormatStringBuffer& operator% (sFormatStringBuffer &f,const sMatrix44 &mat)
 
 void sQuaternion::Unit()
 {
-  sF32 e = sFRSqrt(1.0f*i*i + 1.0f*j*j + 1.0f*k*k + 1.0f*r*r);
+  float e = sFRSqrt(1.0f*i*i + 1.0f*j*j + 1.0f*k*k + 1.0f*r*r);
 
-  i = sF32(e*i);
-  j = sF32(e*j);
-  k = sF32(e*k);
-  r = sF32(e*r);
+  i = float(e*i);
+  j = float(e*j);
+  k = float(e*k);
+  r = float(e*r);
 
   // no safety check, zero-quaternions should never come across
 }
 
-void sQuaternion::Lerp(sF32 fade,sQuaternionArg a,sQuaternionArg b)
+void sQuaternion::Lerp(float fade,sQuaternionArg a,sQuaternionArg b)
 {
-  sF32 dot = a.r*b.r + a.i*b.i + a.j*b.j + a.k*b.k;
+  float dot = a.r*b.r + a.i*b.i + a.j*b.j + a.k*b.k;
 #if 1		// this part introduces the interpolation error over 90 DEG (in some cases)
   if(dot<0.f)
   {
@@ -1625,11 +1625,11 @@ void sQuaternion::Lerp(sF32 fade,sQuaternionArg a,sQuaternionArg b)
 }
 
 
-void sQuaternion::Slerp(sF32 fade,sQuaternionArg a,sQuaternionArg b)
+void sQuaternion::Slerp(float fade,sQuaternionArg a,sQuaternionArg b)
 {
-  sF32 f0,f1;
-	sF32 angle,s;
-	sF32 dot;
+  float f0,f1;
+	float angle,s;
+	float dot;
 
   dot = a.r*b.r + a.i*b.i + a.j*b.j + a.k*b.k;
 
@@ -1644,8 +1644,8 @@ void sQuaternion::Slerp(sF32 fade,sQuaternionArg a,sQuaternionArg b)
   }
   else
   {
-	  f0 = sF32(sFSin((1-fade)*angle)/s);
-	  f1 = sF32(sFSin(   fade *angle)/s);
+	  f0 = float(sFSin((1-fade)*angle)/s);
+	  f1 = float(sFSin(   fade *angle)/s);
 	  r = f0*a.r + f1*b.r;
 	  i = f0*a.i + f1*b.i;
 	  j = f0*a.j + f1*b.j;
@@ -1655,7 +1655,7 @@ void sQuaternion::Slerp(sF32 fade,sQuaternionArg a,sQuaternionArg b)
 }
 
 
-void sQuaternion::FastSlerp(sF32 fade, sQuaternionArg a, sQuaternionArg b)
+void sQuaternion::FastSlerp(float fade, sQuaternionArg a, sQuaternionArg b)
 {
   // ideas taken from Jonathan Blow's paper "Hacking Quaternions" [Blow2002]
   // use a cubic spline to correct the speed error introduced by lerp
@@ -1677,7 +1677,7 @@ void sQuaternion::FastSlerp(sF32 fade, sQuaternionArg a, sQuaternionArg b)
     return;
   }
 
-  sF32 K = 1.0f - 0.8228677f * dot(a,b);
+  float K = 1.0f - 0.8228677f * dot(a,b);
   K = K*K*0.5069269f;
   if (fade>=0.5f)
   { fade = 1.0f-fade;
@@ -1688,7 +1688,7 @@ void sQuaternion::FastSlerp(sF32 fade, sQuaternionArg a, sQuaternionArg b)
 
   Lerp(fade,a,b);
 #if 1
-  sF32 e = i*i + j*j + k*k + r*r;
+  float e = i*i + j*j + k*k + r*r;
 	if(e<0.00000000001f)	// make the code bulletproof...
 	{ i = j = r = 0;   k = 1;
 		return;
@@ -1703,13 +1703,13 @@ void sQuaternion::FastSlerp(sF32 fade, sQuaternionArg a, sQuaternionArg b)
 
 void sQuaternion::Init(const sMatrix34 &mat)
 {
-  sF32 tr,s;
+  float tr,s;
 	
 	tr = mat.i.x + mat.j.y + mat.k.z;
 
 	if(tr>=0) 
   {
-		s = (sF32)sFSqrt(tr + 1);
+		s = (float)sFSqrt(tr + 1);
 		r = s*0.5f;
 		s = 0.5f / s;
 		i = (mat.k.y - mat.j.z) * s;
@@ -1731,7 +1731,7 @@ void sQuaternion::Init(const sMatrix34 &mat)
 		switch(index)
     {
 		case 0:
-			s = (sF32)sFSqrt((mat.i.x - (mat.j.y+mat.k.z)) + 1.0f );
+			s = (float)sFSqrt((mat.i.x - (mat.j.y+mat.k.z)) + 1.0f );
 			i = s*0.5f;
 			s = 0.5f / s;
 			j = (mat.i.y + mat.j.x) * s;
@@ -1739,7 +1739,7 @@ void sQuaternion::Init(const sMatrix34 &mat)
 			r = (mat.k.y - mat.j.z) * s;
 			break;
 		case 1:
-			s = (sF32)sFSqrt( (mat.j.y - (mat.k.z+mat.i.x)) + 1.0f );
+			s = (float)sFSqrt( (mat.j.y - (mat.k.z+mat.i.x)) + 1.0f );
 			j = s*0.5f;
 			s = 0.5f / s;
 			k = (mat.j.z + mat.k.y) * s;
@@ -1747,7 +1747,7 @@ void sQuaternion::Init(const sMatrix34 &mat)
 			r = (mat.i.z - mat.k.x) * s;
 			break;
 		case 2:
-			s = (sF32)sFSqrt( (mat.k.z - (mat.i.x+mat.j.y)) + 1.0f );
+			s = (float)sFSqrt( (mat.k.z - (mat.i.x+mat.j.y)) + 1.0f );
 			k = s*0.5f;
 			s = 0.5f / s;
 			i = (mat.k.x + mat.i.z) * s;
@@ -1758,9 +1758,9 @@ void sQuaternion::Init(const sMatrix34 &mat)
 	}
 }
 
-void sQuaternion::Init(sVector30Arg axis, sF32 angle)
+void sQuaternion::Init(sVector30Arg axis, float angle)
 {
-  sF32 si;
+  float si;
   sFSinCos(angle/2,si,r);
   i=si*axis.x;
   j=si*axis.y;
@@ -1769,16 +1769,16 @@ void sQuaternion::Init(sVector30Arg axis, sF32 angle)
 
 /****************************************************************************/
 
-void sQuaternion::Euler(sF32 h, sF32 p, sF32 b)
+void sQuaternion::Euler(float h, float p, float b)
 {
-  sF32 sh,ch,sp,cp,sb,cb;
+  float sh,ch,sp,cp,sb,cb;
   sFSinCos(h*0.5f,sh,ch);
   sFSinCos(p*0.5f,sp,cp);
   sFSinCos(b*0.5f,sb,cb);
-  const sF32 chcp=ch*cp;
-  const sF32 shsp=sh*sp;
-  const sF32 shcp=sh*cp;
-  const sF32 chsp=ch*sp;
+  const float chcp=ch*cp;
+  const float shsp=sh*sp;
+  const float shcp=sh*cp;
+  const float chsp=ch*sp;
   r = chcp*cb - shsp*sb;
   i = chcp*sb + shsp*cb;
   j = shcp*cb + chsp*sb;
@@ -1787,8 +1787,8 @@ void sQuaternion::Euler(sF32 h, sF32 p, sF32 b)
 
 sVector30 sQuaternion::GetEuler() const
 {
-  sF32 h,p,b;
-  const sF32 d = i*j+k*r;
+  float h,p,b;
+  const float d = i*j+k*r;
   if (d>0.4999f)
   {
     h=2.0f*sFATan2(i,r);
@@ -1803,9 +1803,9 @@ sVector30 sQuaternion::GetEuler() const
   }
   else
   {
-    const sF32 i2=i*i;
-    const sF32 j2=j*j;
-    const sF32 k2=k*k;
+    const float i2=i*i;
+    const float j2=j*j;
+    const float k2=k*k;
     h=sFATan2(2.0f*(j*r-i*k),1.0f-2.0f*(j2-k2));
     p=sFASin(2.0f*d);
     b=sFATan2(2.0f*(i*r-j*k),1.0f-2.0f*(i2-k2));
@@ -1814,9 +1814,9 @@ sVector30 sQuaternion::GetEuler() const
 }
 
 
-void sQuaternion::GetAxisAngle(sVector30 &axis, sF32 &angle)
+void sQuaternion::GetAxisAngle(sVector30 &axis, float &angle)
 {
-  sF32 lensq=i*i+j*j+k*k;
+  float lensq=i*i+j*j+k*k;
   if (lensq>sEPSILON)
   {
     lensq=sFRSqrt(lensq);
@@ -1835,7 +1835,7 @@ void sQuaternion::MakeRotation(sVector30Arg v1, sVector30Arg v2)
 {
   sVector30 axis; 
   axis.Cross(v2,v1);
-  sF32 dot=v1^v2;
+  float dot=v1^v2;
   if (dot < sEPSILON-1) 
   {
     r=i=k=0;
@@ -1852,7 +1852,7 @@ void sQuaternion::MakeRotation(sVector30Arg v1, sVector30Arg v2)
 
 void sQuaternion::Invert()
 {
-  sF32 lensq=r*r+i*i+j*j+k*k;
+  float lensq=r*r+i*i+j*j+k*k;
   if (lensq>sEPSILON)
   {
     lensq=sFRSqrt(lensq);
@@ -1865,7 +1865,7 @@ void sQuaternion::Invert()
 
 void sQuaternion::Invert(sQuaternionArg q)
 {
-  sF32 lensq=q.r*q.r+q.i*q.i+q.j*q.j+q.k*q.k;
+  float lensq=q.r*q.r+q.i*q.i+q.j*q.j+q.k*q.k;
   if (lensq>sEPSILON)
   {
     lensq=sFRSqrt(lensq);
@@ -1966,15 +1966,15 @@ sVector30 operator* (sVector30Arg a,sQuaternionArg b)
   */
   
   // cross of vector part of v with q
-  sF32 t0x = a.y*b.k - a.z*b.j;
-  sF32 t0y = a.z*b.i - a.x*b.k;
-  sF32 t0z = a.x*b.j - a.y*b.i;
+  float t0x = a.y*b.k - a.z*b.j;
+  float t0y = a.z*b.i - a.x*b.k;
+  float t0z = a.x*b.j - a.y*b.i;
 
   // the sum
-  sF32 t1x = b.i + b.i;
-  sF32 t1y = b.j + b.j;
-  sF32 t1z = b.k + b.k;
-  sF32 t1r = b.r + b.r;
+  float t1x = b.i + b.i;
+  float t1y = b.j + b.j;
+  float t1z = b.k + b.k;
+  float t1r = b.r + b.r;
 
   // final expression
   return sVector30(
@@ -1989,15 +1989,15 @@ sVector31 operator* (sVector31Arg a,sQuaternionArg b)
   // same as above.
 
   // cross of vector part of v with q
-  sF32 t0x = a.y*b.k - a.z*b.j;
-  sF32 t0y = a.z*b.i - a.x*b.k;
-  sF32 t0z = a.x*b.j - a.y*b.i;
+  float t0x = a.y*b.k - a.z*b.j;
+  float t0y = a.z*b.i - a.x*b.k;
+  float t0z = a.x*b.j - a.y*b.i;
 
   // the sum
-  sF32 t1x = b.i + b.i;
-  sF32 t1y = b.j + b.j;
-  sF32 t1z = b.k + b.k;
-  sF32 t1r = b.r + b.r;
+  float t1x = b.i + b.i;
+  float t1y = b.j + b.j;
+  float t1z = b.k + b.k;
+  float t1r = b.r + b.r;
 
   // final expression
   return sVector31(
@@ -2121,17 +2121,17 @@ void sAABBox::MakePoints(sVector31 *v) const
   v[7].Init(Min.x,Max.y,Max.z);
 }
 
-sBool sAABBox::HitRay(sF32 &dist,const sRay &ray) const
+sBool sAABBox::HitRay(float &dist,const sRay &ray) const
 {
-  sF32 min = 0.0f, max = 1e+20f;
+  float min = 0.0f, max = 1e+20f;
 
   for(int i=0;i<3;i++)
   {
     if(ray.Dir[i])
     {
-      sF32 inv = 1.0f / ray.Dir[i];
-      sF32 t0 = (Min[i] - ray.Start[i]) * inv;
-      sF32 t1 = (Max[i] - ray.Start[i]) * inv;
+      float inv = 1.0f / ray.Dir[i];
+      float t0 = (Min[i] - ray.Start[i]) * inv;
+      float t1 = (Max[i] - ray.Start[i]) * inv;
       if(t0 > t1) sSwap(t0,t1);
       min = sMax(min,t0);
       max = sMin(max,t1);
@@ -2147,17 +2147,17 @@ sBool sAABBox::HitRay(sF32 &dist,const sRay &ray) const
 
 // this is *almost* the same as sIntersectRayAABB, but it handles the case where one or more
 // components of dir are zero differently (=without using IEEE infinities). 
-sBool sAABBox::HitInvRay(sF32 &dist,sVector31Arg origin,sVector30Arg invDir) const
+sBool sAABBox::HitInvRay(float &dist,sVector31Arg origin,sVector30Arg invDir) const
 {
-  sF32 min = 0.0f, max = 1e+20f;
+  float min = 0.0f, max = 1e+20f;
 
   // x and z before y since we have lots of tests in +y or -y direction
   if(invDir.x)
   {
-    sF32 t0 = (Min.x - origin.x) * invDir.x;
-    sF32 t1 = (Max.x - origin.x) * invDir.x;
-    sF32 tMin = sMin(t0,t1);
-    sF32 tMax = sMax(t0,t1);
+    float t0 = (Min.x - origin.x) * invDir.x;
+    float t1 = (Max.x - origin.x) * invDir.x;
+    float tMin = sMin(t0,t1);
+    float tMax = sMax(t0,t1);
     min = sMax(min,tMin);
     max = sMin(max,tMax);
   }
@@ -2166,10 +2166,10 @@ sBool sAABBox::HitInvRay(sF32 &dist,sVector31Arg origin,sVector30Arg invDir) con
 
   if(invDir.z)
   {
-    sF32 t0 = (Min.z - origin.z) * invDir.z;
-    sF32 t1 = (Max.z - origin.z) * invDir.z;
-    sF32 tMin = sMin(t0,t1);
-    sF32 tMax = sMax(t0,t1);
+    float t0 = (Min.z - origin.z) * invDir.z;
+    float t1 = (Max.z - origin.z) * invDir.z;
+    float tMin = sMin(t0,t1);
+    float tMax = sMax(t0,t1);
     min = sMax(min,tMin);
     max = sMin(max,tMax);
   }
@@ -2178,10 +2178,10 @@ sBool sAABBox::HitInvRay(sF32 &dist,sVector31Arg origin,sVector30Arg invDir) con
 
   if(invDir.y)
   {
-    sF32 t0 = (Min.y - origin.y) * invDir.y;
-    sF32 t1 = (Max.y - origin.y) * invDir.y;
-    sF32 tMin = sMin(t0,t1);
-    sF32 tMax = sMax(t0,t1);
+    float t0 = (Min.y - origin.y) * invDir.y;
+    float t1 = (Max.y - origin.y) * invDir.y;
+    float tMin = sMin(t0,t1);
+    float tMax = sMax(t0,t1);
     min = sMax(min,tMin);
     max = sMin(max,tMax);
   }
@@ -2198,8 +2198,8 @@ sBool sAABBox::HitInvRay(sF32 &dist,sVector31Arg origin,sVector30Arg invDir) con
   //{
   //  if(invDir[i])
   //  {
-  //    sF32 t0 = (Min[i] - origin[i]) * invDir[i];
-  //    sF32 t1 = (Max[i] - origin[i]) * invDir[i];
+  //    float t0 = (Min[i] - origin[i]) * invDir[i];
+  //    float t1 = (Max[i] - origin[i]) * invDir[i];
   //    if(t0 > t1) sSwap(t0,t1);
   //    min = sMax(min,t0);
   //    max = sMin(max,t1);
@@ -2213,17 +2213,17 @@ sBool sAABBox::HitInvRay(sF32 &dist,sVector31Arg origin,sVector30Arg invDir) con
   //return sTRUE;
 }
 
-sF32 sAABBox::CalcArea()const
+float sAABBox::CalcArea()const
 {
-  sF32 area = (Max.x-Min.x)*(Max.y-Min.y);
+  float area = (Max.x-Min.x)*(Max.y-Min.y);
   area += (Max.y-Min.y)*(Max.z-Min.z);
   area += (Max.z-Min.z)*(Max.x-Min.x);
   return area*2.0f;
 }
 
-sF32 sAABBox::CalcVolume()const
+float sAABBox::CalcVolume()const
 {
-  sF32 area = (Max.x-Min.x)*(Max.y-Min.y)*(Max.z-Min.z);
+  float area = (Max.x-Min.x)*(Max.y-Min.y)*(Max.z-Min.z);
   return area;
 }
 
@@ -2250,7 +2250,7 @@ sBool sAABBox::IntersectsXZ(const sAABBox &b) const
   return sMax(Min.x,b.Min.x) <= sMin(Max.x,b.Max.x) && sMax(Min.z,b.Min.z) <= sMin(Max.z,b.Max.z);
 }
 
-sBool sAABBox::IntersectsMovingBox(const sAABBox &box,sVector30Arg v,sF32 tMin,sF32 tMax) const
+sBool sAABBox::IntersectsMovingBox(const sAABBox &box,sVector30Arg v,float tMin,float tMax) const
 {
   sVector30 invV;
   invV.x = v.x ? 1.0f / v.x : 0.0f;
@@ -2259,20 +2259,20 @@ sBool sAABBox::IntersectsMovingBox(const sAABBox &box,sVector30Arg v,sF32 tMin,s
   return IntersectsMovingBoxInv(box,invV,tMin,tMax);
 }
 
-sBool sAABBox::IntersectsMovingBoxInv(const sAABBox &box,sVector30Arg invV,sF32 tMin,sF32 tMax) const
+sBool sAABBox::IntersectsMovingBoxInv(const sAABBox &box,sVector30Arg invV,float tMin,float tMax) const
 {
   if(tMin > tMax)
     return sFALSE;
 
   for(int i=0;i<3;i++)
   {
-    sF32 iv = invV[i];
+    float iv = invV[i];
 
     if(iv)
     {
       // calc start/end time of interval overlap
-      sF32 t0 = (Min[i] - box.Max[i]) * iv;
-      sF32 t1 = (Max[i] - box.Min[i]) * iv;
+      float t0 = (Min[i] - box.Max[i]) * iv;
+      float t1 = (Max[i] - box.Min[i]) * iv;
       if(iv < 0.0f)
         sSwap(t0,t1);
 
@@ -2289,9 +2289,9 @@ sBool sAABBox::IntersectsMovingBoxInv(const sAABBox &box,sVector30Arg invV,sF32 
   return sTRUE;
 }
 
-sF32 sAABBox::DistanceToSq(sVector31Arg p) const
+float sAABBox::DistanceToSq(sVector31Arg p) const
 {
-  sF32 d=0.0f;
+  float d=0.0f;
   
   if(p.x < Min.x)       d += sSquare(p.x-Min.x);
   else if(p.x > Max.x)  d += sSquare(p.x-Max.x);
@@ -2319,10 +2319,10 @@ sAABBox &sAABBox::operator*=(const sMatrix34 &m)
   return *this;
 }
 
-int sAABBox::Classify(sVector30Arg n, sF32 d)
+int sAABBox::Classify(sVector30Arg n, float d)
 {
   sVector31 c = Center();
-  sF32 radius = Size().Length() * 0.5f;
+  float radius = Size().Length() * 0.5f;
 
   return ((n ^ c) - d) < radius;
 }
@@ -2357,11 +2357,11 @@ sFormatStringBuffer& operator% (sFormatStringBuffer &f,const sAABBox &bbox)
 /****************************************************************************/
 /****************************************************************************/
 
-sBool sRay::HitTriangle(sF32 &dist,sVector31Arg p0,sVector31Arg p1,sVector31Arg p2) const
+sBool sRay::HitTriangle(float &dist,sVector31Arg p0,sVector31Arg p1,sVector31Arg p2) const
 {
   sVector30 d1,d2,n,org,org1,org2;
-  sF32 angle,e1,e2;
-  sF32 b;
+  float angle,e1,e2;
+  float b;
   
   org = Start-p0;
   d2 = p1-p0;
@@ -2387,11 +2387,11 @@ sBool sRay::HitTriangle(sF32 &dist,sVector31Arg p0,sVector31Arg p1,sVector31Arg 
   return 1;
 }
 
-sBool sRay::HitTriangleDoubleSided(sF32 &dist,sVector31Arg p0,sVector31Arg p1,sVector31Arg p2) const
+sBool sRay::HitTriangleDoubleSided(float &dist,sVector31Arg p0,sVector31Arg p1,sVector31Arg p2) const
 {
   sVector30 d1,d2,n,org,org1,org2;
-  sF32 angle,e1,e2;
-  sF32 b;
+  float angle,e1,e2;
+  float b;
   
   org = Start-p0;
   d2 = p1-p0;
@@ -2423,11 +2423,11 @@ sBool sRay::HitTriangleDoubleSided(sF32 &dist,sVector31Arg p0,sVector31Arg p1,sV
   return 1;
 }
 
-sBool sRay::HitTriangleBary(sF32 &dist,sVector31Arg p0,sVector31Arg p1,sVector31Arg p2,sF32 &u0,sF32 &u1,sF32 &u2) const
+sBool sRay::HitTriangleBary(float &dist,sVector31Arg p0,sVector31Arg p1,sVector31Arg p2,float &u0,float &u1,float &u2) const
 {
   sVector30 d1,d2,n,org,org1,org2;
-  sF32 angle,e1,e2;
-  sF32 b;
+  float angle,e1,e2;
+  float b;
 
   org = Start-p0;
   d2 = p1-p0;
@@ -2449,7 +2449,7 @@ sBool sRay::HitTriangleBary(sF32 &dist,sVector31Arg p0,sVector31Arg p1,sVector31
   b = -org^n; 
   if(b<=0)return 0;
 
-  sF32 invAngle = 1.0f / angle;
+  float invAngle = 1.0f / angle;
   dist = b * invAngle;
   u2 = e2 * invAngle;
   u1 = e1 * invAngle;
@@ -2459,8 +2459,8 @@ sBool sRay::HitTriangleBary(sF32 &dist,sVector31Arg p0,sVector31Arg p1,sVector31
 
 sBool sRay::HitPlane(sVector31 &intersect,sVector4Arg plane) const
 {
-  sF32 angle;
-  sF32 dist;
+  float angle;
+  float dist;
 
   dist = plane^Start;             // distance above plane
   if(dist<0) return 0;            // already below plane.
@@ -2473,8 +2473,8 @@ sBool sRay::HitPlane(sVector31 &intersect,sVector4Arg plane) const
 
 sBool sRay::HitPlaneDoubleSided(sVector31 &intersect,sVector4Arg plane) const
 {
-  sF32 angle;
-  sF32 dist;
+  float angle;
+  float dist;
 
   dist = plane^Start;             // distance above plane
   angle = -(plane^Dir);           // direction
@@ -2492,9 +2492,9 @@ sBool sRay::HitPlaneDoubleSided(sVector31 &intersect,sVector4Arg plane) const
 }
 
 
-sBool sRay::HitSphere(sF32 *dist, sVector31Arg center, sF32 radius) const
+sBool sRay::HitSphere(float *dist, sVector31Arg center, float radius) const
 {
-  sF32 r2=radius*radius;
+  float r2=radius*radius;
   sVector30 dir2=center-Start;
   if ((dir2^dir2) <= r2) // ray start in sphere?
   {
@@ -2502,11 +2502,11 @@ sBool sRay::HitSphere(sF32 *dist, sVector31Arg center, sF32 radius) const
     return 0;
   }
 
-  sF32 l=Dir^dir2; 
+  float l=Dir^dir2; 
   if (l<0) return 0; // point is behind ray
 
   sVector30 d=center-(Start+l*Dir);
-  sF32 d2=d^d;
+  float d2=d^d;
   if (d2<=r2)
   {
     if (dist)
@@ -2517,11 +2517,11 @@ sBool sRay::HitSphere(sF32 *dist, sVector31Arg center, sF32 radius) const
 }
 
 
-sBool sIntersectRayAABB(sF32 &min, sF32 &max, const sVector31 &ro, const sVector30 &ird, const sVector31 &bbmin, const sVector31 &bbmax)
+sBool sIntersectRayAABB(float &min, float &max, const sVector31 &ro, const sVector30 &ird, const sVector31 &bbmin, const sVector31 &bbmax)
 {
-  sF32 near = (bbmin.x-ro.x)*ird.x;
-  sF32 far = (bbmax.x-ro.x)*ird.x;
-  sF32 temp = near;
+  float near = (bbmin.x-ro.x)*ird.x;
+  float far = (bbmax.x-ro.x)*ird.x;
+  float temp = near;
   near = (near>far) ? far : near;
   far = (temp>far) ? temp : far;
   min = (near>min) ? near : min;
@@ -2552,7 +2552,7 @@ sBool sIntersectRayAABB(sF32 &min, sF32 &max, const sVector31 &ro, const sVector
   return sTRUE;
 }
 
-sBool sRay::HitAABB(sF32 &min, sF32 &max, const sVector31& bbmin,const sVector31& bbmax)const
+sBool sRay::HitAABB(float &min, float &max, const sVector31& bbmin,const sVector31& bbmax)const
 {
 //  sBool result = sTRUE;
 
@@ -2565,9 +2565,9 @@ sBool sRay::HitAABB(sF32 &min, sF32 &max, const sVector31& bbmin,const sVector31
   
   //for(int i=0;i<3;i++)
   //{
-  //  sF32 idir = 1.0f / Dir[i];
-  //  sF32 near = (bbmin[i]-Start[i])*idir;
-  //  sF32 far = (bbmax[i]-Start[i])*idir;
+  //  float idir = 1.0f / Dir[i];
+  //  float near = (bbmin[i]-Start[i])*idir;
+  //  float far = (bbmax[i]-Start[i])*idir;
   //  if(near>far) sSwap(near,far);
   //  min = near > min ? near : min;
   //  max = far < max ? far : max;
@@ -2576,10 +2576,10 @@ sBool sRay::HitAABB(sF32 &min, sF32 &max, const sVector31& bbmin,const sVector31
   //return sTRUE;
 }
 
-int sRay::IntersectPlane(sF32 &t, sVector4Arg plane)const
+int sRay::IntersectPlane(float &t, sVector4Arg plane)const
 {
-  sF32 nd = plane.x*Dir.x+plane.y*Dir.y+plane.z*Dir.z;
-  sF32 dist=plane.w-plane.x*Start.x-plane.y*Start.y-plane.z*Start.z;;
+  float nd = plane.x*Dir.x+plane.y*Dir.y+plane.z*Dir.z;
+  float dist=plane.w-plane.x*Start.x-plane.y*Start.y-plane.z*Start.z;;
   if(-sEPSILON<nd && nd<sEPSILON)
   {
     t = 0.0f;
@@ -2591,13 +2591,13 @@ int sRay::IntersectPlane(sF32 &t, sVector4Arg plane)const
   return 1;
 }
 
-sBool sRay::HitBilinearPatch(sF32 &dist,const sVector31 &p00,const sVector31 &p01,const sVector31 &p10,const sVector31 &p11,sF32 *uOut,sF32 *vOut) const
+sBool sRay::HitBilinearPatch(float &dist,const sVector31 &p00,const sVector31 &p01,const sVector31 &p10,const sVector31 &p11,float *uOut,float *vOut) const
 {
   sVERIFY((uOut && vOut) || (!uOut && !vOut))
 
   // Algorithm by Ramsey, Potter, Hansen, "Ray Bilinear Patch Intersections",
   // Journal of Graphics Tools Vol. 9 No. 3 (2004)
-  static const sF32 sISECT_EPSILON = 1e-6f;
+  static const float sISECT_EPSILON = 1e-6f;
   sVector30 d = p00 - Start;
   sVector30 c = p10 - p00;
   sVector30 b = p01 - p00;
@@ -2623,14 +2623,14 @@ sBool sRay::HitBilinearPatch(sF32 &dist,const sVector31 &p00,const sVector31 &p0
     sSwap(q.y,q.z);
   }
 
-  sF32 A1 = a.x*q.z - a.z*q.x, A2 = a.y*q.z - a.z*q.y;
-  sF32 B1 = b.x*q.z - b.z*q.x, B2 = b.y*q.z - b.z*q.y;
-  sF32 C1 = c.x*q.z - c.z*q.x, C2 = c.y*q.z - c.z*q.y;
-  sF32 D1 = d.x*q.z - d.z*q.x, D2 = d.y*q.z - d.z*q.y;
+  float A1 = a.x*q.z - a.z*q.x, A2 = a.y*q.z - a.z*q.y;
+  float B1 = b.x*q.z - b.z*q.x, B2 = b.y*q.z - b.z*q.y;
+  float C1 = c.x*q.z - c.z*q.x, C2 = c.y*q.z - c.z*q.y;
+  float D1 = d.x*q.z - d.z*q.x, D2 = d.y*q.z - d.z*q.y;
   
-  sF32 v[2];
+  float v[2];
   int nSolutions = sSolveQuadratic(v, A2*C1 - A1*C2, A2*D1 - A1*D2 + B2*C1 - B1*C2, B2*D1 - B1*D2);
-  sF32 currentMinT = 1e+20f;
+  float currentMinT = 1e+20f;
   sBool gotOne = sFALSE;
 
   for(int i=0;i<nSolutions;i++)
@@ -2639,7 +2639,7 @@ sBool sRay::HitBilinearPatch(sF32 &dist,const sVector31 &p00,const sVector31 &p0
       continue;
 
     // compute u
-    sF32 da,db,u;
+    float da,db,u;
     da = v[i] * A2 + B2;
     db = v[i] * (A2 - A1) + (B2 - B1);
     if(sFAbs(db) >= sFAbs(da))
@@ -2651,7 +2651,7 @@ sBool sRay::HitBilinearPatch(sF32 &dist,const sVector31 &p00,const sVector31 &p0
       continue;
 
     // compute t
-    sF32 t = (u*v[i]*a.z + u*b.z + v[i]*c.z + d.z) / q.z;
+    float t = (u*v[i]*a.z + u*b.z + v[i]*c.z + d.z) / q.z;
     if(t >= 0.0f && t < currentMinT)
     {
       if(uOut) *uOut = u, *vOut = v[i];
@@ -2664,19 +2664,19 @@ sBool sRay::HitBilinearPatch(sF32 &dist,const sVector31 &p00,const sVector31 &p0
 }
 
 /*
-static sF32 sDistRaySegmentSquared (const sRay &ray, const sVector31 &seg1, const sVector31 &seg2, sF32 *rayparm=0)
+static float sDistRaySegmentSquared (const sRay &ray, const sVector31 &seg1, const sVector31 &seg2, float *rayparm=0)
 {
   sVector30 segd = seg2-seg1;
-  sF32 extent = segd.Length();
+  float extent = segd.Length();
   segd*=1/extent;
 
   sVector30 kDiff = ray.Start - seg1;
-  sF32 fA01 = -ray.Dir ^  segd;
-  sF32 fB0 = kDiff^ray.Dir;
-  sF32 fB1 = -kDiff^segd;
-  sF32 fC = kDiff.LengthSq();
-  sF32 fDet = sFAbs(1.0f - fA01*fA01);
-  sF32 fS0, fS1, fSqrDist, fExtDet;
+  float fA01 = -ray.Dir ^  segd;
+  float fB0 = kDiff^ray.Dir;
+  float fB1 = -kDiff^segd;
+  float fC = kDiff.LengthSq();
+  float fDet = sFAbs(1.0f - fA01*fA01);
+  float fS0, fS1, fSqrDist, fExtDet;
 
   if (fDet >= sEPSILON)
   {
@@ -2692,7 +2692,7 @@ static sF32 sDistRaySegmentSquared (const sRay &ray, const sVector31 &seg1, cons
         if (fS1 <= fExtDet)  // region 0
         {
           // minimum at interior points of ray and segment
-          sF32 fInvDet = (1.0f)/fDet;
+          float fInvDet = (1.0f)/fDet;
           fS0 *= fInvDet;
           fS1 *= fInvDet;
           fSqrDist = fS0*(fS0+fA01*fS1+(2.0f)*fB0) + fS1*(fA01*fS0+fS1+(2.0f)*fB1)+fC;
@@ -2783,9 +2783,9 @@ static sF32 sDistRaySegmentSquared (const sRay &ray, const sVector31 &seg1, cons
 }
 
 
-sBool sRay::HitCappedCylinder(const sVector31 &cylstart, const sVector31 &cylend, sF32 radius, sF32 *dist) const
+sBool sRay::HitCappedCylinder(const sVector31 &cylstart, const sVector31 &cylend, float radius, float *dist) const
 {
-  sF32 d2=sDistRaySegmentSquared(*this,cylstart,cylend,dist);
+  float d2=sDistRaySegmentSquared(*this,cylstart,cylend,dist);
   return (d2<=(radius*radius));
 }
 */
@@ -2844,7 +2844,7 @@ void sOBBox::Init(const sAABBoxC &box)
 
 /****************************************************************************/
 
-void sFrustum::Init(const sMatrix44 &mat,sF32 xMin,sF32 xMax,sF32 yMin,sF32 yMax,sF32 zMin,sF32 zMax)
+void sFrustum::Init(const sMatrix44 &mat,float xMin,float xMax,float yMin,float yMax,float zMin,float zMax)
 {
   const sVector4 colX(mat.i.x,mat.j.x,mat.k.x,mat.l.x);
   const sVector4 colY(mat.i.y,mat.j.y,mat.k.y,mat.l.y);
@@ -2872,8 +2872,8 @@ int sFrustum::IsInside(const sAABBoxC &b) const
   int result = sTEST_IN;
   for(int i=0;i<6;i++)
   {
-    sF32 m = b.Center ^ Planes[i];
-    sF32 n = b.Radius ^ AbsPlanes[i];
+    float m = b.Center ^ Planes[i];
+    float n = b.Radius ^ AbsPlanes[i];
     if(m+n<0) return sTEST_OUT;
     if(m-n<0) result = sTEST_CLIP;
   }
@@ -2888,8 +2888,8 @@ int sFrustum::IsInside(const sOBBox &b) const
   int result = sTEST_IN;
   for(int i=0;i<6;i++)
   {
-    sF32 m = b.Center ^ Planes[i];
-    sF32 n = b.HalfExtents.x * sFAbs(mat.i ^ Planes[i])
+    float m = b.Center ^ Planes[i];
+    float n = b.HalfExtents.x * sFAbs(mat.i ^ Planes[i])
            + b.HalfExtents.y * sFAbs(mat.j ^ Planes[i])
            + b.HalfExtents.z * sFAbs(mat.k ^ Planes[i]);
     if(m+n<0) return sTEST_OUT;
@@ -2904,8 +2904,8 @@ sBool sFrustum::IsOutside(const sOBBox &b) const
   mat.Init(b.BoxToWorld);
   for(int i=0;i<6;i++)
   {
-    sF32 m = b.Center ^ Planes[i];
-    sF32 n = b.HalfExtents.x * sFAbs(mat.i ^ Planes[i])
+    float m = b.Center ^ Planes[i];
+    float n = b.HalfExtents.x * sFAbs(mat.i ^ Planes[i])
            + b.HalfExtents.y * sFAbs(mat.j ^ Planes[i])
            + b.HalfExtents.z * sFAbs(mat.k ^ Planes[i]);
     if(m+n<0) return sTRUE;
@@ -2945,7 +2945,7 @@ void sFrustum::Transform(const sFrustum &src,const sMatrix34CM &matcm)
 /****************************************************************************/
 /****************************************************************************/
 
-sF32 sDistSegmentToPointSq(sVector2Arg a,sVector2Arg b,sVector2Arg p)
+float sDistSegmentToPointSq(sVector2Arg a,sVector2Arg b,sVector2Arg p)
 {
   sVector2 ab,ap,bp;
 
@@ -2953,12 +2953,12 @@ sF32 sDistSegmentToPointSq(sVector2Arg a,sVector2Arg b,sVector2Arg p)
   ap = p-a;
   bp = p-b;
 
-  sF32 e = ap^ab;
+  float e = ap^ab;
   if(e <= 0.0f) // outside of segment on side of a
     return ap^ap;
   else
   {
-    sF32 f = ab^ab;
+    float f = ab^ab;
     if(e >= f) // outside of segment on side of b
       return bp^bp;
     else
@@ -2966,7 +2966,7 @@ sF32 sDistSegmentToPointSq(sVector2Arg a,sVector2Arg b,sVector2Arg p)
   }
 }
 
-sF32 sDistSegmentToPointSq(const sVector31 &a,const sVector31 &b,const sVector31 &p)
+float sDistSegmentToPointSq(const sVector31 &a,const sVector31 &b,const sVector31 &p)
 {
   sVector30 ab,ap,bp;
 
@@ -2974,12 +2974,12 @@ sF32 sDistSegmentToPointSq(const sVector31 &a,const sVector31 &b,const sVector31
   ap = p-a;
   bp = p-b;
 
-  sF32 e = ap^ab;
+  float e = ap^ab;
   if(e <= 0.0f) // outside of segment on side of a
     return ap^ap;
   else
   {
-    sF32 f = ab^ab;
+    float f = ab^ab;
     if(e >= f) // outside of segment on side of b
       return bp^bp;
     else
@@ -2987,7 +2987,7 @@ sF32 sDistSegmentToPointSq(const sVector31 &a,const sVector31 &b,const sVector31
   }
 }
 
-sF32 sDistSegmentToPointSq(sVector2Arg a,sVector2Arg b,sVector2Arg p,sF32 &t)
+float sDistSegmentToPointSq(sVector2Arg a,sVector2Arg b,sVector2Arg p,float &t)
 {
   sVector2 ab,ap,bp;
 
@@ -2995,7 +2995,7 @@ sF32 sDistSegmentToPointSq(sVector2Arg a,sVector2Arg b,sVector2Arg p,sF32 &t)
   ap = p-a;
   bp = p-b;
 
-  sF32 e = ap^ab;
+  float e = ap^ab;
   if(e <= 0.0f) // outside of segment on side of a
   {
     t = 0.0f;
@@ -3003,7 +3003,7 @@ sF32 sDistSegmentToPointSq(sVector2Arg a,sVector2Arg b,sVector2Arg p,sF32 &t)
   }
   else
   {
-    sF32 f = ab^ab; // >=0
+    float f = ab^ab; // >=0
     if(e >= f) // outside of segment on side of b
     {
       t = 1.0f;
@@ -3017,7 +3017,7 @@ sF32 sDistSegmentToPointSq(sVector2Arg a,sVector2Arg b,sVector2Arg p,sF32 &t)
   }
 }
 
-sF32 sDistSegmentToPointSq(const sVector31 &a,const sVector31 &b,const sVector31 &p,sF32 &t)
+float sDistSegmentToPointSq(const sVector31 &a,const sVector31 &b,const sVector31 &p,float &t)
 {
   sVector30 ab,ap,bp;
 
@@ -3025,7 +3025,7 @@ sF32 sDistSegmentToPointSq(const sVector31 &a,const sVector31 &b,const sVector31
   ap = p-a;
   bp = p-b;
 
-  sF32 e = ap^ab;
+  float e = ap^ab;
   if(e <= 0.0f) // outside of segment on side of a
   {
     t = 0.0f;
@@ -3033,7 +3033,7 @@ sF32 sDistSegmentToPointSq(const sVector31 &a,const sVector31 &b,const sVector31
   }
   else
   {
-    sF32 f = ab^ab; // >=0
+    float f = ab^ab; // >=0
     if(e >= f) // outside of segment on side of b
     {
       t = 1.0f;
@@ -3057,7 +3057,7 @@ sSRT::sSRT()
   Translate.Init(0,0,0);
 }
 
-void sSRT::Init(sF32 *s)
+void sSRT::Init(float *s)
 {
   Scale    .Init(s[0],s[1],s[2]);
   Rotate   .Init(s[3],s[4],s[5]);
@@ -3099,19 +3099,19 @@ void sSRT::Invert()
 
 void sSRT::ToString(const sStringDesc &outStr) const
 {
-  sU32 sx,sy,sz;
-  sU32 rx,ry,rz;
-  sU32 tx,ty,tz;
+  uint32_t sx,sy,sz;
+  uint32_t rx,ry,rz;
+  uint32_t tx,ty,tz;
 
-  sx = *((const sU32 *) &Scale.x);
-  sy = *((const sU32 *) &Scale.y);
-  sz = *((const sU32 *) &Scale.z);
-  rx = *((const sU32 *) &Rotate.x);
-  ry = *((const sU32 *) &Rotate.y);
-  rz = *((const sU32 *) &Rotate.z);
-  tx = *((const sU32 *) &Translate.x);
-  ty = *((const sU32 *) &Translate.y);
-  tz = *((const sU32 *) &Translate.z);
+  sx = *((const uint32_t *) &Scale.x);
+  sy = *((const uint32_t *) &Scale.y);
+  sz = *((const uint32_t *) &Scale.z);
+  rx = *((const uint32_t *) &Rotate.x);
+  ry = *((const uint32_t *) &Rotate.y);
+  rz = *((const uint32_t *) &Rotate.z);
+  tx = *((const uint32_t *) &Translate.x);
+  ty = *((const uint32_t *) &Translate.y);
+  tz = *((const uint32_t *) &Translate.z);
 
   sSPrintF(outStr,L"SRT=[%08x,%08x,%08x,%08x,%08x,%08x,%08x,%08x,%08x]",
     sx,sy,sz,rx,ry,rz,tx,ty,tz);
@@ -3119,7 +3119,7 @@ void sSRT::ToString(const sStringDesc &outStr) const
 
 sBool sSRT::FromString(const sChar *str)
 {
-  sU32 fields[9];
+  uint32_t fields[9];
   const sChar *p = str;
 
   if(sCmpStringLen(p,L"SRT=[",5) != 0)
@@ -3135,15 +3135,15 @@ sBool sSRT::FromString(const sChar *str)
       return sFALSE;
   }
 
-  Scale.x = *((const sF32 *) &fields[0]);
-  Scale.y = *((const sF32 *) &fields[1]);
-  Scale.z = *((const sF32 *) &fields[2]);
-  Rotate.x = *((const sF32 *) &fields[3]);
-  Rotate.y = *((const sF32 *) &fields[4]);
-  Rotate.z = *((const sF32 *) &fields[5]);
-  Translate.x = *((const sF32 *) &fields[6]);
-  Translate.y = *((const sF32 *) &fields[7]);
-  Translate.z = *((const sF32 *) &fields[8]);
+  Scale.x = *((const float *) &fields[0]);
+  Scale.y = *((const float *) &fields[1]);
+  Scale.z = *((const float *) &fields[2]);
+  Rotate.x = *((const float *) &fields[3]);
+  Rotate.y = *((const float *) &fields[4]);
+  Rotate.z = *((const float *) &fields[5]);
+  Translate.x = *((const float *) &fields[6]);
+  Translate.y = *((const float *) &fields[7]);
+  Translate.z = *((const float *) &fields[8]);
 
   return sTRUE;
 }
@@ -3154,10 +3154,10 @@ sBool sSRT::FromString(const sChar *str)
 /***                                                                      ***/
 /****************************************************************************/
 
-void sHermite(const sF32 x1, sF32 &c0, sF32 &c1, sF32 &c2, sF32 &c3)
+void sHermite(const float x1, float &c0, float &c1, float &c2, float &c3)
 {
-  sF32 x2=x1*x1;
-  sF32 x3=x2*x1;
+  float x2=x1*x1;
+  float x3=x2*x1;
 
   c0 = -0.5f*x3 +      x2 - 0.5f*x1       ;
   c1 =  1.5f*x3 - 2.5f*x2           + 1.0f;
@@ -3166,9 +3166,9 @@ void sHermite(const sF32 x1, sF32 &c0, sF32 &c1, sF32 &c2, sF32 &c3)
 }
 
 
-void sHermiteD(const sF32 x1, sF32 &c0, sF32 &c1, sF32 &c2, sF32 &c3)
+void sHermiteD(const float x1, float &c0, float &c1, float &c2, float &c3)
 {
-  sF32 x2=x1*x1;
+  float x2=x1*x1;
 
   c0 = -1.5f*x2 + 2.0f*x1 - 0.5f;
   c1 =  4.5f*x2 - 5.0f*x1       ;
@@ -3176,19 +3176,19 @@ void sHermiteD(const sF32 x1, sF32 &c0, sF32 &c1, sF32 &c2, sF32 &c3)
   c3 =  1.5f*x2 - 1.0f*x1       ;
 }
 
-void sHermiteUniform(const sF32 x1,sF32 t0,sF32 t1,sF32 t2,sF32 &c0,sF32 &c1,sF32 &c2,sF32 &c3)
+void sHermiteUniform(const float x1,float t0,float t1,float t2,float &c0,float &c1,float &c2,float &c3)
 {
-  sF32 x2=x1*x1;
-  sF32 x3=x2*x1;
+  float x2=x1*x1;
+  float x3=x2*x1;
 
-  sF32 d0,d1,d2,d3;
+  float d0,d1,d2,d3;
   d0 = -0.5f*x3 +      x2 - 0.5f*x1       ;
   d1 =  1.5f*x3 - 2.5f*x2           + 1.0f;
   d2 = -1.5f*x3 + 2.0f*x2 + 0.5f*x1       ;
   d3 =  0.5f*x3 - 0.5f*x2                 ;
 
-  sF32 f3 = t1 / t2;
-  sF32 f0 = t1 / t0;
+  float f3 = t1 / t2;
+  float f0 = t1 / t0;
   
   c0 = d0*f0;
   c1 = d1+d0-d0*f0;
@@ -3196,18 +3196,18 @@ void sHermiteUniform(const sF32 x1,sF32 t0,sF32 t1,sF32 t2,sF32 &c0,sF32 &c1,sF3
   c3 = d3*f3;
 }
 
-void sHermiteUniformD(const sF32 x1,sF32 t0,sF32 t1,sF32 t2,sF32 &c0,sF32 &c1,sF32 &c2,sF32 &c3)
+void sHermiteUniformD(const float x1,float t0,float t1,float t2,float &c0,float &c1,float &c2,float &c3)
 {
-  sF32 x2=x1*x1;
+  float x2=x1*x1;
 
-  sF32 d0,d1,d2,d3;
+  float d0,d1,d2,d3;
   d0 = -1.5f*x2 + 2.0f*x1 - 0.5f;
   d1 =  4.5f*x2 - 5.0f*x1       ;
   d2 = -4.5f*x2 + 4.0f*x1 + 0.5f;
   d3 =  1.5f*x2 - 1.0f*x1       ;
 
-  sF32 f3 = t1 / t2;
-  sF32 f0 = t1 / t0;
+  float f3 = t1 / t2;
+  float f0 = t1 / t0;
   
   c0 = d0*f0;
   c1 = d1+d0-d0*f0;
@@ -3215,14 +3215,14 @@ void sHermiteUniformD(const sF32 x1,sF32 t0,sF32 t1,sF32 t2,sF32 &c0,sF32 &c1,sF
   c3 = d3*f3;
 }
 
-void sHermiteWeighted(const sF32 x1, sF32 l0, sF32 l1, sF32 l2, sF32 &c0, sF32 &c1, sF32 &c2, sF32 &c3)
+void sHermiteWeighted(const float x1, float l0, float l1, float l2, float &c0, float &c1, float &c2, float &c3)
 {
-  sF32 x2 = x1 * x1;
-  sF32 x3 = x2 * x1;
-  sF32 il01 = 1.0f / (l0 + l1);
-  sF32 il12 = 1.0f / (l1 + l2);
-  sF32 d0 = x3 - 2.0f*x2 + x1;
-  sF32 d1 = x3 - x2;
+  float x2 = x1 * x1;
+  float x3 = x2 * x1;
+  float il01 = 1.0f / (l0 + l1);
+  float il12 = 1.0f / (l1 + l2);
+  float d0 = x3 - 2.0f*x2 + x1;
+  float d1 = x3 - x2;
 
   c0 = -l0 * il01 * d0;
   c1 = 2.0f*x3 - 3.0f*x2 + 1.0f + (l0-l1) * il01 * d0 - l1 * il12 * d1;
@@ -3230,11 +3230,11 @@ void sHermiteWeighted(const sF32 x1, sF32 l0, sF32 l1, sF32 l2, sF32 &c0, sF32 &
   c3 = l2 * il12 * d1;
 }
 
-void sUniformBSpline(sF32 x1, sF32 &c0, sF32 &c1, sF32 &c2, sF32 &c3)
+void sUniformBSpline(float x1, float &c0, float &c1, float &c2, float &c3)
 {
-  sF32 x2=x1*x1;
-  sF32 x3=x2*x1;
-  static const sF32 i6 = 1.0f / 6.0f;
+  float x2=x1*x1;
+  float x3=x2*x1;
+  static const float i6 = 1.0f / 6.0f;
 
   c0 =   -i6*x3 + 0.5f*x2 - 0.5f*x1 +   i6;
   c1 =  0.5f*x3 -      x2           + 4*i6;
@@ -3242,9 +3242,9 @@ void sUniformBSpline(sF32 x1, sF32 &c0, sF32 &c1, sF32 &c2, sF32 &c3)
   c3 =    i6*x3                           ;
 }
 
-void sUniformBSplineD(sF32 x1, sF32 &c0, sF32 &c1, sF32 &c2, sF32 &c3)
+void sUniformBSplineD(float x1, float &c0, float &c1, float &c2, float &c3)
 {
-  const sF32 x2=x1*x1;
+  const float x2=x1*x1;
 
   c0 = -0.5f*x2 +      x1 - 0.5f;
   c1 =  1.5f*x2 - 2.0f*x1       ;
@@ -3252,9 +3252,9 @@ void sUniformBSplineD(sF32 x1, sF32 &c0, sF32 &c1, sF32 &c2, sF32 &c3)
   c3 =  0.5f*x2                 ;
 }
 
-void sCubicBezier(sF32 t, sF32 &c0, sF32 &c1, sF32 &c2, sF32 &c3)
+void sCubicBezier(float t, float &c0, float &c1, float &c2, float &c3)
 {
-  sF32 u = 1.0f - t;
+  float u = 1.0f - t;
 
   c0 = 1.0f * u*u*u;
   c1 = 3.0f * u*u*t;
@@ -3268,7 +3268,7 @@ void sCubicBezier(sF32 t, sF32 &c0, sF32 &c1, sF32 &c2, sF32 &c3)
 /***                                                                      ***/
 /****************************************************************************/
 
-sF32 sSmooth(sF32 x,sF32 s)
+float sSmooth(float x,float s)
 {
   if(x<=0) return 0;
   else if(x>=1) return 1;
@@ -3281,9 +3281,9 @@ sF32 sSmooth(sF32 x,sF32 s)
 /***                                                                      ***/
 /****************************************************************************/
 
-void sMakeDamp(int timeslice,sF32 damp,sF32 &d_,sF32 &f_)
+void sMakeDamp(int timeslice,float damp,float &d_,float &f_)
 {
-  sF32 f,d;
+  float f,d;
 
   f = 1;
   d = damp;
@@ -3307,18 +3307,18 @@ void sFilter2Pole::Init()
   sSetMem(this,0,sizeof(*this));
 }
 
-void sFilter2Pole::Scale(sF32 s)
+void sFilter2Pole::Scale(float s)
 {
   a0 *= s;
   a1 *= s;
   a2 *= s;
 }
 
-void sFilter2Pole::Band(sF32 f,sF32 bw)
+void sFilter2Pole::Band(float f,float bw)
 {
-  sF64 c = sFCos(f*sPI2F);
-  sF64 r = 1-3*bw;
-  sF64 k = (1-2*r*c+r*r) / (2-2*c);
+  double c = sFCos(f*sPI2F);
+  double r = 1-3*bw;
+  double k = (1-2*r*c+r*r) / (2-2*c);
 
   a0 = 1-k;
   a1 = 2*(k-r)*c;
@@ -3329,12 +3329,12 @@ void sFilter2Pole::Band(sF32 f,sF32 bw)
 
 
 
-void sFilter2Pole::Low(sF32 f,sF32 rr)
+void sFilter2Pole::Low(float f,float rr)
 {
   // tweaked butterworth
 
-  sF64 c = 1/sFTan(f*sPIF);
-  sF64 r = (1-rr)*sSQRT2F;
+  double c = 1/sFTan(f*sPIF);
+  double r = (1-rr)*sSQRT2F;
   
   a0 = 1/(1 + r*c + c*c);
   a1 = 2*a0;
@@ -3343,12 +3343,12 @@ void sFilter2Pole::Low(sF32 f,sF32 rr)
   b2 = -(1 - r*c + c*c) * a0;
 }
 
-void sFilter2Pole::High(sF32 f,sF32 rr)
+void sFilter2Pole::High(float f,float rr)
 {
   // tweaked butterworth
 
-  sF64 c = sFTan(f*sPIF);
-  sF64 r = (1-rr)*sSQRT2F;
+  double c = sFTan(f*sPIF);
+  double r = (1-rr)*sSQRT2F;
 
   a0 = 1/(1 + r*c +c*c);
   a1 = -2*a0;
@@ -3357,9 +3357,9 @@ void sFilter2Pole::High(sF32 f,sF32 rr)
   b2 = -(1 - r*c + c*c)*a0;
 }
 
-sF32 sFilter2Pole::Filter(sFilter2PoleTemp &t,sF32 sample)
+float sFilter2Pole::Filter(sFilter2PoleTemp &t,float sample)
 {
-  sF64 x0,y0;
+  double x0,y0;
 
   x0 = sample;
   y0 = x0*a0 + t.x1*a1 + t.x2*a2 + t.y1*b1 + t.y2*b2;
@@ -3368,18 +3368,18 @@ sF32 sFilter2Pole::Filter(sFilter2PoleTemp &t,sF32 sample)
   t.x1 =   x0;
   t.y2 = t.y1;
   t.y1 =   y0;
-  return sF32(y0);
+  return float(y0);
 }
 
-void sFilter2Pole::Filter(sFilter2PoleTemp &t,sF32 *in,sF32 *out,int count)
+void sFilter2Pole::Filter(sFilter2PoleTemp &t,float *in,float *out,int count)
 {
-  sF64 x0,y0;
+  double x0,y0;
 
   for(int i=0;i<count;i++)
   {
     x0 = in[i];
     y0 = x0*a0 + t.x1*a1 + t.x2*a2 + t.y1*b1 + t.y2*b2;
-    out[i] = sF32(y0);
+    out[i] = float(y0);
    
     t.x2 = t.x1;
     t.x1 =   x0;
@@ -3388,15 +3388,15 @@ void sFilter2Pole::Filter(sFilter2PoleTemp &t,sF32 *in,sF32 *out,int count)
   }
 }
 
-void sFilter2Pole::FilterStereo(sFilter2PoleTemp *t,sF32 *in,sF32 *out,int count)
+void sFilter2Pole::FilterStereo(sFilter2PoleTemp *t,float *in,float *out,int count)
 {
-  sF64 x0,y0;
+  double x0,y0;
 
   for(int i=0;i<count;i++)
   {
     x0 = in[i*2+0];
     y0 = x0*a0 + t[0].x1*a1 + t[0].x2*a2 + t[0].y1*b1 + t[0].y2*b2;
-    out[i*2+0] = sF32(y0);
+    out[i*2+0] = float(y0);
    
     t[0].x2 = t[0].x1;
     t[0].x1 =      x0;
@@ -3407,7 +3407,7 @@ void sFilter2Pole::FilterStereo(sFilter2PoleTemp *t,sF32 *in,sF32 *out,int count
   {
     x0 = in[i*2+1];
     y0 = x0*a0 + t[1].x1*a1 + t[1].x2*a2 + t[1].y1*b1 + t[1].y2*b2;
-    out[i*2+1] = sF32(y0);
+    out[i*2+1] = float(y0);
    
     t[1].x2 = t[1].x1;
     t[1].x1 =      x0;
@@ -3422,8 +3422,8 @@ void sFilter2Pole::FilterStereo(sFilter2PoleTemp *t,sF32 *in,sF32 *out,int count
 /***                                                                      ***/
 /****************************************************************************/
 
-sF32 sPerlinRandom2D[256][2];
-sF32 sPerlinRandom3D[256][3];
+float sPerlinRandom2D[256][2];
+float sPerlinRandom3D[256][3];
 int sPerlinPermute[512];
 
 static void sInitPerlin()
@@ -3457,7 +3457,7 @@ static void sInitPerlin()
   // random 2d
   for(i=0;i<256;)
   {
-    sF32 x,y;
+    float x,y;
     x = rnd.Float(2.0f)-1.0f;
     y = rnd.Float(2.0f)-1.0f;
     if(x*x+y*y<1.0f)
@@ -3471,7 +3471,7 @@ static void sInitPerlin()
   // random 3d
   for(i=0;i<256;)
   {
-    sF32 x,y,z;
+    float x,y,z;
     x = rnd.Float(2.0f)-1.0f;
     y = rnd.Float(2.0f)-1.0f;
     z = rnd.Float(2.0f)-1.0f;
@@ -3486,13 +3486,13 @@ static void sInitPerlin()
 
 }
 
-sF32 sPerlin2D(int x,int y,int mask,int seed)
+float sPerlin2D(int x,int y,int mask,int seed)
 {
   int vx0,vy0,vx1,vy1;
   int v00,v01,v10,v11;
-  sF32 f00,f01,f10,f11;
-  sF32 f0,f1,f;
-  sF32 tx,ty;
+  float f00,f01,f10,f11;
+  float f0,f1,f;
+  float tx,ty;
 
   mask &= 255;
   vx0 = (x>>16) & mask; vx1 = (vx0+1) & mask; tx=(x&0xffff)/65536.0f;
@@ -3515,16 +3515,16 @@ sF32 sPerlin2D(int x,int y,int mask,int seed)
   return f;
 }
 
-sF32 sPerlin3D(int x,int y,int z,int mask,int seed)
+float sPerlin3D(int x,int y,int z,int mask,int seed)
 {
   int vx0,vy0,vz0,vx1,vy1,vz1;
   int v000,v001,v010,v011;
   int v100,v101,v110,v111;
-  sF32 f000,f001,f010,f011;
-  sF32 f100,f101,f110,f111;
-  sF32 f00,f01,f10,f11;
-  sF32 f0,f1,f;
-  sF32 tx,ty,tz;
+  float f000,f001,f010,f011;
+  float f100,f101,f110,f111;
+  float f00,f01,f10,f11;
+  float f0,f1,f;
+  float tx,ty,tz;
 
   mask &= 255;
   vx0 = (x>>16) & mask; vx1 = (vx0+1) & mask; tx=(x&0xffff)/65536.0f;
@@ -3565,19 +3565,19 @@ sF32 sPerlin3D(int x,int y,int z,int mask,int seed)
 }
 
 
-void sPerlinDerive3D(int x,int y,int z,int mask,int seed,sF32 &value,sVector30 &dir)
+void sPerlinDerive3D(int x,int y,int z,int mask,int seed,float &value,sVector30 &dir)
 {
   int vx0,vy0,vz0,vx1,vy1,vz1;
   int v000,v001,v010,v011;
   int v100,v101,v110,v111;
-  sF32 tx,ty,tz;
-  sF32 px000,px001,px010,px011,px100,px101,px110,px111;
-  sF32 py000,py001,py010,py011,py100,py101,py110,py111;
-  sF32 pz000,pz001,pz010,pz011,pz100,pz101,pz110,pz111;
-  sF32 rx000,rx001,rx010,rx011,rx100,rx101,rx110,rx111;
-  sF32 ry000,ry001,ry010,ry011,ry100,ry101,ry110,ry111;
-  sF32 rz000,rz001,rz010,rz011,rz100,rz101,rz110,rz111;
-  sF32 ra0,ra1,rb0,rb1;
+  float tx,ty,tz;
+  float px000,px001,px010,px011,px100,px101,px110,px111;
+  float py000,py001,py010,py011,py100,py101,py110,py111;
+  float pz000,pz001,pz010,pz011,pz100,pz101,pz110,pz111;
+  float rx000,rx001,rx010,rx011,rx100,rx101,rx110,rx111;
+  float ry000,ry001,ry010,ry011,ry100,ry101,ry110,ry111;
+  float rz000,rz001,rz010,rz011,rz100,rz101,rz110,rz111;
+  float ra0,ra1,rb0,rb1;
 
   mask &= 255;
   vx0 = (x>>16) & mask; vx1 = (vx0+1) & mask; tx=(x&0xffff)/65536.0f;
@@ -3600,9 +3600,9 @@ void sPerlinDerive3D(int x,int y,int z,int mask,int seed,sF32 &value,sVector30 &
   px110=sPerlinRandom3D[v110][0];  py110=sPerlinRandom3D[v110][1];  pz110=sPerlinRandom3D[v110][2];
   px111=sPerlinRandom3D[v111][0];  py111=sPerlinRandom3D[v111][1];  pz111=sPerlinRandom3D[v111][2];
   
-  sF32 hx = 3*tx*tx - 2*tx*tx*tx;
-  sF32 hy = 3*ty*ty - 2*ty*ty*ty;
-  sF32 hz = 3*tz*tz - 2*tz*tz*tz;
+  float hx = 3*tx*tx - 2*tx*tx*tx;
+  float hy = 3*ty*ty - 2*ty*ty*ty;
+  float hz = 3*tz*tz - 2*tz*tz*tz;
   
   // X
   
@@ -3714,23 +3714,23 @@ void sPerlinDerive3D(int x,int y,int z,int mask,int seed,sF32 &value,sVector30 &
   dir.z = ra0 + 6*tz*(rb1-rb0-ra1) + 3*tz*tz*(5*ra1-3*ra0-2*rb1+2*rb0) - 8*tz*tz*tz*(ra1-ra0); 
 }
 
-sF32 sPerlin2D(sF32 x,sF32 y,int octaves,sF32 falloff,int mode,int seed)
+float sPerlin2D(float x,float y,int octaves,float falloff,int mode,int seed)
 {
   int xi = int(x*0x10000);
   int yi = int(y*0x10000);
   int mask = 0xff;
-  sF32 sum,amp;
+  float sum,amp;
 
   sum = 0;
   amp = 1.0f;
 
   for(int i=0;i<octaves && i<8;i++)
   {
-    sF32 val = sPerlin2D(xi,yi,mask,seed);
+    float val = sPerlin2D(xi,yi,mask,seed);
     if(mode&1)
-      val = (sF32)sFAbs(val)*2-1;
+      val = (float)sFAbs(val)*2-1;
     if(mode&2)
-      val = (sF32)sFSin(val*sPI2F);
+      val = (float)sFSin(val*sPI2F);
     sum += val * amp;
 
     amp *= falloff;
@@ -3747,17 +3747,17 @@ sF32 sPerlin2D(sF32 x,sF32 y,int octaves,sF32 falloff,int mode,int seed)
 /***                                                                      ***/
 /****************************************************************************/
 
-sBool sGetIntersection(sVector2Arg u1, sVector2Arg u2, sVector2Arg v1, sVector2Arg v2, sF32 *s, sF32 *t, sVector2 *p)
+sBool sGetIntersection(sVector2Arg u1, sVector2Arg u2, sVector2Arg v1, sVector2Arg v2, float *s, float *t, sVector2 *p)
 {
   sVector2 du(u2.x - u1.x, u2.y - u1.y);
   sVector2 dv(v2.x - v1.x, v2.y - v1.y);
-  sF32 d = (dv.x * du.y - dv.y * du.x);
+  float d = (dv.x * du.y - dv.y * du.x);
   if (!d)
     return sFALSE;
-  sF32 _t = ((v1.y - u1.y) * du.x - (v1.x - u1.x) * du.y) / d;
+  float _t = ((v1.y - u1.y) * du.x - (v1.x - u1.x) * du.y) / d;
   if ((_t < 0)||(_t > 1))
     return sFALSE;
-  sF32 _s;
+  float _s;
   if (sAbs(du.y) > 0.00001f * sMax(1.0f, sMax(sAbs(u1.y), sAbs(u2.y))))
     _s = (v1.y - u1.y + _t * dv.y) / du.y;
   else
@@ -3773,7 +3773,7 @@ sBool sGetIntersection(sVector2Arg u1, sVector2Arg u2, sVector2Arg v1, sVector2A
   return sTRUE;
 }
 
-sBool sGetIntersection(sVector2Arg u1, sVector2Arg u2, const sFRect &rect, sF32 *s, sVector2 *p)
+sBool sGetIntersection(sVector2Arg u1, sVector2Arg u2, const sFRect &rect, float *s, sVector2 *p)
 {  
   sVector2 _p;
   if ((sGetIntersection(u1, u2, sVector2(rect.x0, rect.y0), sVector2(rect.x1, rect.y1), s, sNULL, &_p) && rect.Hit(_p.x, _p.y))
@@ -3785,20 +3785,20 @@ sBool sGetIntersection(sVector2Arg u1, sVector2Arg u2, const sFRect &rect, sF32 
   return sFALSE;
 }
 
-int sGetLineSegmentIntersection(sF32 &dist0, sF32 &dist1, sVector2Arg ls0, sVector2Arg ld0, sVector2Arg ls1, sVector2Arg ld1)
+int sGetLineSegmentIntersection(float &dist0, float &dist1, sVector2Arg ls0, sVector2Arg ld0, sVector2Arg ls1, sVector2Arg ld1)
 {
-  sF32 denom = ld1.y*ld0.x-ld1.x*ld0.y;
-  sF32 nume_a = ld1.x*(ls0.y-ls1.y)-ld1.y*(ls0.x-ls1.x);
-  sF32 nume_b = ld0.x*(ls0.y-ls1.y)-ld0.y*(ls0.x-ls1.x);
+  float denom = ld1.y*ld0.x-ld1.x*ld0.y;
+  float nume_a = ld1.x*(ls0.y-ls1.y)-ld1.y*(ls0.x-ls1.x);
+  float nume_b = ld0.x*(ls0.y-ls1.y)-ld0.y*(ls0.x-ls1.x);
 
   if(sFAbs(denom)<0.00001f)
   {
     if(nume_a==0.0f && nume_b==0.0f)
     {
       // coincident lines, check if segments overlap
-      sF32 lengthsqr = ld0.x*ld0.x+ld0.y*ld0.y;
-      sF32 length0 = ld0.x*ls1.x+ld0.y*ls1.y;
-      sF32 length1 = ld0.x*(ls1.x+ld1.x)+ld0.y*(ls1.y+ld1.y);
+      float lengthsqr = ld0.x*ld0.x+ld0.y*ld0.y;
+      float length0 = ld0.x*ls1.x+ld0.y*ls1.y;
+      float length1 = ld0.x*(ls1.x+ld1.x)+ld0.y*(ls1.y+ld1.y);
       if(length1<length0)
         sSwap(length0,length1);
       if(length0<0.0f)
@@ -3807,14 +3807,14 @@ int sGetLineSegmentIntersection(sF32 &dist0, sF32 &dist1, sVector2Arg ls0, sVect
         length1 = lengthsqr;
       if(length1<length0)
         return 0;         // line segments not intersecting
-      sF32 invlsqr = 1.0f / lengthsqr;
+      float invlsqr = 1.0f / lengthsqr;
       dist0 = length0*invlsqr;
       dist1 = length1*invlsqr;
       return 2;
     }
     return 0;
   }
-  sF32 invdenom = 1.0f/denom;
+  float invdenom = 1.0f/denom;
   dist0 = nume_a*invdenom;
   dist1 = nume_b*invdenom;
 
@@ -3829,18 +3829,18 @@ int sGetLineSegmentIntersection(sF32 &dist0, sF32 &dist1, sVector2Arg ls0, sVect
 /***                                                                      ***/
 /****************************************************************************/
 
-sVector30 sGetBezierSplineFactors3(sF32 n)
+sVector30 sGetBezierSplineFactors3(float n)
 {
-  sF32 m = (1.0f-n);
+  float m = (1.0f-n);
   return sVector30(
     m*m, 
     2.0f*n*m, 
     n*n);
 }
 
-sVector4 sGetBezierSplineFactors4(sF32 n)
+sVector4 sGetBezierSplineFactors4(float n)
 {
-  sF32 m = (1.0f-n);
+  float m = (1.0f-n);
   return sVector4(
     m*m*m,
     3.0f*n*m*m,
@@ -3848,19 +3848,19 @@ sVector4 sGetBezierSplineFactors4(sF32 n)
     n*n*n);
 }
 
-void sGetBezierSplinePoint(sF32 *out, sF32 n, const sF32 *v1, const sF32 *v2, const sF32 *v3, const sU32 d)
+void sGetBezierSplinePoint(float *out, float n, const float *v1, const float *v2, const float *v3, const uint32_t d)
 {
   sVector30 f = sGetBezierSplineFactors3(n);
-  for (sU32 i = 0; i != d; ++i)
+  for (uint32_t i = 0; i != d; ++i)
   {
     out[i] = v1[i] * f[0] + v2[i] * f[1] + v3[i] * f[2];
   }
 }
 
-void sGetBezierSplinePoint(sF32 *out, sF32 n, const sF32 *v1, const sF32 *v2, const sF32 *v3, const sF32 *v4, const sU32 d)
+void sGetBezierSplinePoint(float *out, float n, const float *v1, const float *v2, const float *v3, const float *v4, const uint32_t d)
 {
   sVector4 f = sGetBezierSplineFactors4(n);
-  for (sU32 i = 0; i != d; ++i)
+  for (uint32_t i = 0; i != d; ++i)
   {
     out[i] = v1[i] * f[0] + v2[i] * f[1] + v3[i] * f[2] + v4[i] * f[3];
   }
@@ -3877,10 +3877,10 @@ void sGetBezierSplinePoint(sF32 *out, sF32 n, const sF32 *v1, const sF32 *v2, co
 // S: color saturation
 // L: color lightness
 
-void sRgbToHsl(sF32 r, sF32 g, sF32 b, sF32 &h, sF32 &s, sF32 &l)
+void sRgbToHsl(float r, float g, float b, float &h, float &s, float &l)
 {
-  sF32 maxc = sMax(sMax(r,g),b);
-  sF32 minc = sMin(sMin(r,g),b);
+  float maxc = sMax(sMax(r,g),b);
+  float minc = sMin(sMin(r,g),b);
   l = (minc+maxc)/2.0f;
   if (minc == maxc)
   {
@@ -3891,9 +3891,9 @@ void sRgbToHsl(sF32 r, sF32 g, sF32 b, sF32 &h, sF32 &s, sF32 &l)
     s = (maxc - minc) / (maxc + minc);
   else
     s = (maxc - minc) / (2.0f-maxc-minc);
-  sF32 rc = (maxc-r) / (maxc-minc);
-  sF32 gc = (maxc-g) / (maxc-minc);
-  sF32 bc = (maxc-b) / (maxc-minc);
+  float rc = (maxc-r) / (maxc-minc);
+  float gc = (maxc-g) / (maxc-minc);
+  float bc = (maxc-b) / (maxc-minc);
   if (r == maxc)
     h = bc-gc;
   else if (g == maxc)
@@ -3904,7 +3904,7 @@ void sRgbToHsl(sF32 r, sF32 g, sF32 b, sF32 &h, sF32 &s, sF32 &l)
 
 }
 
-static sF32 _sHslToRgb_GetChannel(sF32 m1, sF32 m2, sF32 hue)
+static float _sHslToRgb_GetChannel(float m1, float m2, float hue)
 {
   hue = sAbsMod(hue, 1.0f);
   if (hue < (1.0f/6.0f))
@@ -3916,7 +3916,7 @@ static sF32 _sHslToRgb_GetChannel(sF32 m1, sF32 m2, sF32 hue)
   return m1;
 }
 
-void sHslToRgb(sF32 h, sF32 s, sF32 l, sF32 &r, sF32 &g, sF32 &b)
+void sHslToRgb(float h, float s, float l, float &r, float &g, float &b)
 {
   if (s == 0.0f)
   {
@@ -3925,7 +3925,7 @@ void sHslToRgb(sF32 h, sF32 s, sF32 l, sF32 &r, sF32 &g, sF32 &b)
     b = l;
     return;
   }
-  sF32 m1,m2;
+  float m1,m2;
   if (l <= 0.5f)
     m2 = l * (1.0f+s);
   else
@@ -3942,7 +3942,7 @@ void sHslToRgb(const sVector4 &in, sVector4 &out)
   sHslToRgb(in.x, in.y, in.z, out.x, out.y, out.z);
 }
 
-sU32 sHslToColor(sF32 h, sF32 s, sF32 l, sF32 a)
+uint32_t sHslToColor(float h, float s, float l, float a)
 {
   sVector4 v(h,s,l,a);
   sHslToRgb(v,v);

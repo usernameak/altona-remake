@@ -26,27 +26,27 @@
 // is) on a Core2 2.83GHz for both compression and decompression.
 class sFastLzpCompressor
 {
-  sU8 *ChunkBuffer;
-  sU8 *OutBuffer;
-  sU32 *HashTable;
-  sU32 CurrentPos;
+  uint8_t *ChunkBuffer;
+  uint8_t *OutBuffer;
+  uint32_t *HashTable;
+  uint32_t CurrentPos;
 
-  sU8 *RawPos;
-  sU8 *BitPos1,*BitPos2;
-  sU32 BitBuffer;
+  uint8_t *RawPos;
+  uint8_t *BitPos1,*BitPos2;
+  uint32_t BitBuffer;
   int BitShift;
 
-  sU32 PWritePos;
+  uint32_t PWritePos;
   sBool PFirstBlock;
 
-  void StartWrite(sU8 *ptr);
+  void StartWrite(uint8_t *ptr);
   void EndWrite();
 
   void Shift();
 
   // The BitPos1/BitPos2 stuff looks strange, I know. But it's all too make the
   // depacker very simple+fast.
-  sINLINE void PutBits(sU32 value,int nBits) // nBits must be <=16!!
+  sINLINE void PutBits(uint32_t value,int nBits) // nBits must be <=16!!
   {
     BitShift -= nBits;
     BitBuffer |= value << BitShift;
@@ -55,7 +55,7 @@ class sFastLzpCompressor
       Shift();
   }
 
-  sINLINE void PutBitsLong(sU32 value,int nBits) // nBits may be up to 32
+  sINLINE void PutBitsLong(uint32_t value,int nBits) // nBits may be up to 32
   {
     if(nBits <= 16)
       PutBits(value,nBits);
@@ -66,10 +66,10 @@ class sFastLzpCompressor
     }
   }
 
-  sINLINE void PutByte(sU8 value) { *RawPos++ = value; }
-  void PutExpGolomb(sU32 value);
+  sINLINE void PutByte(uint8_t value) { *RawPos++ = value; }
+  void PutExpGolomb(uint32_t value);
 
-  int CompressChunk(sU32 nBytes,sBool isLast);
+  int CompressChunk(uint32_t nBytes,sBool isLast);
   void Reset();
 
 public:
@@ -81,31 +81,31 @@ public:
 
   // OR: Piecewise I/O (normal write operations)
   void StartPiecewise();
-  sBool WritePiecewise(sFile *dest,const void *buffer,sDInt size);
+  sBool WritePiecewise(sFile *dest,const void *buffer,ptrdiff_t size);
   sBool EndPiecewise(sFile *dest);
 };
 
 // The corresponding decompressor.
 class sFastLzpDecompressor
 {
-  sU8 *ChunkBuffer;
-  sU8 *InBuffer;
-  sU32 *HashTable;
-  sU32 CurrentPos;
+  uint8_t *ChunkBuffer;
+  uint8_t *InBuffer;
+  uint32_t *HashTable;
+  uint32_t CurrentPos;
 
-  sU32 PReadPos;
-  sU32 PBlockEnd;
+  uint32_t PReadPos;
+  uint32_t PBlockEnd;
   sBool PIsLast;
 
-  const sU8 *RawPos;
-  sU32 BitBuffer;
+  const uint8_t *RawPos;
+  uint32_t BitBuffer;
   int BitFill;
 
-  void StartRead(const sU8 *ptr);
+  void StartRead(const uint8_t *ptr);
 
   void Shift();
 
-  sINLINE sU32 PeekBits(int nBits) // nBits must be <=16!!
+  sINLINE uint32_t PeekBits(int nBits) // nBits must be <=16!!
   {
     return BitBuffer >> (32 - nBits);
   }
@@ -118,24 +118,24 @@ class sFastLzpDecompressor
       Shift();
   }
 
-  sINLINE sU32 GetBits(int nBits) // nBits must be <=16!!
+  sINLINE uint32_t GetBits(int nBits) // nBits must be <=16!!
   {
-    sU32 v = PeekBits(nBits);
+    uint32_t v = PeekBits(nBits);
     SkipBits(nBits);
     return v;
   }
 
-  sINLINE sU8 GetByte()
+  sINLINE uint8_t GetByte()
   {
     return *RawPos++;
   }
 
-  sU32 GetExpGolomb();
+  uint32_t GetExpGolomb();
 
-  int DecompressChunk(sU32 blockLen,sBool &last,sU8 *&ptr);
+  int DecompressChunk(uint32_t blockLen,sBool &last,uint8_t *&ptr);
   void Reset();
 
-  sU32 ReadLen(const sU8* ptr);
+  uint32_t ReadLen(const uint8_t* ptr);
 
 public:
   sFastLzpDecompressor();
@@ -146,7 +146,7 @@ public:
 
   // OR: Piecewise I/O (normal read operations)
   void StartPiecewise();
-  sBool ReadPiecewise(sFile *src,void *buffer,sDInt size);
+  sBool ReadPiecewise(sFile *src,void *buffer,ptrdiff_t size);
   void EndPiecewise();
 };
 
@@ -158,7 +158,7 @@ class sFastLzpFile : public sFile
   sFastLzpCompressor *Comp;
   sFastLzpDecompressor *Decomp;
   sFile *Host;
-  sS64 Size;
+  int64_t Size;
 
 public:
   sFastLzpFile();
@@ -172,9 +172,9 @@ public:
   static sFile *OpenWrite(sFile *host);
 
   virtual sBool Close();
-  virtual sBool Read(void *data,sDInt size);
-  virtual sBool Write(const void *data,sDInt size);
-  virtual sS64 GetSize();
+  virtual sBool Read(void *data,ptrdiff_t size);
+  virtual sBool Write(const void *data,ptrdiff_t size);
+  virtual int64_t GetSize();
 };
 
 /****************************************************************************/

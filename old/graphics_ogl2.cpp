@@ -56,7 +56,7 @@ static GLXContext GLXC;
 
 #endif
 
-void GLError(sU32 err,const sChar *file,int line,const sChar *system)
+void GLError(uint32_t err,const sChar *file,int line,const sChar *system)
 {
   sString<256> buffer;
 
@@ -122,7 +122,7 @@ void sVertexFormatHandle::Create()
     int i = 0;
     while(Data[i])
     {
-      if(((Data[i]&sVF_STREAMMASK)>>sVF_STREAMSHIFT)==(sU32)stream)
+      if(((Data[i]&sVF_STREAMMASK)>>sVF_STREAMSHIFT)==(uint32_t)stream)
       {
         if(firstvert)
         {
@@ -304,7 +304,7 @@ void sGeoBufferPart::Init(int count,int size,sGeometryDuration duration,int buff
 void sGeoBufferPart::Lock(void **ptr)
 {
   glBindBufferARB(Buffer->GLType,Buffer->GLName);
-  sU8 *data = (sU8 *)glMapBufferARB(Buffer->GLType,GL_WRITE_ONLY);
+  uint8_t *data = (uint8_t *)glMapBufferARB(Buffer->GLType,GL_WRITE_ONLY);
   GLERR();
   glBindBufferARB(Buffer->GLType,0);
   data+=Start;
@@ -356,7 +356,7 @@ void sGeometry::Draw(sDrawRange *ir,int irc,int instancecount, sVertexOffset *of
     {
       glVertexAttribPointerARB(
         decl->Index,decl->Size,decl->Type,decl->Normalized,
-        stride,(const void *)(sDInt)(decl->Offset+start));
+        stride,(const void *)(ptrdiff_t)(decl->Offset+start));
       glEnableVertexAttribArrayARB(decl->Index);
       disablemask |= (1<<decl->Index);
     }
@@ -406,7 +406,7 @@ void sGeometry::Draw(sDrawRange *ir,int irc,int instancecount, sVertexOffset *of
     glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB,IndexPart.Buffer->GLName);
     const int type = (Flags & sGF_INDEX32) ? GL_UNSIGNED_INT : GL_UNSIGNED_SHORT;
     glDrawRangeElements(primtype,0,VertexPart[0].Count-1,IndexPart.Count, 
-      type, (void*) sDInt(IndexPart.Start));
+      type, (void*) ptrdiff_t(IndexPart.Start));
   }
   else
   {
@@ -442,7 +442,7 @@ sBool sReadTexture(sReader &s, sTextureBase *&tex)
   return sFALSE;
 }
 
-sU64 sGetAvailTextureFormats()
+uint64_t sGetAvailTextureFormats()
 {
   return (1ULL<<sTEX_ARGB8888);
 }
@@ -461,7 +461,7 @@ void sTexture2D::Destroy2()
   GLName = 0;
 }
 
-void sTexture2D::BeginLoad(sU8 *&data,int &pitch,int mipmap)
+void sTexture2D::BeginLoad(uint8_t *&data,int &pitch,int mipmap)
 {
   sVERIFY(LoadBuffer==0);
   sVERIFY(mipmap>=0 && mipmap<Mipmaps);
@@ -469,7 +469,7 @@ void sTexture2D::BeginLoad(sU8 *&data,int &pitch,int mipmap)
   int ys = SizeY>>mipmap;
 
   LoadMipmap = mipmap;
-  LoadBuffer = new sU8[BitsPerPixel*xs*ys/8];
+  LoadBuffer = new uint8_t[BitsPerPixel*xs*ys/8];
   data = LoadBuffer;
   pitch = BitsPerPixel*xs/8;
 }
@@ -562,7 +562,7 @@ void sTextureCube::Destroy2()
   GLName = 0;
 }
 
-void sTextureCube::BeginLoad(sTexCubeFace cf, sU8*& data, int& pitch, int mipmap)
+void sTextureCube::BeginLoad(sTexCubeFace cf, uint8_t*& data, int& pitch, int mipmap)
 {
   sVERIFY(LoadBuffer == 0);
   sVERIFY(mipmap >= 0 && mipmap < Mipmaps);
@@ -571,7 +571,7 @@ void sTextureCube::BeginLoad(sTexCubeFace cf, sU8*& data, int& pitch, int mipmap
 
   LoadFace = cf;
   LoadMipmap = mipmap;
-  LoadBuffer = new sU8[BitsPerPixel * xs * ys / 8];
+  LoadBuffer = new uint8_t[BitsPerPixel * xs * ys / 8];
   data = LoadBuffer;
   pitch = BitsPerPixel * xs / 8;
 }
@@ -640,7 +640,7 @@ void sTextureCube::EndLoad()
 
 /****************************************************************************/
 
-void sPackDXT(sU8 *d,sU32 *bmp,int xs,int ys,int format,sBool dither)
+void sPackDXT(uint8_t *d,uint32_t *bmp,int xs,int ys,int format,sBool dither)
 {
   sVERIFY("sPackDXT not supported with opengl")
 }
@@ -824,7 +824,7 @@ void sMaterial::SetStates(int variant_ignored)
   }
 
   // alpha test
-  const sU8 alphaFunc = FuncFlags[sMFT_ALPHA];
+  const uint8_t alphaFunc = FuncFlags[sMFT_ALPHA];
 
   if (sMFF_ALWAYS == alphaFunc)
   {
@@ -942,11 +942,11 @@ void sSetPSParam(int o, int count, const sVector4* psf)
   sSetPSParamImpl(o,count,psf);
 }
 
-void sSetVSBool(sU32 bits,sU32 mask)
+void sSetVSBool(uint32_t bits,uint32_t mask)
 {
 }
 
-void sSetPSBool(sU32 bits,sU32 mask)
+void sSetPSBool(uint32_t bits,uint32_t mask)
 {
 }
 
@@ -1163,7 +1163,7 @@ void InitGFX(int flags,int xs,int ys)
 
   DXScreenMode.ScreenX = xs;
   DXScreenMode.ScreenY = ys;
-  DXScreenMode.Aspect = sF32(xs)/ys;
+  DXScreenMode.Aspect = float(xs)/ys;
   sGFXViewRect.Init(0,0,xs,ys);
 
   sInitGfxCommon();
@@ -1221,7 +1221,7 @@ void sGetScreenInfo(sScreenInfo &si,int flags,int display)
   si.RefreshRates[0] = 60;
   si.AspectRatios[0].x = 4;
   si.AspectRatios[0].y = 3;
-  si.CurrentAspect = sF32(DXScreenMode.ScreenX)/DXScreenMode.ScreenY;
+  si.CurrentAspect = float(DXScreenMode.ScreenX)/DXScreenMode.ScreenY;
   si.CurrentXSize = DXScreenMode.ScreenX;
   si.CurrentYSize = DXScreenMode.ScreenY;
 }
@@ -1237,7 +1237,7 @@ sBool sSetScreenMode(const sScreenMode &sm)
   return 1;
 }
 
-void sGetScreenSafeArea(sF32 &xs, sF32 &ys)
+void sGetScreenSafeArea(float &xs, float &ys)
 {
 #if sCONFIG_BUILD_DEBUG || sCONFIG_BUILD_DEBUGFAST
   xs = 0.95f;
@@ -1270,22 +1270,22 @@ sTexture2D *sGetCurrentBackZBuffer(void)
   return 0;
 }
 
-/*void sSetRendertarget(const sRect *vrp,int flags,sU32 clearcolor,sTexture2D **tex,int count)
+/*void sSetRendertarget(const sRect *vrp,int flags,uint32_t clearcolor,sTexture2D **tex,int count)
 {
   sVERIFY(0);
   
 }
 
-static void sSetRendertargetPrivate(const sRect *vrp,int flags,sU32 color)
+static void sSetRendertargetPrivate(const sRect *vrp,int flags,uint32_t color)
 {
 }
 
-void sSetRendertarget(const sRect *vrp, int clearflags, sU32 clearcolor)
+void sSetRendertarget(const sRect *vrp, int clearflags, uint32_t clearcolor)
 {
   sSetRendertarget(vrp,0,clearflags,clearcolor);
 }
 
-void sSetRendertarget(const sRect *vrp,sTexture2D *tex, int clearflags, sU32 clearcolor)
+void sSetRendertarget(const sRect *vrp,sTexture2D *tex, int clearflags, uint32_t clearcolor)
 {
   sVERIFY(tex==0);
 
@@ -1322,7 +1322,7 @@ void sSetRendertarget(const sRect *vrp,sTexture2D *tex, int clearflags, sU32 cle
 
 }
 
-void sSetRendertargetCube(sTextureCube* tex,sTexCubeFace face,int cf, sU32 cc)
+void sSetRendertargetCube(sTextureCube* tex,sTexCubeFace face,int cf, uint32_t cc)
 {
   sFatal(L"sSetRendertargetCube not implemented!");
 }
@@ -1393,7 +1393,7 @@ void sCopyTexture(const sCopyTexturePara &para) {
 
 }
 
-void sBeginSaveRT(const sU8 *&data, sS32 &pitch, enum sTextureFlags &flags)
+void sBeginSaveRT(const uint8_t *&data, int32_t &pitch, enum sTextureFlags &flags)
 {
 }
 
@@ -1401,7 +1401,7 @@ void sEndSaveRT()
 {
 }
 
-void sBeginReadTexture(const sU8*& data, sS32& pitch, enum sTextureFlags& flags,sTexture2D *tex)
+void sBeginReadTexture(const uint8_t*& data, int32_t& pitch, enum sTextureFlags& flags,sTexture2D *tex)
 {
   sVERIFYFALSE;
 }
@@ -1471,18 +1471,18 @@ void sGetGraphicsStats(sGraphicsStats &stat)
   sLogF(L"gfx",L"sGetGraphicsStats not implemented\n");
 }
 
-int sRenderStateTexture(sU32* data, int texstage, sU32 tflags)
+int sRenderStateTexture(uint32_t* data, int texstage, uint32_t tflags)
 {
   sLogF(L"gfx",L"sRenderStateTexture not implemented\n");
   return 0;
 }
 
-void sSetRenderStates(const sU32* data, int count)
+void sSetRenderStates(const uint32_t* data, int count)
 {
   sLogF(L"gfx",L"sSetRenderStates not implemented\n");
 }
 
-int sRenderStateTexture(sU32* data, int texstage, sU32 tflags,sF32 lodbias)
+int sRenderStateTexture(uint32_t* data, int texstage, uint32_t tflags,float lodbias)
 {
   sFatal(L"sRenderStateTexture not implemented!");
   return 0;
@@ -1533,11 +1533,11 @@ void sSetTexture(int stage,class sTextureBase *tex)
   }
 }
 
-void sSetDesiredFrameRate(sF32 rate)
+void sSetDesiredFrameRate(float rate)
 {
 }
 
-void sSetScreenGamma(sF32 gamma)
+void sSetScreenGamma(float gamma)
 {
 }
 

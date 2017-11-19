@@ -67,7 +67,7 @@ public:
   void OnLayout();
   void OnCalcSize();
   void OnPaint2D();
-  sBool OnShortcut(sU32 key);
+  sBool OnShortcut(uint32_t key);
 
   void CmdLeft();
   void CmdRight();
@@ -162,7 +162,7 @@ void sDialogWindow::OnPaint2D()
   sGui->PropFont->Print(sF2P_OPAQUE|sF2P_MULTILINE|sF2P_TOP|sF2P_LEFT,Client,Text.Get(),-1,5);
 }
 
-sBool sDialogWindow::OnShortcut(sU32 key)
+sBool sDialogWindow::OnShortcut(uint32_t key)
 {
   switch(key & (sKEYQ_MASK|sKEYQ_BREAK))
   {
@@ -380,7 +380,7 @@ void sMultipleChoiceDialog::OnCalcSize()
 {
 }
 
-sBool sMultipleChoiceDialog::OnKey(sU32 key)
+sBool sMultipleChoiceDialog::OnKey(uint32_t key)
 {
   if(key & sKEYQ_SHIFT) key |= sKEYQ_SHIFT;
   if(key & sKEYQ_CTRL) key |= sKEYQ_CTRL;
@@ -397,7 +397,7 @@ sBool sMultipleChoiceDialog::OnKey(sU32 key)
   return 0;
 }
 
-void sMultipleChoiceDialog::AddItem(const sChar *text,const sMessage &cmd,sU32 shortcut)
+void sMultipleChoiceDialog::AddItem(const sChar *text,const sMessage &cmd,uint32_t shortcut)
 {
   Item *item = Items.AddMany(1);
   item->Cmd = cmd;
@@ -573,7 +573,7 @@ void sProgressDialog::SetText(const sChar *message,sBool forceUpdate)
   }
 }
 
-sBool sProgressDialog::SetProgress(sF32 percentage)
+sBool sProgressDialog::SetProgress(float percentage)
 {
   int now = sGetTime();
 
@@ -592,7 +592,7 @@ sBool sProgressDialog::SetProgress(sF32 percentage)
     return sTRUE; // no progress bar -> no cancel
 }
 
-void sProgressDialog::PushLevel(sF32 start,sF32 end)
+void sProgressDialog::PushLevel(float start,float end)
 {
   if(Instance)
   {
@@ -616,7 +616,7 @@ void sProgressDialog::PopLevel()
   if(Instance)
   {
     sVERIFY(Instance->BracketStack.GetCount() > 1);
-    sF32 tailProgress = Instance->BracketStack.GetTail().End;
+    float tailProgress = Instance->BracketStack.GetTail().End;
     Instance->BracketStack.RemTail();
     SetProgress(tailProgress);
   }
@@ -674,7 +674,7 @@ public:
   void OnCalcSize();
   void OnPaint2D();
   void OnDrag(const sWindowDrag &dd);
-  sBool OnKey(sU32 key);
+  sBool OnKey(uint32_t key);
 };
 
 sFindWindow::sFindWindow() : EditString(0,0)
@@ -768,7 +768,7 @@ void sFindWindow::OnDrag(const sWindowDrag &dd)
   }
 }
 
-sBool sFindWindow::OnKey(sU32 key)
+sBool sFindWindow::OnKey(uint32_t key)
 {
   switch(key & (sKEYQ_MASK|sKEYQ_BREAK))
   {
@@ -857,7 +857,7 @@ protected:
     if (Live) sGui->SetTheme(Theme);
   }
 
-  void CmdButton(sDInt code)
+  void CmdButton(ptrdiff_t code)
   {
     switch (code)
     {

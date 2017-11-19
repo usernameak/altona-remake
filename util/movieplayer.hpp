@@ -19,9 +19,9 @@ struct sMovieInfo
 {
   int  XSize;   // width in pixels
   int  YSize;   // height in pixels
-  sF32  Aspect;  // actual aspect ratio (width/height)
-  sF32  Length;  // length in seconds
-  sF32  FPS;     // frames per second
+  float  Aspect;  // actual aspect ratio (width/height)
+  float  Length;  // length in seconds
+  float  FPS;     // frames per second
 };
 
 
@@ -54,7 +54,7 @@ public:
   virtual void RenderToScreen(sBool zoom=sFALSE);
 
   // sets volume. parameter is linear between 0 and 1
-  virtual void SetVolume(sF32 volume)=0;
+  virtual void SetVolume(float volume)=0;
 
   // close and delete the player
   virtual void Release()=0;
@@ -66,19 +66,19 @@ public:
   /****************************************************************************/   
 
   // starts playing or seeks (if applicable), time is in seconds
-  virtual void Play(sF32 time) { sVERIFYFALSE; }
+  virtual void Play(float time) { sVERIFYFALSE; }
 
   // returns information about the movie
   virtual sMovieInfo GetInfo() { sMovieInfo info; sClear(info); return info; }
 
   // returns current movie position in seconds
-  virtual sF32 GetTime()=0;
+  virtual float GetTime()=0;
 
   // pauses playback (if applicable)
   virtual void Pause()=0;          
 
   // overrides movie's aspect ratio in case you know better
-  virtual void OverrideAspectRatio(sF32 aspect)=0;
+  virtual void OverrideAspectRatio(float aspect)=0;
 
   // returns material for painting the current frame yourself. 
   // uvrect is filled with the needed UVs for painting the image.

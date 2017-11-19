@@ -13,7 +13,7 @@
 
 #include "util/painter.hpp"
 #include "shaders.hpp"
-extern sU8 sFontData[];
+extern uint8_t sFontData[];
 
 /****************************************************************************/
 
@@ -38,11 +38,11 @@ sBasicPainter::sBasicPainter(int vertexmax)
     const int tx = 128;
     const int ty = 128;
 
-    sU32 col0 = 0x00ffffff;
-    sU32 col1 = 0xffffffff;
+    uint32_t col0 = 0x00ffffff;
+    uint32_t col1 = 0xffffffff;
 
     Tex = new sTexture2D(tx,ty,sTEX_ARGB8888|sTEX_2D,1);
-    sU32 *data = (sU32 *)sAllocMem(tx*ty*4,16,sAMF_ALT);
+    uint32_t *data = (uint32_t *)sAllocMem(tx*ty*4,16,sAMF_ALT);
 
     for(int y=0;y<16;y++)
     {
@@ -60,7 +60,7 @@ sBasicPainter::sBasicPainter(int vertexmax)
       }
     }
 
-    Tex->LoadAllMipmaps((sU8 *)data);
+    Tex->LoadAllMipmaps((uint8_t *)data);
     sFreeMem(data);
   }
 
@@ -186,7 +186,7 @@ void sBasicPainter::ClipOff()
 {
 }
 
-void sBasicPainter::PaintTexture(sTexture2D* tex,sU32 col,int xs,int ys,int xo,int yo,sBool noalpha)
+void sBasicPainter::PaintTexture(sTexture2D* tex,uint32_t col,int xs,int ys,int xo,int yo,sBool noalpha)
 {
   sFRect r;
   if (xs == -1 || ys == -1)
@@ -302,14 +302,14 @@ void sBasicPainter::PaintTexture(sTextureCube *tex, int xs/*=-1*/, int ys/*=-1*/
 
 /****************************************************************************/
 
-void sBasicPainter::Box(const sFRect &r,const sU32 col)
+void sBasicPainter::Box(const sFRect &r,const uint32_t col)
 {
-  sU32 c[4];
+  uint32_t c[4];
   c[0]=c[1]=c[2]=c[3]=col;
   Box(r,c);
 }
 
-void sBasicPainter::Box(const sFRect &r,const sU32 *col)
+void sBasicPainter::Box(const sFRect &r,const uint32_t *col)
 {
   sVertexSingle *vp;
 
@@ -321,7 +321,7 @@ void sBasicPainter::Box(const sFRect &r,const sU32 *col)
   sVERIFY(Used<=Alloc);
 #endif
 
-  const sF32 f=4.0f/128;
+  const float f=4.0f/128;
   vp[0].Init(r.x0,r.y0,1,col[0],f,f);
   vp[1].Init(r.x1,r.y0,1,col[1],f,f);
   vp[2].Init(r.x1,r.y1,1,col[2],f,f);
@@ -331,7 +331,7 @@ void sBasicPainter::Box(const sFRect &r,const sU32 *col)
 #endif
 }
 
-void sBasicPainter::Line(sF32 x0,sF32 y0,sF32 x1,sF32 y1,sU32 c0,sU32 c1,sBool skiplastpixel)
+void sBasicPainter::Line(float x0,float y0,float x1,float y1,uint32_t c0,uint32_t c1,sBool skiplastpixel)
 {
   sVertexSingle *vp;
   sVector30 d,e;
@@ -349,9 +349,9 @@ void sBasicPainter::Line(sF32 x0,sF32 y0,sF32 x1,sF32 y1,sU32 c0,sU32 c1,sBool s
   d = d * 1.0f;
   e.Init(d.y,-d.x,0);
 
-  const sF32 fc=12.0f/128;
-  const sF32 f0=3.5f/128;
-  const sF32 f1=5.5f/128;
+  const float fc=12.0f/128;
+  const float f0=3.5f/128;
+  const float f1=5.5f/128;
   vp[0].Init( x0-d.x+e.x , y0-d.y+e.y ,0,c0,fc,f0);
   vp[1].Init( x0-d.x-e.x , y0-d.y-e.y ,0,c0,fc,f1);
   if(skiplastpixel)
@@ -375,7 +375,7 @@ void sBasicPainter::RegisterFont(int /*fontid*/,const sChar * /*name*/,int /*hei
 {
 }
 
-void sBasicPainter::Print(int /*fontid*/,sF32 x,sF32 y,sU32 col,const sChar *text,int len,sF32 zoom)
+void sBasicPainter::Print(int /*fontid*/,float x,float y,uint32_t col,const sChar *text,int len,float zoom)
 {
   sVertexSingle *vp;
 
@@ -398,11 +398,11 @@ void sBasicPainter::Print(int /*fontid*/,sF32 x,sF32 y,sU32 col,const sChar *tex
     int u = (c&15)*8;
     int v = (c/16)*8;
 #if sRENDERER==sRENDER_DX9 || sRENDERER==sRENDER_DX11
-    sF32 uvo = UVOffset;
-    sF32 xyo = XYOffset;
+    float uvo = UVOffset;
+    float xyo = XYOffset;
 #else
-    sF32 uvo = 0.0f;
-    sF32 xyo = 0.0f;
+    float uvo = 0.0f;
+    float xyo = 0.0f;
 #endif
     sFRect r(x+xyo,y+xyo,x+xyo+6*zoom,y+xyo+8*zoom);
     sFRect uv((u+uvo)/128.0f,(v+uvo)/128.0f,(u+6+uvo)/128.0f,(v+8+uvo)/128.0f);
@@ -420,14 +420,14 @@ void sBasicPainter::Print(int /*fontid*/,sF32 x,sF32 y,sU32 col,const sChar *tex
 #endif
 }
 
-sF32 sBasicPainter::GetWidth(int /*fontid*/,const sChar *text,int len)
+float sBasicPainter::GetWidth(int /*fontid*/,const sChar *text,int len)
 {
   if(len==-1) 
     len = sGetStringLen(text);
-  return (sF32)(len*6);
+  return (float)(len*6);
 }
 
-sF32 sBasicPainter::GetHeight(int /*fontid*/)
+float sBasicPainter::GetHeight(int /*fontid*/)
 {
   return 8;
 }
@@ -446,9 +446,9 @@ sPainter::sPainter(int vertexmax) : sBasicPainter(vertexmax)
 }
 
 
-void sPainter::Box(const sFRect &r,sU32 col)
+void sPainter::Box(const sFRect &r,uint32_t col)
 {
-  sU32 cols[4];
+  uint32_t cols[4];
   cols[0] = col;
   cols[1] = col;
   cols[2] = col;
@@ -457,13 +457,13 @@ void sPainter::Box(const sFRect &r,sU32 col)
   sBasicPainter::Box(r,cols);
 }
 
-void sPainter::Box(sF32 x0,sF32 y0,sF32 x1,sF32 y1,sU32 col)
+void sPainter::Box(float x0,float y0,float x1,float y1,uint32_t col)
 {
   Box(sFRect(x0,y0,x1,y1),col);
 }
 
 
-void sPainter::SetPrint(int fontid,sU32 col,sF32 zoom,sU32 altcol,int advance)
+void sPainter::SetPrint(int fontid,uint32_t col,float zoom,uint32_t altcol,int advance)
 {
   FontId = fontid;
   TextColor = col;
@@ -472,16 +472,16 @@ void sPainter::SetPrint(int fontid,sU32 col,sF32 zoom,sU32 altcol,int advance)
   Advance = advance;
 }
 
-void sPainter::Print(sF32 x,sF32 y,const sChar *txt)
+void sPainter::Print(float x,float y,const sChar *txt)
 {
   Print0(x,y,txt);
 }
 
-void sPainter::Print0(sF32 x,sF32 y,const sChar *txt)
+void sPainter::Print0(float x,float y,const sChar *txt)
 {
   const sChar *start;
   int alt = 0;
-  sF32 x0 = x;
+  float x0 = x;
 
   while(*txt)
   {
@@ -519,7 +519,7 @@ void sPainter::Print0(sF32 x,sF32 y,const sChar *txt)
 
 
 
-sU8 sFontData[] = 
+uint8_t sFontData[] = 
 //ChrSet generated by ChrsetEditor
 {
     255,255,255,255,255,255,255,255,

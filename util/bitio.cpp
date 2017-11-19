@@ -12,7 +12,7 @@
 
 /****************************************************************************/
 
-static sU8 WriteScratch;  // scratch byte in case of buffer overruns
+static uint8_t WriteScratch;  // scratch byte in case of buffer overruns
 
 void sBitWriter::FlushBuffer(sBool finish)
 {
@@ -31,7 +31,7 @@ void sBitWriter::FlushBuffer(sBool finish)
   }
   else
   {
-    sDInt size = BufferPtr - Buffer;
+    ptrdiff_t size = BufferPtr - Buffer;
     if(!File->Write(Buffer,size))
       Error = sTRUE;
 
@@ -57,7 +57,7 @@ sBitWriter::~sBitWriter()
   sVERIFY(Buffer == 0);
 }
 
-void sBitWriter::Start(sU8 *outBuffer,sDInt bufferSize)
+void sBitWriter::Start(uint8_t *outBuffer,ptrdiff_t bufferSize)
 {
   sVERIFY(outBuffer != 0);
   sVERIFY(bufferSize > 0);
@@ -77,11 +77,11 @@ void sBitWriter::Start(sFile *outFile)
   static const int BufferSize = 4096;
 
   sVERIFY(outFile != 0);
-  Start(new sU8[BufferSize],BufferSize);
+  Start(new uint8_t[BufferSize],BufferSize);
   File = outFile;
 }
 
-sDInt sBitWriter::Finish()
+ptrdiff_t sBitWriter::Finish()
 {
   if(BitsLeft != 32) // might need to write last byte
     PutByte(BitBuffer >> 24);
@@ -103,7 +103,7 @@ sDInt sBitWriter::Finish()
 
 /****************************************************************************/
 
-static sU8 ReadScratch = 0;
+static uint8_t ReadScratch = 0;
 
 void sBitReader::RefillBuffer()
 {
@@ -120,8 +120,8 @@ void sBitReader::RefillBuffer()
     return;
   }
 
-  sDInt bufferSize = BufferEnd - Buffer;
-  sDInt read = sMin((sS64) bufferSize,FileSize - File->GetOffset());
+  ptrdiff_t bufferSize = BufferEnd - Buffer;
+  ptrdiff_t read = sMin((int64_t) bufferSize,FileSize - File->GetOffset());
 
   if(read == 0 || !File->Read(Buffer,read)) // io error or end of file
   {
@@ -155,12 +155,12 @@ sBitReader::~sBitReader()
     Finish();
 }
 
-void sBitReader::Start(const sU8 *buffer,sDInt size)
+void sBitReader::Start(const uint8_t *buffer,ptrdiff_t size)
 {
   File = 0;
   FileSize = 0;
 
-  Buffer = (sU8 *) buffer;
+  Buffer = (uint8_t *) buffer;
   BufferPtr = Buffer;
   BufferEnd = Buffer + size;
   BitBuffer = 0;
@@ -170,7 +170,7 @@ void sBitReader::Start(const sU8 *buffer,sDInt size)
   Error = sFALSE;
 
   // fill bitbuffer (as far as possible)
-  for(int i=0;i<sMin<sDInt>(size,4);i++)
+  for(int i=0;i<sMin<ptrdiff_t>(size,4);i++)
   {
     BitsLeft += 8;
     BitBuffer |= *BufferPtr++ << (32 - BitsLeft);
@@ -185,7 +185,7 @@ void sBitReader::Start(sFile *file)
   File = file;
   FileSize = file->GetSize();
 
-  Buffer = new sU8[bufferSize];
+  Buffer = new uint8_t[bufferSize];
   BufferPtr = Buffer;
   BufferEnd = Buffer + bufferSize;
   BitBuffer = 0;
@@ -197,7 +197,7 @@ void sBitReader::Start(sFile *file)
   // fill bitbuffer (as far as possible)
   RefillBuffer();
 
-  for(int i=0;i<sMin<sDInt>(BufferEnd-Buffer,4);i++)
+  for(int i=0;i<sMin<ptrdiff_t>(BufferEnd-Buffer,4);i++)
   {
     BitsLeft += 8;
     BitBuffer |= *BufferPtr++ << (32 - BitsLeft);
@@ -216,7 +216,7 @@ sBool sBitReader::Finish()
     if(!ExtraBytes)
     {
       // seek back if we read too much because of buffering
-      sDInt seekBack = (BufferEnd - BufferPtr) + (BitsLeft / 8);
+      ptrdiff_t seekBack = (BufferEnd - BufferPtr) + (BitsLeft / 8);
       if(seekBack)
         File->SetOffset(File->GetOffset() - seekBack);
     }
@@ -241,14 +241,14 @@ sBool sBitReader::Finish()
 /***                                                                      ***/
 /****************************************************************************/
 
-static sU32 AddWeights(sU32 w0,sU32 w1)
+static uint32_t AddWeights(uint32_t w0,uint32_t w1)
 {
-  sU32 wN = (w0 & ~0xff) + (w1 & ~0xff);    // weights
-  sU32 dN = 1u + sMax(w0 & 0xff,w1 & 0xff); // depths
+  uint32_t wN = (w0 & ~0xff) + (w1 & ~0xff);    // weights
+  uint32_t dN = 1u + sMax(w0 & 0xff,w1 & 0xff); // depths
   return wN | dN;
 }
 
-static void AddToHeap(sStaticArray<int> &heap,const sStaticArray<sU32> &weight,int item)
+static void AddToHeap(sStaticArray<int> &heap,const sStaticArray<uint32_t> &weight,int item)
 {
   heap.AddTail(item);
 
@@ -267,7 +267,7 @@ static void AddToHeap(sStaticArray<int> &heap,const sStaticArray<sU32> &weight,i
   }
 }
 
-static int PopHeap(sStaticArray<int> &heap,const sStaticArray<sU32> &weight)
+static int PopHeap(sStaticArray<int> &heap,const sStaticArray<uint32_t> &weight)
 {
   sVERIFY(heap.GetCount() > 0);
   int ret = heap[0];
@@ -298,9 +298,9 @@ static int PopHeap(sStaticArray<int> &heap,const sStaticArray<sU32> &weight)
   return ret;
 }
 
-void sBuildHuffmanCodeLens(int *lens,const sU32 *freq,int count,int maxLen)
+void sBuildHuffmanCodeLens(int *lens,const uint32_t *freq,int count,int maxLen)
 {
-  sStaticArray<sU32> weight(count*2-1);
+  sStaticArray<uint32_t> weight(count*2-1);
   sStaticArray<int> parent(count*2-1);
   sStaticArray<int> heap(count+1);
 
@@ -372,7 +372,7 @@ void sBuildHuffmanCodeLens(int *lens,const sU32 *freq,int count,int maxLen)
   while(tooLong);
 }
 
-void sBuildHuffmanCodeValues(sU32 *value,const int *lens,int count)
+void sBuildHuffmanCodeValues(uint32_t *value,const int *lens,int count)
 {
   // find min/max len
   int minLen = 0x7fffffff, maxLen = 0;
@@ -388,7 +388,7 @@ void sBuildHuffmanCodeValues(sU32 *value,const int *lens,int count)
   sVERIFY(minLen >= 1 && maxLen <= 24); // 24 is limit for putbits
 
   // assign codes
-  sU32 code = 0;
+  uint32_t code = 0;
   for(int i=minLen;i<=maxLen;i++)
   {
     for(int j=0;j<count;j++)
@@ -399,7 +399,7 @@ void sBuildHuffmanCodeValues(sU32 *value,const int *lens,int count)
   }
 }
 
-void sBuildHuffmanCodes(sU32 *codes,int *lens,const sU32 *freq,int count,int maxLen)
+void sBuildHuffmanCodes(uint32_t *codes,int *lens,const uint32_t *freq,int count,int maxLen)
 {
   sBuildHuffmanCodeLens(lens,freq,count,maxLen);
   sBuildHuffmanCodeValues(codes,lens,count);
@@ -492,8 +492,8 @@ sFastHuffmanDecoder::~sFastHuffmanDecoder()
 sBool sFastHuffmanDecoder::Init(const int *lens,int count)
 {
   sVERIFY(count <= 4096); // max because of 16bit fastpath encoding
-  CodeMap = new sU16[count];
-  sU32 *codes = new sU32[count];
+  CodeMap = new uint16_t[count];
+  uint32_t *codes = new uint32_t[count];
 
   // find min/max len
   int maxLen = 0;
@@ -503,7 +503,7 @@ sBool sFastHuffmanDecoder::Init(const int *lens,int count)
   sVERIFY(maxLen <= 24);
 
   // build slow decode tables
-  sU32 code = 0;
+  uint32_t code = 0;
   int syms = 0;
   for(int i=1;i<=24;i++)
   {
@@ -537,7 +537,7 @@ sBool sFastHuffmanDecoder::Init(const int *lens,int count)
     int len = lens[i];
     if(len && len <= FastBits)
     {
-      sU32 c = codes[i] << (FastBits - len);
+      uint32_t c = codes[i] << (FastBits - len);
       int n = 1 << (FastBits - len);
       for(int j=0;j<n;j++)
         FastPath[c+j] = (len<<12) + i;

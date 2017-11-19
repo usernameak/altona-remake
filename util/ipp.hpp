@@ -67,7 +67,7 @@ public:
   void SetScreen(const sTargetSpec &spec);
   sTexture2D *ReadScreen();                   // grab screen to texture
   sTexture2D *WriteScreen(sBool finish=0);    // queue a texture for write-to-screen. return 0 for direct screen rendering
-  void SetTarget(sTexture2D *tex,int clrflags=0,sU32 clrcol=0,sTexture2D *dep=0); // set rendertarget. tex might be 0
+  void SetTarget(sTexture2D *tex,int clrflags=0,uint32_t clrcol=0,sTexture2D *dep=0); // set rendertarget. tex might be 0
   void FinishScreen();                                // write back te
 };
 

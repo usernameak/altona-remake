@@ -22,11 +22,11 @@ public:
   ~NewCode();
 
   int ShaderType;                // sSTF_???
-  sU8 *DX9Code;
+  uint8_t *DX9Code;
   int DX9Size;
-  sU8 *DX11Code;
+  uint8_t *DX11Code;
   int DX11Size; 
-  sU8 *GLSLCode;                  // misused as CG right now
+  uint8_t *GLSLCode;                  // misused as CG right now
   int GLSLSize; 
 };
 

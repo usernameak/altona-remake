@@ -47,8 +47,8 @@ sMusicPlayer::~sMusicPlayer()
 sBool sMusicPlayer::LoadAndCache(const sChar *name)
 {
   sString<4096> buffer;
-  sDInt size;
-  sU8 *mem;
+  ptrdiff_t size;
+  uint8_t *mem;
 
   buffer = name;
   buffer.Add(L".raw");
@@ -56,7 +56,7 @@ sBool sMusicPlayer::LoadAndCache(const sChar *name)
   mem = sLoadFile(buffer,size);
   if(mem)
   {
-    RewindBuffer = (sS16 *)mem;
+    RewindBuffer = (int16_t *)mem;
     RewindSize = size/4;
     RewindPos = size/4;
     sVERIFY(Stream==0);
@@ -69,9 +69,9 @@ sBool sMusicPlayer::LoadAndCache(const sChar *name)
     {
       Start(0);
       size = GetTuneLength() * 5;     // 25% safety for unrelyable GetTuneLength()
-      mem = new sU8[size];
-      size = Render((sS16 *)mem,size/4)*4;
-      RewindBuffer = (sS16 *)mem;
+      mem = new uint8_t[size];
+      size = Render((int16_t *)mem,size/4)*4;
+      RewindBuffer = (int16_t *)mem;
       RewindSize = size/4;
       RewindPos = size/4;
       sSaveFile(buffer,mem,size);
@@ -86,7 +86,7 @@ sBool sMusicPlayer::LoadAndCache(const sChar *name)
 
 sBool sMusicPlayer::Load(const sChar *name)
 {
-  sDInt size;
+  ptrdiff_t size;
 
   if(StreamDelete)
     delete[] Stream;
@@ -102,7 +102,7 @@ sBool sMusicPlayer::Load(const sChar *name)
   return sFALSE;
 }
 
-sBool sMusicPlayer::Load(sU8 *data,int size)
+sBool sMusicPlayer::Load(uint8_t *data,int size)
 {
   if(StreamDelete)
     delete[] Stream;
@@ -116,7 +116,7 @@ sBool sMusicPlayer::Load(sU8 *data,int size)
 void sMusicPlayer::AllocRewind(int bytes)
 {
   RewindSize = bytes/4;
-  RewindBuffer = new sS16[bytes/2];
+  RewindBuffer = new int16_t[bytes/2];
   RewindPos = 0;
 }
 
@@ -138,7 +138,7 @@ void sMusicPlayer::Stop()
     Status = 1;
 }
 
-static void sMusicPlayerSoundHandler(sS16 *samples,int count)
+static void sMusicPlayerSoundHandler(int16_t *samples,int count)
 {
   if(sMusicPlayerPtr)
     sMusicPlayerPtr->Handler(samples,count,0x100);
@@ -151,7 +151,7 @@ void sMusicPlayer::InstallHandler()
   sSetSoundHandler(44100,sMusicPlayerSoundHandler,44100);
 }
 
-sBool sMusicPlayer::Handler(sS16 *buffer,int samples,int vol)
+sBool sMusicPlayer::Handler(int16_t *buffer,int samples,int vol)
 {
   int diff,size;
   int result;

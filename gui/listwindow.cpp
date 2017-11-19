@@ -29,7 +29,7 @@ class sListWindow2Field_Int : public sListWindow2Field
 public:
   int Min;
   int Max;
-  sF32 Step;
+  float Step;
 
   sListWindow2Field_Int() 
   {
@@ -70,9 +70,9 @@ public:
 class sListWindow2Field_Float : public sListWindow2Field
 {
 public:
-  sF32 Min;
-  sF32 Max;
-  sF32 Step;
+  float Min;
+  float Max;
+  float Step;
 
   sListWindow2Field_Float() 
   {
@@ -84,14 +84,14 @@ public:
   void PaintField(sStaticListWindow *lw,const sRect &client,sObject *obj,int line,int select)
   {
     sString<64> buffer;
-    lw->AddNotify(Ref.Ref<sF32>(obj));
-    sSPrintF(buffer,L"%f",Ref.Ref<sF32>(obj));
+    lw->AddNotify(Ref.Ref<float>(obj));
+    sSPrintF(buffer,L"%f",Ref.Ref<float>(obj));
     lw->PaintField(client,select,buffer);
   }
 
   void EditField(sStaticListWindow *lw,const sRect &rect,sObject *obj,int line)
   {
-    sControl *sc = new sFloatControl(&Ref.Ref<sF32>(obj),Min,Max,Step);
+    sControl *sc = new sFloatControl(&Ref.Ref<float>(obj),Min,Max,Step);
     sc->ChangeMsg = lw->ChangeMsg;
     sc->DoneMsg = lw->DoneMsg;
     sc->Outer = rect;
@@ -205,8 +205,8 @@ public:
   void PaintField(sStaticListWindow *lw,const sRect &client,sObject *obj,int line,int select)
   {
     sString<64> buffer;
-    lw->AddNotify(Ref.Ref<sU32>(obj));
-    sSPrintF(buffer,L"%08x",Ref.Ref<sU32>(obj));
+    lw->AddNotify(Ref.Ref<uint32_t>(obj));
+    sSPrintF(buffer,L"%08x",Ref.Ref<uint32_t>(obj));
     lw->PaintField(client,select,buffer);
   }
 
@@ -220,7 +220,7 @@ class sListWindow2Field_Progress : public sListWindow2Field
 {
   void PaintField(sStaticListWindow *lw,const sRect &client,sObject *obj,int line,int select)
   {
-    lw->AddNotify(Ref.Ref<sF32>(obj));
+    lw->AddNotify(Ref.Ref<float>(obj));
 
     sRect rc = client;
     sRect2D(client,lw->BackColor);
@@ -229,7 +229,7 @@ class sListWindow2Field_Progress : public sListWindow2Field
     sRectFrame2D(rc,sGC_TEXT);
     
     rc.Extend(-1);
-    rc.x1 = rc.x0 + int(Ref.Ref<sF32>(obj) * (rc.x1 - rc.x0));
+    rc.x1 = rc.x0 + int(Ref.Ref<float>(obj) * (rc.x1 - rc.x0));
     sRect2D(rc,sGC_BLUE);
   }
 };
@@ -600,13 +600,13 @@ void sStaticListWindow::PaintField(const sRect &client,sListWindow2Field *field,
     PaintField(client,select,buffer);
     break;
   case sLWT_FLOAT:
-    AddNotify(field->Ref.Ref<sF32>(obj));
-    sSPrintF(buffer,L"%f",field->Ref.Ref<sF32>(obj));
+    AddNotify(field->Ref.Ref<float>(obj));
+    sSPrintF(buffer,L"%f",field->Ref.Ref<float>(obj));
     PaintField(client,select,buffer);
     break;
   case sLWT_COLOR:
-    AddNotify(field->Ref.Ref<sU32>(obj));
-    sSPrintF(buffer,L"%08x",field->Ref.Ref<sU32>(obj));
+    AddNotify(field->Ref.Ref<uint32_t>(obj));
+    sSPrintF(buffer,L"%08x",field->Ref.Ref<uint32_t>(obj));
     PaintField(client,select,buffer);
     break;
   case sLWT_CHOICE:
@@ -619,7 +619,7 @@ void sStaticListWindow::PaintField(const sRect &client,sListWindow2Field *field,
     PaintField(client,select,field->Ref.Ref<sPoolString>(obj));
     break;
   case sLWT_PROGRESS:
-    AddNotify(field->Ref.Ref<sF32>(obj));
+    AddNotify(field->Ref.Ref<float>(obj));
     {
       // paint a small progress bar
       sRect rc = client;
@@ -629,7 +629,7 @@ void sStaticListWindow::PaintField(const sRect &client,sListWindow2Field *field,
       sRectFrame2D(rc,sGC_TEXT);
       
       rc.Extend(-1);
-      rc.x1 = rc.x0 + int(field->Ref.Ref<sF32>(obj) * (rc.x1 - rc.x0));
+      rc.x1 = rc.x0 + int(field->Ref.Ref<float>(obj) * (rc.x1 - rc.x0));
       sRect2D(rc,sGC_BLUE);
     }
     break;
@@ -678,7 +678,7 @@ void sStaticListWindow::EditField(const sRect &rect,sListWindow2Field *field,sOb
     break;
 
   case sLWT_FLOAT:
-    sc = new sFloatControl(&field->Ref.Ref<sF32>(obj),field->Min,field->Max,field->Step);
+    sc = new sFloatControl(&field->Ref.Ref<float>(obj),field->Min,field->Max,field->Step);
     break;
 
   case sLWT_CHOICE:    
@@ -727,8 +727,8 @@ int sStaticListWindow::CompareField(sListWindow2Field *field,sObject *o0,sObject
   const sChar *str0,*str1;
   sPoolString p0,p1;
   int i0,i1;
-  sU32 u0,u1;
-  sF32 f0,f1;
+  uint32_t u0,u1;
+  float f0,f1;
   switch(field->Type)
   {
   case sLWT_STRING:
@@ -744,14 +744,14 @@ int sStaticListWindow::CompareField(sListWindow2Field *field,sObject *o0,sObject
     return 0;
   case sLWT_FLOAT:
   case sLWT_PROGRESS:
-    f0 = field->Ref.Ref<sF32>(o0);
-    f1 = field->Ref.Ref<sF32>(o1);
+    f0 = field->Ref.Ref<float>(o0);
+    f1 = field->Ref.Ref<float>(o1);
     if(f0<f1) return -1;
     if(f0>f1) return 1;
     return 0;
   case sLWT_COLOR:
-    u0 = field->Ref.Ref<sU32>(o0);
-    u1 = field->Ref.Ref<sU32>(o1);
+    u0 = field->Ref.Ref<uint32_t>(o0);
+    u1 = field->Ref.Ref<uint32_t>(o1);
     i0 = ((u0>>16)&0xff) + ((u0>>8)&0xff) + ((u0)&0xff);
     i1 = ((u1>>16)&0xff) + ((u1>>8)&0xff) + ((u1)&0xff);
     if(i0<i1) return -1;
@@ -792,7 +792,7 @@ sListWindow2Field *sStaticListWindow::AddField(const sChar *label,int flags,int 
   return field;
 }
 
-sListWindow2Field *sStaticListWindow::AddField(const sChar *label,int flags,int width,sMemberPtr<int> ref,int min,int max,sF32 step)
+sListWindow2Field *sStaticListWindow::AddField(const sChar *label,int flags,int width,sMemberPtr<int> ref,int min,int max,float step)
 {
   sListWindow2Field_Int *field;
 
@@ -828,7 +828,7 @@ sListWindow2Field *sStaticListWindow::AddFieldChoice(const sChar *label,int flag
   return field;
 }
 
-sListWindow2Field *sStaticListWindow::AddFieldProgress(const sChar *label,int flags,int width,sMemberPtr<sF32> ref)
+sListWindow2Field *sStaticListWindow::AddFieldProgress(const sChar *label,int flags,int width,sMemberPtr<float> ref)
 {
   sListWindow2Field_Progress *field;
 
@@ -845,7 +845,7 @@ sListWindow2Field *sStaticListWindow::AddFieldProgress(const sChar *label,int fl
 }
 
 
-sListWindow2Field *sStaticListWindow::AddField(const sChar *label,int flags,int width,sMemberPtr<sF32> ref,sF32 min,sF32 max,sF32 step)
+sListWindow2Field *sStaticListWindow::AddField(const sChar *label,int flags,int width,sMemberPtr<float> ref,float min,float max,float step)
 {
   sListWindow2Field_Float *field;
 
@@ -864,7 +864,7 @@ sListWindow2Field *sStaticListWindow::AddField(const sChar *label,int flags,int 
   return field;
 }
 
-sListWindow2Field *sStaticListWindow::AddFieldColor(const sChar *label,int flags,int width,sMemberPtr<sU32> ref)
+sListWindow2Field *sStaticListWindow::AddFieldColor(const sChar *label,int flags,int width,sMemberPtr<uint32_t> ref)
 {
   sListWindow2Field_Color *field;
 
@@ -1107,7 +1107,7 @@ void sStaticListWindow::DragSelectSingle(const sWindowDrag &dd)
   }
 }
 
-void sStaticListWindow::DragSelectMulti(const sWindowDrag &dd,sDInt mode)
+void sStaticListWindow::DragSelectMulti(const sWindowDrag &dd,ptrdiff_t mode)
 {
   int line,column;
   sRect r;
@@ -1349,7 +1349,7 @@ void sStaticListWindow::UpdateTreeInfo()
   }
 }
 
-void sStaticListWindow::CmdDelete(sDInt mode)
+void sStaticListWindow::CmdDelete(ptrdiff_t mode)
 {
   if(!Array) return;
 
@@ -1399,7 +1399,7 @@ void sStaticListWindow::CmdSelectAll()
   }
 }
 
-void sStaticListWindow::CmdSelUp(sDInt extend)
+void sStaticListWindow::CmdSelUp(ptrdiff_t extend)
 {
   if(!Array) return;
 
@@ -1426,7 +1426,7 @@ void sStaticListWindow::CmdSelUp(sDInt extend)
   DragSelectLine = -1;
 }
 
-void sStaticListWindow::CmdSelDown(sDInt extend)
+void sStaticListWindow::CmdSelDown(ptrdiff_t extend)
 {
   if(!Array) return;
 
@@ -1453,7 +1453,7 @@ void sStaticListWindow::CmdSelDown(sDInt extend)
   DragSelectLine = -1;
 }
 
-void sStaticListWindow::CmdMoveUp(sDInt mode)
+void sStaticListWindow::CmdMoveUp(ptrdiff_t mode)
 {
   if(!Array) return;
 
@@ -1502,7 +1502,7 @@ void sStaticListWindow::CmdMoveUp(sDInt mode)
   DragSelectLine = -1;
 }
 
-void sStaticListWindow::CmdMoveDown(sDInt mode)
+void sStaticListWindow::CmdMoveDown(ptrdiff_t mode)
 {
   if(!Array) return;
 
@@ -1633,7 +1633,7 @@ void sStaticListWindow::CmdMoveRight()
   DragSelectLine = -1;
 }
 
-void sStaticListWindow::CmdOpenClose(sDInt mode)
+void sStaticListWindow::CmdOpenClose(ptrdiff_t mode)
 {
   if(!Array) return;
 

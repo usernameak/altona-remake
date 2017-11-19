@@ -27,14 +27,14 @@ void sMoviePlayer::RenderToScreen(sBool zoom)
 
     // make destination rect according to movie and screen aspect
     sMovieInfo info = GetInfo();
-    sF32 arr=info.Aspect/sGetRendertargetAspect();
-    sF32 w=1, h=1;
+    float arr=info.Aspect/sGetRendertargetAspect();
+    float w=1, h=1;
     // reverted change; the line below WORKS. if you want to switch behaviour, why not invert
     // the zoom parameter - that's what it is for.
     if ((arr>1.0f)^zoom) h/=arr; else w*=arr; 
     sFRect dest((1-w)/2,(1-h)/2,(1+w)/2,(1+h)/2);
 
-    sU16 *ip;
+    uint16_t *ip;
     sVertexSingle *vp=0L;
     geo.BeginLoad(sVertexFormatSingle,sGF_INDEX16|sGF_TRILIST,sGD_STREAM,4,6,&vp,&ip);
     vp[0].Init(dest.x0,dest.y0,0.01f,0xffffffff,uv.x0,uv.y0);

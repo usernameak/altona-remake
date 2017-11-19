@@ -58,7 +58,7 @@ MyApp::MyApp()
   CubeMtrl->Prepare(sVertexFormatStandard);
 
   CubeGeo = new sGeometry(sGF_TRILIST|sGF_INDEX16,sVertexFormatStandard);
-  sF32 s = 0.5f;
+  float s = 0.5f;
   CubeGeo->LoadCube(-1,s,s,s);
 
   CubeMats.AddMany(20);
@@ -88,26 +88,26 @@ MyApp::MyApp()
 
   int tx = 64;
   int ty = 48;
-  sF32 ro = 2.0f;
-  sF32 ri = 0.85f;
+  float ro = 2.0f;
+  float ri = 0.85f;
   sVertexStandard *vp;
-  sU16 *ip;
+  uint16_t *ip;
   TorusGeo = new sGeometry(sGF_TRILIST|sGF_INDEX16,sVertexFormatStandard);
   TorusGeo->BeginLoadVB((tx+1)*(ty+1),sGD_STATIC,&vp);
   for(int y=0;y<=ty;y++)
   {
     for(int x=0;x<=tx;x++)
     {
-      sF32 px = x * sPI2F / tx;
-      sF32 py = y * sPI2F / ty;
+      float px = x * sPI2F / tx;
+      float py = y * sPI2F / ty;
       vp->px = -sFCos(px)*(ro+sFCos(py)*ri);
       vp->py = -              sFSin(py)*ri;
       vp->pz =  sFSin(px)*(ro+sFCos(py)*ri);
       vp->nx = -sFCos(px)*sFCos(py);
       vp->ny = -          sFSin(py);
       vp->nz =  sFSin(px)*sFCos(py);
-      vp->u0 = sF32(x)/tx;
-      vp->v0 = sF32(y)/ty;
+      vp->u0 = float(x)/tx;
+      vp->v0 = float(y)/ty;
       vp++;
     }
   }
@@ -153,7 +153,7 @@ void MyApp::OnPaint3D()
   RenderScene();
 
   // debug out: framerate.
-  sF32 avg = Timer.GetAverageDelta();
+  float avg = Timer.GetAverageDelta();
   Painter->Begin();
   Painter->SetPrint(0,~0,1);
   Painter->PrintF(10,10,L"%5.2ffps %5.3fms",1000/avg,avg);

@@ -45,7 +45,7 @@ public:
   public:
     enum { MyType=NUMBER, };
     Number() : TypeBase(NUMBER) {}
-    sF64 Value;
+    double Value;
   };
 
   class String : public TypeBase

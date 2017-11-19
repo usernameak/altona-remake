@@ -159,20 +159,20 @@ sBool Compiler::Process(NewCode *code,NewShader *ns,sTextBuffer *errors)
     }
     sChar8 *GLSLCode = (sChar8 *) Hlsl2Glsl_GetShader(compiler);
     code->GLSLSize = strlen((char *) GLSLCode) + 1;
-    code->GLSLCode = new sU8[code->GLSLSize];
+    code->GLSLCode = new uint8_t[code->GLSLSize];
     sCopyString((sChar8 *) code->GLSLCode, GLSLCode, code->GLSLSize);
     Hlsl2Glsl_DestructCompiler(compiler);
   }
   else if (!ns->GlslSource.IsEmpty())
   {
     code->GLSLSize = sGetStringLen(ns->GlslSource) + 1;
-    code->GLSLCode = new sU8[code->GLSLSize];
+    code->GLSLCode = new uint8_t[code->GLSLSize];
     sCopyString((sChar8 *)code->GLSLCode, ns->GlslSource, code->GLSLSize);
   }*/
   if(!ns->GlslSource.IsEmpty())
     {
       code->GLSLSize = sGetStringLen(ns->GlslSource)+1;
-      code->GLSLCode = new sU8[code->GLSLSize];
+      code->GLSLCode = new uint8_t[code->GLSLSize];
       sCopyString((sChar8 *)code->GLSLCode,ns->GlslSource,code->GLSLSize);
     }
     else if(ok && sCONFIG_SDK_CG && (sPLATFORM != sPLAT_WINDOWS || sGetShellSwitch(L"-gen_cg")))

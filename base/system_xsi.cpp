@@ -41,7 +41,7 @@ struct sThreadContext *sGetThreadContext(void) { return &sEmergencyThreadContext
 void sPrint(const sChar *text) {}
 void sTriggerEvent(int) { sFatal(L"not implemented"); }
 
-sU8 *sFile::MapAll() { sFatal(L"not implemented"); }
+uint8_t *sFile::MapAll() { sFatal(L"not implemented"); }
 
 /****************************************************************************/
 

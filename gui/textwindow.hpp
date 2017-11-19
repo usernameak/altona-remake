@@ -79,7 +79,7 @@ public:
   sBool HasSelection() { return MarkMode!=0; }
 
   void OnPaint2D();
-  sBool OnKey(sU32 key);
+  sBool OnKey(uint32_t key);
   void OnDrag(const sWindowDrag &dd);
   void OnCalcSize();
 
@@ -93,7 +93,7 @@ public:
   int EnterCmd;                  // post this when enter is pressed
   int BackColor;                 // sGC_???
   int HintLine;                  // fine vertical line that hints the right border of the page
-  sU32 HintLineColor;             // sGC_???
+  uint32_t HintLineColor;             // sGC_???
   int TabSize;                   // default 8. currently, TAB insert spaces
   sMessage EnterMsg;
   sMessage ChangeMsg;
@@ -135,8 +135,8 @@ class sWireTextWindow : public sTextWindow
 {
 public:
   void InitWire(const sChar *name) { sWire->AddWindow(name,this); }
-  sBool OnKey(sU32 key) { if(sWire->HandleKey(this,key)) return 1; else return sTextWindow::OnKey(key); }
-  sBool OnShortcut(sU32 key) { return sWire->HandleShortcut(this,key); }
+  sBool OnKey(uint32_t key) { if(sWire->HandleKey(this,key)) return 1; else return sTextWindow::OnKey(key); }
+  sBool OnShortcut(uint32_t key) { return sWire->HandleShortcut(this,key); }
 };
 
 /****************************************************************************/

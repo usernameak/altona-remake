@@ -119,7 +119,7 @@ void sRenderTargetManager_::AddRef(sTextureBase *tex)
     if(t)
       t->RefCount++;
     else
-      sFatal(L"sRenderTargetManager_: texture %08x not aquired\n",sDInt(tex));
+      sFatal(L"sRenderTargetManager_: texture %08x not aquired\n",ptrdiff_t(tex));
   }
 }
 
@@ -131,7 +131,7 @@ void sRenderTargetManager_::Release(sTextureBase *tex)
     if(t)
       t->RefCount--;
     else
-      sFatal(L"sRenderTargetManager_: texture %08x not aquired\n",sDInt(tex));
+      sFatal(L"sRenderTargetManager_: texture %08x not aquired\n",ptrdiff_t(tex));
   }
 }
 
@@ -283,7 +283,7 @@ sTexture2D *sRenderTargetManager_::WriteScreen(sBool finish)
   return ScreenProxy;
 }
 
-void sRenderTargetManager_::SetTarget(sTexture2D *tex,int clrflags,sU32 clrcol,sTexture2D *dep)
+void sRenderTargetManager_::SetTarget(sTexture2D *tex,int clrflags,uint32_t clrcol,sTexture2D *dep)
 {
   if(tex)
     sSetTarget(sTargetPara((clrflags&3)|sST_NOMSAA,clrcol,0,tex,dep));

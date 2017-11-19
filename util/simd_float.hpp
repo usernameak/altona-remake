@@ -37,12 +37,12 @@ typedef const sSSE &sSSEPara;
 
 static sINLINE sSSE sVecZero()                          { return _mm_setzero_ps(); }
 
-static sINLINE sSSE sVecLoad(const void *ptr)           { return _mm_load_ps((sF32*) ptr); }
-static sINLINE sSSE sVecLoadU(const void *ptr)          { return _mm_loadu_ps((sF32*) ptr); }
-static sINLINE sSSE sVecLoadScalar(sF32 x)              { return _mm_set1_ps(x); }
-static sINLINE void sVecStore(sSSE vec,void *ptr)       { _mm_store_ps((sF32*) ptr,vec); }
-static sINLINE void sVecStoreU(sSSE vec,void *ptr)      { _mm_storeu_ps((sF32*) ptr,vec); }
-#define sVecStoreElem(v,ptr,i)                          (_mm_store_ss((sF32*) (ptr),_mm_shuffle_ps(v,v,(i)*0x55)))
+static sINLINE sSSE sVecLoad(const void *ptr)           { return _mm_load_ps((float*) ptr); }
+static sINLINE sSSE sVecLoadU(const void *ptr)          { return _mm_loadu_ps((float*) ptr); }
+static sINLINE sSSE sVecLoadScalar(float x)              { return _mm_set1_ps(x); }
+static sINLINE void sVecStore(sSSE vec,void *ptr)       { _mm_store_ps((float*) ptr,vec); }
+static sINLINE void sVecStoreU(sSSE vec,void *ptr)      { _mm_storeu_ps((float*) ptr,vec); }
+#define sVecStoreElem(v,ptr,i)                          (_mm_store_ss((float*) (ptr),_mm_shuffle_ps(v,v,(i)*0x55)))
 
 // ---- Shuffling
 
@@ -140,7 +140,7 @@ static sINLINE sSSE sVecFloat2Int(sSSE a)
 }
 
 #define sVecInt2FloatScale(a,exp)                       _mm_mul_ps(sVecInt2Float(a),_mm_set1_ps(1.0f / (1<<(exp))))
-#define sVecFloat2IntScale(a,exp)                       sVecFloat2Int(_mm_mul_ps(a,_mm_set1_ps((sF32) (1<<(exp)))))
+#define sVecFloat2IntScale(a,exp)                       sVecFloat2Int(_mm_mul_ps(a,_mm_set1_ps((float) (1<<(exp)))))
 
 // ---- Mask building
 

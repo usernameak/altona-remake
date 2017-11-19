@@ -129,7 +129,7 @@ void RectWindow::InitWire(const sChar *name)
   sWire->AddKey(name,L"Toggle",sMessage(this,&RectWindow::OnCmdToggle));
 }
 
-void RectWindow::OnDragDraw(const sWindowDrag &dd,sDInt mode)
+void RectWindow::OnDragDraw(const sWindowDrag &dd,ptrdiff_t mode)
 {
   int mx = dd.MouseX-Client.x0;
   int my = dd.MouseY-Client.y0;

@@ -44,7 +44,7 @@ static union
 } sSerLink;
 
 static const int sSerBufferSize = sSerMaxBytes*3+sSerMaxAlign;
-sALIGNED(static sU8,sSerBuffer[sSerBufferSize],sSerMaxAlign);
+sALIGNED(static uint8_t,sSerBuffer[sSerBufferSize],sSerMaxAlign);
 static int sSerBufferUsed = 0;
 
 #else
@@ -89,7 +89,7 @@ void sWriter::Begin(sFile *file)
   File = file;
 #if !STATICMEM
   BufferSize = sSerMaxBytes*2+sSerMaxAlign;
-  Buffer = (sU8*) sAllocMem_(BufferSize,sSerMaxAlign,0);
+  Buffer = (uint8_t*) sAllocMem_(BufferSize,sSerMaxAlign,0);
 #else
   sVERIFY(!sSerBufferUsed);   // multiple file reader/writers not supported with STATICMEM
   BufferSize = sSerBufferSize;
@@ -101,7 +101,7 @@ void sWriter::Begin(sFile *file)
   CheckEnd = Buffer+sSerMaxBytes;
   if(!File)
     Ok = 0;
-  sVERIFY((sDInt(Buffer)&(sSerMaxAlign-1))==0);
+  sVERIFY((ptrdiff_t(Buffer)&(sSerMaxAlign-1))==0);
 
   WOCount = 1;
   sClear(WOH);
@@ -130,8 +130,8 @@ void sWriter::Check()
   {
     if(Data>=CheckEnd)
     {
-      sDInt bytes = (Data-Buffer) & ~(sSerMaxAlign-1);
-      sDInt left = (Data-Buffer) - bytes;
+      ptrdiff_t bytes = (Data-Buffer) & ~(sSerMaxAlign-1);
+      ptrdiff_t left = (Data-Buffer) - bytes;
       sVERIFY(bytes>0);
       File->Write(Buffer,bytes);
       sCopyMem(Buffer,Buffer+bytes,left);
@@ -141,16 +141,16 @@ void sWriter::Check()
 }
 
 
-sDInt sWriter::GetSize()
+ptrdiff_t sWriter::GetSize()
 {
-  sDInt bytes = (Data-Buffer);
+  ptrdiff_t bytes = (Data-Buffer);
   return File->GetOffset() + bytes;
 }
 
 
 /****************************************************************************/
 
-int sWriter::Header(sU32 id,int currentversion)
+int sWriter::Header(uint32_t id,int currentversion)
 {
   Align();
   Check();
@@ -182,7 +182,7 @@ void sWriter::Skip(int bytes)
 
 void sWriter::Align(int alignment)
 {
-  while(sDInt(Data)&(alignment-1))
+  while(ptrdiff_t(Data)&(alignment-1))
     U8(0);
 }
 
@@ -202,7 +202,7 @@ int sWriter::RegisterPtr(void *obj)
 {
   sVERIFY(WOCount<sSerObjectMaxW);
 
-  sDInt hash = sDInt(obj);
+  ptrdiff_t hash = ptrdiff_t(obj);
   hash = (hash & 0xffff) ^ ((hash>>16)&0xffff);
   hash = (hash & 0x00ff) ^ ((hash>> 8)&0x00ff);
 
@@ -223,7 +223,7 @@ sBool sWriter::IsRegistered(void *obj)
     return 1;       // zero pointers are always registered!
   }
 
-  sDInt hash = sDInt(obj);
+  ptrdiff_t hash = ptrdiff_t(obj);
   hash = (hash & 0xffff) ^ ((hash>>16)&0xffff);
   hash = (hash & 0x00ff) ^ ((hash>> 8)&0x00ff);
 
@@ -252,7 +252,7 @@ void sWriter::VoidPtr(const void *obj)
     return;
   }
 
-  sDInt hash = sDInt(obj);
+  ptrdiff_t hash = ptrdiff_t(obj);
   hash = (hash & 0xffff) ^ ((hash>>16)&0xffff);
   hash = (hash & 0x00ff) ^ ((hash>> 8)&0x00ff);
 
@@ -268,12 +268,12 @@ void sWriter::VoidPtr(const void *obj)
     }
     e = e->Next;
   }
-  sFatal(L"tried to write unregistered object %08x",(sDInt)obj);
+  sFatal(L"tried to write unregistered object %08x",(ptrdiff_t)obj);
 }
 
 void sWriter::Bits(int *a,int *b,int *c,int *d,int *e,int *f,int *g,int *h)
 {
-  sU8 bits = 0;
+  uint8_t bits = 0;
   if(a) bits |= (*a&0x01)<<0;
   if(b) bits |= (*b&0x01)<<1;
   if(c) bits |= (*c&0x01)<<2;
@@ -287,7 +287,7 @@ void sWriter::Bits(int *a,int *b,int *c,int *d,int *e,int *f,int *g,int *h)
 
 /****************************************************************************/
 
-void sWriter::ArrayU8(const sU8 *ptr,int count)
+void sWriter::ArrayU8(const uint8_t *ptr,int count)
 {
   int chunk;
   Check();
@@ -304,7 +304,7 @@ void sWriter::ArrayU8(const sU8 *ptr,int count)
   }
 }
 
-void sWriter::ArrayU16(const sU16 *ptr,int count)
+void sWriter::ArrayU16(const uint16_t *ptr,int count)
 {
   int chunk;
   Check();
@@ -318,7 +318,7 @@ void sWriter::ArrayU16(const sU16 *ptr,int count)
   }
 }
 
-void sWriter::ArrayU16Align4(const sU16 *ptr,int count)
+void sWriter::ArrayU16Align4(const uint16_t *ptr,int count)
 {
   int chunk;
   Check();
@@ -329,7 +329,7 @@ void sWriter::ArrayU16Align4(const sU16 *ptr,int count)
       U16(*ptr++);
     if(chunk & 1)
     {
-      sU16 pad=0;
+      uint16_t pad=0;
       U16(pad);
     }
     Check();
@@ -337,7 +337,7 @@ void sWriter::ArrayU16Align4(const sU16 *ptr,int count)
   }
 }
 
-void sWriter::ArrayU32(const sU32 *ptr,int count)
+void sWriter::ArrayU32(const uint32_t *ptr,int count)
 {
   int chunk;
   Check();
@@ -351,7 +351,7 @@ void sWriter::ArrayU32(const sU32 *ptr,int count)
   }
 }
 
-void sWriter::ArrayU64(const sU64 *ptr,int count)
+void sWriter::ArrayU64(const uint64_t *ptr,int count)
 {
   int chunk;
   Check();
@@ -369,7 +369,7 @@ void sWriter::String(const sChar *v)
 {
   int len = sGetStringLen(v);
   U32(len);
-  ArrayU16((sU16 *)v,len);
+  ArrayU16((uint16_t *)v,len);
   Align();
 }
 
@@ -422,7 +422,7 @@ void sReader::Begin(sFile *file)
   if(Map==0)
   {
     BufferSize = sSerMaxBytes*3+sSerMaxAlign;
-    Buffer = (sU8 *)sAllocMem(BufferSize,64,0);
+    Buffer = (uint8_t *)sAllocMem(BufferSize,64,0);
     Data = CheckEnd = LoadEnd = Buffer;
     Check();
   }
@@ -481,13 +481,13 @@ void sReader::Check()
   {
     if(Data>LoadEnd)
       sFatal(L"read past end of serialize buffer (last header read: %08x). call sReader::Check more often!",LastId);
-    sDInt remove = (Data-Buffer) & ~(sSerMaxAlign-1);
-    sDInt copy = (LoadEnd-Buffer) - remove;
+    ptrdiff_t remove = (Data-Buffer) & ~(sSerMaxAlign-1);
+    ptrdiff_t copy = (LoadEnd-Buffer) - remove;
 
     sCopyMem(Buffer,Buffer+remove,copy);
     Data -= remove;
     LoadEnd -= remove;
-    sDInt load = Buffer+BufferSize-LoadEnd;
+    ptrdiff_t load = Buffer+BufferSize-LoadEnd;
     if(load>ReadLeft) 
       load = ReadLeft;
     if(load>0)
@@ -505,8 +505,8 @@ void sReader::Check()
     CheckEnd = Buffer+BufferSize-sSerMaxBytes-sSerMaxAlign;
     // checksumme erzeugen:
 #if 0
-    sU32 size = sU32(CheckEnd-Data);
-    sU32 checksum = sChecksumCRC32(Data,size);
+    uint32_t size = uint32_t(CheckEnd-Data);
+    uint32_t checksum = sChecksumCRC32(Data,size);
     sLogF(L"sReader",L"chunksize:%d checksum:%x\n",size,checksum);
 #endif
   }
@@ -514,7 +514,7 @@ void sReader::Check()
 
 void sReader::DebugPeek(int count)
 {
-  const sU32 *ptr = (const sU32 *)Data;
+  const uint32_t *ptr = (const uint32_t *)Data;
   for(int i=0;i<count;i++)
     sDPrintF(L"%08x ",ptr[i]);
   sDPrintF(L"\n");
@@ -522,9 +522,9 @@ void sReader::DebugPeek(int count)
 
 /****************************************************************************/
 
-int sReader::Header(sU32 id,int currentversion)
+int sReader::Header(uint32_t id,int currentversion)
 {
-  sU32 value;
+  uint32_t value;
   int version;
   Check();
   Align();
@@ -541,11 +541,11 @@ int sReader::Header(sU32 id,int currentversion)
   return Ok ? version : 0;
 }
 
-sU32 sReader::PeekHeader()
+uint32_t sReader::PeekHeader()
 {
-  sU32 value;
+  uint32_t value;
   Check();
-  const sU8 *tmp = Data;
+  const uint8_t *tmp = Data;
   Align();
   U32(value); if(value!=sMAKE4('<','<','<','<')) Ok  = 0;
   U32(value);
@@ -553,11 +553,11 @@ sU32 sReader::PeekHeader()
   return value;
 }
 
-sU32 sReader::PeekU32()
+uint32_t sReader::PeekU32()
 {
-  sU32 value;
+  uint32_t value;
   Check();
-  const sU8 *tmp = Data;
+  const uint8_t *tmp = Data;
   Align();
   U32(value);
   Data = tmp;
@@ -566,15 +566,15 @@ sU32 sReader::PeekU32()
 
 void sReader::Footer()
 {
-  sU32 v;
+  uint32_t v;
   Check();
   U32(v); if(v!=sMAKE4('>','>','>','>')) Ok = 0;
 }
 
 sBool sReader::PeekFooter()
 {
-  const sU8 *tmp = Data;
-  sU32 v;
+  const uint8_t *tmp = Data;
+  uint32_t v;
   Check();
   sBool result = sFALSE;
   U32(v);
@@ -597,9 +597,9 @@ void sReader::Skip(int bytes)
   }
 }
 
-const sU8 *sReader::GetPtr(int bytes)
+const uint8_t *sReader::GetPtr(int bytes)
 {
-  const sU8 *result;
+  const uint8_t *result;
   Check();
   result = Data;
   Data += bytes;
@@ -610,10 +610,10 @@ const sU8 *sReader::GetPtr(int bytes)
 
 void sReader::Align(int alignment)
 {
-  sDInt misalign = sDInt(Data)&(alignment-1);
+  ptrdiff_t misalign = ptrdiff_t(Data)&(alignment-1);
   if(misalign>0)
     Data += alignment-misalign;
-  sVERIFY((sDInt(Data) & (alignment-1)) == 0);
+  sVERIFY((ptrdiff_t(Data) & (alignment-1)) == 0);
 }
 
 int sReader::RegisterPtr(void *obj)
@@ -633,7 +633,7 @@ void sReader::VoidPtr(void *&obj)
 
 void sReader::Bits(int *a,int *b,int *c,int *d,int *e,int *f,int *g,int *h)
 {
-  sU8 bits;
+  uint8_t bits;
   U8(bits);
   if(a) *a = (bits>>0)&0x01;
   if(b) *b = (bits>>1)&0x01;
@@ -647,7 +647,7 @@ void sReader::Bits(int *a,int *b,int *c,int *d,int *e,int *f,int *g,int *h)
 
 /****************************************************************************/
 
-void sReader::ArrayU8(sU8 *ptr,int count)
+void sReader::ArrayU8(uint8_t *ptr,int count)
 {
   int chunk;
   Check();
@@ -664,7 +664,7 @@ void sReader::ArrayU8(sU8 *ptr,int count)
   }
 }
 
-void sReader::ArrayU16(sU16 *ptr,int count)
+void sReader::ArrayU16(uint16_t *ptr,int count)
 {
   int chunk;
   Check();
@@ -678,7 +678,7 @@ void sReader::ArrayU16(sU16 *ptr,int count)
   }
 }
 
-void sReader::ArrayU32(sU32 *ptr,int count)
+void sReader::ArrayU32(uint32_t *ptr,int count)
 {
   int chunk;
   Check();
@@ -687,7 +687,7 @@ void sReader::ArrayU32(sU32 *ptr,int count)
     chunk = sMin(sSerMaxBytes/4,count);
     //for(int i=0;i<chunk;i++)
     //  U32(*ptr++);
-    const sU8 *data = Data;
+    const uint8_t *data = Data;
     for(int i=0;i<chunk;i++)
     {
       sUnalignedLittleEndianLoad32(data,*ptr++);
@@ -699,7 +699,7 @@ void sReader::ArrayU32(sU32 *ptr,int count)
   }
 }
 
-void sReader::ArrayU64(sU64 *ptr,int count)
+void sReader::ArrayU64(uint64_t *ptr,int count)
 {
   int chunk;
   Check();
@@ -720,14 +720,14 @@ void sReader::String(sChar *v,int maxsize)
   S32(len);
   if(len<=maxsize)
   {
-    ArrayU16((sU16 *)v,len);
+    ArrayU16((uint16_t *)v,len);
     v[len] = 0;
   }
   else
   {
-    ArrayU16((sU16 *)v,maxsize);
+    ArrayU16((uint16_t *)v,maxsize);
     v[maxsize] = 0;
-    Skip((len-maxsize)*sizeof(sU16));
+    Skip((len-maxsize)*sizeof(uint16_t));
   }
   Align();
 }

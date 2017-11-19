@@ -38,14 +38,14 @@ class sTextureBasePrivate
 protected:
   /*
   friend void sSetRendertargetPrivate(class sTextureBase *tex,int xs,int ys,const sRect *vrp,int flags,struct IDirect3DSurface9 *cubesurface);
-  friend void sSetScreen(const sRect &rect,sU32 *data);
+  friend void sSetScreen(const sRect &rect,uint32_t *data);
   friend void sResolveTargetPrivate();
 */
   friend void sRender3DEnd(sBool flip);
   friend void sSetTarget(const struct sTargetPara &para);
   friend void sResolveTargetPrivate(class sTextureBase *tex);
   friend void sCopyTexture(const struct sCopyTexturePara &para);
-  friend void sBeginReadTexture(const sU8*& data, sS32& pitch, enum sTextureFlags& flags,class sTexture2D *tex);
+  friend void sBeginReadTexture(const uint8_t*& data, int32_t& pitch, enum sTextureFlags& flags,class sTexture2D *tex);
   friend class sGpuToCpu;
 
   enum TexturePrivateResolveFlags
@@ -64,8 +64,8 @@ protected:
   struct IDirect3DSurface9 *Surf2D;       // used only by DXBackBuffer
   struct IDirect3DSurface9 *MultiSurf2D;  // used by DXBackBuffer and multisampled rendertargets
   virtual void OnLostDevice(sBool reinit=sFALSE);
-  sU32 ResolveFlags;                      // RF_???
-  sU32 DXFormat;
+  uint32_t ResolveFlags;                      // RF_???
+  uint32_t DXFormat;
 
   sTextureBasePrivate();
 };
@@ -73,8 +73,8 @@ protected:
 
 class sShaderPrivate 
 {
-  friend sShader *sCreateShader(int type,const sU8 *code,int bytes);
-  friend sShader *sCreateShaderRaw(int type,const sU8 *code,int bytes);
+  friend sShader *sCreateShader(int type,const uint8_t *code,int bytes);
+  friend sShader *sCreateShaderRaw(int type,const uint8_t *code,int bytes);
   friend void sSetShaders(sShader *vs,sShader *ps,sShader *gs,sLinkedShader **link,sCBufferBase **cbuffers,int cbcount);
   friend void sCreateShader2(sShader *shader,sShaderBlob *blob);
   friend void sDeleteShader2(sShader *shader);
@@ -91,7 +91,7 @@ protected:
 class sMaterialPrivate 
 {
 public: // need access from specialized sToolPlatforms...
-  sU32 **States;
+  uint32_t **States;
   int *StateCount;
 };
 
@@ -118,7 +118,7 @@ class sCBufferBasePrivate
 public:
   void *DataPersist;
   void **DataPtr;
-  sU64 Mask;                                // used register mask
+  uint64_t Mask;                                // used register mask
 };
 
 /****************************************************************************/

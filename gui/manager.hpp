@@ -25,16 +25,16 @@
 
 struct sGuiTheme
 {
-  sU32 BackColor;
-  sU32 DocColor;
-  sU32 ButtonColor;
-  sU32 TextColor;
-  sU32 DrawColor;
-  sU32 SelectColor;
-  sU32 HighColor;
-  sU32 LowColor;
-  sU32 HighColor2;
-  sU32 LowColor2;
+  uint32_t BackColor;
+  uint32_t DocColor;
+  uint32_t ButtonColor;
+  uint32_t TextColor;
+  uint32_t DrawColor;
+  uint32_t SelectColor;
+  uint32_t HighColor;
+  uint32_t LowColor;
+  uint32_t HighColor2;
+  uint32_t LowColor2;
 
   sString<64> PropFont;
   sString<64> FixedFont;
@@ -43,7 +43,7 @@ struct sGuiTheme
   void Serialize(sWriter &s);
   void Serialize(sReader &s);
 
-  void Tint(sU32 add,sU32 sub);
+  void Tint(uint32_t add,uint32_t sub);
 };
 
 extern const sGuiTheme sGuiThemeDefault;
@@ -112,9 +112,9 @@ private:
   };
   struct Event
   {
-    sU8 Mode;
-    sS8 MouseButton;
-    sU32 Key;
+    uint8_t Mode;
+    int8_t MouseButton;
+    uint32_t Key;
     int MouseX;
     int MouseY;
     int HardX;
@@ -133,13 +133,13 @@ private:
   void RecLayout(sWindow *);
   void RecPaint(sWindow *,const sRect &update);
   void RecPaint3d(sWindow *,const sRect &wr);
-  sBool RecShortcut(sWindow *w,sU32 key);
+  sBool RecShortcut(sWindow *w,uint32_t key);
   sWindow *RecHitWindow(sWindow *,int x,int y,sBool border) const;
   void SendMouse(const Event &ie);
   void OnPrepareFrame();
   void OnPaint(const sRect &client,const sRect &update);
   void OnPaint3d();
-  void SendKey(sU32 key);
+  void SendKey(uint32_t key);
   void OnEvent(int event);
   void OnInput(const sInput2Event &ie);
   void DoInput(const Event &ie);
@@ -169,7 +169,7 @@ public:
   void PaintHandle(int x,int y,sBool select) const;
   sBool HitHandle(int x,int y,int mx,int my) const;
   void PaintButtonBorder(sRect &r,sBool pressed) const;
-  void PaintButton(const sRect &rect,const sChar *text,int flags,int len=-1,sU32 backcolor=0) const;
+  void PaintButton(const sRect &rect,const sChar *text,int flags,int len=-1,uint32_t backcolor=0) const;
   void BeginBackBuffer(const sRect &rect);
   void EndBackBuffer();
 
@@ -187,7 +187,7 @@ public:
   void Update(const sRect &r);    // repaint windows in this rectangle. do not call sUpdateWindow(...) directly!
   void Update();
   void PostAsync(sWindow *win,int cmd); // post a message in the message-queue. it will be handled at the end of the frame
-  void Notify(const void *ptr,sDInt n);
+  void Notify(const void *ptr,ptrdiff_t n);
   template<typename Type> void Notify(const Type &Val) { Notify(&Val,sizeof(Val)); }
   void CommandToAll(int cmd,sWindow *w=0);
   void GetMousePos(int &x,int &y) { x=DragData.MouseX; y=DragData.MouseY; }

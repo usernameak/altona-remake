@@ -14,18 +14,18 @@
 
 // Hash table size. Influences both compression and decompression. Changing this
 // *will* break existing compressed files.
-static const sU32 HashSize = 65536;
+static const uint32_t HashSize = 65536;
 
-static const sU32 ChunkBits = 15;
-static const sU32 ChunkSize = 1<<ChunkBits;
-static const sU32 MaxOutSize = (ChunkSize*9 + 7) / 8 + 8 + 3; // 9bits/byte+header+align+safety margin
+static const uint32_t ChunkBits = 15;
+static const uint32_t ChunkSize = 1<<ChunkBits;
+static const uint32_t MaxOutSize = (ChunkSize*9 + 7) / 8 + 8 + 3; // 9bits/byte+header+align+safety margin
 static const int LenBytes = 3;
 
-static const sU32 PeriodicUpdate = 1<<24;
-static const sU32 WrapMask = 2*ChunkSize-1;
+static const uint32_t PeriodicUpdate = 1<<24;
+static const uint32_t WrapMask = 2*ChunkSize-1;
 
 // Length of first few exponential golomb codes (for fast encoding)
-static const sU8 EGLen[31] =
+static const uint8_t EGLen[31] =
 {
   1,
   3,3,
@@ -35,7 +35,7 @@ static const sU8 EGLen[31] =
 };
 
 // Number of leading zeroes for first few binary values (for fast decoding)
-static const sU8 LZCount[32] =
+static const uint8_t LZCount[32] =
 {
   5,                                  // 00000
   4,                                  // 00001
@@ -46,7 +46,7 @@ static const sU8 LZCount[32] =
 };
 
 // Direct decode from first 5 bits
-static const sU8 DirectV[32][2] =
+static const uint8_t DirectV[32][2] =
 {
   {0,0}, {0,0}, {0,0}, {0,0},         // 00000-00011 (invalid)
   {3,5}, {4,5}, {5,5}, {6,5},         // 00100-00111 (3-6)
@@ -60,7 +60,7 @@ static const sU8 DirectV[32][2] =
 
 /****************************************************************************/
 
-void sFastLzpCompressor::StartWrite(sU8 *ptr)
+void sFastLzpCompressor::StartWrite(uint8_t *ptr)
 {
   BitPos1 = ptr+2; // \ these two lines make a lot more sense
   BitPos2 = ptr;   // / if you look at the decompressor.
@@ -87,7 +87,7 @@ void sFastLzpCompressor::Shift()
   RawPos += 2;
 }
 
-sINLINE void sFastLzpCompressor::PutExpGolomb(sU32 value)
+sINLINE void sFastLzpCompressor::PutExpGolomb(uint32_t value)
 {
   if(value < sCOUNTOF(EGLen)) // fast path for short (=most common) values
     PutBits(value+1,EGLen[value]);
@@ -95,7 +95,7 @@ sINLINE void sFastLzpCompressor::PutExpGolomb(sU32 value)
   {
     value++;
 
-    sU32 v = value;
+    uint32_t v = value;
     int nBits = 0;
     if(v & 0xffff0000)  v>>=16, nBits+=16;
     if(v & 0x0000ff00)  v>>= 8, nBits+= 8;
@@ -108,7 +108,7 @@ sINLINE void sFastLzpCompressor::PutExpGolomb(sU32 value)
   }
 }
 
-int sFastLzpCompressor::CompressChunk(sU32 nBytes,sBool isLast)
+int sFastLzpCompressor::CompressChunk(uint32_t nBytes,sBool isLast)
 {
   sVERIFYSTATIC(WrapMask>0 && (WrapMask & (WrapMask+1)) == 0); // power of 2
   sVERIFYSTATIC(ChunkSize < (1<<24));
@@ -129,10 +129,10 @@ int sFastLzpCompressor::CompressChunk(sU32 nBytes,sBool isLast)
   while(pos<endPos)
   {
     int hash = (ChunkBuffer[(pos-2)&WrapMask]<<8) + ChunkBuffer[(pos-1)&WrapMask];
-    sU32 matchPos = HashTable[hash];
+    uint32_t matchPos = HashTable[hash];
     HashTable[hash] = pos;
 
-    if(sU32(pos - matchPos) < sU32(ChunkSize)) // match, not too distant
+    if(uint32_t(pos - matchPos) < uint32_t(ChunkSize)) // match, not too distant
     {
       // determine match len
       int len = 0, maxLen = endPos-pos-1;
@@ -150,7 +150,7 @@ int sFastLzpCompressor::CompressChunk(sU32 nBytes,sBool isLast)
   }
 
   // did that actually compress? if not, just use an uncompressed block instead.
-  if(sU32(RawPos-OutBuffer) > nBytes)
+  if(uint32_t(RawPos-OutBuffer) > nBytes)
   {
     StartWrite(OutBuffer + LenBytes); // start over
     if(!isLast)
@@ -177,8 +177,8 @@ int sFastLzpCompressor::CompressChunk(sU32 nBytes,sBool isLast)
   EndWrite();
 
   // write size of block
-  sVERIFY(RawPos - OutBuffer <= (sDInt) MaxOutSize);
-  sU32 size = RawPos - (OutBuffer+LenBytes);
+  sVERIFY(RawPos - OutBuffer <= (ptrdiff_t) MaxOutSize);
+  uint32_t size = RawPos - (OutBuffer+LenBytes);
   OutBuffer[0] = (size >>  0) & 0xff;
   OutBuffer[1] = (size >>  8) & 0xff;
   OutBuffer[2] = (size >> 16) & 0xff;
@@ -188,8 +188,8 @@ int sFastLzpCompressor::CompressChunk(sU32 nBytes,sBool isLast)
   // clean up the hash table periodically
   if(!isLast && CurrentPos >= PeriodicUpdate+ChunkSize)
   {
-    for(sU32 i=0;i<HashSize;i++)
-      HashTable[i] = (sU32) sMin<int>(HashTable[i]-PeriodicUpdate,-int(ChunkSize));
+    for(uint32_t i=0;i<HashSize;i++)
+      HashTable[i] = (uint32_t) sMin<int>(HashTable[i]-PeriodicUpdate,-int(ChunkSize));
 
     CurrentPos -= PeriodicUpdate;
   }
@@ -201,15 +201,15 @@ void sFastLzpCompressor::Reset()
 {
   CurrentPos = 0;
   sSetMem(ChunkBuffer,0,ChunkSize*2);
-  for(sU32 i=0;i<HashSize;i++)
-    HashTable[i] = (sU32) -int(ChunkSize);
+  for(uint32_t i=0;i<HashSize;i++)
+    HashTable[i] = (uint32_t) -int(ChunkSize);
 }
 
 sFastLzpCompressor::sFastLzpCompressor()
 {
-  HashTable = new sU32[HashSize];
-  ChunkBuffer = new sU8[ChunkSize*2];
-  OutBuffer = new sU8[MaxOutSize];
+  HashTable = new uint32_t[HashSize];
+  ChunkBuffer = new uint8_t[ChunkSize*2];
+  OutBuffer = new uint8_t[MaxOutSize];
 
   PWritePos = ~0u;
 }
@@ -227,12 +227,12 @@ sBool sFastLzpCompressor::Compress(sFile *dest,sFile *src)
 {
   sVERIFY(PWritePos == ~0u); // no piecewise I/O in progress
 
-  sS64 size = src->GetSize();
+  int64_t size = src->GetSize();
   Reset();
 
   while(size)
   {
-    int nBytes = sMin<sS64>(size,ChunkSize);
+    int nBytes = sMin<int64_t>(size,ChunkSize);
     if(!src->Read(&ChunkBuffer[(CurrentPos & WrapMask)],nBytes))
       return sFALSE;
 
@@ -255,11 +255,11 @@ void sFastLzpCompressor::StartPiecewise()
   PFirstBlock = sTRUE;
 }
 
-sBool sFastLzpCompressor::WritePiecewise(sFile *dest,const void *buffer,sDInt size)
+sBool sFastLzpCompressor::WritePiecewise(sFile *dest,const void *buffer,ptrdiff_t size)
 {
   sVERIFY(PWritePos != ~0u);
 
-  const sU8 *bufPtr = (const sU8 *) buffer;
+  const uint8_t *bufPtr = (const uint8_t *) buffer;
   while(size > 0)
   {
     if(!PFirstBlock && (PWritePos & (ChunkSize-1)) == 0) // this chunk is full
@@ -270,7 +270,7 @@ sBool sFastLzpCompressor::WritePiecewise(sFile *dest,const void *buffer,sDInt si
     }
 
     int nextBoundary = (PWritePos < ChunkSize) ? ChunkSize : 2*ChunkSize;
-    int blockSize = sMin<sDInt>(size,nextBoundary-PWritePos);
+    int blockSize = sMin<ptrdiff_t>(size,nextBoundary-PWritePos);
 
     sCopyMem(&ChunkBuffer[PWritePos],bufPtr,blockSize);
     bufPtr += blockSize;
@@ -290,8 +290,8 @@ sBool sFastLzpCompressor::EndPiecewise(sFile *dest)
     return sTRUE;
   }
 
-  sU32 cpm = CurrentPos & WrapMask;
-  sU32 size = PWritePos > cpm ? (PWritePos - cpm) : (PWritePos - cpm + 2*ChunkSize);
+  uint32_t cpm = CurrentPos & WrapMask;
+  uint32_t size = PWritePos > cpm ? (PWritePos - cpm) : (PWritePos - cpm + 2*ChunkSize);
   sVERIFY(size <= ChunkSize);
   
   int outBytes = CompressChunk(size,sTRUE);
@@ -301,7 +301,7 @@ sBool sFastLzpCompressor::EndPiecewise(sFile *dest)
 
 /****************************************************************************/
 
-void sFastLzpDecompressor::StartRead(const sU8 *ptr)
+void sFastLzpDecompressor::StartRead(const uint8_t *ptr)
 {
   sUnalignedLittleEndianLoad32(ptr,BitBuffer);
   BitFill = 32;
@@ -310,19 +310,19 @@ void sFastLzpDecompressor::StartRead(const sU8 *ptr)
 
 void sFastLzpDecompressor::Shift()
 {
-  sU16 v;
+  uint16_t v;
   sUnalignedLittleEndianLoad16(RawPos,v);
   RawPos += 2;
   BitBuffer |= v << (16 - BitFill);
   BitFill += 16;
 }
 
-sINLINE sU32 sFastLzpDecompressor::GetExpGolomb()
+sINLINE uint32_t sFastLzpDecompressor::GetExpGolomb()
 {
   int first5 = PeekBits(5);
   if(first5 >= 4) // really fast path (4=00100)
   {
-    sU32 val = DirectV[first5][0];
+    uint32_t val = DirectV[first5][0];
     SkipBits(DirectV[first5][1]);
     return val;
   }
@@ -350,7 +350,7 @@ sINLINE sU32 sFastLzpDecompressor::GetExpGolomb()
   }
 }
 
-int sFastLzpDecompressor::DecompressChunk(sU32 blockLen,sBool &last,sU8 *&ptr)
+int sFastLzpDecompressor::DecompressChunk(uint32_t blockLen,sBool &last,uint8_t *&ptr)
 {
   // call after the chunk has been read+block length consumed
   // read header.
@@ -358,7 +358,7 @@ int sFastLzpDecompressor::DecompressChunk(sU32 blockLen,sBool &last,sU8 *&ptr)
 
   int flags = GetBits(2);
   last = (flags & 1) == 1;
-  sU32 nBytes = last ? GetExpGolomb() : ChunkSize;
+  uint32_t nBytes = last ? GetExpGolomb() : ChunkSize;
 
   if(nBytes > ChunkSize || nBytes && (CurrentPos & (ChunkSize-1)) != 0)
     return -1; // error
@@ -368,12 +368,12 @@ int sFastLzpDecompressor::DecompressChunk(sU32 blockLen,sBool &last,sU8 *&ptr)
   if(flags & 2) // uncompressed
   {
     // uncompressed block; copy, but keep hash table updated
-    const sU8 *raw = RawPos;
+    const uint8_t *raw = RawPos;
     int hash = (ChunkBuffer[(CurrentPos-2)&WrapMask]<<8) + ChunkBuffer[(CurrentPos-1)&WrapMask];
-    for(sU32 pos=CurrentPos;pos<CurrentPos+nBytes;pos++)
+    for(uint32_t pos=CurrentPos;pos<CurrentPos+nBytes;pos++)
     {
       HashTable[hash] = pos;
-      sU8 byte = *raw++;
+      uint8_t byte = *raw++;
       ChunkBuffer[pos&WrapMask] = byte;
       hash = ((hash<<8) + byte) & 0xffff;
     }
@@ -382,24 +382,24 @@ int sFastLzpDecompressor::DecompressChunk(sU32 blockLen,sBool &last,sU8 *&ptr)
   }
   else // compressed
   {
-    const sU8 *endRaw = InBuffer + blockLen;
+    const uint8_t *endRaw = InBuffer + blockLen;
 
     int pos = CurrentPos;
     int endPos = CurrentPos+nBytes;
     while(pos<endPos)
     {
       int hash = (ChunkBuffer[(pos-2)&WrapMask]<<8) + ChunkBuffer[(pos-1)&WrapMask];
-      sU32 matchPos = HashTable[hash];
+      uint32_t matchPos = HashTable[hash];
       HashTable[hash] = pos;
 
       if(pos - matchPos < ChunkSize) // match, not too distant
       {
-        sU32 len = GetExpGolomb();
+        uint32_t len = GetExpGolomb();
         if(len >= ChunkSize || int(pos+len+1) > endPos)
           return -1;
 
         // copy loop (could probably be done faster. check average iteration count!)
-        for(sU32 i=0;i!=len;i++)
+        for(uint32_t i=0;i!=len;i++)
           ChunkBuffer[(pos+i)&WrapMask] = ChunkBuffer[(matchPos+i)&WrapMask];
 
         pos += len;
@@ -415,15 +415,15 @@ int sFastLzpDecompressor::DecompressChunk(sU32 blockLen,sBool &last,sU8 *&ptr)
   }
 
   CurrentPos += nBytes;
-  sVERIFY(RawPos - InBuffer <= (sDInt) blockLen);
-  if(RawPos - InBuffer != (sDInt) blockLen) // wrong number of bytes depacked
+  sVERIFY(RawPos - InBuffer <= (ptrdiff_t) blockLen);
+  if(RawPos - InBuffer != (ptrdiff_t) blockLen) // wrong number of bytes depacked
     return -1;
 
   // clean up the hash table periodically
   if(!last && CurrentPos >= PeriodicUpdate+ChunkSize)
   {
-    for(sU32 i=0;i<HashSize;i++)
-      HashTable[i] = (sU32) sMin<int>(HashTable[i]-PeriodicUpdate,-int(ChunkSize));
+    for(uint32_t i=0;i<HashSize;i++)
+      HashTable[i] = (uint32_t) sMin<int>(HashTable[i]-PeriodicUpdate,-int(ChunkSize));
 
     CurrentPos -= PeriodicUpdate;
   }
@@ -435,20 +435,20 @@ void sFastLzpDecompressor::Reset()
 {
   CurrentPos = 0;
   sSetMem(ChunkBuffer,0,ChunkSize*2);
-  for(sU32 i=0;i<HashSize;i++)
-    HashTable[i] = (sU32) -int(ChunkSize);
+  for(uint32_t i=0;i<HashSize;i++)
+    HashTable[i] = (uint32_t) -int(ChunkSize);
 }
 
-sU32 sFastLzpDecompressor::ReadLen(const sU8 *ptr)
+uint32_t sFastLzpDecompressor::ReadLen(const uint8_t *ptr)
 {
   return ptr[0] + (ptr[1] << 8) + (ptr[2] << 16);
 }
 
 sFastLzpDecompressor::sFastLzpDecompressor()
 {
-  HashTable = new sU32[HashSize];
-  ChunkBuffer = new sU8[ChunkSize*2];
-  InBuffer = new sU8[MaxOutSize];
+  HashTable = new uint32_t[HashSize];
+  ChunkBuffer = new uint8_t[ChunkSize*2];
+  InBuffer = new uint8_t[MaxOutSize];
 
   PReadPos = ~0u;
 }
@@ -464,7 +464,7 @@ sBool sFastLzpDecompressor::Decompress(sFile *dest,sFile *src)
 {
   sVERIFY(PReadPos == ~0u);
   sBool last = sFALSE;
-  sU8 *ptr;
+  uint8_t *ptr;
 
   Reset();
 
@@ -474,7 +474,7 @@ sBool sFastLzpDecompressor::Decompress(sFile *dest,sFile *src)
     if(!src->Read(InBuffer,3))
       return sFALSE;
 
-    sU32 len = ReadLen(InBuffer);
+    uint32_t len = ReadLen(InBuffer);
     if(len > ChunkSize+8 || !src->Read(InBuffer,len))
       return sFALSE;
 
@@ -499,10 +499,10 @@ void sFastLzpDecompressor::StartPiecewise()
   PIsLast = sFALSE;
 }
 
-sBool sFastLzpDecompressor::ReadPiecewise(sFile *src,void *buffer,sDInt size)
+sBool sFastLzpDecompressor::ReadPiecewise(sFile *src,void *buffer,ptrdiff_t size)
 {
   sVERIFY(PReadPos != ~0u);
-  sU8 *bufPtr = (sU8 *) buffer;
+  uint8_t *bufPtr = (uint8_t *) buffer;
 
   while(size > 0)
   {
@@ -517,12 +517,12 @@ sBool sFastLzpDecompressor::ReadPiecewise(sFile *src,void *buffer,sDInt size)
       if(!src->Read(InBuffer,3))
         return sFALSE;
 
-      sU32 compLen = ReadLen(InBuffer);
+      uint32_t compLen = ReadLen(InBuffer);
       if(compLen > ChunkSize+8 || !src->Read(InBuffer,compLen))
         return sFALSE;
 
       // try to decompress
-      sU8 *ptr = 0;
+      uint8_t *ptr = 0;
       int deLen = DecompressChunk(compLen,PIsLast,ptr);
       if(deLen == -1)
         return sFALSE;
@@ -531,7 +531,7 @@ sBool sFastLzpDecompressor::ReadPiecewise(sFile *src,void *buffer,sDInt size)
     }
 
     int nextBoundary = (PReadPos < ChunkSize) ? ChunkSize : 2*ChunkSize;
-    int blockSize = sMin<sDInt>(size,nextBoundary-PReadPos);
+    int blockSize = sMin<ptrdiff_t>(size,nextBoundary-PReadPos);
 
     sCopyMem(bufPtr,&ChunkBuffer[PReadPos],blockSize);
     bufPtr += blockSize;
@@ -573,7 +573,7 @@ sBool sFastLzpFile::Open(sFile *host,sBool writing)
   if(writing)
   {
     // store magic and null size tag in front
-    sU8 buffer[16];
+    uint8_t buffer[16];
     sClear(buffer);
     sCopyMem(buffer,"FastLZP",8);
     if(!Host->Write(buffer,16))
@@ -589,14 +589,14 @@ sBool sFastLzpFile::Open(sFile *host,sBool writing)
   else
   {
     // read magic and size tag
-    sU8 buffer[16];
+    uint8_t buffer[16];
     if(!Host->Read(buffer,16) || sCmpMem(buffer,"FastLZP",8)!=0)
     {
       sDelete(Host);
       return sFALSE;
     }
 
-    sUnalignedLittleEndianLoad64(buffer+8,(sU64&)Size);
+    sUnalignedLittleEndianLoad64(buffer+8,(uint64_t&)Size);
     Decomp = new sFastLzpDecompressor;
     Decomp->StartPiecewise();
   }
@@ -630,7 +630,7 @@ sBool sFastLzpFile::Close()
   {
     Comp->EndPiecewise(Host);
 
-    sU8 buffer[8];
+    uint8_t buffer[8];
     sUnalignedLittleEndianStore64(buffer,Size);
     if(!Host || !Host->SetOffset(8) || !Host->Write(buffer,8))
       ret = sFALSE;
@@ -652,13 +652,13 @@ sBool sFastLzpFile::Close()
   return ret;
 }
 
-sBool sFastLzpFile::Read(void *data,sDInt size)
+sBool sFastLzpFile::Read(void *data,ptrdiff_t size)
 {
   sVERIFY(Host && Decomp);
   return Decomp->ReadPiecewise(Host,data,size);
 }
 
-sBool sFastLzpFile::Write(const void *data,sDInt size)
+sBool sFastLzpFile::Write(const void *data,ptrdiff_t size)
 {
   sVERIFY(Host && Comp);
   sBool ret = Comp->WritePiecewise(Host,data,size);
@@ -666,7 +666,7 @@ sBool sFastLzpFile::Write(const void *data,sDInt size)
   return ret;
 }
 
-sS64 sFastLzpFile::GetSize()
+int64_t sFastLzpFile::GetSize()
 {
   return Size;
 }

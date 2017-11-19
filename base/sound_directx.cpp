@@ -202,9 +202,9 @@ static void SoundThreadCode(sThread *thread, void *userdata)
             if(DXSOHandler)
             {
               if(count1>0)
-                (*DXSOHandler)((sS16 *)pos1,count1/SAMPLESIZE);
+                (*DXSOHandler)((int16_t *)pos1,count1/SAMPLESIZE);
               if(count2>0)
-                (*DXSOHandler)((sS16 *)pos2,count2/SAMPLESIZE);
+                (*DXSOHandler)((int16_t *)pos2,count2/SAMPLESIZE);
             }
             DXSOBuffer->Unlock(pos1,count1,pos2,count2);
           }
@@ -429,9 +429,9 @@ void sSoundInput()
           if(DXSIHandler)
           {
             if(count1>0)
-              (*DXSIHandler)((sS16 *)pos1,count1/SAMPLESIZE);
+              (*DXSIHandler)((int16_t *)pos1,count1/SAMPLESIZE);
             if(count2>0)
-              (*DXSIHandler)((sS16 *)pos2,count2/SAMPLESIZE);
+              (*DXSIHandler)((int16_t *)pos2,count2/SAMPLESIZE);
           }
           DXSIBuffer->Unlock(pos1,count1,pos2,count2);
         }

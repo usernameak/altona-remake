@@ -75,8 +75,8 @@ HWND sExternalWindow = 0;
 
 static int sInPaint = 0;
 
-static sU32 sKeyTable[3][256];    // norm/shift/alt
-sU32 sKeyQual;
+static uint32_t sKeyTable[3][256];    // norm/shift/alt
+uint32_t sKeyQual;
 
 HINSTANCE WInstance;
 static int sMouseWheelAkku;
@@ -272,7 +272,7 @@ void SetXSIModeD3D(sBool enable);
 /****************************************************************************/
 
 #if sSTRIPPED
-void DXError(sU32 err)
+void DXError(uint32_t err)
 {
   if(FAILED(err))
   {
@@ -282,11 +282,11 @@ void DXError(sU32 err)
     sFatal(buffer);
   }
 }
-#define DIErr(hr) { sU32 err=hr; if(FAILED(err)) DXError(err); }
+#define DIErr(hr) { uint32_t err=hr; if(FAILED(err)) DXError(err); }
 
 #else
 #pragma comment(lib,"dxerr.lib")
-void DXError(sU32 err,const sChar *file,int line,const sChar *system)
+void DXError(uint32_t err,const sChar *file,int line,const sChar *system)
 {
   if(FAILED(err))
   {
@@ -297,7 +297,7 @@ void DXError(sU32 err,const sChar *file,int line,const sChar *system)
     sFatal(buffer);
   }
 }
-#define DIErr(hr) { sU32 err=hr; if(FAILED(err)) DXError(err,sTXT(__FILE__),__LINE__,L"dinput"); }
+#define DIErr(hr) { uint32_t err=hr; if(FAILED(err)) DXError(err,sTXT(__FILE__),__LINE__,L"dinput"); }
 #endif
 
 #ifndef sCRASHDUMP
@@ -555,7 +555,7 @@ void sDPrint(const sChar *text)
 
 void sInitKeys()
 {
-  static const sU32 keys[][2] =
+  static const uint32_t keys[][2] =
   {
     { sKEY_ENTER    , VK_RETURN   },
     { sKEY_UP       , VK_UP       },
@@ -694,8 +694,8 @@ class sRootFileHandler : public sFileHandler
 
   struct ReadEntry
   {
-    sU8 *Buffer;
-    sDInt Size;
+    uint8_t *Buffer;
+    ptrdiff_t Size;
     OVERLAPPED Ovl;
     sBool Active;
     int Next;
@@ -723,13 +723,13 @@ class sRootFile : public sFile
 {
   HANDLE File;
   sFileAccess Access;
-  sS64 Size;
-  sS64 Offset;
+  int64_t Size;
+  int64_t Offset;
   sBool Ok;
 
-  sS64 MapOffset;
-  sDInt MapSize;
-  sU8 *MapPtr;             // 0 = mapping not active
+  int64_t MapOffset;
+  ptrdiff_t MapSize;
+  uint8_t *MapPtr;             // 0 = mapping not active
   HANDLE MapHandle;
   sBool MapFailed;          // 1 = we tryed once to map and it didn't work, do don't try again
   sRootFileHandler *Handler;
@@ -745,15 +745,15 @@ public:
   sRootFile(HANDLE file,sFileAccess access,sRootFileHandler *h,sBool isovl);
   ~sRootFile();
   sBool Close();
-  sBool Read(void *data,sDInt size); 
-  sBool Write(const void *data,sDInt size);
-  sU8 *Map(sS64 offset,sDInt size); 
-  sBool SetOffset(sS64 offset);      
-  sS64 GetOffset();                  
-  sBool SetSize(sS64);               
-  sS64 GetSize();                    
+  sBool Read(void *data,ptrdiff_t size); 
+  sBool Write(const void *data,ptrdiff_t size);
+  uint8_t *Map(int64_t offset,ptrdiff_t size); 
+  sBool SetOffset(int64_t offset);      
+  int64_t GetOffset();                  
+  sBool SetSize(int64_t);               
+  int64_t GetSize();                    
 
-  sFileReadHandle BeginRead(sS64 offset,sDInt size,void *destbuffer, sFilePriorityFlags prio);  // begin reading
+  sFileReadHandle BeginRead(int64_t offset,ptrdiff_t size,void *destbuffer, sFilePriorityFlags prio);  // begin reading
   sBool DataAvailable(sFileReadHandle handle);  // data valid?
   void *GetData(sFileReadHandle handle);  // access data (only valid if you didn't specify the buffer yourself!)
   void EndRead(sFileReadHandle handle);   // the data buffer may be reused now
@@ -936,7 +936,7 @@ sBool sRootFile::Close()
   return Ok;
 }
 
-sBool sRootFile::Read(void *data,sDInt size)
+sBool sRootFile::Read(void *data,ptrdiff_t size)
 {
   sVERIFY(File!=INVALID_HANDLE_VALUE)
   DWORD read=0;
@@ -947,23 +947,23 @@ sBool sRootFile::Read(void *data,sDInt size)
   {
     OVERLAPPED ovl;
     sClear(ovl);
-    ovl.Offset=sU32(Offset);
-    ovl.OffsetHigh=sU32(Offset>>32);
+    ovl.Offset=uint32_t(Offset);
+    ovl.OffsetHigh=uint32_t(Offset>>32);
     ovl.hEvent=OvlEvent;
 
     result=ReadFile(File,data,size,&read,&ovl);
     while(!result)
     {
-      sU32 error = GetLastError();
+      uint32_t error = GetLastError();
       if(ERROR_NO_SYSTEM_RESOURCES==error)
       {
         // try smaller chunks
-        sU8 *dest = (sU8*)data;
-        sDInt left = size;
+        uint8_t *dest = (uint8_t*)data;
+        ptrdiff_t left = size;
         result = 1;
         while(left && result)
         {
-          int chunk=sMin(left,sDInt(1024*1024));
+          int chunk=sMin(left,ptrdiff_t(1024*1024));
           result=ReadFile(File,dest,chunk,&read,&ovl);
           if(!result && ERROR_IO_PENDING==GetLastError())
             result=GetOverlappedResult(File,&ovl,&read,TRUE);
@@ -971,12 +971,12 @@ sBool sRootFile::Read(void *data,sDInt size)
           dest += read;
           left -= read;
 
-          sU64 offset = (sU64(ovl.OffsetHigh)<<32)|ovl.Offset;
+          uint64_t offset = (uint64_t(ovl.OffsetHigh)<<32)|ovl.Offset;
           offset += read;
-          ovl.Offset=sU32(offset);
-          ovl.OffsetHigh=sU32(offset>>32);
+          ovl.Offset=uint32_t(offset);
+          ovl.OffsetHigh=uint32_t(offset>>32);
         }
-        read = dest-(sU8*)data;
+        read = dest-(uint8_t*)data;
       }
       else if (error==ERROR_IO_PENDING)
         result=GetOverlappedResult(File,&ovl,&read,TRUE);
@@ -992,14 +992,14 @@ sBool sRootFile::Read(void *data,sDInt size)
     result = ReadFile(File,data,size,&read,0);
   }
 
-  if(read!=sU32(size))
+  if(read!=uint32_t(size))
     result = 0;
   if(!result) Ok = 0;
   Offset+=read;
   return result;
 }
 
-sBool sRootFile::Write(const void *data,sDInt size)
+sBool sRootFile::Write(const void *data,ptrdiff_t size)
 {
   sVERIFY(!IsOverlapped)
   sVERIFY(File!=INVALID_HANDLE_VALUE)
@@ -1014,7 +1014,7 @@ sBool sRootFile::Write(const void *data,sDInt size)
     DWORD written;
     sVERIFY(size<=0x7fffffff);
     sBool result = WriteFile(File,data,size,&written,0);
-    if(written!=sU32(size))
+    if(written!=uint32_t(size))
       result = 0;
     if(!result) Ok = 0;
     Offset+=written;
@@ -1022,7 +1022,7 @@ sBool sRootFile::Write(const void *data,sDInt size)
   }
   else
   {
-    const sU8 *ptr = (const sU8 *) data;
+    const uint8_t *ptr = (const uint8_t *) data;
     while(size>chunk)
     {
       if(!Write(ptr,chunk))
@@ -1035,7 +1035,7 @@ sBool sRootFile::Write(const void *data,sDInt size)
   }
 }
 
-sU8 *sRootFile::Map(sS64 offset,sDInt size)
+uint8_t *sRootFile::Map(int64_t offset,ptrdiff_t size)
 {
   // try mapping only once
 
@@ -1067,7 +1067,7 @@ sU8 *sRootFile::Map(sS64 offset,sDInt size)
   // map new view
 
   if(size>=0x7fffffff) return 0;
-  MapPtr = (sU8 *)MapViewOfFile(MapHandle,FILE_MAP_READ,offset>>32,offset&0xffffffff,size);
+  MapPtr = (uint8_t *)MapViewOfFile(MapHandle,FILE_MAP_READ,offset>>32,offset&0xffffffff,size);
   if(MapPtr)
   {
     MapOffset = offset;
@@ -1081,7 +1081,7 @@ sU8 *sRootFile::Map(sS64 offset,sDInt size)
   return MapPtr;
 }
 
-sBool sRootFile::SetOffset(sS64 offset)
+sBool sRootFile::SetOffset(int64_t offset)
 {
   sVERIFY(File!=INVALID_HANDLE_VALUE)
 
@@ -1099,12 +1099,12 @@ sBool sRootFile::SetOffset(sS64 offset)
   return Offset>=0 && Offset<=Size;
 }
 
-sS64 sRootFile::GetOffset()
+int64_t sRootFile::GetOffset()
 {
   return Offset;
 }
 
-sBool sRootFile::SetSize(sS64 size)
+sBool sRootFile::SetSize(int64_t size)
 {
   sVERIFY(File!=INVALID_HANDLE_VALUE)
   sVERIFY(!IsOverlapped)
@@ -1118,14 +1118,14 @@ sBool sRootFile::SetSize(sS64 size)
   return Ok;
 }
 
-sS64 sRootFile::GetSize()
+int64_t sRootFile::GetSize()
 {
   return Size;
 }
 
 /****************************************************************************/
 
-sFileReadHandle sRootFile::BeginRead(sS64 offset,sDInt size,void *destbuffer, sFilePriorityFlags prio)
+sFileReadHandle sRootFile::BeginRead(int64_t offset,ptrdiff_t size,void *destbuffer, sFilePriorityFlags prio)
 {
   int handle=Handler->AllocReadHandle();
   sRootFileHandler::ReadEntry &e=Handler->ReadEntries[handle];
@@ -1134,12 +1134,12 @@ sFileReadHandle sRootFile::BeginRead(sS64 offset,sDInt size,void *destbuffer, sF
   sClear(e.Ovl);
 
   if (!destbuffer)
-    destbuffer = e.Buffer = new sU8[size];
+    destbuffer = e.Buffer = new uint8_t[size];
 
   sVERIFY(offset + size <= Size);
 
-  e.Ovl.Offset=sU32(offset);
-  e.Ovl.OffsetHigh=sU32(offset>>32);
+  e.Ovl.Offset=uint32_t(offset);
+  e.Ovl.OffsetHigh=uint32_t(offset>>32);
   ReadFile(File,destbuffer,size,0,&e.Ovl);
   e.Active=sTRUE;
 
@@ -1170,7 +1170,7 @@ sBool sRootFile::DataAvailable(sFileReadHandle handle)
   DWORD read;
   if (GetOverlappedResult(File,&e.Ovl,&read,FALSE))
   {
-    sVERIFY((sDInt)read==e.Size);
+    sVERIFY((ptrdiff_t)read==e.Size);
     e.Active=sFALSE;
     return sTRUE;
   }
@@ -1305,7 +1305,7 @@ sBool sLoadDir(sArray<sDirEntry> &list,const sChar *path,const sChar *pattern)
     if(de->Size<0 || dir.nFileSizeHigh)
       de->Size = 0x7fffffff;
     de->Name = (sChar *)dir.cFileName;
-    de->LastWriteTime = dir.ftLastWriteTime.dwLowDateTime + (((sU64) dir.ftLastWriteTime.dwHighDateTime)<<32);
+    de->LastWriteTime = dir.ftLastWriteTime.dwLowDateTime + (((uint64_t) dir.ftLastWriteTime.dwHighDateTime)<<32);
   }
   while(FindNextFileW(handle,&dir));
 
@@ -1325,7 +1325,7 @@ sBool sLoadDir(sArray<sDirEntry> &list,const sChar *path,const sChar *pattern)
   return 1;
 }
 
-sDateAndTime sFromFileTime(sU64 lastWriteTime)
+sDateAndTime sFromFileTime(uint64_t lastWriteTime)
 {
   FILETIME ft;
 
@@ -1334,11 +1334,11 @@ sDateAndTime sFromFileTime(sU64 lastWriteTime)
   return TimeFromFileTime(ft);
 }
 
-sU64 sToFileTime(sDateAndTime time)
+uint64_t sToFileTime(sDateAndTime time)
 {
   FILETIME ft;
   TimeToFileTime(ft,time);
-  return (sU64(ft.dwHighDateTime) << 32) + ft.dwLowDateTime;
+  return (uint64_t(ft.dwHighDateTime) << 32) + ft.dwLowDateTime;
 }
 
 sBool sFindFile(sChar *foundname, int foundnamesize, const sChar *path, const sChar *pattern)
@@ -1497,7 +1497,7 @@ sBool sGetFileInfo(const sChar *name,sDirEntry *de)
     // time
 
     GetFileTime(hnd,0,0,&time);
-    de->LastWriteTime = time.dwLowDateTime + (((sU64) time.dwHighDateTime)<<32);
+    de->LastWriteTime = time.dwLowDateTime + (((uint64_t) time.dwHighDateTime)<<32);
 
     // attributes
 
@@ -1521,7 +1521,7 @@ sBool sGetFileInfo(const sChar *name,sDirEntry *de)
 }
 
 
-sBool sGetDiskSizeInfo(const sChar *path, sS64 &availablesize, sS64 &totalsize)
+sBool sGetDiskSizeInfo(const sChar *path, int64_t &availablesize, int64_t &totalsize)
 {
   ULARGE_INTEGER available;
   ULARGE_INTEGER total;
@@ -1532,7 +1532,7 @@ sBool sGetDiskSizeInfo(const sChar *path, sS64 &availablesize, sS64 &totalsize)
 }
 
 
-sBool sSetFileTime(const sChar *name, sU64 lastwritetime)
+sBool sSetFileTime(const sChar *name, uint64_t lastwritetime)
 {
   sBool ok = 0;
   HANDLE hnd = CreateFileW(name,GENERIC_WRITE,0,0,OPEN_EXISTING,0,0);
@@ -1568,7 +1568,7 @@ typedef BOOL (__stdcall *PSYMCLEANUP)(HANDLE);
 typedef DWORD (__stdcall *PSYMSETOPTIONS)(DWORD);
 typedef BOOL (__stdcall *PSTACKWALK64)(DWORD,HANDLE,HANDLE,LPSTACKFRAME64,PVOID,PREAD_PROCESS_MEMORY_ROUTINE64,PFUNCTION_TABLE_ACCESS_ROUTINE64,PGET_MODULE_BASE_ROUTINE64,PTRANSLATE_ADDRESS_ROUTINE64);
 typedef DWORD64 (__stdcall *PSYMGETMODULEBASE64)(HANDLE,DWORD64);
-typedef PVOID (__stdcall *PSYMFUNCTIONTABLEACCESS64)(HANDLE,DWORD64);
+typedef PVOID (__stdcall *PSYMFUNCTIONTABLEACCEint64_t)(HANDLE,DWORD64);
 typedef BOOL (__stdcall *PSYMGETLINEFROMADDR64)(HANDLE,DWORD64,PDWORD,PIMAGEHLP_LINE64);
 typedef BOOL (__stdcall *PSYMFROMADDR)(HANDLE,DWORD64,PDWORD64,PSYMBOL_INFO);
 
@@ -1597,7 +1597,7 @@ static sBool sStackTraceFromContext(const sStringDesc &tgt,int skipCount,int max
   PSYMSETOPTIONS SymSetOptions = (PSYMSETOPTIONS) GetProcAddress(hDbgHelp,"SymSetOptions");
   PSTACKWALK64 StackWalk64 = (PSTACKWALK64) GetProcAddress(hDbgHelp,"StackWalk64");
   PSYMGETMODULEBASE64 SymGetModuleBase64 = (PSYMGETMODULEBASE64) GetProcAddress(hDbgHelp,"SymGetModuleBase64");
-  PSYMFUNCTIONTABLEACCESS64 SymFunctionTableAccess64 = (PSYMFUNCTIONTABLEACCESS64) GetProcAddress(hDbgHelp,"SymFunctionTableAccess64");
+  PSYMFUNCTIONTABLEACCEint64_t SymFunctionTableAcceint64_t = (PSYMFUNCTIONTABLEACCEint64_t) GetProcAddress(hDbgHelp,"SymFunctionTableAcceint64_t");
   PSYMGETLINEFROMADDR64 SymGetLineFromAddr64 = (PSYMGETLINEFROMADDR64) GetProcAddress(hDbgHelp,"SymGetLineFromAddr64");
   PSYMFROMADDR SymFromAddr = (PSYMFROMADDR) GetProcAddress(hDbgHelp,"SymFromAddr");
 
@@ -1605,7 +1605,7 @@ static sBool sStackTraceFromContext(const sStringDesc &tgt,int skipCount,int max
   {
 
     if(!SymInitialize || !SymCleanup || !SymSetOptions || !StackWalk64
-      || !SymGetModuleBase64 || !SymFunctionTableAccess64 || !SymFromAddr)
+      || !SymGetModuleBase64 || !SymFunctionTableAcceint64_t || !SymFromAddr)
     {
       FreeLibrary(hDbgHelp);
       hDbgHelp = sNULL;
@@ -1676,7 +1676,7 @@ static sBool sStackTraceFromContext(const sStringDesc &tgt,int skipCount,int max
       // found a stack frame! try to find the function and line number.
       IMAGEHLP_LINE64 line;
       int symMemAmount = sizeof(SYMBOL_INFO) + (MaxNameLen-1)*sizeof(sChar8);
-      sU8 *symMem = new sU8[symMemAmount];
+      uint8_t *symMem = new uint8_t[symMemAmount];
       SYMBOL_INFO *sym = (SYMBOL_INFO *) symMem;
 
       sSetMem(symMem,0,symMemAmount);
@@ -1713,7 +1713,7 @@ static sBool sStackTraceFromContext(const sStringDesc &tgt,int skipCount,int max
     }
 
     frameCounter++;
-  } while(StackWalk64(machineType,hProcess,hThread,&frame,&ctx,0,SymFunctionTableAccess64,SymGetModuleBase64,0));
+  } while(StackWalk64(machineType,hProcess,hThread,&frame,&ctx,0,SymFunctionTableAcceint64_t,SymGetModuleBase64,0));
 
   // if stacktrace is active in sStaticArray we better not unload the library
 #if !DEBUGHELP_STAYS_IN_MEMORY
@@ -2127,13 +2127,13 @@ LRESULT WINAPI MsgProc(HWND win,UINT msg,WPARAM wparam,LPARAM lparam)
             Mouse[0].RawY += my-Mouse[0].Y;
             Mouse[0].X = mx;
             Mouse[0].Y = my;
-            sInput2SendEvent(sInput2Event(sKEY_MOUSEHARD, 0, (sU16(sS16(mx)) << 16) | sU16(sS16(my))));
+            sInput2SendEvent(sInput2Event(sKEY_MOUSEHARD, 0, (uint16_t(int16_t(mx)) << 16) | uint16_t(int16_t(my))));
           }
           else*/
           {
             Mouse[0].RawX += rm->lLastX;
             Mouse[0].RawY += rm->lLastY;
-            sInput2SendEvent(sInput2Event(sKEY_MOUSEHARD, 0, (sU16(sS16(rm->lLastX)) << 16) | sU16(sS16(rm->lLastY))));
+            sInput2SendEvent(sInput2Event(sKEY_MOUSEHARD, 0, (uint16_t(int16_t(rm->lLastX)) << 16) | uint16_t(int16_t(rm->lLastY))));
           }
         }
       }
@@ -2195,12 +2195,12 @@ LRESULT WINAPI MsgProc(HWND win,UINT msg,WPARAM wparam,LPARAM lparam)
     break;
 
   case WM_MOUSEMOVE:
-    Mouse[0].X = sS16(lparam&0xffff);
-    Mouse[0].Y = sS16(lparam>>16);
+    Mouse[0].X = int16_t(lparam&0xffff);
+    Mouse[0].Y = int16_t(lparam>>16);
     sInput2SendEvent(sInput2Event(sKEY_MOUSEMOVE, 0, (Mouse[0].X << 16) | Mouse[0].Y));
     break;
   case WM_MOUSEWHEEL:
-    sMouseWheelAkku += sS16((wparam>>16)&0xffff);
+    sMouseWheelAkku += int16_t((wparam>>16)&0xffff);
     while(sMouseWheelAkku>=120)
     {
       Mouse[0].Z += 1.0f;
@@ -2342,7 +2342,7 @@ LRESULT WINAPI MsgProc(HWND win,UINT msg,WPARAM wparam,LPARAM lparam)
 
     sSPrintF(sStringDesc(msg,sCOUNTOF(msg)),
       L"Exception occured in Windows Message Loop.\nCode = %08x, Address = %016x.",
-      sU32(exceptInfo->ExceptionRecord->ExceptionCode),sPtr(exceptInfo->ExceptionRecord->ExceptionAddress));
+      uint32_t(exceptInfo->ExceptionRecord->ExceptionCode),sPtr(exceptInfo->ExceptionRecord->ExceptionAddress));
 
     sFatalImplTrace(msg,traceMsg);
   }
@@ -2358,7 +2358,7 @@ LRESULT WINAPI MsgProc(HWND win,UINT msg,WPARAM wparam,LPARAM lparam)
 
 // init/exit is called several times, so we don't wanna adding up the test leaks
 #if sCONFIG_COMPILER_MSC
-static sU8* ExternTestLeak = 0;
+static uint8_t* ExternTestLeak = 0;
 #endif
 
 void sExternMainInit(void *p_instance, void *p_hwnd)
@@ -2525,7 +2525,7 @@ void sInit(int flags,int xs,int ys)
 
       // Create the application's window
 
-      sU32 style = WS_OVERLAPPEDWINDOW; //WS_OVERLAPPED|WS_CAPTION|WS_MINIMIZEBOX|WS_MAXIMIZEBOX|WS_SYSMENU;
+      uint32_t style = WS_OVERLAPPEDWINDOW; //WS_OVERLAPPED|WS_CAPTION|WS_MINIMIZEBOX|WS_MAXIMIZEBOX|WS_SYSMENU;
 
     
       RECT r2;
@@ -2755,7 +2755,7 @@ int sGetTime()
   return timeGetTime();
 }
 
-sU64 sGetTimeUS()
+uint64_t sGetTimeUS()
 {
   LARGE_INTEGER pc, pf;
   QueryPerformanceCounter(&pc);
@@ -2788,7 +2788,7 @@ sDateAndTime sAddLocalTime(sDateAndTime origin,int seconds)
   return TimeFromSystemTime(system);
 }
 
-sS64 sDiffLocalTime(sDateAndTime a,sDateAndTime b)
+int64_t sDiffLocalTime(sDateAndTime a,sDateAndTime b)
 {
   SYSTEMTIME sa,sb;
   union
@@ -2803,10 +2803,10 @@ sS64 sDiffLocalTime(sDateAndTime a,sDateAndTime b)
   TimeToSystemTime(sb,b);
   SystemTimeToFileTime(&sb,&fb.file);
 
-  return sS64(fa.intVal.QuadPart - fb.intVal.QuadPart) / 10000000ll;
+  return int64_t(fa.intVal.QuadPart - fb.intVal.QuadPart) / 10000000ll;
 }
 
-sU8 sGetFirstDayOfWeek()
+uint8_t sGetFirstDayOfWeek()
 {
   WCHAR buffer[4];
   int  firstDayOfWeek = 1; // set default first day of week to monday
@@ -2839,7 +2839,7 @@ sBool sDaemonize()
 int sGetRandomSeed()
 {
   SYSTEMTIME time;
-  sU32 val;
+  uint32_t val;
   static sRandom rnd;
 
 #define Step(val,in) { val=(val<<7)|(val>>(32-7)); val ^= in^(in<<16)^(in>>16); }
@@ -2864,7 +2864,7 @@ sBool sGetEnvironmentVariable(const sStringDesc &dst,const sChar *var)
 {
   DWORD result = GetEnvironmentVariable(var,dst.Buffer,dst.Size);
   
-  if(result && result<=sU32(dst.Size))
+  if(result && result<=uint32_t(dst.Size))
     return sTRUE;
   sVERIFY(!result && GetLastError()==ERROR_ENVVAR_NOT_FOUND);
   return sFALSE;
@@ -2872,7 +2872,7 @@ sBool sGetEnvironmentVariable(const sStringDesc &dst,const sChar *var)
 
 sBool sExecuteOpen(const sChar *file)
 {
-  return sDInt(ShellExecuteW(0,L"open",file,0,L"",SW_SHOW))>=32;
+  return ptrdiff_t(ShellExecuteW(0,L"open",file,0,L"",SW_SHOW))>=32;
 }
 
 
@@ -2985,14 +2985,14 @@ sBool sExecuteShell(const sChar *cmdline,sTextBuffer *tb)
     // read and convert to unicode in chunks
 
     const int block = 4096;
-    sU8 ascii[block];
+    uint8_t ascii[block];
     sChar uni[block];
 
     for(;;)
     {
       if(!ReadFile(readpipe,ascii,block,&bytesread,0) || bytesread==0)
         break;
-      for(sU32 i=0;i<bytesread;i++)
+      for(uint32_t i=0;i<bytesread;i++)
         uni[i] = ascii[i];
       tb->Print(uni,bytesread);
     }
@@ -3049,7 +3049,7 @@ sBool sGotCtrlC()
 
 sBool sCheckBreakKey()
 {
-  sU32 n = GetAsyncKeyState(VK_PAUSE);
+  uint32_t n = GetAsyncKeyState(VK_PAUSE);
   return (n!=0) ? 1 : 0;
 }
 
@@ -3069,7 +3069,7 @@ void sSetErrorCode(int i)
   WError = i;
 }
 
-sU32 sGetKeyQualifier()
+uint32_t sGetKeyQualifier()
 {
   return sKeyQual;
 }
@@ -3119,11 +3119,11 @@ struct sJoypadData
   int ButtonMask;                // which buttons are available? usually continuous
   int AnalogMask;                // which axes are available? usually NOT continous
   int PovMask;                   // which POV's are available? usually the first
-  sU32 Buttons;                   // all buttons states
-  sU32 Povs;                      // 8 pov states @ 4 bits
-  sU16 Analog[16];                // 16 analog channel states, 0 .. 0xffff
-  sU8 Pressure[32];               // pressure of the buttons
-  sU8 JoypadType;                   // one of sJOYPAD_* in enum sJoypadType
+  uint32_t Buttons;                   // all buttons states
+  uint32_t Povs;                      // 8 pov states @ 4 bits
+  uint16_t Analog[16];                // 16 analog channel states, 0 .. 0xffff
+  uint8_t Pressure[32];               // pressure of the buttons
+  uint8_t JoypadType;                   // one of sJOYPAD_* in enum sJoypadType
 };
 
 void sPollJoypads(void *user)
@@ -3489,7 +3489,7 @@ unsigned long sSTDCALL sThreadTrunk(void *ptr)
 
 sThread::sThread(void (*code)(sThread *,void *),int pri,int stacksize,void *userdata, int flags/*=0*/)
 {
-  sVERIFY(sizeof(ULONG)==sizeof(sU32));
+  sVERIFY(sizeof(ULONG)==sizeof(uint32_t));
 
   TerminateFlag = 0;
   Code = code;
@@ -3673,8 +3673,8 @@ void sPrint(const sChar* t)
 /***                                                                      ***/
 /****************************************************************************/
 
-sU8 *sMainHeapBase;
-sU8 *sDebugHeapBase;
+uint8_t *sMainHeapBase;
+uint8_t *sDebugHeapBase;
 class sMemoryHeap sMainHeap;
 class sMemoryHeap sDebugHeap;
 
@@ -3688,7 +3688,7 @@ class sVSHeapBase : public sMemoryHandler
 
     HANDLE hproc = GetCurrentProcess();
     MEMORY_BASIC_INFORMATION mbi;
-    const sU8 *ptr = 0;
+    const uint8_t *ptr = 0;
 
     while (VirtualQueryEx(hproc,ptr,&mbi,sizeof(mbi)))
     {
@@ -3713,12 +3713,12 @@ public:
   {
     void *mem = _aligned_malloc(size,align);
     if(mem==0) return 0;
-    sAtomicAdd(&sMemoryUsed, (sDInt)_aligned_msize(mem,0,0));
+    sAtomicAdd(&sMemoryUsed, (ptrdiff_t)_aligned_msize(mem,0,0));
     return mem;
   }
   sBool Free(void *ptr)
   {
-    sAtomicAdd(&sMemoryUsed,-(sDInt)_aligned_msize(ptr,0,0));
+    sAtomicAdd(&sMemoryUsed,-(ptrdiff_t)_aligned_msize(ptr,0,0));
     _aligned_free(ptr);
     return 1;
   }
@@ -3751,14 +3751,14 @@ public:
     if(po==0) return 0;
     void *ptr = (void *)((sPtr(po)+sizeof(sPtr)+align-1)&~(align-1));
     *((sPtr*) (sPtr(ptr)-sizeof(sPtr))) = sPtr(po);
-    sAtomicAdd(&sMemoryUsed,(sDInt)_msize_dbg(po,_NORMAL_BLOCK));
+    sAtomicAdd(&sMemoryUsed,(ptrdiff_t)_msize_dbg(po,_NORMAL_BLOCK));
 
     return ptr;
   }
   sBool Free(void *ptr)
   {
     void *po = (void*)((sPtr*)ptr)[-1];
-    sAtomicAdd(&sMemoryUsed,-(sDInt)_msize_dbg(po,_NORMAL_BLOCK));
+    sAtomicAdd(&sMemoryUsed,-(ptrdiff_t)_msize_dbg(po,_NORMAL_BLOCK));
     _free_dbg(po,_NORMAL_BLOCK);
     return 1;
   }
@@ -3792,7 +3792,7 @@ void sInitMem1()
     if (flags & sIMF_NORTL)
     {
       int size = sMemoryInitDebugSize;
-      sDebugHeapBase = (sU8 *)VirtualAlloc(0,size,MEM_COMMIT,PAGE_READWRITE);
+      sDebugHeapBase = (uint8_t *)VirtualAlloc(0,size,MEM_COMMIT,PAGE_READWRITE);
       sDebugHeap.Init(sDebugHeapBase,size);
       sRegisterMemHandler(sAMF_DEBUG,&sDebugHeap);
     }
@@ -3801,7 +3801,7 @@ void sInitMem1()
   }
   if((flags & sIMF_NORTL) && sMemoryInitSize>0)
   {
-    sMainHeapBase = (sU8 *)VirtualAlloc(0,sMemoryInitSize,MEM_COMMIT,PAGE_READWRITE);
+    sMainHeapBase = (uint8_t *)VirtualAlloc(0,sMemoryInitSize,MEM_COMMIT,PAGE_READWRITE);
     if(flags & sIMF_CLEAR)
       sSetMem(sMainHeapBase,0x77,sMemoryInitSize);
     sMainHeap.Init(sMainHeapBase,sMemoryInitSize);
@@ -3859,10 +3859,10 @@ sBool sIsTrialVersion()
 #endif
 
 #if sCONFIG_OPTION_DEMO
-sU32 sGetDemoTimeOut()
+uint32_t sGetDemoTimeOut()
 {
 #if !sSTRIPPED
-  static const sU32 TimeOut = sGetShellParameterInt(L"timeout",0,0);
+  static const uint32_t TimeOut = sGetShellParameterInt(L"timeout",0,0);
   return TimeOut;
 #else
   return 0;
@@ -3890,11 +3890,11 @@ class sVideoWriterWin32 : public sVideoWriter
 
   sString<sMAXPATH> BaseName;
   int Segment;
-  sU32 Codec;
-  sU32 OverflowCounter;
-  sF32 FPS;
+  uint32_t Codec;
+  uint32_t OverflowCounter;
+  float FPS;
 
-  sU8 *ConversionBuffer;
+  uint8_t *ConversionBuffer;
   int XRes,YRes;
   int Frame;
 
@@ -3902,13 +3902,13 @@ public:
   sVideoWriterWin32();
   ~sVideoWriterWin32();
 
-  sBool Init(const sChar *filename,const sChar *codec,sF32 fps,int xRes,int yRes);
+  sBool Init(const sChar *filename,const sChar *codec,float fps,int xRes,int yRes);
   void Exit();
 
   sBool AVIInit();
   void AVICleanup();
 
-  sBool WriteFrame(const sU32 *data);
+  sBool WriteFrame(const uint32_t *data);
 };
 
 sVideoWriterWin32::sVideoWriterWin32()
@@ -3923,7 +3923,7 @@ sVideoWriterWin32::~sVideoWriterWin32()
   Exit();
 }
 
-sBool sVideoWriterWin32::Init(const sChar *filename,const sChar *codec,sF32 fps,int xRes,int yRes)
+sBool sVideoWriterWin32::Init(const sChar *filename,const sChar *codec,float fps,int xRes,int yRes)
 {
   Exit();
 
@@ -3943,7 +3943,7 @@ sBool sVideoWriterWin32::Init(const sChar *filename,const sChar *codec,sF32 fps,
     Codec = 0;
 
   Segment = 1;
-  ConversionBuffer = new sU8[xRes*yRes*3];
+  ConversionBuffer = new uint8_t[xRes*yRes*3];
 
   return AVIInit();
 }
@@ -3988,7 +3988,7 @@ sBool sVideoWriterWin32::AVIInit()
     goto cleanup;
   }
 
-  sU32 codec = Codec ? Codec : MAKEFOURCC('D','I','B',' ');
+  uint32_t codec = Codec ? Codec : MAKEFOURCC('D','I','B',' ');
   sClear(aco);
   aco.fccType = streamtypeVIDEO;
   aco.fccHandler = codec;
@@ -4033,7 +4033,7 @@ void sVideoWriterWin32::AVICleanup()
   AVIFileExit();
 }
 
-sBool sVideoWriterWin32::WriteFrame(const sU32 *data)
+sBool sVideoWriterWin32::WriteFrame(const uint32_t *data)
 {
   sBool error = sTRUE;
 
@@ -4049,8 +4049,8 @@ sBool sVideoWriterWin32::WriteFrame(const sU32 *data)
     // convert from ARGB8888 to RGB888
     for(int y=0;y<YRes;y++)
     {
-      const sU8 *src = (const sU8 *) data + (YRes-1-y) * XRes * 4;
-      sU8 *dst = ConversionBuffer + y * XRes * 3;
+      const uint8_t *src = (const uint8_t *) data + (YRes-1-y) * XRes * 4;
+      uint8_t *dst = ConversionBuffer + y * XRes * 3;
 
       for(int x=0;x<XRes;x++)
       {
@@ -4072,7 +4072,7 @@ sBool sVideoWriterWin32::WriteFrame(const sU32 *data)
   return !error;
 }
 
-sVideoWriter *sCreateVideoWriter(const sChar *filename,const sChar *codec,sF32 fps,int xRes,int yRes)
+sVideoWriter *sCreateVideoWriter(const sChar *filename,const sChar *codec,float fps,int xRes,int yRes)
 {
   sVideoWriterWin32 *writer = new sVideoWriterWin32;
   if(!writer->Init(filename,codec,fps,xRes,yRes))
@@ -4131,7 +4131,7 @@ sBool sIsUserOnline(int joypadId)
   return online;
 }
 
-sBool sGetOnlineUserId(sU64 &dest, int joypadId)
+sBool sGetOnlineUserId(uint64_t &dest, int joypadId)
 {
   sString<128> userName;
   sString<128> computerName;
@@ -4151,7 +4151,7 @@ sBool sGetOnlineUserId(sU64 &dest, int joypadId)
 
   // UserName@ComputerName.ProcessId
   sString<272> ident;
-  sSPrintF(ident, L"%s@%s.%d", userName, computerName, (sU64)processId);
+  sSPrintF(ident, L"%s@%s.%d", userName, computerName, (uint64_t)processId);
 
   dest = sHashStringFNV(ident);
   return sTRUE;

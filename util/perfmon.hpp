@@ -24,7 +24,7 @@ void sAddPerfMon(int maxThreads=8, int maxEvents=8000, int maxValues=100, int ma
 sBool sPerfMonInited();
 
 // sets the maximum and frame time for the bar graph
-void sSetPerfMonTimes(sF32 maxtime, sF32 frametime);
+void sSetPerfMonTimes(float maxtime, float frametime);
 
 // for turning perf mon display on/off
 void sShowPerfMon(sBool show);
@@ -52,21 +52,21 @@ void sPerfRemThread(sThreadContext *tid=0);
 /****************************************************************************/
 
 // function/scope/range start
-void sPerfEnter(const sChar *name, sU32 color, sThreadContext * tid=0);
-void sPerfEnter(const sChar8 *name, sU32 color, sThreadContext * tid=0);
+void sPerfEnter(const sChar *name, uint32_t color, sThreadContext * tid=0);
+void sPerfEnter(const sChar8 *name, uint32_t color, sThreadContext * tid=0);
 
 // function/scope/range end
 void sPerfLeave(sThreadContext * tid=0);
 
 // for things you don't know the end of
-void sPerfSet(const sChar *name, sU32 color, sThreadContext * tid=0);
+void sPerfSet(const sChar *name, uint32_t color, sThreadContext * tid=0);
 
 // helper class for scopes
 class sPerfScope
 {
 public:
-  inline sPerfScope(const sChar *name, sU32 color) { sPerfEnter(name,color); }
-  inline sPerfScope(const sChar8 *name, sU32 color) { sPerfEnter(name,color); }
+  inline sPerfScope(const sChar *name, uint32_t color) { sPerfEnter(name,color); }
+  inline sPerfScope(const sChar8 *name, uint32_t color) { sPerfEnter(name,color); }
   inline ~sPerfScope() { sPerfLeave(); }
 };
 #define sPERF_SCOPE__(name,color,line) sPerfScope _perfdummy##line(name,color)

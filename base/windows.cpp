@@ -67,7 +67,7 @@ void sGetAppDataDir(const sStringDesc &str)
 #define MAX_CLIPS   64
 
 static HCURSOR Cursors[sMP_MAX];
-static sU32 BrushColor[MAX_BRUSHES];
+static uint32_t BrushColor[MAX_BRUSHES];
 static HBRUSH BrushHandle[MAX_BRUSHES];
 static HPEN BrushPen[MAX_BRUSHES];
 static HRGN ClipStack[MAX_CLIPS];
@@ -75,9 +75,9 @@ static int ClipStackResult[MAX_CLIPS];
 static int ClipIndex;
 static sString<256> WindowName;
 static sString<2048> DragDropFilename;
-static sU32 ClipboardFormat;
+static uint32_t ClipboardFormat;
 
-inline sU32 GDICOL(sU32 col) { return ((col&0xff0000)>>16) | (col&0x00ff00) | ((col&0x0000ff)<<16); }
+inline uint32_t GDICOL(uint32_t col) { return ((col&0xff0000)>>16) | (col&0x00ff00) | ((col&0x0000ff)<<16); }
 
 void InitGDI()
 {
@@ -87,7 +87,7 @@ void InitGDI()
 
 //  if(sGetSystemFlags() & sISF_2D)
   {
-    sU32 color = GDICOL(0);
+    uint32_t color = GDICOL(0);
     for(int i=0;i<MAX_BRUSHES;i++)
     {
       BrushColor[i] = color;
@@ -326,27 +326,27 @@ sChar *sGetClipboard()
   return result;
 }
 
-void sSetClipboard(const sU8 *data,sDInt size,sU32 serid,int sermode)
+void sSetClipboard(const uint8_t *data,ptrdiff_t size,uint32_t serid,int sermode)
 {
   OpenClipboard(sHWND);
   EmptyClipboard();
 
-  HANDLE hmem = GlobalAlloc(GMEM_MOVEABLE,size+sizeof(sU64)*3);
+  HANDLE hmem = GlobalAlloc(GMEM_MOVEABLE,size+sizeof(uint64_t)*3);
 
-  sU8 *d = (sU8 *) GlobalLock(hmem);
-  ((sU64 *)d)[0] = size;
-  ((sU64 *)d)[1] = serid;
-  ((sS64 *)d)[2] = sermode;
-  sCopyMem(d+sizeof(sU64)*3,data,size);
+  uint8_t *d = (uint8_t *) GlobalLock(hmem);
+  ((uint64_t *)d)[0] = size;
+  ((uint64_t *)d)[1] = serid;
+  ((int64_t *)d)[2] = sermode;
+  sCopyMem(d+sizeof(uint64_t)*3,data,size);
 
   GlobalUnlock(hmem);
   SetClipboardData(ClipboardFormat,hmem);
   CloseClipboard();
 }
 
-sU8 *sGetClipboard(sDInt &size,sU32 serid,int sermode)
+uint8_t *sGetClipboard(ptrdiff_t &size,uint32_t serid,int sermode)
 {
-  sU8 *data = 0;
+  uint8_t *data = 0;
   size = 0;
 
   OpenClipboard(sHWND);
@@ -354,12 +354,12 @@ sU8 *sGetClipboard(sDInt &size,sU32 serid,int sermode)
   HANDLE hmem = GetClipboardData(ClipboardFormat);
   if(hmem)
   {
-    sU8 *d = (sU8 *) GlobalLock(hmem);
-    size = ((sU64 *)d)[0];
-    if(((sU64 *)d)[1] == serid && ((sS64 *)d)[2] == sermode)
+    uint8_t *d = (uint8_t *) GlobalLock(hmem);
+    size = ((uint64_t *)d)[0];
+    if(((uint64_t *)d)[1] == serid && ((int64_t *)d)[2] == sermode)
     {
-      data = new sU8[size];
-      sCopyMem(data,d+sizeof(sU64)*3,size);
+      data = new uint8_t[size];
+      sCopyMem(data,d+sizeof(uint64_t)*3,size);
     }
 
     GlobalUnlock(hmem);
@@ -617,7 +617,7 @@ void sClipRect(const sRect &r)
 /***                                                                      ***/
 /****************************************************************************/
 
-void sSetColor2D(int colid,sU32 color)
+void sSetColor2D(int colid,uint32_t color)
 {
   sVERIFY(colid>=0 && colid<MAX_BRUSHES);
   color = GDICOL(color);
@@ -631,7 +631,7 @@ void sSetColor2D(int colid,sU32 color)
   }
 }
 
-sU32 sGetColor2D(int colid)
+uint32_t sGetColor2D(int colid)
 {
   sVERIFY(colid>=0 && colid<MAX_BRUSHES);
   return GDICOL(BrushColor[colid]);
@@ -714,7 +714,7 @@ void sLineList2D(int *list,int count,int colid)
   }
 }
 
-void sBlit2D(const sU32 *data,int width,const sRect &dest)
+void sBlit2D(const uint32_t *data,int width,const sRect &dest)
 {
   BITMAPINFO bmi;
   sClear(bmi);
@@ -728,7 +728,7 @@ void sBlit2D(const sU32 *data,int width,const sRect &dest)
   SetDIBitsToDevice(sGDIDC,dest.x0,dest.y0,dest.SizeX(),dest.SizeY(),0,0,0,dest.SizeY(),data,&bmi,DIB_RGB_COLORS);
 }
 
-void sStretch2D(const sU32 *data,int width,const sRect &source,const sRect &dest)
+void sStretch2D(const uint32_t *data,int width,const sRect &source,const sRect &dest)
 {
   BITMAPINFO bmi;
   sClear(bmi);
@@ -837,7 +837,7 @@ void sRender2DEnd()
   WMPaintDC = 0;
 }
 
-void sRender2DSet(sU32 *data)
+void sRender2DSet(uint32_t *data)
 {
   BITMAPINFO bmi;
 
@@ -853,7 +853,7 @@ void sRender2DSet(sU32 *data)
   SetDIBits(sGDIDC,Render2DBM,0,Render2DSizeY,data,&bmi,DIB_RGB_COLORS);
 }
 
-void sRender2DGet(sU32 *data)
+void sRender2DGet(uint32_t *data)
 {
   BITMAPINFO bmi;
 
@@ -876,7 +876,7 @@ void sRender2DGet(sU32 *data)
 /***                                                                      ***/
 /****************************************************************************/
 
-sImage2D::sImage2D(int xs,int ys,sU32 *data)
+sImage2D::sImage2D(int xs,int ys,uint32_t *data)
 {
   prv = new sImage2DPrivate;
   prv->SizeX = xs;
@@ -911,7 +911,7 @@ int sImage2D::GetSizeY()
 
 /****************************************************************************/
 
-void sImage2D::Update(sU32 *data)
+void sImage2D::Update(uint32_t *data)
 {
   BITMAPINFO bmi;
   sClear(bmi);
@@ -959,9 +959,9 @@ struct sFont2DPrivate
   int CharHeight;
   int Baseline;
   HFONT Font;
-  sU32 BackPen;
-  sU32 BackColor;
-  sU32 TextColor;
+  uint32_t BackPen;
+  uint32_t BackColor;
+  uint32_t TextColor;
   ABC Widths[NUMABC];
 };
 
@@ -1225,7 +1225,7 @@ void sFont2D::PrintMarked(int flags,const sRect *rc,int x,int y,const sChar *tex
         text += i;
       }
 
-      sU32 oldbackcolor=prv->BackColor;
+      uint32_t oldbackcolor=prv->BackColor;
       if (pi->SelectBackColor!=~0)
         prv->BackColor=BrushColor[pi->SelectBackColor];
       else

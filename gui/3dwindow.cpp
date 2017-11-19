@@ -91,7 +91,7 @@ void s3DWindow::Tag()
   sWireClientWindow::Tag();
 }
 
-sBool s3DWindow::OnKey(sU32 key)
+sBool s3DWindow::OnKey(uint32_t key)
 {
   sBool use = 0;
   if(QuakeMode)
@@ -152,13 +152,13 @@ void s3DWindow::OnDrag(const sWindowDrag &dd)
 sRay s3DWindow::MakeRay(int x, int y)
 {
   sRay ray;
-  sF32 mx=2*sF32(x)/sF32(Client.SizeX())-1;
-  sF32 my=-(2*sF32(y)/sF32(Client.SizeY())-1);
+  float mx=2*float(x)/float(Client.SizeX())-1;
+  float my=-(2*float(y)/float(Client.SizeY())-1);
   View.MakeRay(mx,my,ray);
   return ray;
 }
 
-void s3DWindow::SetCam(const sMatrix34 &mat,sF32 zoom)
+void s3DWindow::SetCam(const sMatrix34 &mat,float zoom)
 {
   Zoom = zoom;
   Pos = mat;
@@ -207,8 +207,8 @@ void s3DWindow::QuakeCam()
   
   {
     GearSpeed = sPow(2,GearShift*0.5f);
-    sF32 ss = SideSpeed*GearSpeed;
-    sF32 sf = ForeSpeed*GearSpeed;
+    float ss = SideSpeed*GearSpeed;
+    float sf = ForeSpeed*GearSpeed;
     if(sGetKeyQualifier()&sKEYQ_SHIFT)
     {
       ss *= 10;
@@ -229,7 +229,7 @@ void s3DWindow::QuakeCam()
       if(QuakeMask & 2) RotY -= ss*1000.0f;
       if (QuakeMask & 3)
       {
-        sF32 dist = -(Pos.l - Focus).Length();
+        float dist = -(Pos.l - Focus).Length();
         Pos.EulerXYZ(RotX,RotY,RotZ);
         Pos.l = Focus + (Pos.k * dist);
       }
@@ -300,38 +300,38 @@ void s3DWindow::CmdQuakeCam()
 //  MousePointer = QuakeMode ? sMP_OFF : sMP_ARROW;
 }
 
-void s3DWindow::CmdQuakeForwToggle(sDInt n)
+void s3DWindow::CmdQuakeForwToggle(ptrdiff_t n)
 {
   QuakeMask = (QuakeMask & ~(1<<3)) | ((n&1)<<3);
 }
 
-void s3DWindow::CmdQuakeBackToggle(sDInt n)
+void s3DWindow::CmdQuakeBackToggle(ptrdiff_t n)
 {
   QuakeMask = (QuakeMask & ~(1<<2)) | ((n&1)<<2);
 }
 
-void s3DWindow::CmdQuakeLeftToggle(sDInt n)
+void s3DWindow::CmdQuakeLeftToggle(ptrdiff_t n)
 {
   QuakeMask = (QuakeMask & ~(1<<0)) | ((n&1)<<0);
 }
 
-void s3DWindow::CmdQuakeRightToggle(sDInt n)
+void s3DWindow::CmdQuakeRightToggle(ptrdiff_t n)
 {
   QuakeMask = (QuakeMask & ~(1<<1)) | ((n&1)<<1);
 }
 
 
-void s3DWindow::CmdQuakeUpToggle(sDInt n)
+void s3DWindow::CmdQuakeUpToggle(ptrdiff_t n)
 {
   QuakeMask = (QuakeMask & ~(1<<4)) | ((n&1)<<4);
 }
 
-void s3DWindow::CmdQuakeDownToggle(sDInt n)
+void s3DWindow::CmdQuakeDownToggle(ptrdiff_t n)
 {
   QuakeMask = (QuakeMask & ~(1<<5)) | ((n&1)<<5);
 }
 
-void s3DWindow::CmdGearShift(sDInt n)
+void s3DWindow::CmdGearShift(ptrdiff_t n)
 {
   GearShift = sClamp(GearShift+int(n),-40,40);
   GearShiftDisplay = sGetTime()+500;
@@ -401,8 +401,8 @@ void s3DWindow::OnPaint3D()
 
     if(ScreenshotFlag)
     {
-      const sU8 *data;
-      sS32 pitch;
+      const uint8_t *data;
+      int32_t pitch;
       sTextureFlags flags;
       sImage img;
 
@@ -414,7 +414,7 @@ void s3DWindow::OnPaint3D()
       if(flags==sTEX_ARGB8888)
       {
         data += r.x0*4 + r.y0*pitch;
-        sU32 *dest = img.Data;
+        uint32_t *dest = img.Data;
         for(int y=r.y0;y<r.y1;y++)
         {
           sCopyMem(dest,data,r.SizeX()*4);
@@ -509,7 +509,7 @@ void s3DWindow::Lines(sVertexBasic *src,int linecount, sBool zon)
 }
 
 
-void s3DWindow::Circle(const sVector31 &center, const sVector30 &normal, sF32 radius, sU32 color, sBool zon, int segs)
+void s3DWindow::Circle(const sVector31 &center, const sVector30 &normal, float radius, uint32_t color, sBool zon, int segs)
 {
   sVertexBasic *vp;
 
@@ -534,11 +534,11 @@ void s3DWindow::Circle(const sVector31 &center, const sVector30 &normal, sF32 ra
 
   WireGeo->BeginLoadVB(segs*2,sGD_STREAM,(void **)&vp);
 
-  sF32 s=0,c=1;
+  float s=0,c=1;
   for (int i=1; i<=segs; i++)
   {
     (vp++)->Init(center+s*v1+c*v2,color);
-    sFSinCos(sPI2F*sF32(i)/sF32(segs),s,c);
+    sFSinCos(sPI2F*float(i)/float(segs),s,c);
     (vp++)->Init(center+s*v1+c*v2,color);
   }
 
@@ -551,9 +551,9 @@ void s3DWindow::PaintGrid()
 {
   sVertexBasic *vp;
   const int count=21;
-  sF32 dist;
-  sF32 size;
-  sU32 col,col1,col0;
+  float dist;
+  float size;
+  uint32_t col,col1,col0;
   sVector30 delta;
 
   delta = Focus-Pos.l;
@@ -604,8 +604,8 @@ void s3DWindow::PaintGrid()
 
 void s3DWindow::SetFocus(const sAABBox &bounds,const sVector31 &center)
 {
-  sF32 dist;
-  sF32 largest;
+  float dist;
+  float largest;
   sVector30 delta;
   sVector31 v[8];
   
@@ -749,7 +749,7 @@ void s3DWindow::CmdResetTilt()
 
 void s3DWindow::DragMove(const sWindowDrag &dd)
 {
-  sF32 speed = sAbs(((Focus - Pos.l)^Pos.k) / Client.SizeX() * 2);
+  float speed = sAbs(((Focus - Pos.l)^Pos.k) / Client.SizeX() * 2);
 
   switch(dd.Mode)
   {
@@ -779,7 +779,7 @@ void s3DWindow::DragZoom(const sWindowDrag &dd)
     DragDist = Zoom;
     break;
   case sDD_DRAG:
-    Zoom = sFExp(sFLog(sMax<sF64>(DragDist,0))+dd.DeltaY*0.01f);
+    Zoom = sFExp(sFLog(sMax<double>(DragDist,0))+dd.DeltaY*0.01f);
     Update();
     break;
   }
@@ -794,7 +794,7 @@ void s3DWindow::DragDolly(const sWindowDrag &dd)
     DragDist = (Focus-Pos.l)^Pos.k;
     break;
   case sDD_DRAG:
-    Pos.l = Focus - Pos.k*sFExp(sFLog(sMax<sF64>(DragDist,0))-dd.DeltaY*0.01f-dd.DeltaX*0.01f);
+    Pos.l = Focus - Pos.k*sFExp(sFLog(sMax<double>(DragDist,0))-dd.DeltaY*0.01f-dd.DeltaX*0.01f);
     Update();
     break;
   }

@@ -30,8 +30,8 @@
 static sDecompressImageDataHandler DecompressImageHandler[sICT_COUNT] = { 0 };
 
 
-//void UnpackDXT(sU32 *d32,sU8 *s,int level,int xs,int ys);
-sU64 sTotalImageDataMem;
+//void UnpackDXT(uint32_t *d32,uint8_t *s,int level,int xs,int ys);
+uint64_t sTotalImageDataMem;
 
 /****************************************************************************/
 /***                                                                      ***/
@@ -198,9 +198,9 @@ static int MiplevelSize(int format,int xs,int ys,int zs,int bitsPerPixel)
 {
   switch(format & sTEX_TYPE_MASK)
   {
-  case sTEX_2D:   return sS64(xs)*ys*bitsPerPixel/8;
-  case sTEX_CUBE: return 6 * (sS64(xs)*ys*bitsPerPixel/8); 
-  case sTEX_3D:   return sS64(xs)*ys*zs*bitsPerPixel/8; 
+  case sTEX_2D:   return int64_t(xs)*ys*bitsPerPixel/8;
+  case sTEX_CUBE: return 6 * (int64_t(xs)*ys*bitsPerPixel/8); 
+  case sTEX_3D:   return int64_t(xs)*ys*zs*bitsPerPixel/8; 
   default:        sVERIFYFALSE; return -1;
   }
   return 0; // GCC complains...
@@ -243,7 +243,7 @@ void sImageData::Init2(int format,int mipmaps,int xs,int ys,int zs)
   switch(Format & sTEX_TYPE_MASK)
   {
   case sTEX_2D:
-    mipsize = sS64(xs)*ys*BitsPerPixel/8;
+    mipsize = int64_t(xs)*ys*BitsPerPixel/8;
     while(Mipmaps<mipmaps && xs>=minx && ys>=miny)
     {
       DataSize += mipsize;
@@ -254,7 +254,7 @@ void sImageData::Init2(int format,int mipmaps,int xs,int ys,int zs)
     }
     break;
   case sTEX_3D:
-    mipsize = sS64(xs)*ys*zs*BitsPerPixel/8;
+    mipsize = int64_t(xs)*ys*zs*BitsPerPixel/8;
     while(Mipmaps<mipmaps && xs>=minx && ys>=miny && zs>=minz)
     {
       DataSize += mipsize;
@@ -266,7 +266,7 @@ void sImageData::Init2(int format,int mipmaps,int xs,int ys,int zs)
     }
     break;
   case sTEX_CUBE:
-    mipsize = sS64(xs)*ys*BitsPerPixel/8;
+    mipsize = int64_t(xs)*ys*BitsPerPixel/8;
     while(Mipmaps<mipmaps && xs>=minx && ys>=miny)
     {
       DataSize += mipsize;
@@ -294,14 +294,14 @@ void sImageData::Init2(int format,int mipmaps,int xs,int ys,int zs)
   if(olddatasize!=DataSize)
     sDeleteArray(Data);
   if(Palette==0 && PaletteCount>0)
-    Palette = new sU32[PaletteCount];
+    Palette = new uint32_t[PaletteCount];
   if(Data==0)
-    Data = new sU8[DataSize];
+    Data = new uint8_t[DataSize];
   sTotalImageDataMem += DataSize;
   sVERIFY(!(Palette && PaletteCount==0));
 }
 
-void sImageData::InitCoded(int codecType,int format,int mipmaps,int xs,int ys,int zs,const sU8 *data,int dataSize)
+void sImageData::InitCoded(int codecType,int format,int mipmaps,int xs,int ys,int zs,const uint8_t *data,int dataSize)
 {
   sDeleteArray(Palette);
   sDeleteArray(Data);
@@ -333,7 +333,7 @@ void sImageData::InitCoded(int codecType,int format,int mipmaps,int xs,int ys,in
   }
 
   DataSize = dataSize;
-  Data = new sU8[dataSize];
+  Data = new uint8_t[dataSize];
   if(data)
     sCopyMem(Data,data,dataSize);
   NameId = 0;
@@ -356,14 +356,14 @@ void sImageData::Copy(const sImageData *source)
     PaletteCount = source->PaletteCount;
     sDeleteArray(Palette);
     if(PaletteCount>0)
-      Palette = new sU32[PaletteCount];
+      Palette = new uint32_t[PaletteCount];
   }
   if(DataSize!=source->DataSize)
   {
     sTotalImageDataMem -= DataSize;
     DataSize = source->DataSize;
     delete[] Data;
-    Data = new sU8[DataSize];
+    Data = new uint8_t[DataSize];
     sTotalImageDataMem += DataSize;
   }
 
@@ -427,16 +427,16 @@ template <class streamer> void sImageData::Serialize_(streamer &stream)
 
       delete[] Palette;
       if(PaletteCount>0)
-        Palette = new sU32[PaletteCount];
+        Palette = new uint32_t[PaletteCount];
       else
         Palette = 0;
       delete[] Data;
-      Data = new sU8[DataSize];
+      Data = new uint8_t[DataSize];
     }
 
     stream.ArrayU32(Palette,PaletteCount);
     if(BitsPerPixel==32 && CodecType == sICT_RAW)
-      stream.ArrayU32((sU32 *)Data,DataSize/4);
+      stream.ArrayU32((uint32_t *)Data,DataSize/4);
     else
       stream.ArrayU8(Data,DataSize);
     stream.Align();
@@ -579,12 +579,12 @@ void sImageData::ConvertFrom(const sImage *imgorig)
 
   const sImage *img=imgorig;
   sImage *other;
-  sU8 *d,*s;
+  uint8_t *d,*s;
   int m;
 
   s = 0;
   d = Data;
-  sU16 *d16 = (sU16 *) Data;
+  uint16_t *d16 = (uint16_t *) Data;
 
   m = 0;
   for(;;)
@@ -604,9 +604,9 @@ void sImageData::ConvertFrom(const sImage *imgorig)
           v.y = d[1]-128;
           v.z = d[2]-128;
           v.Unit();
-          d[0] = sU8(v.x*127+128);
-          d[1] = sU8(v.y*127+128);
-          d[2] = sU8(v.z*127+128);
+          d[0] = uint8_t(v.x*127+128);
+          d[1] = uint8_t(v.y*127+128);
+          d[2] = uint8_t(v.z*127+128);
           d += 4;          
         }
       }
@@ -616,7 +616,7 @@ void sImageData::ConvertFrom(const sImage *imgorig)
       break;
     case sTEX_QWVU8888:
       {
-        sS8 *s = (sS8*) img->Data;
+        int8_t *s = (int8_t*) img->Data;
         for(int i=0;i<pc;i++)
         {
           d[i*4+0] = (s[2]-0x80);
@@ -631,16 +631,16 @@ void sImageData::ConvertFrom(const sImage *imgorig)
       if(Format&sTEX_NORMALIZE)
       {
         sVector30 v;
-        sS8 *s = (sS8*)d;
+        int8_t *s = (int8_t*)d;
         for(int i=0;i<pc;i++)
         {
           v.x = s[0];
           v.y = s[1];
           v.z = s[2];
           v.Unit();
-          s[0] = sS8(v.x*127);
-          s[1] = sS8(v.y*127);
-          s[2] = sS8(v.z*127);
+          s[0] = int8_t(v.x*127);
+          s[1] = int8_t(v.y*127);
+          s[2] = int8_t(v.z*127);
           s += 4;
         }
       }
@@ -649,7 +649,7 @@ void sImageData::ConvertFrom(const sImage *imgorig)
       break;
 
     case sTEX_ARGB1555:
-      s = (sU8*) img->Data;
+      s = (uint8_t*) img->Data;
       for(int i=0;i<pc;i++)
       {
         *d16++ = ((s[3]&0x80)<<8) | ((s[2]&0xf8)<<7) | ((s[1]&0xf8)<<2) | ((s[0]&0xf8)>>3);
@@ -659,7 +659,7 @@ void sImageData::ConvertFrom(const sImage *imgorig)
       break;
 
     case sTEX_ARGB4444:
-      s = (sU8*) img->Data;
+      s = (uint8_t*) img->Data;
       for(int i=0;i<pc;i++)
       {
         *d16++ = ((s[3]&0xf0)<<8) | ((s[2]&0xf0)<<4) | ((s[1]&0xf0)) | ((s[0]&0xf0)>>4);
@@ -669,7 +669,7 @@ void sImageData::ConvertFrom(const sImage *imgorig)
       break;
 
     case sTEX_RGB565:
-      s = (sU8*) img->Data;
+      s = (uint8_t*) img->Data;
       for(int i=0;i<pc;i++)
       {
         *d16++ = ((s[2]&0xf8)<<8) | ((s[1]&0xfc)<<3) | ((s[0]&0xf8)>>3);
@@ -679,7 +679,7 @@ void sImageData::ConvertFrom(const sImage *imgorig)
       break;
 
     case sTEX_RGB5A3:
-      s = (sU8*) img->Data;
+      s = (uint8_t*) img->Data;
       for(int i=0;i<pc;i++)
       {
         if(s[3]<0xe0)
@@ -696,7 +696,7 @@ void sImageData::ConvertFrom(const sImage *imgorig)
       break;
 
     case sTEX_A8:
-      s = (sU8 *)img->Data;
+      s = (uint8_t *)img->Data;
       for(int i=0;i<pc;i++)
       {
         *d++ = s[3];
@@ -706,7 +706,7 @@ void sImageData::ConvertFrom(const sImage *imgorig)
 
     case sTEX_I8:
     case sTEX_8TOIA:
-      s = (sU8 *)img->Data;
+      s = (uint8_t *)img->Data;
       for(int i=0;i<pc;i++)
       {
         *d++ =  (11*s[0]+59*s[1]+30*s[2])/100;
@@ -715,7 +715,7 @@ void sImageData::ConvertFrom(const sImage *imgorig)
       break;
 /*
     case sTEX_A4:
-      s = (sU8 *)img->Data;
+      s = (uint8_t *)img->Data;
       for(int i=0;i<pc;i+=2)
       {
         *d++ = ((s[3]&0xf0)>>4)+(s[7]&0xf0);
@@ -724,7 +724,7 @@ void sImageData::ConvertFrom(const sImage *imgorig)
       break;
       */
     case sTEX_I4:
-      s = (sU8 *)img->Data;
+      s = (uint8_t *)img->Data;
       for(int i=0;i<pc;i+=2)
       {
         int c0 = s[0]+s[1]+s[1]+s[2]+2;
@@ -735,7 +735,7 @@ void sImageData::ConvertFrom(const sImage *imgorig)
       break;
 
     case sTEX_IA4:
-      s = (sU8 *)img->Data;
+      s = (uint8_t *)img->Data;
       for(int i=0;i<pc;i++)
       {
         *d++ = ((s[0]+s[1]+s[1]+s[2])/64)|(s[3]&0xf0);
@@ -744,7 +744,7 @@ void sImageData::ConvertFrom(const sImage *imgorig)
       break;
 
     case sTEX_IA8:
-      s = (sU8 *)img->Data;
+      s = (uint8_t *)img->Data;
       for(int i=0;i<pc;i++)
       {
         *d++ = s[3];
@@ -768,13 +768,13 @@ void sImageData::ConvertFrom(const sImage *imgorig)
     case sTEX_ARGB32F:
       {
         sVector4 *dst = (sVector4*)Data;
-        sU32 *src = (sU32*)img->Data;
+        uint32_t *src = (uint32_t*)img->Data;
         for(int i=0;i<pc;i++)
           dst[i].InitColor(*src++);
       }
 
     case sTEX_GR8:
-      s = (sU8 *)img->Data;
+      s = (uint8_t *)img->Data;
       for(int i=0;i<pc;i++)
       {
         *d++ = s[1];
@@ -808,7 +808,7 @@ void sImageData::ConvertFromCube(sImage **imgptr)
 
   sImage *images[6];
   sImage *other;
-  sU8 *d=0,*s=0;
+  uint8_t *d=0,*s=0;
   int m;
 
 
@@ -818,7 +818,7 @@ void sImageData::ConvertFromCube(sImage **imgptr)
   for(int face=0;face<6;face++)
   {
     d = Data+CubeFaceSize*face;
-    sU16 *d16 = (sU16 *)d;
+    uint16_t *d16 = (uint16_t *)d;
     m = 0;
     for(;;)
     {
@@ -837,9 +837,9 @@ void sImageData::ConvertFromCube(sImage **imgptr)
             v.y = d[1]-128;
             v.z = d[2]-128;
             v.Unit();
-            d[0] = sU8(v.x*127+128);
-            d[1] = sU8(v.y*127+128);
-            d[2] = sU8(v.z*127+128);
+            d[0] = uint8_t(v.x*127+128);
+            d[1] = uint8_t(v.y*127+128);
+            d[2] = uint8_t(v.z*127+128);
             d += 4;          
           }
         }
@@ -849,7 +849,7 @@ void sImageData::ConvertFromCube(sImage **imgptr)
 
       case sTEX_QWVU8888:
         {
-          sS8 *s = (sS8*) images[face]->Data;
+          int8_t *s = (int8_t*) images[face]->Data;
           for(int i=0;i<pc;i++)
           {
             d[i*4+0] = (s[2]-0x80);
@@ -864,16 +864,16 @@ void sImageData::ConvertFromCube(sImage **imgptr)
         if(Format&sTEX_NORMALIZE)
         {
           sVector30 v;
-          sS8 *s = (sS8*)d;
+          int8_t *s = (int8_t*)d;
           for(int i=0;i<pc;i++)
           {
             v.x = s[0];
             v.y = s[1];
             v.z = s[2];
             v.Unit();
-            s[0] = sS8(v.x*127);
-            s[1] = sS8(v.y*127);
-            s[2] = sS8(v.z*127);
+            s[0] = int8_t(v.x*127);
+            s[1] = int8_t(v.y*127);
+            s[2] = int8_t(v.z*127);
             s += 4;
           }
         }
@@ -899,7 +899,7 @@ void sImageData::ConvertFromCube(sImage **imgptr)
         break;
 
       case sTEX_A8:
-        s = (sU8 *)images[face]->Data;
+        s = (uint8_t *)images[face]->Data;
         for(int i=0;i<pc;i++)
         {
           *d++ = s[3];
@@ -909,7 +909,7 @@ void sImageData::ConvertFromCube(sImage **imgptr)
 
       case sTEX_I8:
       case sTEX_8TOIA:
-        s = (sU8 *)images[face]->Data;
+        s = (uint8_t *)images[face]->Data;
         for(int i=0;i<pc;i++)
         {
           *d++ =  (11*s[0]+59*s[1]+30*s[2])/100;
@@ -932,7 +932,7 @@ void sImageData::ConvertFromCube(sImage **imgptr)
       case sTEX_ARGB32F:
         {
           sVector4 *dst = (sVector4*)d;
-          sU32 *src = (sU32*)images[face]->Data;
+          uint32_t *src = (uint32_t*)images[face]->Data;
           for(int i=0;i<pc;i++)
             dst[i].InitColor(*src++);
         }
@@ -981,13 +981,13 @@ void sImageData::ConvertToCube(sImage **imgptr, int mipmap/*=0*/)const
   {
     sVERIFY(imgptr[f]->SizeX == xs);
     sVERIFY(imgptr[f]->SizeY == ys);
-    sU8 *data = Data+f*CubeFaceSize+offset;
+    uint8_t *data = Data+f*CubeFaceSize+offset;
 
     int pc = xs*ys;
-    sU8 *d = (sU8 *)imgptr[f]->Data;
-    sU32 *d32 = (sU32 *)imgptr[f]->Data;
-    sU8 *s = data;
-    sU16 *s16 = (sU16 *) data;
+    uint8_t *d = (uint8_t *)imgptr[f]->Data;
+    uint32_t *d32 = (uint32_t *)imgptr[f]->Data;
+    uint8_t *s = data;
+    uint16_t *s16 = (uint16_t *) data;
     switch(Format & sTEX_FORMAT)
     {
     case sTEX_ARGB8888:
@@ -997,10 +997,10 @@ void sImageData::ConvertToCube(sImage **imgptr, int mipmap/*=0*/)const
     case sTEX_QWVU8888:
       for(int i=0;i<pc;i++)
       {
-        d[2] = ((sS8*)s)[0]+0x80;
-        d[1] = ((sS8*)s)[1]+0x80;
-        d[0] = ((sS8*)s)[2]+0x80;
-        d[3] = ((sS8*)s)[3]+0x80;
+        d[2] = ((int8_t*)s)[0]+0x80;
+        d[1] = ((int8_t*)s)[1]+0x80;
+        d[0] = ((int8_t*)s)[2]+0x80;
+        d[3] = ((int8_t*)s)[3]+0x80;
         d += 4;
         s += 4;
       }
@@ -1055,7 +1055,7 @@ void sImageData::ConvertToCube(sImage **imgptr, int mipmap/*=0*/)const
     case sTEX_RGB5A3:
       for(int i=0;i<pc;i++)
       {
-        sU16 val = *s16++;
+        uint16_t val = *s16++;
         if(val&0x8000)
         {
           *d32++ = 0xff000000
@@ -1150,7 +1150,7 @@ void sImageData::ConvertToCube(sImage **imgptr, int mipmap/*=0*/)const
     case sTEX_DXT5:
     case sTEX_DXT5N:
     case sTEX_DXT5_AYCOCG:
-      UnpackDXT((sU32 *)d,s,Format & sTEX_FORMAT,imgptr[f]->SizeX,imgptr[f]->SizeY);
+      UnpackDXT((uint32_t *)d,s,Format & sTEX_FORMAT,imgptr[f]->SizeX,imgptr[f]->SizeY);
       break;*/
     case sTEX_ARGB32F:
       {
@@ -1161,7 +1161,7 @@ void sImageData::ConvertToCube(sImage **imgptr, int mipmap/*=0*/)const
       break;
     case sTEX_MRGB8:
       {
-        sU32 *src = (sU32*)data;
+        uint32_t *src = (uint32_t*)data;
         for(int i=0;i<pc;i++)
         {
           sVector4 tmp; tmp.InitMRGB8(src[i]);
@@ -1172,7 +1172,7 @@ void sImageData::ConvertToCube(sImage **imgptr, int mipmap/*=0*/)const
       break;
     case sTEX_MRGB16:
       {
-        sU64 *src = (sU64*)data;
+        uint64_t *src = (uint64_t*)data;
         for(int i=0;i<pc;i++)
         {
           sVector4 tmp; tmp.InitMRGB16(src[i]);
@@ -1215,7 +1215,7 @@ void sImageData::ConvertTo(sImage *img,int mipmap) const
 
   int xs = SizeX;
   int ys = SizeY;
-  sU8 *data = Data;
+  uint8_t *data = Data;
   
   for(int i=0;i<mipmap;i++)
   {
@@ -1228,10 +1228,10 @@ void sImageData::ConvertTo(sImage *img,int mipmap) const
   sVERIFY(img->SizeY == ys);
 
   int pc = xs*ys;
-  sU8 *d = (sU8 *)img->Data;
-  sU32 *d32 = (sU32 *)img->Data;
-  sU8 *s = data;
-  sU16 *s16 = (sU16 *) data;
+  uint8_t *d = (uint8_t *)img->Data;
+  uint32_t *d32 = (uint32_t *)img->Data;
+  uint8_t *s = data;
+  uint16_t *s16 = (uint16_t *) data;
   switch(Format & sTEX_FORMAT)
   {
   case sTEX_ARGB8888:
@@ -1241,10 +1241,10 @@ void sImageData::ConvertTo(sImage *img,int mipmap) const
   case sTEX_QWVU8888:
     for(int i=0;i<pc;i++)
     {
-      d[2] = ((sS8*)s)[0]+0x80;
-      d[1] = ((sS8*)s)[1]+0x80;
-      d[0] = ((sS8*)s)[2]+0x80;
-      d[3] = ((sS8*)s)[3]+0x80;
+      d[2] = ((int8_t*)s)[0]+0x80;
+      d[1] = ((int8_t*)s)[1]+0x80;
+      d[0] = ((int8_t*)s)[2]+0x80;
+      d[3] = ((int8_t*)s)[3]+0x80;
       d += 4;
       s += 4;
     }
@@ -1299,7 +1299,7 @@ void sImageData::ConvertTo(sImage *img,int mipmap) const
   case sTEX_RGB5A3:
     for(int i=0;i<pc;i++)
     {
-      sU16 val = *s16++;
+      uint16_t val = *s16++;
       if(val&0x8000)
       {
         *d32++ = 0xff000000
@@ -1394,7 +1394,7 @@ void sImageData::ConvertTo(sImage *img,int mipmap) const
   case sTEX_DXT5:
   case sTEX_DXT5N:
   case sTEX_DXT5_AYCOCG:
-    UnpackDXT((sU32 *)d,s,Format & sTEX_FORMAT,img->SizeX,img->SizeY);
+    UnpackDXT((uint32_t *)d,s,Format & sTEX_FORMAT,img->SizeX,img->SizeY);
     break;*/
   case sTEX_INDEX8:
     for(int i=0;i<pc;i++)
@@ -1417,7 +1417,7 @@ void sImageData::ConvertTo(sImage *img,int mipmap) const
     break;
   case sTEX_MRGB8:
     {
-      sU32 *src = (sU32*)Data;
+      uint32_t *src = (uint32_t*)Data;
       for(int i=0;i<pc;i++)
       {
         sVector4 tmp; tmp.InitMRGB8(src[i]);
@@ -1428,7 +1428,7 @@ void sImageData::ConvertTo(sImage *img,int mipmap) const
     break;
   case sTEX_MRGB16:
     {
-      sU64 *src = (sU64*)Data;
+      uint64_t *src = (uint64_t*)Data;
       //for(int i=0;i<pc;i++)
       //{
       //  sVector4 tmp; tmp.InitMRGB16(src[i]);
@@ -1437,7 +1437,7 @@ void sImageData::ConvertTo(sImage *img,int mipmap) const
       //}
       for(int i=0;i<pc;i++)
       {
-        sU64 in = src[i];
+        uint64_t in = src[i];
         
         int w = ((in >> 48) & 0xffff) + 1;
         int r = sClamp((int((in >> 32) & 0xffff) * w) >> 8,0,255);
@@ -1497,23 +1497,23 @@ void sGenerateMipmaps(sImageData *img)
   {
   case sTEX_ARGB8888:
     {
-      sU32 *src = (sU32*)img->Data;
+      uint32_t *src = (uint32_t*)img->Data;
 
       for(int m=1;m<img->Mipmaps;m++)
       {
-        sU32 *dst = src+xs*ys;
+        uint32_t *dst = src+xs*ys;
         int ysn = ys/2;
         int xsn = xs/2;
         for(int y=0;y<ysn;y++)
         {
           for(int x=0;x<xsn;x++)
           {
-            sU8 *p0 = (sU8*) &src[x*2+y*2*xs];
-            sU8 *p1 = (sU8*) &src[x*2+1+y*2*xs];
-            sU8 *p2 = (sU8*) &src[x*2+1+y*2*xs+xs];
-            sU8 *p3 = (sU8*) &src[x*2+y*2*xs+xs];
+            uint8_t *p0 = (uint8_t*) &src[x*2+y*2*xs];
+            uint8_t *p1 = (uint8_t*) &src[x*2+1+y*2*xs];
+            uint8_t *p2 = (uint8_t*) &src[x*2+1+y*2*xs+xs];
+            uint8_t *p3 = (uint8_t*) &src[x*2+y*2*xs+xs];
 
-            sU8 *dst8 = (sU8*) &dst[y*xsn+x];
+            uint8_t *dst8 = (uint8_t*) &dst[y*xsn+x];
 
             dst8[0] = (p0[0]+p1[0]+p2[0]+p3[0])/4;
             dst8[1] = (p0[1]+p1[1]+p2[1]+p3[1])/4;
@@ -1548,11 +1548,11 @@ void sGenerateMipmaps(sImageData *img)
     break;
   case sTEX_MRGB8:
     {
-      sU32 *src = (sU32*)img->Data;
+      uint32_t *src = (uint32_t*)img->Data;
 
       for(int m=1;m<img->Mipmaps;m++)
       {
-        sU32 *dst = src+xs*ys;
+        uint32_t *dst = src+xs*ys;
         int ysn = ys/2;
         int xsn = xs/2;
         for(int y=0;y<ysn;y++)
@@ -1575,11 +1575,11 @@ void sGenerateMipmaps(sImageData *img)
     }
   case sTEX_MRGB16:
     {
-      sU64 *src = (sU64*)img->Data;
+      uint64_t *src = (uint64_t*)img->Data;
 
       for(int m=1;m<img->Mipmaps;m++)
       {
-        sU64 *dst = src+xs*ys;
+        uint64_t *dst = src+xs*ys;
         int ysn = ys/2;
         int xsn = xs/2;
         for(int y=0;y<ysn;y++)
@@ -1627,7 +1627,7 @@ sImageData *sDecompressAndConvertImageData(const sImageData *src)
     return 0;
 
   // convert to target format
-  sU32 outFmt = src->Format;
+  uint32_t outFmt = src->Format;
   //outFmt = (outFmt & ~sTEX_FORMAT) | sTEX_ARGB8888; // RYG DEBUG
 
   sImageData *out = new sImageData;
@@ -1692,7 +1692,7 @@ void sSetDecompressHandler(int codecType,sDecompressImageDataHandler handler)
   sTextureBase *tb=0;
   sTexture2D *t2d;
   
-  sU8 *dest;
+  uint8_t *dest;
   int pitch;
   int bytes;
   int ys;
@@ -1707,7 +1707,7 @@ void sSetDecompressHandler(int codecType,sDecompressImageDataHandler handler)
     t2d = new sTexture2D(SizeX,SizeY,Format,Mipmaps);
     if(PaletteCount)
     {
-      sU32 *pal = (sU32 *)t2d->BeginLoadPalette();
+      uint32_t *pal = (uint32_t *)t2d->BeginLoadPalette();
       s.ArrayU32(pal,PaletteCount);
       t2d->EndLoadPalette();
     }
@@ -1831,13 +1831,13 @@ void sImage::Init(int xs,int ys)
 
   SizeX = xs;
   SizeY = ys;
-  Data = new sU32[xs*ys];
+  Data = new uint32_t[xs*ys];
 }
 
 void sImage::CopyRect(sImage *src,const sRect &destpos,int srcx,int srcy)
 {
-  sU32 *dp = Data+destpos.x0+destpos.y0*SizeX;
-  sU32 *sp = src->Data + srcx + srcy*src->SizeX;
+  uint32_t *dp = Data+destpos.x0+destpos.y0*SizeX;
+  uint32_t *sp = src->Data + srcx + srcy*src->SizeX;
   int xs = destpos.SizeX();
   int ys = destpos.SizeY();
 
@@ -1886,7 +1886,7 @@ void sImage::Serialize(sReader &stream) { Serialize_(stream); }
 
 void sImage::SwapEndian()
 {
-  sU32 *ptr = Data;
+  uint32_t *ptr = Data;
   int size = SizeX*SizeY;
   for(int i=0;i<size;i++)
     sSwapEndianI(*ptr++);
@@ -1900,14 +1900,14 @@ sBool sImage::HasAlpha()
   return 0;
 }
 
-void sImage::Fill(sU32 color)
+void sImage::Fill(uint32_t color)
 {
   color = sSwapIfBE(color);
   for(int i=0;i<SizeX*SizeY;i++)
     Data[i] = color;
 }
 /*
-void sImage::Fill(sU32 srcBitmask, sU32 color)
+void sImage::Fill(uint32_t srcBitmask, uint32_t color)
 {
   for(int i=0;i<SizeX*SizeY;i++)
     Data[i] = (Data[i] & srcBitmask) | color;
@@ -1929,26 +1929,26 @@ void sImage::SwapRedBlue()
   }
 }
 
-void sImage::Checker(sU32 col0,sU32 col1,int maskx,int masky)
+void sImage::Checker(uint32_t col0,uint32_t col1,int maskx,int masky)
 {
-  sU32 *data = Data;
+  uint32_t *data = Data;
   for(int y=0;y<SizeY;y++)
     for(int x=0;x<SizeX;x++)
       *data++ = (!(x&maskx) != !(y&masky))?col0:col1;
 }
 
-void sImage::Glow(sF32 cx,sF32 cy,sF32 rx,sF32 ry,sU32 color,sF32 alpha,sF32 power)
+void sImage::Glow(float cx,float cy,float rx,float ry,uint32_t color,float alpha,float power)
 {
-  sU32 *data = Data;
+  uint32_t *data = Data;
 
-  sF32 fx,fy,r;
+  float fx,fy,r;
 
   for(int y=0;y<SizeY;y++)
   {
-    fy = (sF32(y+0.5f)/SizeY-cy)/ry;
+    fy = (float(y+0.5f)/SizeY-cy)/ry;
     for(int x=0;x<SizeX;x++)
     {
-      fx = (sF32(x+0.5f)/SizeX-cx)/rx;
+      fx = (float(x+0.5f)/SizeX-cx)/rx;
       r = (1-(sFPow(fx*fx+fy*fy,power)))*alpha;
       if(r>0)
         *data = sFadeColor(int(r*0x10000),*data,color);
@@ -1958,17 +1958,17 @@ void sImage::Glow(sF32 cx,sF32 cy,sF32 rx,sF32 ry,sU32 color,sF32 alpha,sF32 pow
 }
 
 
-void sImage::Rect(sF32 x0,sF32 x1,sF32 y0,sF32 y1,sU32 color)
+void sImage::Rect(float x0,float x1,float y0,float y1,uint32_t color)
 {
   if (x0>x1) sSwap(x0,x1);
   if (y0>y1) sSwap(y0,y1);
-  const int ix0=int(sClamp<sF32>(x0*SizeX,0.f,sF32(SizeX)));
-  const int ix1=int(sClamp<sF32>(x1*SizeX,0.f,sF32(SizeX)));
-  const int iy0=int(sClamp<sF32>(y0*SizeY,0.f,sF32(SizeY)));
-  const int iy1=int(sClamp<sF32>(y1*SizeY,0.f,sF32(SizeY)));
+  const int ix0=int(sClamp<float>(x0*SizeX,0.f,float(SizeX)));
+  const int ix1=int(sClamp<float>(x1*SizeX,0.f,float(SizeX)));
+  const int iy0=int(sClamp<float>(y0*SizeY,0.f,float(SizeY)));
+  const int iy1=int(sClamp<float>(y1*SizeY,0.f,float(SizeY)));
   const int w=ix1-ix0;
   const int h=iy1-iy0;
-  sU32 *data=Data+iy0*SizeX+ix0;
+  uint32_t *data=Data+iy0*SizeX+ix0;
 
   for (int y=0; y<h; y++)
   {
@@ -1979,22 +1979,22 @@ void sImage::Rect(sF32 x0,sF32 x1,sF32 y0,sF32 y1,sU32 color)
 }
 
 
-sF32 sPerlin2DFixed(sF32 x,sF32 y,int start,int octaves,sF32 falloff,int mode,int seed)
+float sPerlin2DFixed(float x,float y,int start,int octaves,float falloff,int mode,int seed)
 {
   int xi = int(x*0x10000);
   int yi = int(y*0x10000);
-  sF32 sum,amp;
+  float sum,amp;
 
   sum = 0;
   amp = 1.0f;
 
   for(int i=start;i<start+octaves && i<8;i++)
   {
-    sF32 val = sPerlin2D(xi<<i,yi<<i,(1<<i)-1,seed);
+    float val = sPerlin2D(xi<<i,yi<<i,(1<<i)-1,seed);
     if(mode&1)
-      val = (sF32)sFAbs(val)*2-1;
+      val = (float)sFAbs(val)*2-1;
     if(mode&2)
-      val = (sF32)sFSin(val*sPI2F);
+      val = (float)sFSin(val*sPI2F);
     sum += val * amp;
 
     amp *= falloff;
@@ -2003,16 +2003,16 @@ sF32 sPerlin2DFixed(sF32 x,sF32 y,int start,int octaves,sF32 falloff,int mode,in
   return sum;
 }
 
-void sImage::Perlin(int start,int octaves,sF32 falloff,int mode,int seed,sF32 amount)
+void sImage::Perlin(int start,int octaves,float falloff,int mode,int seed,float amount)
 {
-  sU32 *data = Data;
-  sF32 sx = sF32(1<<start)/SizeX;
-  sF32 sy = sF32(1<<start)/SizeY;
+  uint32_t *data = Data;
+  float sx = float(1<<start)/SizeX;
+  float sy = float(1<<start)/SizeY;
   for(int y=0;y<SizeY;y++)
   {
     for(int x=0;x<SizeX;x++)
     {
-      sF32 val = (sPerlin2DFixed(x*sx,y*sy,start,octaves,falloff,mode,seed)*amount+0.5f);
+      float val = (sPerlin2DFixed(x*sx,y*sy,start,octaves,falloff,mode,seed)*amount+0.5f);
       int c = sClamp(int(val*255),0,255);
       *data++ = 0xff000000 | (c<<16) | (c<<8) | c;
     }
@@ -2022,8 +2022,8 @@ void sImage::Perlin(int start,int octaves,sF32 falloff,int mode,int seed,sF32 am
 
 void sImage::MakeSigned()
 {
-  sU8 s[4];
-  sS8 *d = (sS8 *) Data;
+  uint8_t s[4];
+  int8_t *d = (int8_t *) Data;
   for(int i=0;i<SizeX*SizeY;i++)
   {
     s[0] = d[0];
@@ -2049,17 +2049,17 @@ void sImage::Copy(sImage *img)
 void sImage::Add(sImage *img)
 {
   sVERIFY(SizeX==img->SizeX && SizeY==img->SizeY);
-  sU8 *s = (sU8 *) img->Data;
-  sU8 *d = (sU8 *) Data;
+  uint8_t *s = (uint8_t *) img->Data;
+  uint8_t *d = (uint8_t *) Data;
 
   for(int i=0;i<SizeX*SizeY*4;i++)
     d[i] = sClamp(d[i]+s[i],0,255);
 }
 
-void sImage::Mul(sU32 color)
+void sImage::Mul(uint32_t color)
 {
-  sU8 *d = (sU8 *) Data;
-  sU8 *col = (sU8*)&color;
+  uint8_t *d = (uint8_t *) Data;
+  uint8_t *col = (uint8_t*)&color;
 
   for(int i=0;i<SizeX*SizeY*4;i++)
     d[i] = d[i]*col[i&3]/255;
@@ -2067,7 +2067,7 @@ void sImage::Mul(sU32 color)
 
 void sImage::ContrastBrightness(int contrast,int brightness)
 {
-  sU8 *d = (sU8 *) Data;
+  uint8_t *d = (uint8_t *) Data;
 
   int c = contrast;
   int b = brightness + 128;
@@ -2083,8 +2083,8 @@ void sImage::ContrastBrightness(int contrast,int brightness)
 void sImage::Mul(sImage *img)
 {
   sVERIFY(SizeX==img->SizeX && SizeY==img->SizeY);
-  sU8 *s = (sU8 *) img->Data;
-  sU8 *d = (sU8 *) Data;
+  uint8_t *s = (uint8_t *) img->Data;
+  uint8_t *d = (uint8_t *) Data;
 
   for(int i=0;i<SizeX*SizeY*4;i++)
     d[i] = d[i]*s[i]/255;
@@ -2093,8 +2093,8 @@ void sImage::Mul(sImage *img)
 void sImage::Blend(sImage *img, sBool premultiplied)
 {
   sVERIFY(SizeX==img->SizeX && SizeY==img->SizeY);
-  sU32 *s = img->Data;
-  sU32 *d = Data;
+  uint32_t *s = img->Data;
+  uint32_t *d = Data;
 
   if (premultiplied)
   {
@@ -2129,11 +2129,11 @@ void sImage::Scale(const sImage *src, sBool filter)
 
   if(filter && xs<src->SizeX && ys<src->SizeY)  // integer box filter. will look bad for non-integral shrinks
   {
-    sU8 *d,*s;
+    uint8_t *d,*s;
     sRect r;
     int c[4],area;
 
-    d = (sU8 *)Data;
+    d = (uint8_t *)Data;
     for(int y=0;y<ys;y++)
     {
       r.y0 = sMulDiv(y+0,src->SizeY,ys);
@@ -2150,7 +2150,7 @@ void sImage::Scale(const sImage *src, sBool filter)
         {
           for(int xx=r.x0;xx<r.x1;xx++)
           {
-            s = (sU8*) &src->Data[xx + yy*src->SizeX];
+            s = (uint8_t*) &src->Data[xx + yy*src->SizeX];
             c[0] += s[0];
             c[1] += s[1];
             c[2] += s[2];
@@ -2167,7 +2167,7 @@ void sImage::Scale(const sImage *src, sBool filter)
   }
   else                      // general case, does not filter at all
   {
-    sU32 *d;
+    uint32_t *d;
     d = dest->Data;
     for(int y=0;y<dest->SizeY;y++)
     {
@@ -2184,14 +2184,14 @@ void sImage::Scale(const sImage *src, sBool filter)
 sImage *sImage::Half(sBool gammacorrect) const
 {
   sImage *img;
-  sU8 *d;
+  uint8_t *d;
 
   sVERIFY(SizeX > 1); 
   sVERIFY(SizeY > 1);
 
   img = new sImage;
   img->Init(SizeX/2,SizeY/2);
-  d = (sU8 *)img->Data;
+  d = (uint8_t *)img->Data;
 #if FASTHALF
   if (gammacorrect) sVERIFYFALSE; // not yet implemented!
   if(img->SizeX>4096)  // security fallback, in case of insane resolutions...
@@ -2203,12 +2203,12 @@ sImage *sImage::Half(sBool gammacorrect) const
       {
         for(int x=0;x<img->SizeX;x++)
         {
-          sU8 *p0 = (sU8 *)&Data[(x*2+0) + (y*2+0)*SizeX];
-          sU8 *p1 = (sU8 *)&Data[(x*2+1) + (y*2+0)*SizeX];
-          sU8 *p2 = (sU8 *)&Data[(x*2+0) + (y*2+1)*SizeX];
-          sU8 *p3 = (sU8 *)&Data[(x*2+1) + (y*2+1)*SizeX];
+          uint8_t *p0 = (uint8_t *)&Data[(x*2+0) + (y*2+0)*SizeX];
+          uint8_t *p1 = (uint8_t *)&Data[(x*2+1) + (y*2+0)*SizeX];
+          uint8_t *p2 = (uint8_t *)&Data[(x*2+0) + (y*2+1)*SizeX];
+          uint8_t *p3 = (uint8_t *)&Data[(x*2+1) + (y*2+1)*SizeX];
           for (int c=0; c<3; c++)
-            *d++=(sU8)sSqrt((sSquare<int>(p0[c])+sSquare<int>(p1[c])+sSquare<int>(p2[c])+sSquare<int>(p3[c])+512)/4);
+            *d++=(uint8_t)sSqrt((sSquare<int>(p0[c])+sSquare<int>(p1[c])+sSquare<int>(p2[c])+sSquare<int>(p3[c])+512)/4);
           *d++= (p0[3]+p1[3]+p2[3]+p3[3]+2)/4;
         }
       }
@@ -2219,10 +2219,10 @@ sImage *sImage::Half(sBool gammacorrect) const
       {
         for(int x=0;x<img->SizeX;x++)
         {
-          sU8 *p0 = (sU8 *)&Data[(x*2+0) + (y*2+0)*SizeX];
-          sU8 *p1 = (sU8 *)&Data[(x*2+1) + (y*2+0)*SizeX];
-          sU8 *p2 = (sU8 *)&Data[(x*2+0) + (y*2+1)*SizeX];
-          sU8 *p3 = (sU8 *)&Data[(x*2+1) + (y*2+1)*SizeX];
+          uint8_t *p0 = (uint8_t *)&Data[(x*2+0) + (y*2+0)*SizeX];
+          uint8_t *p1 = (uint8_t *)&Data[(x*2+1) + (y*2+0)*SizeX];
+          uint8_t *p2 = (uint8_t *)&Data[(x*2+0) + (y*2+1)*SizeX];
+          uint8_t *p3 = (uint8_t *)&Data[(x*2+1) + (y*2+1)*SizeX];
 
           d[0] = (p0[0]+p1[0]+p2[0]+p3[0]+2)/4;
           d[1] = (p0[1]+p1[1]+p2[1]+p3[1]+2)/4;
@@ -2236,9 +2236,9 @@ sImage *sImage::Half(sBool gammacorrect) const
 #if FASTHALF
   } else
   { // this version is faster and a lot more cache friendlier
-    sU16 line[4096*4];
+    uint16_t line[4096*4];
     for(int y=0;y<img->SizeY;y++)
-    { sU8 *p0 = (sU8 *)&Data[(y*2+0)*SizeX];
+    { uint8_t *p0 = (uint8_t *)&Data[(y*2+0)*SizeX];
       // 1st row
       for(int x=0,o=0;x<img->SizeX;x++,o+=4,p0+=8)
       { // point 1
@@ -2274,11 +2274,11 @@ void sImage::ExchangeChannels(IChannel channelX,IChannel channelY)
   int yShift = channelY*8;
 
   int i  = SizeX*SizeY;
-  sU32 *d = Data;
+  uint32_t *d = Data;
   while (i--)
   {
-    sU32 valX = ((*d>>xShift)&0xff)<<yShift;
-    sU32 valY = ((*d>>yShift)&0xff)<<xShift;
+    uint32_t valX = ((*d>>xShift)&0xff)<<yShift;
+    uint32_t valY = ((*d>>yShift)&0xff)<<xShift;
     *d = (*d & ~((0xff<<xShift)|(0xff<<yShift))) | valX | valY;
     d++;
   }
@@ -2293,24 +2293,24 @@ void sImage::CopyChannelFrom(IChannel channelDst,IChannel channelSrc)
   int srcShift = channelSrc*8;
 
   int i  = SizeX*SizeY;
-  sU32 *d = Data;
+  uint32_t *d = Data;
   while (i--)
   {
-    sU32 valSrc = ((*d>>srcShift)&0xff)<<dstShift;
+    uint32_t valSrc = ((*d>>srcShift)&0xff)<<dstShift;
     *d = (*d & ~(0xff<<dstShift)) | valSrc;
     d++;
   }
 }
 
-void sImage::SetChannel(IChannel channelX,sU8 val)
+void sImage::SetChannel(IChannel channelX,uint8_t val)
 {
   int xShift = channelX*8;
   
   int i  = SizeX*SizeY;
-  sU32 *d = Data;
+  uint32_t *d = Data;
   while (i--)
   {
-    sU32 valX = val<<xShift;
+    uint32_t valX = val<<xShift;
     *d = (*d & ~(0xff<<xShift)) | valX;
     d++;
   }
@@ -2397,8 +2397,8 @@ void sImage::BlitFrom(const sImage *src, int sx, int sy, int dx, int dy, int wid
   if (height<0 || width <0 || sstartx<0 || sstarty<0)
     return;
 
-  sU32 *s = src->Data + sstarty * src->SizeX + sstartx;
-  sU32 *d =      Data + dstarty *      SizeX + dstartx;
+  uint32_t *s = src->Data + sstarty * src->SizeX + sstartx;
+  uint32_t *d =      Data + dstarty *      SizeX + dstartx;
   
   width *= 4;
   for (int i=0; i<height; i++)
@@ -2411,17 +2411,17 @@ void sImage::BlitFrom(const sImage *src, int sx, int sy, int dx, int dy, int wid
 
 /****************************************************************************/
 
-sU32 sImage::Filter(int x,int y) const
+uint32_t sImage::Filter(int x,int y) const
 {
   int x0 = (x>>8)&(SizeX-1);
   int y0 = (y>>8)&(SizeY-1);
   int x1 = (x0+1)&(SizeX-1);
   int y1 = (y0+1)&(SizeY-1);
 
-  sU8 *col00 = (sU8 *)&Data[x0+y0*SizeX];
-  sU8 *col01 = (sU8 *)&Data[x1+y0*SizeX];
-  sU8 *col10 = (sU8 *)&Data[x0+y1*SizeX];
-  sU8 *col11 = (sU8 *)&Data[x1+y1*SizeX];
+  uint8_t *col00 = (uint8_t *)&Data[x0+y0*SizeX];
+  uint8_t *col01 = (uint8_t *)&Data[x1+y0*SizeX];
+  uint8_t *col10 = (uint8_t *)&Data[x0+y1*SizeX];
+  uint8_t *col11 = (uint8_t *)&Data[x1+y1*SizeX];
   
   x &= 0xff;
   y &= 0xff;
@@ -2430,7 +2430,7 @@ sU32 sImage::Filter(int x,int y) const
   int f10 = (256-x)*     y ;
   int f11 =      x *     y ;
 
-  sU8 col[4];
+  uint8_t col[4];
 
   for(int i=0;i<4;i++)
     col[i] = (col00[i]*f00 + col01[i]*f01 + col10[i]*f10 + col11[i]*f11)/0x10000;
@@ -2442,8 +2442,8 @@ sU32 sImage::Filter(int x,int y) const
 
 sBool sImage::Load(const sChar *name)
 {
-  sU8 *data;
-  sDInt size;
+  uint8_t *data;
+  ptrdiff_t size;
   int result;
   const sChar *ext;
   sFile *file;
@@ -2491,8 +2491,8 @@ sBool sImage::Save(const sChar *name)
 
 /*void sImage::CopyRenderTarget()
 {
-  const sU8 *data;
-  sS32 pitch;
+  const uint8_t *data;
+  int32_t pitch;
   sTextureFlags flags;
 
   sBeginSaveRT(data, pitch, flags);
@@ -2501,10 +2501,10 @@ sBool sImage::Save(const sChar *name)
   int xs,ys;
   sGetRendertargetSize(xs,ys);
   Init(xs,ys);
-  sU8 *dest = (sU8*) Data;
+  uint8_t *dest = (uint8_t*) Data;
   for (int y=0; y<ys; y++)
   {
-    const sU8* ptr = data+y*pitch;
+    const uint8_t* ptr = data+y*pitch;
     for (int x=0; x<xs; x++)
     {
       *dest++ = *ptr++;
@@ -2524,9 +2524,9 @@ void sImage::Diff(const sImage *img0, const sImage *img1)
   
   Init(img0->SizeX, img0->SizeY);  
 
-  sU8 *src0 = (sU8*) img0->Data;
-  sU8 *src1 = (sU8*) img1->Data;
-  sU8 *dst = (sU8*) Data;
+  uint8_t *src0 = (uint8_t*) img0->Data;
+  uint8_t *src1 = (uint8_t*) img1->Data;
+  uint8_t *dst = (uint8_t*) Data;
   for (int y=0; y<SizeY; y++)
   {
     for (int x=0; x<SizeX; x++)
@@ -2544,23 +2544,23 @@ void sImage::Diff(const sImage *img0, const sImage *img1)
 #pragma pack(push,2)
 struct BMPHeader
 {
-  sU16 Magic;                     // 'B'+'M'*256
-  sU32 FileSize;                  // size of the file
-  sU32 pad0;                      // unused
-  sU32 Offset;                    // offset from start to bits
+  uint16_t Magic;                     // 'B'+'M'*256
+  uint32_t FileSize;                  // size of the file
+  uint32_t pad0;                      // unused
+  uint32_t Offset;                    // offset from start to bits
               
-  sU32 InfoSize;                  // size of the info part
-  sU32 XSize;                     // Pixel Size
-  sU32 YSize;
-  sU16 Planes;                    // always 1
-  sU16 BitCount;                  // 4,8,24
-  sU32 Compression;               // always 0
-  sU32 ImageSize;                 // size in bytes or 0
-  sU32 XPelsPerMeter;             // bla
-  sU32 YPelsPerMeter;
-  sU32 ColorUsed;                 // for 8 bit 
-  sU32 ColorImportant;            // bla
-  sU8 Color[256][4];              // optional xbgr
+  uint32_t InfoSize;                  // size of the info part
+  uint32_t XSize;                     // Pixel Size
+  uint32_t YSize;
+  uint16_t Planes;                    // always 1
+  uint16_t BitCount;                  // 4,8,24
+  uint32_t Compression;               // always 0
+  uint32_t ImageSize;                 // size in bytes or 0
+  uint32_t XPelsPerMeter;             // bla
+  uint32_t YPelsPerMeter;
+  uint32_t ColorUsed;                 // for 8 bit 
+  uint32_t ColorImportant;            // bla
+  uint8_t Color[256][4];              // optional xbgr
 
   void FixEndian()
   {
@@ -2583,13 +2583,13 @@ struct BMPHeader
 };
 #pragma pack(pop)
 
-sBool sImage::LoadBMP(const sU8 *data,int size)
+sBool sImage::LoadBMP(const uint8_t *data,int size)
 {
   BMPHeader *hdr;
   int x,y;
-  sU8 *d;
-  const sU8 *s;
-  sU8 val;
+  uint8_t *d;
+  const uint8_t *s;
+  uint8_t val;
   
   // check for sane file
 
@@ -2623,7 +2623,7 @@ sBool sImage::LoadBMP(const sU8 *data,int size)
 
     for(y=0;y<SizeY;y++)
     {
-      d = (sU8*)(Data + (SizeY-1-y)*SizeX);
+      d = (uint8_t*)(Data + (SizeY-1-y)*SizeX);
       for(x=0;x<SizeX;x++)
       {
         val = *s++;
@@ -2638,7 +2638,7 @@ sBool sImage::LoadBMP(const sU8 *data,int size)
   case 24:
     for(y=0;y<SizeY;y++)
     {
-      d = (sU8*)(Data + (SizeY-1-y)*SizeX);
+      d = (uint8_t*)(Data + (SizeY-1-y)*SizeX);
       for(x=0;x<SizeX;x++)
       {
         *d++ = s[0];
@@ -2653,7 +2653,7 @@ sBool sImage::LoadBMP(const sU8 *data,int size)
   case 32:    // this is not like the BMP standard, but it's what photoshop does
     for(y=0;y<SizeY;y++)
     {
-      d = (sU8*)(Data + (SizeY-1-y)*SizeX);
+      d = (uint8_t*)(Data + (SizeY-1-y)*SizeX);
       for(x=0;x<SizeX;x++)
       {
         *d++ = s[0];
@@ -2674,13 +2674,13 @@ sBool sImage::LoadBMP(const sU8 *data,int size)
   return 1;
 }
 
-int sImage::SaveBMP(sU8 *data, int size)
+int sImage::SaveBMP(uint8_t *data, int size)
 {
   int bpr=sAlign(24*SizeX/8,4);
   int Size = sizeof(BMPHeader)+SizeY*bpr;
   if (size<Size) return 0;
 
-  sU8 *ptr = data;
+  uint8_t *ptr = data;
 
   BMPHeader *hdr = (BMPHeader*) data;
   hdr->Magic = 0x4d42;
@@ -2706,10 +2706,10 @@ int sImage::SaveBMP(sU8 *data, int size)
   ptr += sizeof(BMPHeader);
 
 // copy image
-  sU8 *src=0;
+  uint8_t *src=0;
   for(int y=SizeY-1;y>=0;y--)
   {
-    src=(sU8*)(Data+y*SizeX);
+    src=(uint8_t*)(Data+y*SizeX);
     for(int x=0;x<SizeX;x++)
     {
       ptr[x*3+0] = src[0];
@@ -2732,7 +2732,7 @@ sBool sImage::SaveBMP(const sChar *name)
 
   int bpr=sAlign(24*SizeX/8,4);
   int Size = sizeof(BMPHeader)+SizeY*bpr;
-  sU8 *Convert = new sU8[Size];
+  uint8_t *Convert = new uint8_t[Size];
   SaveBMP(Convert,Size);
 
   sBool result = sSaveFile(name,Convert,Size);
@@ -2747,8 +2747,8 @@ sBool sImage::SavePNG(const sChar *name)
   sBool ok = 0;
   int len;
 
-  sU8 *data = new sU8[SizeX*SizeY*4];
-  const sU8 *src = (const sU8 *) Data;
+  uint8_t *data = new uint8_t[SizeX*SizeY*4];
+  const uint8_t *src = (const uint8_t *) Data;
   for(int i=0;i<SizeX*SizeY;i++)
   {
     data[i*4+0] = src[i*4+2];
@@ -2757,7 +2757,7 @@ sBool sImage::SavePNG(const sChar *name)
     data[i*4+3] = src[i*4+3];
   }
 
-  unsigned char *png = stbi_write_png_to_mem((unsigned char *)data,SizeX*sizeof(sU32),SizeX,SizeY,4,&len);
+  unsigned char *png = stbi_write_png_to_mem((unsigned char *)data,SizeX*sizeof(uint32_t),SizeX,SizeY,4,&len);
   if(png)
   {
     ok = sSaveFile(name,png,len);
@@ -2769,31 +2769,31 @@ sBool sImage::SavePNG(const sChar *name)
 
 /****************************************************************************/
 
-static sU32 Swap32(const sU8 *&scan)
+static uint32_t Swap32(const uint8_t *&scan)
 {
-  sU32 val;
+  uint32_t val;
   val = (scan[0]<<24)|(scan[1]<<16)|(scan[2]<<8)|(scan[3]);
   scan+=4;
   return val;
 }
 
-static sU32 Swap16(const sU8 *&scan)
+static uint32_t Swap16(const uint8_t *&scan)
 {
-  sU32 val;
+  uint32_t val;
   val = (scan[0]<<8)|(scan[1]);
   scan+=2;
   return val;
 }
 
-sBool sImage::LoadPIC(const sU8 *data,int size)
+sBool sImage::LoadPIC(const uint8_t *data,int size)
 {
-  sU8 *d;
+  uint8_t *d;
   int xs,ys,x,y;
   sBool hasalpha;
   int count;
   int i;
   sBool ok;
-  const sU8 *end = data+size;
+  const uint8_t *end = data+size;
 
   ok = 1;
 
@@ -2828,7 +2828,7 @@ sBool sImage::LoadPIC(const sU8 *data,int size)
     {
       for(y=0;y<ys;y++)
       {
-        d = (sU8 *)(Data + y*SizeX);   // color
+        d = (uint8_t *)(Data + y*SizeX);   // color
         x = 0;
         while(x<xs)
         {
@@ -2876,7 +2876,7 @@ sBool sImage::LoadPIC(const sU8 *data,int size)
 
         if(hasalpha)
         {
-          d = (sU8 *)(Data + y*SizeX);   // alpha
+          d = (uint8_t *)(Data + y*SizeX);   // alpha
           x = 0;
           while(x<xs)
           {
@@ -2913,14 +2913,14 @@ sBool sImage::LoadPIC(const sU8 *data,int size)
       // we sometimes have .pic with additional data
       // seem to be meta data, so just skip it and give a warning
       if(data!=end)
-        sPrintWarningF(L"sImage::LoadPIC: ignoring additional %Kb of data\n",sDInt(end-data));
+        sPrintWarningF(L"sImage::LoadPIC: ignoring additional %Kb of data\n",ptrdiff_t(end-data));
     }
     else
     {
       // uncompressed
       for(y=0;y<ys;y++)
       {
-        sU8 *dest = (sU8*) (&Data[y*SizeX]);
+        uint8_t *dest = (uint8_t*) (&Data[y*SizeX]);
         for(x=0;x<xs;x++)
         {
           dest[x*4+2] = *data++;
@@ -2941,7 +2941,7 @@ failed:
   return sFALSE;
 }
 
-sU16 saveantiintel(sU16 x) {return (((x&0x00ff)<<8)|((x&0xff00)>>8));}  
+uint16_t saveantiintel(uint16_t x) {return (((x&0x00ff)<<8)|((x&0xff00)>>8));}  
 
 sBool sImage::SavePIC(const sChar * name)
 {
@@ -2960,24 +2960,24 @@ sBool sImage::SavePIC(const sChar * name)
 
   struct channelinfosect
   {
-    sU8   chained;    //0 -> last, 1 -> another packet
-    sU8   size;       //number of bits for each pixel value
-    sU8   type;       //data and encoding type
-    sU8   channel;    //channel code
+    uint8_t   chained;    //0 -> last, 1 -> another packet
+    uint8_t   size;       //number of bits for each pixel value
+    uint8_t   type;       //data and encoding type
+    uint8_t   channel;    //channel code
   };
 
 
   struct PicsInfoSect
   {
-    sU32 magic;     //0x5380f634
-    sU32 version;
-    sU8  comment[80];
-    sU8  id[4];    //PICT
-    sU16 width;
-    sU16 height;
-    sF32 ratio; //pixel aspect ratio
-    sU16 fields;
-    sU16 pad;   //unused => 0 
+    uint32_t magic;     //0x5380f634
+    uint32_t version;
+    uint8_t  comment[80];
+    uint8_t  id[4];    //PICT
+    uint16_t width;
+    uint16_t height;
+    float ratio; //pixel aspect ratio
+    uint16_t fields;
+    uint16_t pad;   //unused => 0 
 
     channelinfosect channelinfo[2];
   };
@@ -2985,10 +2985,10 @@ sBool sImage::SavePIC(const sChar * name)
   int picSize;
   PicsInfoSect header;
   int x,y;
-  sU32 pos;
+  uint32_t pos;
 
-  sU8 *picData;
-  sU8 *imgData = (sU8*)Data;
+  uint8_t *picData;
+  uint8_t *imgData = (uint8_t*)Data;
 
   sFile *file=sCreateFile(name,sFA_WRITE);
   if(!file)
@@ -3024,7 +3024,7 @@ sBool sImage::SavePIC(const sChar * name)
   header.channelinfo[1].channel=ALPHA_CHANNEL;
 
   picSize=sizeof(header)+SizeX*SizeY*4;
-  picData=new sU8[picSize];
+  picData=new uint8_t[picSize];
 
   sCopyMem(picData,&header,sizeof(header));
 
@@ -3058,18 +3058,18 @@ sBool sImage::SavePIC(const sChar * name)
 
 struct sTGAHead
 {
-  sU8 ID;                         // has to be 0
-  sU8 colorMapType;               // has to be 0
-  sU8 imageTypeCode;              // has to be 2
-  sU8 colorMapOrigin[2];          // have to be 0
-  sU8 colorMapLength[2];          // have to be 0
-  sU8 colorMapEntrySize;          // has to be 0
-  sU8 xOrigin[2];                 // has to be 0
-  sU8 yOrigin[2];                 // has to be 0
-  sU16 width;                     // width of the picture in pixel, plz split your 16 bit values in 2 parts
-  sU16 height;                    // height of the picture in pixel, plz split your 16 bit values in 2 parts
-  sU8 pixelSize;                  // 32 bit for BGRA, 24 for BGR, other types we do not support
-  sU8 imageDescriptorByte;        // has to be 0
+  uint8_t ID;                         // has to be 0
+  uint8_t colorMapType;               // has to be 0
+  uint8_t imageTypeCode;              // has to be 2
+  uint8_t colorMapOrigin[2];          // have to be 0
+  uint8_t colorMapLength[2];          // have to be 0
+  uint8_t colorMapEntrySize;          // has to be 0
+  uint8_t xOrigin[2];                 // has to be 0
+  uint8_t yOrigin[2];                 // has to be 0
+  uint16_t width;                     // width of the picture in pixel, plz split your 16 bit values in 2 parts
+  uint16_t height;                    // height of the picture in pixel, plz split your 16 bit values in 2 parts
+  uint8_t pixelSize;                  // 32 bit for BGRA, 24 for BGR, other types we do not support
+  uint8_t imageDescriptorByte;        // has to be 0
 };
 
 sBool sImage::LoadTGA(const sChar *name)
@@ -3077,7 +3077,7 @@ sBool sImage::LoadTGA(const sChar *name)
   sFile *file = sCreateFile(name,sFA_READ);
 
   sTGAHead tgaHead;
-  sU8 *data = file->MapAll();
+  uint8_t *data = file->MapAll();
   sCopyMem(&tgaHead,data,18);
   tgaHead.width = sSwapIfBE(tgaHead.width);
   tgaHead.height = sSwapIfBE(tgaHead.height);
@@ -3097,7 +3097,7 @@ sBool sImage::LoadTGA(const sChar *name)
   {    
     for(int i=SizeY-1; i>-1; i--)
     {
-      sU8 *ptr = (sU8*)(&Data[i*SizeX]);
+      uint8_t *ptr = (uint8_t*)(&Data[i*SizeX]);
 
       for (int j = 0; j < SizeX; ++j)
       {
@@ -3144,7 +3144,7 @@ sBool sImage::SaveTGA(const sChar *name)
 
   for(int i=SizeY-1; i>-1; i--)
   {
-    sU8 *tempArray = new sU8[SizeX*4];
+    uint8_t *tempArray = new uint8_t[SizeX*4];
     for(int j=0; j<SizeX; j++)
     {
       tempArray[j*4] = 0x000000ff & Data[i*SizeX+j];
@@ -3182,7 +3182,7 @@ extern "C"
 
 #include "util/stb_image.h"
 
-sBool sImage::LoadJPG(const sU8 *data,int size)
+sBool sImage::LoadJPG(const uint8_t *data,int size)
 {
   int x,y;
   int comp;
@@ -3198,7 +3198,7 @@ sBool sImage::LoadJPG(const sU8 *data,int size)
   return 1;
 }
 
-sBool sImage::LoadPNG(const sU8 *data,int size)
+sBool sImage::LoadPNG(const uint8_t *data,int size)
 {
   return LoadJPG(data,size);
 }
@@ -3325,17 +3325,17 @@ error:
 
 /****************************************************************************/
 
-int sDiffImage(sImage *dimg, const sImage *img0, const sImage *img1, sU32 mask/*=0xffffffff*/)
+int sDiffImage(sImage *dimg, const sImage *img0, const sImage *img1, uint32_t mask/*=0xffffffff*/)
 {
   sVERIFY(img0->SizeX == img1->SizeX && img0->SizeY == img1->SizeY);
   dimg->Init(img0->SizeX, img1->SizeY);
 
   int errors = 0;
 
-  sU8 *src0 = (sU8*) img0->Data;
-  sU8 *src1 = (sU8*) img1->Data;
-  sU8 *dest = (sU8*) dimg->Data;
-  sU32 *dest32 = dimg->Data;
+  uint8_t *src0 = (uint8_t*) img0->Data;
+  uint8_t *src1 = (uint8_t*) img1->Data;
+  uint8_t *dest = (uint8_t*) dimg->Data;
+  uint32_t *dest32 = dimg->Data;
   for (int y=0; y<img0->SizeY; y++)
   {
     for (int x=0; x<img0->SizeX; x++)
@@ -3359,17 +3359,17 @@ int sDiffImage(sImage *dimg, const sImage *img0, const sImage *img1, sU32 mask/*
 // code for converter based on
 // http://www.ati.com/developer/sdk/radeonSDK/html/Tools/ToolsPlugIns.html
 
-static inline int GetRed(sU32 col) { return (col >> 16) & 0xff; }
-static inline int Pack8(sF32 val)  { return int((val+1.0f)*127.5f) & 0xff; }
+static inline int GetRed(uint32_t col) { return (col >> 16) & 0xff; }
+static inline int Pack8(float val)  { return int((val+1.0f)*127.5f) & 0xff; }
 
-void Heightmap2Normalmap(sImage *destimage, const sImage *src, sF32 scale/*= 1.0f*/)
+void Heightmap2Normalmap(sImage *destimage, const sImage *src, float scale/*= 1.0f*/)
 {
   int width = src->SizeX;
   int height = src->SizeY;
-  sU32 *data = src->Data;
+  uint32_t *data = src->Data;
 
   destimage->Init(src->SizeX, src->SizeY);
-  sU32 *dest = destimage->Data;
+  uint32_t *dest = destimage->Data;
   
   scale /= 255.0f; // normalize by max pixel magnitude
 
@@ -3395,12 +3395,12 @@ void Heightmap2Normalmap(sImage *destimage, const sImage *src, sF32 scale/*= 1.0
               +     (GetRed(data[yp1w + xp1]) - GetRed(data[yp1w + xm1]));
 
       // Cross Product of components of gradient reduces to
-      sF32 nx = -dx * scale;
-      sF32 ny = -dy * scale;
-      sF32 nz = 1.0f;
+      float nx = -dx * scale;
+      float ny = -dy * scale;
+      float nz = 1.0f;
       
       // Normalize
-      sF32 invlen = 1.0f/sFSqrt(nx*nx + ny*ny + nz*nz);
+      float invlen = 1.0f/sFSqrt(nx*nx + ny*ny + nz*nz);
       nx *= invlen;
       ny *= invlen;
       nz *= invlen;
@@ -3430,11 +3430,11 @@ sImageData *sMergeNormalMaps(const sImageData *img0, const sImageData *img1)
   sImageData *result = new sImageData;
   result->Init2(img0->Format,img0->Mipmaps,img0->SizeX,img0->SizeY,1);
 
-  sU32 *dest = (sU32*)result->Data;
-  const sU32 *src0 = (const sU32*)img0->Data;
-  const sU32 *src1 = (const sU32*)img1->Data;
+  uint32_t *dest = (uint32_t*)result->Data;
+  const uint32_t *src0 = (const uint32_t*)img0->Data;
+  const uint32_t *src1 = (const uint32_t*)img1->Data;
 
-  for(int i=0,iend=result->GetByteSize()/sizeof(sU32);i<iend;i++)
+  for(int i=0,iend=result->GetByteSize()/sizeof(uint32_t);i<iend;i++)
   {
     sVector30 nrm0; nrm0.InitColor(*src0);
     nrm0 = nrm0*2.0f - sVector30(1,1,1);
@@ -3445,8 +3445,8 @@ sImageData *sMergeNormalMaps(const sImageData *img0, const sImageData *img1)
 
     sMatrix34 trn;
     trn.k = nrm0;
-    sF32 c0 = sVector30(0,1,0)^nrm0;
-    sF32 c1 = sVector30(1,0,0)^nrm0;
+    float c0 = sVector30(0,1,0)^nrm0;
+    float c1 = sVector30(1,0,0)^nrm0;
     if(sFAbs(c0)<sFAbs(c1))
     {
       trn.i = sVector30(0,1,0)%nrm0;
@@ -3462,7 +3462,7 @@ sImageData *sMergeNormalMaps(const sImageData *img0, const sImageData *img1)
 
     sVector30 nrm = nrm1*trn;
     nrm = nrm*0.5f+sVector30(0.5f,0.5f,0.5f);
-    sU32 dst_nrm = nrm.GetColor();
+    uint32_t dst_nrm = nrm.GetColor();
     *dest++ = dst_nrm;
     src0++;
     src1++;
@@ -3484,7 +3484,7 @@ void sCompressMRGB(sImageData *dst_img, int format, const sImageData *src_img)
   const sVector4* src = (sVector4*) src_img->Data;
   if((format&sTEX_FORMAT)==sTEX_MRGB8)
   {
-    sU32 *dst = (sU32*) dst_img->Data;
+    uint32_t *dst = (uint32_t*) dst_img->Data;
     for(int i=0;i<iend;i++)
     {
       sVector4 tmp = *src++;
@@ -3493,7 +3493,7 @@ void sCompressMRGB(sImageData *dst_img, int format, const sImageData *src_img)
   }
   else
   {
-    sU64 *dst = (sU64*) dst_img->Data;
+    uint64_t *dst = (uint64_t*) dst_img->Data;
     for(int i=0;i<iend;i++)
     {
       sVector4 tmp = *src++;
@@ -3502,7 +3502,7 @@ void sCompressMRGB(sImageData *dst_img, int format, const sImageData *src_img)
   }
 }
 
-void sDecompressMRGB(sImageData *dst_img, const sImageData *src_img, sF32 alpha/*=1.0f*/)
+void sDecompressMRGB(sImageData *dst_img, const sImageData *src_img, float alpha/*=1.0f*/)
 {
   sVERIFY((src_img->Format&sTEX_FORMAT)==sTEX_MRGB8 || (src_img->Format&sTEX_FORMAT)==sTEX_MRGB16);
   sVERIFY(src_img->CodecType==sICT_RAW);
@@ -3513,7 +3513,7 @@ void sDecompressMRGB(sImageData *dst_img, const sImageData *src_img, sF32 alpha/
 
   if((src_img->Format&sTEX_FORMAT)==sTEX_MRGB8)
   {
-    const sU32 *src = (sU32*) src_img->Data;
+    const uint32_t *src = (uint32_t*) src_img->Data;
     for(int i=0;i<iend;i++)
     {
       dst->InitMRGB8(*src++);
@@ -3523,7 +3523,7 @@ void sDecompressMRGB(sImageData *dst_img, const sImageData *src_img, sF32 alpha/
   }
   else
   {
-    const sU64 *src = (sU64*) src_img->Data;
+    const uint64_t *src = (uint64_t*) src_img->Data;
     for(int i=0;i<iend;i++)
     {
       dst->InitMRGB16(*src++);
@@ -3539,7 +3539,7 @@ void sCompressMRGB(sImageData *img, int format)
   sVERIFY((format&sTEX_FORMAT)==sTEX_MRGB8 || (format&sTEX_FORMAT)==sTEX_MRGB16);
   sVERIFY(img->CodecType==sICT_RAW);
 
-  sU8* temp = img->Data;
+  uint8_t* temp = img->Data;
   img->Data = 0;
   img->Init2((img->Format&~sTEX_FORMAT)|(format&sTEX_FORMAT), img->Mipmaps, img->SizeX, img->SizeY, img->SizeZ);
   
@@ -3548,24 +3548,24 @@ void sCompressMRGB(sImageData *img, int format)
 
   if((format&sTEX_FORMAT)==sTEX_MRGB8)
   {
-    sU32 *dst = (sU32*)img->Data;
+    uint32_t *dst = (uint32_t*)img->Data;
     for(int i=0;i<iend;i++,src++)
       *dst++ = src->GetMRGB8();
   }
   else
   {
-    sU64 *dst = (sU64*)img->Data;
+    uint64_t *dst = (uint64_t*)img->Data;
     for(int i=0;i<iend;i++,src++)
       *dst++ = src->GetMRGB16();
   }
   sDeleteArray(temp);
 }
 
-void sDecompressMRGB(sImageData *img, sF32 alpha/*=1.0f*/)
+void sDecompressMRGB(sImageData *img, float alpha/*=1.0f*/)
 {
   sVERIFY((img->Format&sTEX_FORMAT)==sTEX_MRGB8 || (img->Format&sTEX_FORMAT)==sTEX_MRGB16);
   sVERIFY(img->CodecType==sICT_RAW);
-  sU8* temp = img->Data;
+  uint8_t* temp = img->Data;
   int format = img->Format&sTEX_FORMAT;
   img->Data = 0;
   img->Init2((img->Format&~sTEX_FORMAT)|sTEX_ARGB32F, img->Mipmaps, img->SizeX, img->SizeY, img->SizeZ);
@@ -3575,7 +3575,7 @@ void sDecompressMRGB(sImageData *img, sF32 alpha/*=1.0f*/)
 
   if(format==sTEX_MRGB8)
   {
-    const sU32 *src = (sU32*)temp;
+    const uint32_t *src = (uint32_t*)temp;
     for(int i=0;i<iend;i++,dst++)
     {
       dst->InitMRGB8(*src++);
@@ -3585,7 +3585,7 @@ void sDecompressMRGB(sImageData *img, sF32 alpha/*=1.0f*/)
   else
   {
     sVERIFY(format==sTEX_MRGB16);
-    const sU64 *src = (sU64*)temp;
+    const uint64_t *src = (uint64_t*)temp;
     for(int i=0;i<iend;i++,dst++)
     {
       dst->InitMRGB16(*src++);
@@ -3612,8 +3612,8 @@ void sClampToARGB8(sImageData *img, int mm/*=0*/)
     tmp->Init2(sTEX_2D|sTEX_ARGB8888,mm,img->SizeX,img->SizeY,img->SizeZ);
     tmp->Swap(img);
   }
-  sU32 *dst = (sU32*) img->Data;
-  int iend = img->GetByteSize()/sizeof(sU32);
+  uint32_t *dst = (uint32_t*) img->Data;
+  int iend = img->GetByteSize()/sizeof(uint32_t);
 
   if(tmp)
   {
@@ -3631,8 +3631,8 @@ void sClampToARGB8(sImageData *img, int mm/*=0*/)
     case sTEX_MRGB16:
       {
         if(tmp->Mipmaps<img->Mipmaps)
-          iend = tmp->GetByteSize()/sizeof(sU64);
-        sU64 *src = (sU64*) tmp->Data;
+          iend = tmp->GetByteSize()/sizeof(uint64_t);
+        uint64_t *src = (uint64_t*) tmp->Data;
         for(int i=0;i<iend;i++)
         {
           sVector4 col; col.InitMRGB16(src[i]);
@@ -3643,8 +3643,8 @@ void sClampToARGB8(sImageData *img, int mm/*=0*/)
     case sTEX_MRGB8:
       {
         if(tmp->Mipmaps<img->Mipmaps)
-          iend = tmp->GetByteSize()/sizeof(sU32);
-        sU32 *src = (sU32*) tmp->Data;
+          iend = tmp->GetByteSize()/sizeof(uint32_t);
+        uint32_t *src = (uint32_t*) tmp->Data;
         for(int i=0;i<iend;i++)
         {
           sVector4 col; col.InitMRGB8(src[i]);
@@ -3655,8 +3655,8 @@ void sClampToARGB8(sImageData *img, int mm/*=0*/)
     case sTEX_ARGB8888:
       {
         if(tmp->Mipmaps<img->Mipmaps)
-          iend = tmp->GetByteSize()/sizeof(sU32);
-        sU32 *src = (sU32*) tmp->Data;
+          iend = tmp->GetByteSize()/sizeof(uint32_t);
+        uint32_t *src = (uint32_t*) tmp->Data;
         for(int i=0;i<iend;i++)
           dst[i] = src[i];
       }
@@ -3681,8 +3681,8 @@ sImageData *sConvertARGB8ToHDR(const sImageData *img, int format)
 
   sImageData *img_dst = new sImageData;
   img_dst->Init2(sTEX_2D|format,img->Mipmaps,img->SizeX,img->SizeY,img->SizeZ);
-  int iend = img->GetByteSize()/sizeof(sU32);
-  sU32 *src = (sU32*) img->Data;
+  int iend = img->GetByteSize()/sizeof(uint32_t);
+  uint32_t *src = (uint32_t*) img->Data;
 
   switch(format&sTEX_FORMAT)
   {
@@ -3695,7 +3695,7 @@ sImageData *sConvertARGB8ToHDR(const sImageData *img, int format)
     break;
   case sTEX_MRGB16:
     {
-      sU64 *dst = (sU64*) img_dst->Data;
+      uint64_t *dst = (uint64_t*) img_dst->Data;
       for(int i=0;i<iend;i++)
       {
         sVector4 tmp; tmp.InitColor(src[i]);
@@ -3705,7 +3705,7 @@ sImageData *sConvertARGB8ToHDR(const sImageData *img, int format)
     break;
   case sTEX_MRGB8:
     {
-      sU32 *dst = (sU32*) img_dst->Data;
+      uint32_t *dst = (uint32_t*) img_dst->Data;
       for(int i=0;i<iend;i++)
       {
         sVector4 tmp; tmp.InitColor(src[i]);
@@ -3726,9 +3726,9 @@ sImageData *sConvertARGB8ToHDR(const sImageData *img, int format)
 /***                                                                      ***/
 /****************************************************************************/
 
-static void makecol(sU32 *c32,sU16 c0,sU16 c1,sBool opaque)
+static void makecol(uint32_t *c32,uint16_t c0,uint16_t c1,sBool opaque)
 {
-  sU8 *c8 = (sU8 *) c32;
+  uint8_t *c8 = (uint8_t *) c32;
 
   int r0,g0,b0;
   int r1,g1,b1;
@@ -3788,21 +3788,21 @@ static void makecol(sU32 *c32,sU16 c0,sU16 c1,sBool opaque)
     c8[ 7] = 255;
     if(opaque)
     {
-      c8[ 8] = (sU8)(255 * (b0/31.0f + b0/31.0f + b1/31.0f) / 3 + 0.5f);
-      c8[ 9] = (sU8)(255 * (g0/63.0f + g0/63.0f + g1/63.0f) / 3 + 0.5f);
-      c8[10] = (sU8)(255 * (r0/31.0f + r0/31.0f + r1/31.0f) / 3 + 0.5f);
-      c8[11] = (sU8)(255);
-      c8[12] = (sU8)(255 * (b0/31.0f + b1/31.0f + b1/31.0f) / 3 + 0.5f);
-      c8[13] = (sU8)(255 * (g0/63.0f + g1/63.0f + g1/63.0f) / 3 + 0.5f);
-      c8[14] = (sU8)(255 * (r0/31.0f + r1/31.0f + r1/31.0f) / 3 + 0.5f);
-      c8[15] = (sU8)(255);
+      c8[ 8] = (uint8_t)(255 * (b0/31.0f + b0/31.0f + b1/31.0f) / 3 + 0.5f);
+      c8[ 9] = (uint8_t)(255 * (g0/63.0f + g0/63.0f + g1/63.0f) / 3 + 0.5f);
+      c8[10] = (uint8_t)(255 * (r0/31.0f + r0/31.0f + r1/31.0f) / 3 + 0.5f);
+      c8[11] = (uint8_t)(255);
+      c8[12] = (uint8_t)(255 * (b0/31.0f + b1/31.0f + b1/31.0f) / 3 + 0.5f);
+      c8[13] = (uint8_t)(255 * (g0/63.0f + g1/63.0f + g1/63.0f) / 3 + 0.5f);
+      c8[14] = (uint8_t)(255 * (r0/31.0f + r1/31.0f + r1/31.0f) / 3 + 0.5f);
+      c8[15] = (uint8_t)(255);
     }
     else
     {
-      c8[ 8] = (sU8)(255 * (b0+b1)/31.0f  / 2 + 0.5f);
-      c8[ 9] = (sU8)(255 * (g0+g1)/63.0f  / 2 + 0.5f);
-      c8[10] = (sU8)(255 * (r0+r1)/31.0f  / 2 + 0.5f);
-      c8[11] = (sU8)(255);
+      c8[ 8] = (uint8_t)(255 * (b0+b1)/31.0f  / 2 + 0.5f);
+      c8[ 9] = (uint8_t)(255 * (g0+g1)/63.0f  / 2 + 0.5f);
+      c8[10] = (uint8_t)(255 * (r0+r1)/31.0f  / 2 + 0.5f);
+      c8[11] = (uint8_t)(255);
       c8[12] = 0;
       c8[13] = 0;
       c8[14] = 0;
@@ -3811,15 +3811,15 @@ static void makecol(sU32 *c32,sU16 c0,sU16 c1,sBool opaque)
   }
 }
 /*
-void UnpackDXT(sU32 *d32,sU8 *s,int level,int xs,int ys)
+void UnpackDXT(uint32_t *d32,uint8_t *s,int level,int xs,int ys)
 {
-  sU16 c0,c1;
-  sU32 c[4];
-  sU32 map;
-  sU64 a64;
+  uint16_t c0,c1;
+  uint32_t c[4];
+  uint32_t map;
+  uint64_t a64;
   int a0,a1;
-  sU8 a[8];
-  sU32 *dsave = d32;
+  uint8_t a[8];
+  uint32_t *dsave = d32;
 
   for(int yy=0;yy<ys;yy+=4)
   {
@@ -3829,9 +3829,9 @@ void UnpackDXT(sU32 *d32,sU8 *s,int level,int xs,int ys)
       {
       case sTEX_DXT1:
       case sTEX_DXT1A:
-        c0 = *(sU16 *) (s+0);
-        c1 = *(sU16 *) (s+2);
-        map = *(sU32 *) (s+4);
+        c0 = *(uint16_t *) (s+0);
+        c1 = *(uint16_t *) (s+2);
+        map = *(uint32_t *) (s+4);
         s+=8;
         makecol(&c[0],c0,c1,c0>c1);
         for(int y=0;y<4;y++)
@@ -3844,10 +3844,10 @@ void UnpackDXT(sU32 *d32,sU8 *s,int level,int xs,int ys)
         }
         break;
       case sTEX_DXT3:
-        a64 = *(sU64 *) (s+0);
-        c0 = *(sU16 *) (s+8);
-        c1 = *(sU16 *) (s+10);
-        map = *(sU32 *) (s+12);
+        a64 = *(uint64_t *) (s+0);
+        c0 = *(uint16_t *) (s+8);
+        c1 = *(uint16_t *) (s+10);
+        map = *(uint32_t *) (s+12);
         s+=16;
         makecol(&c[0],c0,c1,1);
         for(int y=0;y<4;y++)
@@ -3864,12 +3864,12 @@ void UnpackDXT(sU32 *d32,sU8 *s,int level,int xs,int ys)
       case sTEX_DXT5:
       case sTEX_DXT5N:
       case sTEX_DXT5_AYCOCG:
-        a0 = *(sU8 *) (s+0);
-        a1 = *(sU8 *) (s+1);
-        a64 = (*(sU64 *) (s+0))>>16;
-        c0 = *(sU16 *) (s+8);
-        c1 = *(sU16 *) (s+10);
-        map = *(sU32 *) (s+12);
+        a0 = *(uint8_t *) (s+0);
+        a1 = *(uint8_t *) (s+1);
+        a64 = (*(uint64_t *) (s+0))>>16;
+        c0 = *(uint16_t *) (s+8);
+        c1 = *(uint16_t *) (s+10);
+        map = *(uint32_t *) (s+12);
         s+=16;
         if(a0>a1)
         {
@@ -3914,10 +3914,10 @@ void UnpackDXT(sU32 *d32,sU8 *s,int level,int xs,int ys)
   {
     for(int i=0;i<xs*ys;i++)
     {
-      sU32 val = dsave[i];
-      sF32 r = ((val&0xff000000)>>24)-127.5f;
-      sF32 g = ((val&0x0000ff00)>> 8)-127.5f;
-      sF32 b = sFSqrt(127.5f*127.5f - r*r - g*g);
+      uint32_t val = dsave[i];
+      float r = ((val&0xff000000)>>24)-127.5f;
+      float g = ((val&0x0000ff00)>> 8)-127.5f;
+      float b = sFSqrt(127.5f*127.5f - r*r - g*g);
       dsave[i] = 0xff000000 
                | (0x00ff0000&(val>>8))
                | (0x0000ff00&val)
@@ -3952,7 +3952,7 @@ sFontMap *sImage::CreateFontPage(sFontMapInputParameter &inParam, int &outLetter
 int FindBestFit(sArray<sRect>& freeRect, int cx, int cy)
 {
   int result = -1;
-  sF32 minWaste = 10E10;
+  float minWaste = 10E10;
 
   for (int j = 0; j < freeRect.GetCount(); ++j)
   {
@@ -3961,7 +3961,7 @@ int FindBestFit(sArray<sRect>& freeRect, int cx, int cy)
 
     if (0 <= diffX && 0 <= diffY) // fits
     {
-      const sF32 wasted = freeRect[j].SizeX() - (cx * cy) / (sF32) freeRect[j].SizeY(); // actual area / freeRect[j].SizeY()
+      const float wasted = freeRect[j].SizeX() - (cx * cy) / (float) freeRect[j].SizeY(); // actual area / freeRect[j].SizeY()
 
       if (wasted < minWaste) // fits better
       {
@@ -4138,8 +4138,8 @@ sFontMap *sImage::CreateFontPage(sFontMapInputParameter &inParam, int &outLetter
   sRender2DBegin(guiImage->SizeX,guiImage->SizeY);    
 
   // write all letters into the mainbitmap
-  sU32 oldcol1 = sGetColor2D(1);
-  sU32 oldcol2 = sGetColor2D(2);
+  uint32_t oldcol1 = sGetColor2D(1);
+  uint32_t oldcol2 = sGetColor2D(2);
   sSetColor2D(1,0xff000000);    // black obviously _made_ a problem here, but now it works. if this fails for anyone, tell shamada
                                   // deprecated: for some reason, total black does not work. Since we use only the red channel, slight green is a safe color
   sSetColor2D(2,0xffffffff);
@@ -4258,7 +4258,7 @@ sINLINE void U32ToRGBA(int c, int &r, int &g, int &b, int &a)
   a = (c >> 24) & 0xff;
 }
 
-sINLINE sU32 RGBAToU32(int r, int g, int b, int a)
+sINLINE uint32_t RGBAToU32(int r, int g, int b, int a)
 {
   return (r)|((g)<<8)|((b)<<16)|((a)<<24);
 }
@@ -4281,7 +4281,7 @@ sINLINE void U32ToRGBASub(int c, int &r, int &g, int &b, int &a)
   a -= (c >> 24) & 0xff;
 }
 
-sINLINE sU32 RGBAToU32Div(int r, int g, int b, int a, int div)
+sINLINE uint32_t RGBAToU32Div(int r, int g, int b, int a, int div)
 {
   return (r/div)|((g/div)<<8)|((b/div)<<16)|((a/div)<<24);
 }
@@ -4291,8 +4291,8 @@ void sImage::BlurX(int R)
   int r,g,b,a;
   sImage old;
   old.Copy(this);
-  sU32 *in = old.Data;
-  sU32 *out = Data;
+  uint32_t *in = old.Data;
+  uint32_t *out = Data;
   for (int y = 0; y != SizeY; ++y)
   {
     r=g=b=a=0;
@@ -4349,7 +4349,7 @@ void sImage::FlipXY()
 void sImage::PMAlpha()
 {
   int r,g,b,a;
-  sU32 *out = Data;
+  uint32_t *out = Data;
   for (int p = 0; p < (SizeX*SizeY); ++p)
   {
     r=g=b=a=0;
@@ -4361,7 +4361,7 @@ void sImage::PMAlpha()
 
 void sImage::ClearRGB()
 {
-  sU32 *out = Data;
+  uint32_t *out = Data;
   for (int p = 0; p < (SizeX*SizeY); ++p)
   {
     *out &= 0xff000000;
@@ -4371,7 +4371,7 @@ void sImage::ClearRGB()
 
 void sImage::ClearAlpha()
 {
-  sU32 *out = Data;
+  uint32_t *out = Data;
   for (int p = 0; p < (SizeX*SizeY); ++p)
   {
     *out |= 0xff000000;
@@ -4394,8 +4394,8 @@ void sImage::MonoToAll()
   if (SizeX<1 && SizeY<1) return;
 
   sBool inalpha=sFALSE, incolor=sFALSE;
-  sU32 refa=Data[0]&0xff000000;
-  sU32 refc=Data[0]&0x00ffffff;
+  uint32_t refa=Data[0]&0xff000000;
+  uint32_t refc=Data[0]&0x00ffffff;
 
   for(int i=0;i<SizeX*SizeY && (!incolor || !inalpha);i++)
   {
@@ -4413,7 +4413,7 @@ void sImage::MonoToAll()
   {
     for(int i=0;i<SizeX*SizeY;i++)
     {
-      sU32 pixel = Data[i];
+      uint32_t pixel = Data[i];
       int lum = (59*((pixel>>8)&0xff)+30*((pixel>>16)&0xff)+11*(pixel&0xff)+50)/100;
       Data[i]=0x1010101*lum;
     }
@@ -4421,7 +4421,7 @@ void sImage::MonoToAll()
 
 }
 
-void sImage::HalfTransparentRect(int x0,int y0,int x1,int y1,sU32 color)
+void sImage::HalfTransparentRect(int x0,int y0,int x1,int y1,uint32_t color)
 {
   // clip
   x0 = sMax(x0,0);
@@ -4431,7 +4431,7 @@ void sImage::HalfTransparentRect(int x0,int y0,int x1,int y1,sU32 color)
 
   for(int y=y0;y<y1;y++)
   {
-    sU32 *data = Data + y*SizeX;
+    uint32_t *data = Data + y*SizeX;
     
     // von neumann adder: ((x&y) << 1) + (x^y) => nice fast pseudo-SIMD average
     for(int x=x0;x<x1;x++)
@@ -4439,7 +4439,7 @@ void sImage::HalfTransparentRect(int x0,int y0,int x1,int y1,sU32 color)
   }
 }
 
-void sImage::HalfTransparentRectHole(const sRect &outer,const sRect &hole,sU32 color)
+void sImage::HalfTransparentRectHole(const sRect &outer,const sRect &hole,uint32_t color)
 {
   HalfTransparentRect(outer.x0,outer.y0,outer.x1,hole.y0, color);
   HalfTransparentRect(outer.x0,hole.y0, hole.x0, hole.y1, color);
@@ -4450,8 +4450,8 @@ void sImage::HalfTransparentRectHole(const sRect &outer,const sRect &hole,sU32 c
 void sImage::AlphaFromLuminance(sImage *img)
 {
   sVERIFY(SizeX==img->SizeX && SizeY==img->SizeY);
-  sU8 *s = (sU8 *) img->Data;
-  sU8 *d = (sU8 *) Data;
+  uint8_t *s = (uint8_t *) img->Data;
+  uint8_t *d = (uint8_t *) Data;
 
   for(int i=0;i<SizeX*SizeY;i++)
     d[i*4+3] = (s[i*4+0] + 2*s[i*4+1] + s[i*4+2] + 2) >> 2;
@@ -4461,7 +4461,7 @@ void sImage::Outline(int pixelCount)
 {
   int x,y,x0,x1,y0,y1,j,k;
   int xs,ys,bpr;
-  sU32 *data;
+  uint32_t *data;
   int val;
 
   xs = SizeX;
@@ -4494,13 +4494,13 @@ void sImage::Outline(int pixelCount)
     }
   }
 
-  sU32 fincolor;
+  uint32_t fincolor;
   for(y=0;y<ys;y++)
   {
     for(x=0;x<xs;x++)
     {
       // composite the layers created before to get a smooth font bitmap
-      fincolor=sMin( ((data[x+y*bpr]>>8)&0xff) + ((data[x+y*bpr]>>0)&0xff) , (sU32)255);
+      fincolor=sMin( ((data[x+y*bpr]>>8)&0xff) + ((data[x+y*bpr]>>0)&0xff) , (uint32_t)255);
       data[x+y*bpr] = (data[x+y*bpr]&0xff000000) | (fincolor<<16) | (fincolor<<8) | (fincolor<<0);
     }
   }
@@ -4514,8 +4514,8 @@ void sImage::Outline(int pixelCount)
 
 /*void sSaveRT(const sChar *filename,sTexture2D *rt)
 {
-  const sU8 *data;
-  sS32 pitch;
+  const uint8_t *data;
+  int32_t pitch;
   sTextureFlags flags;
   sImage img;
   int xs,ys;
@@ -4531,7 +4531,7 @@ void sImage::Outline(int pixelCount)
   if(flags==sTEX_ARGB8888)
   {
     data += r.x0*4 + r.y0*pitch;
-    sU32 *dest = img.Data;
+    uint32_t *dest = img.Data;
     for(int y=r.y0;y<r.y1;y++)
     {
       sCopyMem(dest,data,r.SizeX()*4);
@@ -4565,7 +4565,7 @@ sImageI16::sImageI16(int xs,int ys)
 {
   SizeX = xs;
   SizeY = ys;
-  Data = new sU16[xs*ys];
+  Data = new uint16_t[xs*ys];
 }
 
 sImageI16::~sImageI16()
@@ -4580,21 +4580,21 @@ void sImageI16::Init(int xs,int ys)
     delete[] Data;
     SizeX = xs;
     SizeY = ys;
-    Data = new sU16[xs*ys];
+    Data = new uint16_t[xs*ys];
   }
 }
 
 sImage *sImageI16::Copy() const
 {
   sImage *dest = new sImage(SizeX,SizeY);
-  sCopyMem(dest->Data,Data,SizeX*SizeY*sizeof(sU16));
+  sCopyMem(dest->Data,Data,SizeX*SizeY*sizeof(uint16_t));
   return dest;
 }
 
 void sImageI16::CopyFrom(const sImageI16 *src)
 {
   Init(src->SizeX,src->SizeY);
-  sCopyMem(Data,src->Data,SizeX*SizeY*sizeof(sU16));
+  sCopyMem(Data,src->Data,SizeX*SizeY*sizeof(uint16_t));
 }
 
 void sImageI16::CopyFrom(const sImage *src)
@@ -4603,7 +4603,7 @@ void sImageI16::CopyFrom(const sImage *src)
   int max = src->SizeX*src->SizeY;
   for(int i=0;i<max;i++)
   {
-    sU32 col = src->Data[i];
+    uint32_t col = src->Data[i];
     int r = (col>>16)&0xff;
     int g = (col>>8)&0xff;
     int b = (col>>0)&0xff;
@@ -4640,7 +4640,7 @@ void sImageI16::Serialize(sReader &s) { Serialize_(s); }
 
 /****************************************************************************/
 
-void sImageI16::Fill(sU16 value)
+void sImageI16::Fill(uint16_t value)
 {
   for(int i=0;i<SizeX*SizeY;i++)
     Data[i] = value;
@@ -4661,13 +4661,13 @@ void sImageI16::Add(sImageI16 *img)
 void sImageI16::Mul(sImageI16 *img)
 {
   for(int i=0;i<SizeX*SizeY;i++)
-    Data[i] = ((sU32(Data[i]))*img->Data[i])/65535;
+    Data[i] = ((uint32_t(Data[i]))*img->Data[i])/65535;
 }
 
-void sImageI16::Mul(sU16 value)
+void sImageI16::Mul(uint16_t value)
 {
   for(int i=0;i<SizeX*SizeY;i++)
-    Data[i] = ((sU32(Data[i]))*value)/65535;
+    Data[i] = ((uint32_t(Data[i]))*value)/65535;
 }
 
 void sImageI16::FlipXY()
@@ -4691,10 +4691,10 @@ int sImageI16::Filter(int x,int y,sBool colwrap) const
   int x1 = (x0+1)&(SizeX-1);
   int y1 = (y0+1)&(SizeY-1);
 
-  sU32 col00 = Data[x0+y0*SizeX];
-  sU32 col01 = Data[x1+y0*SizeX];
-  sU32 col10 = Data[x0+y1*SizeX];
-  sU32 col11 = Data[x1+y1*SizeX];
+  uint32_t col00 = Data[x0+y0*SizeX];
+  uint32_t col01 = Data[x1+y0*SizeX];
+  uint32_t col10 = Data[x0+y1*SizeX];
+  uint32_t col11 = Data[x1+y1*SizeX];
 
   if(colwrap)   // this will not interpolate if all the pixel are 0xffff or 0x0000
   {
@@ -4718,10 +4718,10 @@ int sImageI16::Filter(int x,int y,sBool colwrap) const
   
   x &= 0xff;
   y &= 0xff;
-  sU32 f00 = (256-x)*(256-y);
-  sU32 f01 =      x *(256-y);
-  sU32 f10 = (256-x)*     y ;
-  sU32 f11 =      x *     y ;
+  uint32_t f00 = (256-x)*(256-y);
+  uint32_t f01 =      x *(256-y);
+  uint32_t f10 = (256-x)*     y ;
+  uint32_t f11 =      x *     y ;
 
   return (col00*f00 + col01*f01 + col10*f10 + col11*f11)>>16;
 }
@@ -4747,7 +4747,7 @@ sFloatImage::sFloatImage(int xs,int ys,int zs)
   SizeY = ys;
   SizeZ = zs;
   Cubemap = 0;
-  Data = new sF32[xs*ys*zs*4];
+  Data = new float[xs*ys*zs*4];
 }
 
 sFloatImage::~sFloatImage()
@@ -4760,7 +4760,7 @@ void sFloatImage::Init(int xs,int ys,int zs)
   if(xs*ys*zs != SizeX*SizeY*SizeZ)
   {
     delete[] Data;
-    Data = new sF32[xs*ys*zs*4];
+    Data = new float[xs*ys*zs*4];
   }
   SizeX = xs;
   SizeY = ys;
@@ -4771,7 +4771,7 @@ void sFloatImage::Init(int xs,int ys,int zs)
 void sFloatImage::CopyFrom(const sFloatImage *src)
 {
   Init(src->SizeX,src->SizeY,1);
-  sCopyMem(Data,src->Data,4*sizeof(sF32)*SizeX*SizeY*SizeZ);
+  sCopyMem(Data,src->Data,4*sizeof(float)*SizeX*SizeY*SizeZ);
 }
 
 void sFloatImage::CopyFrom(const sImage *src)
@@ -4779,7 +4779,7 @@ void sFloatImage::CopyFrom(const sImage *src)
   Init(src->SizeX,src->SizeY,1);
   for(int i=0;i<SizeX*SizeY*SizeZ;i++)
   {
-    sU32 col = src->Data[i];
+    uint32_t col = src->Data[i];
     Data[i*4+0] = ((col && 0x00ff0000)>>16)/255.0f;
     Data[i*4+1] = ((col && 0x0000ff00)>> 8)/255.0f;
     Data[i*4+2] = ((col && 0x000000ff)>> 0)/255.0f;
@@ -4806,10 +4806,10 @@ void sFloatImage::CopyFrom(const sImageData *src)
     break;
   }
 
-  sF32 *d = Data;
+  float *d = Data;
   for(int z=0;z<SizeZ;z++)
   {
-    sU8 *s = (sU8 *) src->Data;
+    uint8_t *s = (uint8_t *) src->Data;
     s += src->GetFaceSize()*z;
 
     for(int i=0;i<SizeX*SizeY;i++)
@@ -4829,14 +4829,14 @@ void sFloatImage::CopyTo(sImage *dest) const
   CopyTo(dest,1.0f);
 }
 
-void sFloatImage::CopyTo(sImage *dest,sF32 power) const
+void sFloatImage::CopyTo(sImage *dest,float power) const
 {
   sVERIFY(SizeZ==1);
   dest->Init(SizeX,SizeY);
   CopyTo(dest->Data,power);
 }
 
-void sFloatImage::CopyTo(sU32 *d,sF32 power) const
+void sFloatImage::CopyTo(uint32_t *d,float power) const
 {
   if(power==1.0f)
   {
@@ -4888,7 +4888,7 @@ void sFloatImage::CopyTo(sU32 *d,sF32 power) const
   }
 }
 
-void sFloatImage::Fill(sF32 a,sF32 r,sF32 g,sF32 b)
+void sFloatImage::Fill(float a,float r,float g,float b)
 {
   for(int i=0;i<SizeX*SizeY*SizeZ;i++)
   {
@@ -4910,16 +4910,16 @@ void sFloatImage::Scale(const sFloatImage *src,int xs_,int ys_)
   sVERIFY(sx*SizeX == src->SizeX);
   sVERIFY(sy*SizeY == src->SizeY);
 
-  const sF32 *s = src->Data;
-  sF32 *d = Data;
+  const float *s = src->Data;
+  float *d = Data;
   for(int z=0;z<SizeZ;z++)
   {
     for(int y=0;y<SizeY;y++)
     {
-      const sF32 *ss = s;
+      const float *ss = s;
       for(int x=0;x<SizeX;x++)
       {
-        sF32 accu[4];
+        float accu[4];
         accu[0] = 0;
         accu[1] = 0;
         accu[2] = 0;
@@ -4946,7 +4946,7 @@ void sFloatImage::Scale(const sFloatImage *src,int xs_,int ys_)
   }
 }
 
-void sFloatImage::Power(sF32 p)
+void sFloatImage::Power(float p)
 {
   if(p==2.0f)
   {
@@ -4986,7 +4986,7 @@ void sFloatImage::Half(sBool linear)
   int yp = SizeX*xp;
   int zp = SizeY*yp;
 
-  sF32 *d = Data;
+  float *d = Data;
   if(SizeZ==1 || Cubemap)
   {
     if(linear)
@@ -5098,24 +5098,24 @@ void sFloatImage::Downsample(int mip,const sFloatImage *src)
   int my = src->SizeY-1;
 
   int kernelsize = 2+(6<<mip);
-  sF32 *kernel = new sF32[kernelsize];
-  sF32 ksum = 0;
+  float *kernel = new float[kernelsize];
+  float ksum = 0;
   int kshift = -3<<mip;
   for(int i=0;i<kernelsize;i++)
   {
-    sF32 a = 3;
-    sF32 x = (kshift+i-0.5f)/sF32(step);
-    kernel[i] = sF32(sSin(sPIF*x)*sSin((sPIF/a)*x)/(sPIF*sPIF*(x*x)));
+    float a = 3;
+    float x = (kshift+i-0.5f)/float(step);
+    kernel[i] = float(sSin(sPIF*x)*sSin((sPIF/a)*x)/(sPIF*sPIF*(x*x)));
     ksum += kernel[i];
   }
   for(int i=0;i<kernelsize;i++)      // adjust kernel to 1.
     kernel[i] *= 1.0f/ksum;
   kshift += step/2-1;                   // remove offset completely. 
 
-  sF32 *mdata = new sF32[sx*src->SizeY*4];
+  float *mdata = new float[sx*src->SizeY*4];
 
-  const sF32 * __restrict s = src->Data;
-  sF32 * __restrict d = mdata;
+  const float * __restrict s = src->Data;
+  float * __restrict d = mdata;
 
   for(int y=0;y<src->SizeY;y++)
   {
@@ -5123,7 +5123,7 @@ void sFloatImage::Downsample(int mip,const sFloatImage *src)
     {
       for(int i=0;i<4;i++)
       {
-        sF32 sum = 0;
+        float sum = 0;
         for(int j=0;j<kernelsize;j++)
           sum += s[y*yp + sClamp(x+j+kshift,0,mx)*xp + i] * kernel[j];
         d[i] = sum;
@@ -5141,7 +5141,7 @@ void sFloatImage::Downsample(int mip,const sFloatImage *src)
     {
       for(int i=0;i<4;i++)
       {
-        sF32 sum = 0;
+        float sum = 0;
         for(int j=0;j<kernelsize;j++)
           sum += s[sClamp(y+j+kshift,0,my)*myp + x*xp + i] * kernel[j];
         d[i] = sum;
@@ -5157,13 +5157,13 @@ void sFloatImage::Downsample(int mip,const sFloatImage *src)
 
 void sFloatImage::Normalize()
 {
-  sF32 *d = Data;
+  float *d = Data;
   for(int i=0;i<SizeX*SizeY*SizeZ;i++)
   {
-    sF32 x = d[0]*2-1;
-    sF32 y = d[1]*2-1;
-    sF32 z = d[2]*2-1;
-    sF32 e = sRSqrt(x*x + y*y + z*z);
+    float x = d[0]*2-1;
+    float y = d[1]*2-1;
+    float z = d[2]*2-1;
+    float e = sRSqrt(x*x + y*y + z*z);
     x *= e;
     y *= e;
     z *= e;
@@ -5174,33 +5174,33 @@ void sFloatImage::Normalize()
   }
 }
 
-void sFloatImage::ScaleAlpha(sF32 scale)
+void sFloatImage::ScaleAlpha(float scale)
 {
   for(int i=0;i<SizeX*SizeY*SizeZ;i++)
     Data[i*4+3] *= scale;
 }
 
-sF32 sFloatImage::GetAlphaCoverage(sF32 tresh)
+float sFloatImage::GetAlphaCoverage(float tresh)
 {
   int hit = 0;
   int max = SizeX*SizeY*SizeZ;
   for(int i=0;i<max;i++)
     if(Data[i*4+3]>=tresh)
       hit++;
-  return sF32(hit)/max;
+  return float(hit)/max;
 }
 
-void sFloatImage::AdjustAlphaCoverage(sF32 tresh,sF32 oldcov,sF32 maxerror)
+void sFloatImage::AdjustAlphaCoverage(float tresh,float oldcov,float maxerror)
 {
-  sF32 imin = 0.01f;              // don't set this to 0.0, divide by zero looms!
-  sF32 imax = 1.0f;
-  sF32 inow = tresh;
+  float imin = 0.01f;              // don't set this to 0.0, divide by zero looms!
+  float imax = 1.0f;
+  float inow = tresh;
   int n = 0;
-  sF32 error = 1.0f;
-  sF32 scale = 1.0f;
+  float error = 1.0f;
+  float scale = 1.0f;
   do
   {
-    sF32 cov = GetAlphaCoverage(inow);
+    float cov = GetAlphaCoverage(inow);
     scale = tresh/inow;
     error = sFAbs(cov-oldcov)*scale;
 

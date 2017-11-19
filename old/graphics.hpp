@@ -99,7 +99,7 @@ enum
   public:
     void *DataPersist;
     void **DataPtr;
-    sU64 Mask;                                // used register mask
+    uint64_t Mask;                                // used register mask
   };
 #endif
 
@@ -115,16 +115,16 @@ void sSetFullscreen(sBool enable);
 sBool sGetFullscreen();
 
 void sSetScreenResolution(int resX, int resY);
-void sSetScreenResolution(int resX, int resY, sF32 aspectRatio);
+void sSetScreenResolution(int resX, int resY, float aspectRatio);
 void sGetScreenResolution(int &resX, int &resY);
 
 sBool sSetOversizeScreen(int xs,int ys,int fsaa=0,sBool mayfail=0); // should be called BEFORE sInit() xs=ys=0 to disable
 void sGetScreenSize(int &xs,int &ys);
-sF32 sGetScreenAspect();
-void sGetScreenSafeArea(sF32 &xs, sF32 &ys); // returns values between 0 (center) and 1 (outside)
+float sGetScreenAspect();
+void sGetScreenSafeArea(float &xs, float &ys); // returns values between 0 (center) and 1 (outside)
 
-void sSetDesiredFrameRate(sF32 rate);
-void sSetScreenGamma(sF32 gamma);       // only applied in fullscreen mode
+void sSetDesiredFrameRate(float rate);
+void sSetScreenGamma(float gamma);       // only applied in fullscreen mode
 
 void sDbgPaintWireFrame(sBool enable);    // enable/disable wireframe fillmode for debugging
 
@@ -191,7 +191,7 @@ enum sTextureFlags
   sTEX_RAW          = 41,         // compute shader: raw (byte addressed) buffer
   sTEX_UINT32       = 42,         // another format useful for compute shaders.
 
-                                  // don't use more than 64 texture formats, some tools use an sU64 bitmask to store sets of texture formats.
+                                  // don't use more than 64 texture formats, some tools use an uint64_t bitmask to store sets of texture formats.
 
   sTEX_FORMAT       = 0x000000ff, // mask for format field
   sTEX_DYNAMIC      = 0x00000100, // you want to update the texture regulary by BeginLoad() / EndLoad()
@@ -236,7 +236,7 @@ enum sTextureFlags
 
 
 int sGetBitsPerPixel(int format);
-sU64 sGetAvailTextureFormats();   // bitmask of available texture formats on this hardware
+uint64_t sGetAvailTextureFormats();   // bitmask of available texture formats on this hardware
 
 enum sTexCubeFace
 {
@@ -252,8 +252,8 @@ enum sTexCubeFace
 
 
 sBool sIsBlockCompression(int texflags);
-sU32 sAYCoCgtoARGB(sU32 val);
-sU32 sARGBtoAYCoCg(sU32 val);
+uint32_t sAYCoCgtoARGB(uint32_t val);
+uint32_t sARGBtoAYCoCg(uint32_t val);
 
 /****************************************************************************/
 /***                                                                      ***/
@@ -323,7 +323,7 @@ struct sTargetSpec          // a little helper
   sTexture2D *Depth;              // the depth-buffer or 0 for screen
   int Cubeface;                  // set to -1 for cubefaces
   sRect Window;                   // always initialize
-  sF32 Aspect;                    // ys/xs
+  float Aspect;                    // ys/xs
 
   sTargetSpec();
   sTargetSpec(const sRect &r);
@@ -339,24 +339,24 @@ struct sTargetPara
 {
   int Flags;
   sVector4 ClearColor[4];
-  sF32 ClearZ;
+  float ClearZ;
   sRect Window;                   // must be initialized, do not leave at 0
   int Cubeface;                  // set to -1 for 2d textures
   int Mipmap;                    // leave at 0 for largest mipmap
-  sF32 Aspect;                    // must be initialized, by xs/ys for instance
+  float Aspect;                    // must be initialized, by xs/ys for instance
 
   sTextureBase *Depth;            // depth buffer
   sTextureBase *Target[4];        // color buffer (or whatever)
 
   sTargetPara();
-  sTargetPara(int flags,sU32 clearcol,const sTargetSpec &);
-  explicit sTargetPara(int flags,sU32 clearcol=0,const sRect *window=0);
-  sTargetPara(int flags,sU32 clearcol,const sRect *window,sTextureBase *colorbuffer,sTextureBase *depthbuffer=0L);
+  sTargetPara(int flags,uint32_t clearcol,const sTargetSpec &);
+  explicit sTargetPara(int flags,uint32_t clearcol=0,const sRect *window=0);
+  sTargetPara(int flags,uint32_t clearcol,const sRect *window,sTextureBase *colorbuffer,sTextureBase *depthbuffer=0L);
   void Init();
-  void Init(int flags,sU32 clearcol,const sTargetSpec &);
-  void Init(int flags,sU32 clearcol=0,const sRect *window=0);
-  void Init(int flags,sU32 clearcol,const sRect *window,sTextureBase *colorbuffer,sTextureBase *depthbuffer);
-  void SetTarget(int i, sTextureBase *tex, sU32 clearcol);
+  void Init(int flags,uint32_t clearcol,const sTargetSpec &);
+  void Init(int flags,uint32_t clearcol=0,const sRect *window=0);
+  void Init(int flags,uint32_t clearcol,const sRect *window,sTextureBase *colorbuffer,sTextureBase *depthbuffer);
+  void SetTarget(int i, sTextureBase *tex, uint32_t clearcol);
   bool operator==(sTargetPara *para);
   inline bool operator==(sTargetPara para) { return *this == &para; };
 };
@@ -400,7 +400,7 @@ void sEnlargeRTDepthBuffer(int x, int y);
 
 // this method of reading textures is slow because of blocking
 
-void sBeginReadTexture(const sU8 *&data, sS32 &pitch, enum sTextureFlags &flags,sTexture2D *tex);   // returns sTEX_??? bitmap type flag
+void sBeginReadTexture(const uint8_t *&data, int32_t &pitch, enum sTextureFlags &flags,sTexture2D *tex);   // returns sTEX_??? bitmap type flag
 void sEndReadTexture();
 
 // prefer using this one:
@@ -412,7 +412,7 @@ public:
   ~sGpuToCpu();
 
   void CopyFrom(sTexture2D *,int miplevel=0);
-  const void *BeginRead(sDInt &pitch);
+  const void *BeginRead(ptrdiff_t &pitch);
   void EndRead();
 };
 
@@ -450,10 +450,10 @@ enum sSOON_OBSOLETE sRTFlags
   sRTF_TILED_SURFACE    = 0x40000,  // alloc only surface needed for selected target size (equivalent to set sTEX_TILED_RT texture flag)
 };
 
-void sSOON_OBSOLETE sSetRendertarget(const sRect *vrp, int flags=sCLEAR_ALL, sU32 clearcolor=0);
-void sSOON_OBSOLETE sSetRendertarget(const sRect *vrp, sTexture2D *tex,int flags=sCLEAR_ALL|sRTZBUF_DEFAULT, sU32 clearcolor=0);
-void sSOON_OBSOLETE sSetRendertarget(const sRect *vrp,int flags,sU32 clearcolor,sTexture2D **tex,int count);
-void sSOON_OBSOLETE sSetRendertargetCube(sTextureCube* tex, sTexCubeFace cf, int flags=sCLEAR_ALL, sU32 clearcolor=0);
+void sSOON_OBSOLETE sSetRendertarget(const sRect *vrp, int flags=sCLEAR_ALL, uint32_t clearcolor=0);
+void sSOON_OBSOLETE sSetRendertarget(const sRect *vrp, sTexture2D *tex,int flags=sCLEAR_ALL|sRTZBUF_DEFAULT, uint32_t clearcolor=0);
+void sSOON_OBSOLETE sSetRendertarget(const sRect *vrp,int flags,uint32_t clearcolor,sTexture2D **tex,int count);
+void sSOON_OBSOLETE sSetRendertargetCube(sTextureCube* tex, sTexCubeFace cf, int flags=sCLEAR_ALL, uint32_t clearcolor=0);
 
 // returns current front/backbuffer textures, only supported on some consoles
 // returns 0 if unsupported
@@ -472,23 +472,23 @@ void sSOON_OBSOLETE sGrabScreen(sTexture2D *, sGrabFilterFlags filter, const sRe
 //sINLINE void sSOON_OBSOLETE sGrabScreen(sTexture2D *tex) { sGrabScreen(tex,sGFF_NONE,0,0); }
 void sSOON_OBSOLETE sSetScreen(sTexture2D *, sGrabFilterFlags filter, const sRect *dst, const sRect *src);
 
-void sSOON_OBSOLETE sSetScreen(const sRect &rect,sU32 *data);
+void sSOON_OBSOLETE sSetScreen(const sRect &rect,uint32_t *data);
 void sSOON_OBSOLETE sGetRendertargetSize(int &dx,int &dy);
-sF32 sSOON_OBSOLETE sGetRendertargetAspect();
+float sSOON_OBSOLETE sGetRendertargetAspect();
 void sSetRenderClipping(sRect *,int count);
 
-void sPackDXT(sU8 *d,sU32 *s,int xs,int ys,int format,sBool dither=1);
+void sPackDXT(uint8_t *d,uint32_t *s,int xs,int ys,int format,sBool dither=1);
 sBool sIsFormatDXT(int format);
 
 // returns ptr to rendertarget data
 // very slow: use only if absolute necessary (screenshots)!!!
-void sSOON_OBSOLETE sBeginSaveRT(const sU8 *&data, sS32 &pitch, enum sTextureFlags &flags);   // returns sTEX_??? bitmap type flag
+void sSOON_OBSOLETE sBeginSaveRT(const uint8_t *&data, int32_t &pitch, enum sTextureFlags &flags);   // returns sTEX_??? bitmap type flag
 void sSOON_OBSOLETE sEndSaveRT();
 
 /*
 void sSetTexture(int stage, class sTextureBase *tex);
-void sSetRenderStates(const sU32 *data, int count);
-int sRenderStateTexture(sU32 *data, int texstage, sU32 tflags,sF32 lodbias=0);
+void sSetRenderStates(const uint32_t *data, int count);
+int sRenderStateTexture(uint32_t *data, int texstage, uint32_t tflags,float lodbias=0);
 */
 
 void sOBSOLETE sConvertsRGBTex(sBool e);    // to globally switch sRGB convertion on/off (hdr <-> ldr rendering)
@@ -531,7 +531,7 @@ struct sScreenMode
   int ScreenY;
   int OverX;                     // renderbuffer size, may be larger than screen (or 0)
   int OverY;
-  sF32 Aspect;                    // x/y of whole screen
+  float Aspect;                    // x/y of whole screen
   int MultiLevel;                // level 0..n, NOT number of samples! -1 is off
   int OverMultiLevel;            // multisampling for oversized buffer
   // rendertargets
@@ -557,7 +557,7 @@ struct sScreenInfo
 
   int CurrentXSize;              // resolution of desktop
   int CurrentYSize;
-  sF32 CurrentAspect;             // aspect of desktop, as x/y
+  float CurrentAspect;             // aspect of desktop, as x/y
 
   sStaticArray<sScreenInfoXY> Resolutions;    // Available resolutions (not for windowed)
   sStaticArray<int> RefreshRates;            // Available refresh rates (not for windowed)
@@ -587,16 +587,16 @@ enum sGraphicsCapsFlags
 
 struct sGraphicsCaps
 {
-  sU64 Texture2D;                 // bitmask of available textureformats
-  sU64 TextureCube;
-  sU64 VertexTex2D;               // bitmask of available vertex texture formats
-  sU64 VertexTexCube;
-  sU64 TextureRT;                 // bitmask for rendertarget textureformats
-  sU32 Flags;                     // supported type of depth texture, ...
+  uint64_t Texture2D;                 // bitmask of available textureformats
+  uint64_t TextureCube;
+  uint64_t VertexTex2D;               // bitmask of available vertex texture formats
+  uint64_t VertexTexCube;
+  uint64_t TextureRT;                 // bitmask for rendertarget textureformats
+  uint32_t Flags;                     // supported type of depth texture, ...
   int MaxMultisampleLevel;
   int ShaderProfile;             // sSTFP_??? | sSTF_???
-  sF32 UVOffset;                  // for exact pixel addressing, offset uv's by this. either  0.0 (dx11) or  0.0 (dx9).  
-  sF32 XYOffset;                  // for exact pixel addressing, offset pos  by this. either  0.0 (dx11) or -0.5 (dx9).  
+  float UVOffset;                  // for exact pixel addressing, offset uv's by this. either  0.0 (dx11) or  0.0 (dx9).  
+  float XYOffset;                  // for exact pixel addressing, offset pos  by this. either  0.0 (dx11) or -0.5 (dx9).  
   sString<64> AdapterName;        // friendly name for graphics adapter
 };
 
@@ -625,8 +625,8 @@ struct sGraphicsStats
   int RTChanges;
   int MtrlChanges;
 
-  sDInt StaticTextureMem;               // bytes in static textures, not counting rendertargets
-  sDInt StaticVertexMem;                // bytes in static vertex buffers
+  ptrdiff_t StaticTextureMem;               // bytes in static textures, not counting rendertargets
+  ptrdiff_t StaticVertexMem;                // bytes in static vertex buffers
 
   int GeoBuffersActive;                // dx9: static geometry buffers
 };
@@ -675,17 +675,17 @@ enum sVertexFlags                 // experimental way of specifying vertex forma
 
   // optional: specify datatype. if missing, defaults are provided.
   // always available
-  sVF_F2            = 0x0100,     // 2 x sF32
-  sVF_F3            = 0x0200,     // 3 x sF32
-  sVF_F4            = 0x0300,     // 4 x sF32
-  sVF_C4            = 0x0400,     // 4 x sU8, scaled to 0..1 range
+  sVF_F2            = 0x0100,     // 2 x float
+  sVF_F3            = 0x0200,     // 3 x float
+  sVF_F4            = 0x0300,     // 4 x float
+  sVF_C4            = 0x0400,     // 4 x uint8_t, scaled to 0..1 range
   // sometimes available
-  sVF_I4            = 0x0500,     // 4 x sU8, not scaled. for bone-indices
-  sVF_S2            = 0x0600,     // 2 x sS16, scaled to -1..1 range
-  sVF_S4            = 0x0700,     // 4 x sS16, scaled to -1..1 range
+  sVF_I4            = 0x0500,     // 4 x uint8_t, not scaled. for bone-indices
+  sVF_S2            = 0x0600,     // 2 x int16_t, scaled to -1..1 range
+  sVF_S4            = 0x0700,     // 4 x int16_t, scaled to -1..1 range
   sVF_H2            = 0x0800,     // 2 x sF16
   sVF_H4            = 0x0900,     // 4 x sF16
-  sVF_F1            = 0x0a00,     // 1 x sF32
+  sVF_F1            = 0x0a00,     // 1 x float
 
   sVF_H3            = 0x0b00,     // 3 x sF16 (for optimized 3-vectors)
   //                  0x0c00,     // unused
@@ -700,36 +700,36 @@ enum sVertexFlags                 // experimental way of specifying vertex forma
 
 extern const int sVertexFormatTypeSizes[]; // contains sizes of datatypes (index=datatype>>8)
 
-#if 0                             // some platforms require sU32 vertex colors to be swapped. this has nothing to do with endianess
-inline sU32 sSWAPVC(sU32 x)  { return (x>>24)|(x<<8); }
+#if 0                             // some platforms require uint32_t vertex colors to be swapped. this has nothing to do with endianess
+inline uint32_t sSWAPVC(uint32_t x)  { return (x>>24)|(x<<8); }
 #else
 #define sSWAPVC(x) x
 #endif
 
 
-sINLINE sU16 sFloatToHalf(sF32 f)
-{ sU32 i=sRawCast<sU32,sF32>(f); return sU16(((i&0x80000000)>>16)|(((i&0x7f800000)>>13)-(127<<10)+(15<<10))|((i&0x007fe000)>>13)); }
+sINLINE uint16_t sFloatToHalf(float f)
+{ uint32_t i=sRawCast<uint32_t,float>(f); return uint16_t(((i&0x80000000)>>16)|(((i&0x7f800000)>>13)-(127<<10)+(15<<10))|((i&0x007fe000)>>13)); }
 
 struct sHalfFloat // don't try to make a fully featured halffloat class, you don't want to accidentally use it...
 {                 // Seee EEEE EMMM MMMM  MMMm mmmm mmmm mmmm  (32 bit, e-127)
-  sU16 Val;       //                      SEEE EEMM MMMM MMMM  (16 bit, e-15)
-  void Set(sF32 f) { sU32 i=sRawCast<sU32,sF32>(f); Val=sU16(((i&0x80000000)>>16)|(((i&0x7f800000)>>13)-(127<<10)+(15<<10))|((i&0x007fe000)>>13)); } // do not care about special cases :-(
+  uint16_t Val;       //                      SEEE EEMM MMMM MMMM  (16 bit, e-15)
+  void Set(float f) { uint32_t i=sRawCast<uint32_t,float>(f); Val=uint16_t(((i&0x80000000)>>16)|(((i&0x7f800000)>>13)-(127<<10)+(15<<10))|((i&0x007fe000)>>13)); } // do not care about special cases :-(
 
   // ...but we want to be able to read halffloats (we do not handle NaN & co)
-  sF32 Get() const
-  { const sU32 f = ((Val&0x8000)<<16) | (((Val&0x7c00)+0x1C000)<<13) | ((Val&0x03FF)<<13);
-    return sRawCast<sF32,sU32>(f);
+  float Get() const
+  { const uint32_t f = ((Val&0x8000)<<16) | (((Val&0x7c00)+0x1C000)<<13) | ((Val&0x03FF)<<13);
+    return sRawCast<float,uint32_t>(f);
   }
 };
 struct sHalfInt   // in case we are using normalized 16 bit integers instead of floats...
 {
-  sU16 Val;
-  void Set(sF32 f) { Val = sU16(int((f+1)*32767.5f)-0x8000)&0xffff; }
+  uint16_t Val;
+  void Set(float f) { Val = uint16_t(int((f+1)*32767.5f)-0x8000)&0xffff; }
 };
 
 struct sVertexFormatHandle : public sVertexFormatHandlePrivate
 {
-  friend sVertexFormatHandle *sCreateVertexFormat(const sU32 *discriptor);
+  friend sVertexFormatHandle *sCreateVertexFormat(const uint32_t *discriptor);
   friend void sDestroyAllVertexFormats();
   friend void sStreamVertexFormat(sWriter &, const sVertexFormatHandle *vhandle);
   friend void sFlushVertexFormat(sBool flush,void *user=0);
@@ -746,11 +746,11 @@ struct sVertexFormatHandle : public sVertexFormatHandlePrivate
   };
 private:
   int Count;
-  sU32 *Data;
+  uint32_t *Data;
   int UseCount;
   int VertexSize[sVF_STREAMMAX];
   int Streams;
-  sU32 AvailMask;                  // used attributes
+  uint32_t AvailMask;                  // used attributes
   sBool IsMemMarkSet;              // sSetMemMark() was called before allocating this
   sVertexFormatHandle *Next;
 
@@ -767,11 +767,11 @@ public:
   sBool Has(int flag) const {
     return (AvailMask & (1<<(flag & sVF_USEMASK)))!=0;
   } // check if the format has a specific attribute
-  sU32 GetAvailMask() const { return AvailMask; }                   // get all available attributes
+  uint32_t GetAvailMask() const { return AvailMask; }                   // get all available attributes
   int GetOffset(int semantic_and_format);
   int GetDataType(int semantic)const;                             // slow: searches the description array
 
-  const sU32 *GetDesc() const { return Data; }                      // if you want to know exactly...
+  const uint32_t *GetDesc() const { return Data; }                      // if you want to know exactly...
 #if sRENDERER==sRENDER_OGL2
   OGLDecl *GetDecl() { return Decl; }                               // this is only for internal use.
 #endif
@@ -790,7 +790,7 @@ extern sVertexFormatHandle *sVertexFormatTSpace4Anim; // pos, normal, tangent wi
 extern sVertexFormatHandle *sVertexFormatInstance;    // uv5/uv6/uv7 as sMatrix34CM in stream[1]
 extern sVertexFormatHandle *sVertexFormatInstancePlus;    // + float4 in uv4
 
-sVertexFormatHandle *sCreateVertexFormat(const sU32 *descriptor); // create a vertex format
+sVertexFormatHandle *sCreateVertexFormat(const uint32_t *descriptor); // create a vertex format
 void sDestroyAllVertexFormats();                                  // called by system... vertex formats are cheap.
 
 void sStreamVertexFormat(sWriter &, const sVertexFormatHandle *vhandle);
@@ -798,7 +798,7 @@ void sStreamVertexFormat(sReader &, sVertexFormatHandle *&vhandle);
 
 /****************************************************************************/
 
-inline sU32 sMakeU32(sF32 x,sF32 y,sF32 z)
+inline uint32_t sMakeU32(float x,float y,float z)
 { return ((int((x+0.5f)*127)&0xff)<<0)
        + ((int((y+0.5f)*127)&0xff)<<8)
        + ((int((z+0.5f)*127)&0xff)<<16); }
@@ -806,11 +806,11 @@ inline sU32 sMakeU32(sF32 x,sF32 y,sF32 z)
 
 struct sVertexBasic               // 16 bytes
 {
-  sF32 px,py,pz;                  // 3 pos
-  sU32 c0;                        // 1 color
-  void Init(sF32 PX,sF32 PY,sF32 PZ,sU32 C0) volatile
+  float px,py,pz;                  // 3 pos
+  uint32_t c0;                        // 1 color
+  void Init(float PX,float PY,float PZ,uint32_t C0) volatile
   { px=PX; py=PY; pz=PZ; c0=sSWAPVC(C0); }
-  void Init(const sVector31 &p,sU32 C0) volatile
+  void Init(const sVector31 &p,uint32_t C0) volatile
   { px=p.x; py=p.y; pz=p.z; c0=sSWAPVC(C0); }
 
   static sVertexFormatHandle* VertexFormat() {return sVertexFormatBasic;}
@@ -818,12 +818,12 @@ struct sVertexBasic               // 16 bytes
 
 struct sVertexStandard            // 32 bytes
 {
-  sF32 px,py,pz;                  // 3 pos
-  sF32 nx,ny,nz;                  // 3 normal
-  sF32 u0,v0;                     // 2 uv's
-  void Init(sF32 PX,sF32 PY,sF32 PZ,sF32 NX,sF32 NY,sF32 NZ,sF32 U0,sF32 V0) volatile
+  float px,py,pz;                  // 3 pos
+  float nx,ny,nz;                  // 3 normal
+  float u0,v0;                     // 2 uv's
+  void Init(float PX,float PY,float PZ,float NX,float NY,float NZ,float U0,float V0) volatile
   { px=PX; py=PY; pz=PZ; nx=NX; ny=NY; nz=NZ; u0=U0; v0=V0; }
-  void Init(const sVector31 &p,const sVector30 &n,sF32 U0,sF32 V0) volatile
+  void Init(const sVector31 &p,const sVector30 &n,float U0,float V0) volatile
   { px=p.x; py=p.y; pz=p.z; nx=n.x; ny=n.y; nz=n.z; u0=U0; v0=V0; }
 
   static sVertexFormatHandle* VertexFormat() {return sVertexFormatStandard;}
@@ -831,13 +831,13 @@ struct sVertexStandard            // 32 bytes
 
 struct sVertexTangent             // 44 bytes
 {
-  sF32 px,py,pz;                  // 3 position
-  sF32 nx,ny,nz;                  // 3 normal
-  sF32 tx,ty,tz;                  // 3 tangent
-  sF32 u0,v0;                     // 2 uv's
-  void Init(sF32 PX,sF32 PY,sF32 PZ,sF32 NX,sF32 NY,sF32 NZ,sF32 TX,sF32 TY,sF32 TZ,sF32 U0,sF32 V0) volatile
+  float px,py,pz;                  // 3 position
+  float nx,ny,nz;                  // 3 normal
+  float tx,ty,tz;                  // 3 tangent
+  float u0,v0;                     // 2 uv's
+  void Init(float PX,float PY,float PZ,float NX,float NY,float NZ,float TX,float TY,float TZ,float U0,float V0) volatile
   { px=PX; py=PY; pz=PZ; nx=NX; ny=NY; nz=NZ; u0=U0; v0=V0; tx=ty=tz=0;}
-  void Init(const sVector31 &p,const sVector30 &n,sF32 U0,sF32 V0) volatile
+  void Init(const sVector31 &p,const sVector30 &n,float U0,float V0) volatile
   { px=p.x; py=p.y; pz=p.z; nx=n.x; ny=n.y; nz=n.z; u0=U0; v0=V0; tx=ty=tz=0; }
 
   static sVertexFormatHandle* VertexFormat() {return sVertexFormatTangent;}
@@ -845,18 +845,18 @@ struct sVertexTangent             // 44 bytes
 
 struct sVertexDouble              // 32 bytes
 {
-  sF32 px,py,pz;                  // 3 pos
-  sU32 c0;                        // 1 color
-  sF32 u0,v0;                     // 4 uv's
-  sF32 u1,v1;
+  float px,py,pz;                  // 3 pos
+  uint32_t c0;                        // 1 color
+  float u0,v0;                     // 4 uv's
+  float u1,v1;
 
-  void Init(sF32 PX,sF32 PY,sF32 PZ,sU32 C0,sF32 U0,sF32 V0,sF32 U1,sF32 V1) volatile
+  void Init(float PX,float PY,float PZ,uint32_t C0,float U0,float V0,float U1,float V1) volatile
   { px=PX; py=PY; pz=PZ; c0=sSWAPVC(C0); u0=U0; v0=V0; u1=U1; v1=V1; }
-  void Init(const sVector31 &p,sU32 C0,sF32 U0,sF32 V0,sF32 U1,sF32 V1) volatile
+  void Init(const sVector31 &p,uint32_t C0,float U0,float V0,float U1,float V1) volatile
   { px=p.x; py=p.y; pz=p.z; c0=sSWAPVC(C0); u0=U0; v0=V0; u1=U1; v1=V1; }
-  void Init(sF32 PX,sF32 PY,sF32 PZ,sU32 C0,sF32 U0,sF32 V0) volatile
+  void Init(float PX,float PY,float PZ,uint32_t C0,float U0,float V0) volatile
   { px=PX; py=PY; pz=PZ; c0=sSWAPVC(C0); u0=U0; v0=V0; u1=0.0f; v1=0.0f; }
-  void Init(const sVector31 &p,sU32 C0,sF32 U0,sF32 V0) volatile
+  void Init(const sVector31 &p,uint32_t C0,float U0,float V0) volatile
   { px=p.x; py=p.y; pz=p.z; c0=sSWAPVC(C0); u0=U0; v0=V0; u1=0.0f; v1=0.0f; }
 
   static sVertexFormatHandle* VertexFormat() {return sVertexFormatDouble;}
@@ -864,15 +864,15 @@ struct sVertexDouble              // 32 bytes
 
 struct sVertexSingle              // 24 bytes
 {
-  sF32 px,py,pz;                  // 3 pos
-  sU32 c0;                        // 1 color
-  sF32 u0,v0;                     // 2 uv's
+  float px,py,pz;                  // 3 pos
+  uint32_t c0;                        // 1 color
+  float u0,v0;                     // 2 uv's
 
-  void Init(sF32 PX,sF32 PY,sF32 PZ,sU32 C0,sF32 U0,sF32 V0) volatile
+  void Init(float PX,float PY,float PZ,uint32_t C0,float U0,float V0) volatile
   { px=PX; py=PY; pz=PZ; c0=sSWAPVC(C0); u0=U0; v0=V0; }
-  void Init(const sVector31 &p,sU32 C0,sF32 U0,sF32 V0) volatile
+  void Init(const sVector31 &p,uint32_t C0,float U0,float V0) volatile
   { px=p.x; py=p.y; pz=p.z; c0=sSWAPVC(C0); u0=U0; v0=V0; }
-  void Init(const sVector31 &p,sU32 C0,const sVector2 &uv) volatile
+  void Init(const sVector31 &p,uint32_t C0,const sVector2 &uv) volatile
   { px=p.x; py=p.y; pz=p.z; c0=sSWAPVC(C0); u0=uv.x; v0=uv.y; }
 
   static sVertexFormatHandle* VertexFormat() {return sVertexFormatSingle;}
@@ -880,15 +880,15 @@ struct sVertexSingle              // 24 bytes
 
 struct sVertexTSpace              // 56 bytes, this will change a lot....
 {
-  sF32 px,py,pz;                  // 3 position
-  sF32 nx,ny,nz;                  // 3 normal
-  sF32 tx,ty,tz;                  // 3 tangent
-  sU32 c0;                        // 1 color
-  sF32 u0,v0;                     // 4 uv's (we WILL want a lightmap!)
-  sF32 u1,v1;
-  void Init(sF32 PX,sF32 PY,sF32 PZ,sF32 NX,sF32 NY,sF32 NZ,sF32 U0,sF32 V0) volatile
+  float px,py,pz;                  // 3 position
+  float nx,ny,nz;                  // 3 normal
+  float tx,ty,tz;                  // 3 tangent
+  uint32_t c0;                        // 1 color
+  float u0,v0;                     // 4 uv's (we WILL want a lightmap!)
+  float u1,v1;
+  void Init(float PX,float PY,float PZ,float NX,float NY,float NZ,float U0,float V0) volatile
   { px=PX; py=PY; pz=PZ; nx=NX; ny=NY; nz=NZ; u0=U0; v0=V0; tx=ty=tz=u1=v1=0; c0=0;}
-  void Init(const sVector31 &p,const sVector30 &n,sF32 U0,sF32 V0) volatile
+  void Init(const sVector31 &p,const sVector30 &n,float U0,float V0) volatile
   { px=p.x; py=p.y; pz=p.z; nx=n.x; ny=n.y; nz=n.z; u0=U0; v0=V0; tx=ty=tz=u1=v1=0; c0=0; }
 
   static sVertexFormatHandle* VertexFormat() {return sVertexFormatTSpace;}
@@ -897,16 +897,16 @@ struct sVertexTSpace              // 56 bytes, this will change a lot....
 
 struct sVertexTSpace4             // 56 bytes, this will change a lot....
 {
-  sF32 px,py,pz;                  // 3 position
-  sF32 nx,ny,nz;                  // 3 normal
-  sF32 tx,ty,tz,tsign;            // 4 tangent
-  sU32 c0;                        // 1 color
-  sF32 u0,v0;                     // 4 uv's (we WILL want a lightmap!)
-  sF32 u1,v1;
+  float px,py,pz;                  // 3 position
+  float nx,ny,nz;                  // 3 normal
+  float tx,ty,tz,tsign;            // 4 tangent
+  uint32_t c0;                        // 1 color
+  float u0,v0;                     // 4 uv's (we WILL want a lightmap!)
+  float u1,v1;
 /*
-  void Init(sF32 PX,sF32 PY,sF32 PZ,sF32 NX,sF32 NY,sF32 NZ,sF32 U0,sF32 V0)
+  void Init(float PX,float PY,float PZ,float NX,float NY,float NZ,float U0,float V0)
   { px=PX; py=PY; pz=PZ; nx=NX; ny=NY; nz=NZ; u0=U0; v0=V0; tx=ty=tz=u1=v1=0; c0=0;}
-  void Init(const sVector31 &p,const sVector30 &n,sF32 U0,sF32 V0)
+  void Init(const sVector31 &p,const sVector30 &n,float U0,float V0)
   { px=p.x; py=p.y; pz=p.z; nx=n.x; ny=n.y; nz=n.z; u0=U0; v0=V0; tx=ty=tz=u1=v1=0; c0=0; }
 */
   static sVertexFormatHandle* VertexFormat() {return sVertexFormatTSpace4;}
@@ -914,13 +914,13 @@ struct sVertexTSpace4             // 56 bytes, this will change a lot....
 
 struct sVertexTSpace4_uv3         // 68 bytes, this will change a lot....
 {
-  sF32 px,py,pz;                  // 3 position
-  sF32 nx,ny,nz;                  // 3 normal
-  sF32 tx,ty,tz,tsign;            // 4 tangent
-  sU32 c0;                        // 1 color
-  sF32 u0,v0;                     // 6 uv's (we WILL want a lightmap!)
-  sF32 u1,v1;
-  sF32 u2,v2;
+  float px,py,pz;                  // 3 position
+  float nx,ny,nz;                  // 3 normal
+  float tx,ty,tz,tsign;            // 4 tangent
+  uint32_t c0;                        // 1 color
+  float u0,v0;                     // 6 uv's (we WILL want a lightmap!)
+  float u1,v1;
+  float u2,v2;
 
   static sVertexFormatHandle* VertexFormat() {return sVertexFormatTSpace4_uv3;}
 };
@@ -1007,9 +1007,9 @@ template <int Start, int Count> struct CBMask
   {
     enum { Val = val>MAX?MAX:(val<MIN?MIN:val) };
   };
-  static const sU64 Mask =
-    ( (((sU64(1)<<Clamp<(Count+3)/4-32,0,32>::Val)-1)<<32) |
-      ((sU64(1)<<Clamp<(Count+3)/4,0,32>::Val)-1)
+  static const uint64_t Mask =
+    ( (((uint64_t(1)<<Clamp<(Count+3)/4-32,0,32>::Val)-1)<<32) |
+      ((uint64_t(1)<<Clamp<(Count+3)/4,0,32>::Val)-1)
     )<<(Start/4);
 };
 
@@ -1028,11 +1028,11 @@ public:
 
   int RegStart;                            // starting register
   int RegCount;                            // register count
-  sS16 Slot;                                // dedicated slot & shader type
-  sU16 Flags;                               // sCBF_???
+  int16_t Slot;                                // dedicated slot & shader type
+  uint16_t Flags;                               // sCBF_???
 
   void SetCfg(int slot, int start, int count);
-  void SetCfg(int slot, int start, int count, sU64 mask);
+  void SetCfg(int slot, int start, int count, uint64_t mask);
   void SetPtr(void **dataptr,void *data);   // used internally during initialization
   template <typename Type>
   sINLINE void Init(Type *data) { SetCfg(Type::Slot,Type::RegStart,Type::RegCount,CBMask<Type::RegStart,Type::RegCount>::Mask); SetPtr(0,data); }
@@ -1054,7 +1054,7 @@ public:
   sCBuffer()
   {
     typedef int check0[(Type::RegStart&3)?-1:1];    // compile time check for register alignment
-    typedef int check1[((sU32)Type::RegCount<(sizeof(Type)+15)/16)?-1:1];    // compile time check for data size / register count
+    typedef int check1[((uint32_t)Type::RegCount<(sizeof(Type)+15)/16)?-1:1];    // compile time check for data size / register count
     Mask = CBMask<Type::RegStart,Type::RegCount>::Mask;
     void *D = (void*)&Data;
     RegStart=Type::RegStart; 
@@ -1099,10 +1099,10 @@ public:
   void OverridePtr(void *);
   ~sCBufferBase();
 
-  sU8 RegStart;
-  sU8 RegCount;
-  sU8 Slot;
-  sU8 pad;
+  uint8_t RegStart;
+  uint8_t RegCount;
+  uint8_t Slot;
+  uint8_t pad;
 
   void SetCfg(int slot, int start, int count);
   void *DataPersist;
@@ -1138,7 +1138,7 @@ struct sShaderBlob
 {
   int Type;
   int Size;
-  sU8 Data[1];                              // dummy size, real size given by Bytes
+  uint8_t Data[1];                              // dummy size, real size given by Bytes
 
   void SetNext(int type);
   sShaderBlob *Next();
@@ -1146,16 +1146,16 @@ struct sShaderBlob
   sShaderBlob *GetAny(int kind, int platform);
 };
 
-void sSerializeShaderBlob(sU8 *data, int &size, sReader &stream);
-void sSerializeShaderBlob(const sU8 *data, int size, sWriter &stream);
+void sSerializeShaderBlob(uint8_t *data, int &size, sReader &stream);
+void sSerializeShaderBlob(const uint8_t *data, int size, sWriter &stream);
 
 // global functions
 
 sShaderTypeFlag sGetShaderPlatform();
 int sGetShaderProfile();
 
-sShader *sCreateShader(int type,const sU8 *code,int bytes);      // create the shader from shader blob
-sShader *sCreateShaderRaw(int type,const sU8 *code,int bytes);   // create the shader from "raw" data
+sShader *sCreateShader(int type,const uint8_t *code,int bytes);      // create the shader from shader blob
+sShader *sCreateShaderRaw(int type,const uint8_t *code,int bytes);   // create the shader from "raw" data
 //void sSetShaders(sShader *vs,sShader *ps,sShader *gs=0,sLinkedShader **link=0,sCBufferBase **cbuffers=0,int cbcount=0);
 void sSetCBuffers(sCBufferBase **cbuffers,int cbcount);
 sINLINE void sSetCBuffers(sCBufferBase *cbuffers)                 { sSetCBuffers(&cbuffers,1); }
@@ -1166,8 +1166,8 @@ sCBufferBase *sGetCurrentCBuffer(int slot);                      // needed for p
 
 void sSOON_OBSOLETE sSetVSParam(int o, int count, const sVector4* vsf);    // VS consts are persistent between shaders
 void sOBSOLETE sSetPSParam(int o, int count, const sVector4* psf);    // reset all PS constants every time you switch shaders
-void sOBSOLETE sSetVSBool(sU32 bits,sU32 mask);                         // update predication
-void sOBSOLETE sSetPSBool(sU32 bits,sU32 mask);
+void sOBSOLETE sSetVSBool(uint32_t bits,uint32_t mask);                         // update predication
+void sOBSOLETE sSetPSBool(uint32_t bits,uint32_t mask);
 
 // the shader class
 
@@ -1176,19 +1176,19 @@ class sShader : public sShaderPrivate
 public:
   union
   {
-  sU8 *Data;                      // shader code
+  uint8_t *Data;                      // shader code
   sShaderBlob *Blob;
   };
   int Size;                      // size of code in bytes
   int Type;                      // PS/VS/GS
   int UseCount;                  // refcounting
-  sU32 Hash;
+  uint32_t Hash;
   sShader *Link;
 
   ~sShader();
-  sShader(int type,const sU8 *data,int length,sU32 hash,sBool raw=sFALSE);
-  friend sShader *sCreateShader(int type,const sU8 *code,int bytes);
-  friend sShader *sCreateShaderRaw(int type,const sU8 *code,int bytes);
+  sShader(int type,const uint8_t *data,int length,uint32_t hash,sBool raw=sFALSE);
+  friend sShader *sCreateShader(int type,const uint8_t *code,int bytes);
+  friend sShader *sCreateShaderRaw(int type,const uint8_t *code,int bytes);
   friend void sSetShaders(sShader *vs,sShader *ps,sShader *gs,sLinkedShader **link,sCBufferBase **cbuffers,int cbcount);
   friend void sCreateShader2(sShader *shader,sShaderBlob *blob);
   friend void sDeleteShader2(sShader *shader);
@@ -1210,7 +1210,7 @@ public:
   void AddRef();
   void Release();
   sBool CheckKind(int);
-  const sU8 *GetCode(int &bytes);
+  const uint8_t *GetCode(int &bytes);
   sShader *Bind(sVertexFormatHandle *vformat, sShader *pshader);
 
   sDNode Node;                    // privatE: list of all shaders
@@ -1225,8 +1225,8 @@ class sCBuffer
   int RegStart;
   int RegCount;
   int Slot;
-  sU32 *Copy;
-  sU32 *Source;
+  uint32_t *Copy;
+  uint32_t *Source;
 public:
   sCBuffer(int start,int count,int slot,void *source);
   ~sCBuffer();
@@ -1243,8 +1243,8 @@ typedef sOBSOLETE class sShader *sShaderHandle;
                                                               // always first set shader, then set constants
 void sOBSOLETE sAddRefVS(sShader * vsh);
 void sOBSOLETE sAddRefPS(sShader * psh);
-sShader sOBSOLETE *sCreateVS(const sU32 *data,int count, int level=sSTF_DX_20);
-sShader sOBSOLETE *sCreatePS(const sU32 *data,int count, int level=sSTF_DX_20);
+sShader sOBSOLETE *sCreateVS(const uint32_t *data,int count, int level=sSTF_DX_20);
+sShader sOBSOLETE *sCreatePS(const uint32_t *data,int count, int level=sSTF_DX_20);
 void sOBSOLETE sDeleteVS(sShader *&);
 void sOBSOLETE sDeletePS(sShader *&);
 sBool sOBSOLETE sValidVS(sShader * vsh);
@@ -1255,7 +1255,7 @@ sBool sOBSOLETE sValidPS(sShader * psh);
 void sOBSOLETE sReleaseShader(sShader * sh);                      // shaders are refcounted
 void sOBSOLETE sAddRefShader(sShader * sh);                       // shaders are refcounted
 sBool sOBSOLETE sCheckShader(sShader * sh,int type);      // checks if the shader handle is a valid shader of the given type
-const sOBSOLETE sU8 *sGetShaderCode(sShader * sh,int &bytes);    // get code from which the shader was created
+const sOBSOLETE uint8_t *sGetShaderCode(sShader * sh,int &bytes);    // get code from which the shader was created
 
 /****************************************************************************/
 /***                                                                      ***/
@@ -1299,9 +1299,9 @@ public:
   void SetTarget(const sTargetSpec &spec);
   void SetTargetCurrent(const sRect *rect=0);   // takes whatever was set with sSetRendertarget()
   void SetTargetScreen(const sRect *rect=0); // set target to screen
-  void SetZoom(sF32 aspect,sF32 zoom);  // zoom specifies the fov of the smaller axis. see getaspect.
-  void SetZoom(sF32 zoom);        // as above, aspect is calculated from TargetSizeXY
-  sF32 GetZoom() const;           // if you might want your parameter given in SetZoom(sF32) back
+  void SetZoom(float aspect,float zoom);  // zoom specifies the fov of the smaller axis. see getaspect.
+  void SetZoom(float zoom);        // as above, aspect is calculated from TargetSizeXY
+  float GetZoom() const;           // if you might want your parameter given in SetZoom(float) back
   void Prepare(int update=sVUF_ALL);
   void UpdateModelMatrix(const sMatrix34 &mat); // just change model matrix and call prepare.
 
@@ -1316,33 +1316,33 @@ public:
 
   int TargetSizeX;               // size of the rendertarget you want to use.
   int TargetSizeY;               // size of the rendertarget you want to use.
-  sF32 TargetAspect;              // aspect ratio of the rendertarget you want to use.
+  float TargetAspect;              // aspect ratio of the rendertarget you want to use.
   sRect Target;                   // portion inside the rendertarget you want to use.
 
-  sF32 ClipNear;                  // z-clipping
-  sF32 ClipFar;
-//  sF32 Zoom,Aspect;
-  sF32 ZoomX;                     // cot(fov_x / 2)
-  sF32 ZoomY;                     // cot(fov_x / 2)*ys/xs
+  float ClipNear;                  // z-clipping
+  float ClipFar;
+//  float Zoom,Aspect;
+  float ZoomX;                     // cot(fov_x / 2)
+  float ZoomY;                     // cot(fov_x / 2)*ys/xs
 
-  sF32 CenterX;                   // center (set to 0.5 for real center), inside Window
-  sF32 CenterY;
+  float CenterX;                   // center (set to 0.5 for real center), inside Window
+  float CenterY;
   int Orthogonal;                // completly changes meaning of everything: render orthogonally. Please also set CenterX and CenterY to 0
 
-  sF32 DepthOffset;               // depth value offset
-  void SetDepthOffset(sF32 cs_distance, sF32 cs_offset);  // calculating depht offset based on camerspace distance and camera space offset
-  sF32 GetAspect() { return ZoomX/ZoomY; }  // aspect is X/Y, like 16/9. Previously it was defined the other way around!
+  float DepthOffset;               // depth value offset
+  void SetDepthOffset(float cs_distance, float cs_offset);  // calculating depht offset based on camerspace distance and camera space offset
+  float GetAspect() { return ZoomX/ZoomY; }  // aspect is X/Y, like 16/9. Previously it was defined the other way around!
 
   // using the frustum
 
   void MakeRayPixel(int mx,int my,sRay &ray) const;    // make ray, mx and my normalized to -1..1
-  void MakeRay(sF32 mx,sF32 my,sRay &ray) const;    // make ray, mx and my normalized to -1..1
+  void MakeRay(float mx,float my,sRay &ray) const;    // make ray, mx and my normalized to -1..1
   sBool Transform(const sVector31 &p,int &ix,int &iy) const;
-  sBool Transform(const sVector31 &p,sF32 &ix,sF32 &iy) const;
+  sBool Transform(const sVector31 &p,float &ix,float &iy) const;
   int Visible(const sAABBox &box) const { return Visible(box,ClipNear,ClipFar); }    // 0=total out, 1=clip, 2=total in
-  int Visible(const sAABBox &box, sF32 clipnear, sF32 clipfar) const;    // 0=total out, 1=clip, 2=total in
-  int VisibleDist(const sAABBox &box,sF32 &dist) const;    // if not total out, return distance of closest point
-  int VisibleDist2(const sAABBox &box,sF32 &near, sF32 &far) const; // if not total out, return distance range
+  int Visible(const sAABBox &box, float clipnear, float clipfar) const;    // 0=total out, 1=clip, 2=total in
+  int VisibleDist(const sAABBox &box,float &dist) const;    // if not total out, return distance of closest point
+  int VisibleDist2(const sAABBox &box,float &near, float &far) const; // if not total out, return distance range
   sBool Get2DBounds(const sAABBox &box,sFRect &bounds) const; // get 2D bounding box enclosing "box" in normalized clip coordinates. returns sFALSE if not visible.
   sBool Get2DBounds(const sVector31 points[],int count,sFRect &bounds) const; // same as above, 2D bbox for convex hull of "points". returns sFALSE if not visible.
 };
@@ -1486,7 +1486,7 @@ public:
 
   int VertexOffset[sVF_STREAMMAX]; // offset into vertex streams
 
-  sU32 BlendFactor;               // override materials blend factor
+  uint32_t BlendFactor;               // override materials blend factor
 
   sTextureBase *Indirect;         // compute shader: buffer for indirect drawing
 
@@ -1519,7 +1519,7 @@ private:
   sGeoPrim *CurrentPrim;          // used to unlock vertex buffer
   
   sVertexFormatHandle *Format;
-  sU32 MorphTargetId;
+  uint32_t MorphTargetId;
 
   void InitPrivate();             // create private implementation
   void ExitPrivate();             // destroys private implementation
@@ -1540,8 +1540,8 @@ public:
   void Init(int flags,sVertexFormatHandle *);
   sVertexFormatHandle *GetFormat() { return Format; }
   int GetFlags()const { return Flags; }
-  sINLINE void SetMorphTargetId(sU32 id) { MorphTargetId=id; };
-  sINLINE sU32 GetMorphTargetId() const { return MorphTargetId; };
+  sINLINE void SetMorphTargetId(uint32_t id) { MorphTargetId=id; };
+  sINLINE uint32_t GetMorphTargetId() const { return MorphTargetId; };
 
   void Draw();
   void Draw(const sGeometryDrawInfo &di);
@@ -1570,8 +1570,8 @@ public:
   void Merge(sGeometry *a,sGeometry *b);
   void MergeVertexStream(int DestStream,sGeometry *src,int SrcStream);
 
-  void LoadCube(sU32 c0=0xffffffffU,sF32 sx=1,sF32 sy=1,sF32 sz=1,sGeometryDuration gd=sGD_STATIC);  // load cube (24 vertices). is quite smart in interpreting vertex formats and geometry flags
-  void LoadTorus(int tx=48,int ty=12,sF32 ro=1.0f,sF32 ri=0.25f,sGeometryDuration=sGD_STATIC,sU32 c0=0xffffffffU);  // load torus
+  void LoadCube(uint32_t c0=0xffffffffU,float sx=1,float sy=1,float sz=1,sGeometryDuration gd=sGD_STATIC);  // load cube (24 vertices). is quite smart in interpreting vertex formats and geometry flags
+  void LoadTorus(int tx=48,int ty=12,float ro=1.0f,float ri=0.25f,sGeometryDuration=sGD_STATIC,uint32_t c0=0xffffffffU);  // load torus
 
   // dynamic buffer loading, full control to update only parts of the buffer
 
@@ -1602,11 +1602,11 @@ public:
 };
 
 // macros for generating quads:
-// don't template this, only sU16 & sU32 are allowed!
+// don't template this, only uint16_t & uint32_t are allowed!
 
-inline void sQuad(sU16 *&ip,int o,int a,int b,int c,int d)
+inline void sQuad(uint16_t *&ip,int o,int a,int b,int c,int d)
 {
-  volatile sU32 *dst = (sU32*)ip;
+  volatile uint32_t *dst = (uint32_t*)ip;
 
   o = (o<<16)|o;
 #if sCONFIG_BE
@@ -1619,15 +1619,15 @@ inline void sQuad(sU16 *&ip,int o,int a,int b,int c,int d)
   *dst++ = o+((d<<16)|c);
 #endif
 
-  ip = (sU16*)dst;
+  ip = (uint16_t*)dst;
 }
 
-inline void sQuadI(sU16 *&ip,int o,int d,int c,int b,int a)
+inline void sQuadI(uint16_t *&ip,int o,int d,int c,int b,int a)
 {
   sQuad(ip, o, a, b, c, d);
 }
 
-inline void sQuad(sU32 *&ip,int o,int a,int b,int c,int d)
+inline void sQuad(uint32_t *&ip,int o,int a,int b,int c,int d)
 {
   *ip++ = o+a;
   *ip++ = o+b;
@@ -1637,7 +1637,7 @@ inline void sQuad(sU32 *&ip,int o,int a,int b,int c,int d)
   *ip++ = o+d;
 }
 
-inline void sQuadI(sU32 *&ip,int o,int d,int c,int b,int a)
+inline void sQuadI(uint32_t *&ip,int o,int d,int c,int b,int a)
 {
   sQuad(ip, o, a, b, c, d);
 }
@@ -1654,9 +1654,9 @@ public:
   sOccQuery();
   ~sOccQuery();
   
-  sF32 Last;                      // last queried occlusion
-  sF32 Average;                   // average occlusion
-  sF32 Filter;                    // Average' = Average*(1-Filter) + Last*Filter. 1=hard, 0.001=soft
+  float Last;                      // last queried occlusion
+  float Average;                   // average occlusion
+  float Filter;                    // Average' = Average*(1-Filter) + Last*Filter. 1=hard, 0.001=soft
 
   void Begin(int pixels);        // begin sampling
   void End();                     // end sampling
@@ -1682,7 +1682,7 @@ protected:
 
   int Loading;
   int LockFlags;
-  sU8 *LoadBuffer;                // some implementations require a buffer for loading textures
+  uint8_t *LoadBuffer;                // some implementations require a buffer for loading textures
 
   void InitPrivate();             // create private implementation
   void ExitPrivate();             // destroys private implementation
@@ -1718,8 +1718,8 @@ public:
   int SizeX,SizeY,SizeZ;
 
   //!
-  sU16 FrameRT;                   // last frame rendered into rendertarget
-  sU16 SceneRT;                   // last scene rendered into rendertarget
+  uint16_t FrameRT;                   // last frame rendered into rendertarget
+  uint16_t SceneRT;                   // last scene rendered into rendertarget
 };
 
 // shortcut implementation for loading hardware dependant texture data
@@ -1740,8 +1740,8 @@ class sTexture2D : public sTextureBase
 {
 private:
   friend void sCopyCubeFace(sTexture2D *, sTextureCube *, sTexCubeFace);
-  friend void sSetRendertarget(const sRect *vrp,sTexture2D *tex,int flags, sU32 clearcolor);
-  friend void sSetRendertarget(const sRect *vrp,int flags,sU32 clearcolor,sTexture2D **tex,int count);
+  friend void sSetRendertarget(const sRect *vrp,sTexture2D *tex,int flags, uint32_t clearcolor);
+  friend void sSetRendertarget(const sRect *vrp,int flags,uint32_t clearcolor,sTexture2D **tex,int count);
   friend void sGrabScreen(sTexture2D *tex, sGrabFilterFlags filter, const sRect *dst, const sRect *src);
   friend void sSetScreen(sTexture2D *tex, sGrabFilterFlags filter, const sRect *dst, const sRect *src);
 
@@ -1759,17 +1759,17 @@ private:
   int OriginalSizeY;             // this is required for the sTEX_SCREENSIZE flag
 public:
   sTexture2D();
-  sTexture2D(int xs,int ys,sU32 flags,int mipmaps=0);
+  sTexture2D(int xs,int ys,uint32_t flags,int mipmaps=0);
   virtual ~sTexture2D();
 
   void Init(int xs, int ys, int flags,int mipmaps=0, sBool force=sFALSE);
   void ReInit(int xs, int ys, int flags,int mipmaps=0);
   void Clear();
 
-  void BeginLoad(sU8 *&data,int &pitch,int mipmap=0);
-  void BeginLoadPartial(const sRect &rect,sU8 *&data,int &pitch,int mipmap=0);
+  void BeginLoad(uint8_t *&data,int &pitch,int mipmap=0);
+  void BeginLoadPartial(const sRect &rect,uint8_t *&data,int &pitch,int mipmap=0);
   void EndLoad();
-  void LoadAllMipmaps(sU8 *data);
+  void LoadAllMipmaps(uint8_t *data);
   void *BeginLoadPalette();       // most platforms don't support palettes
   void EndLoadPalette();
 
@@ -1788,14 +1788,14 @@ class sTextureCube :
 {
 private:
   friend void sCopyCubeFace(sTexture2D *, sTextureCube *, sTexCubeFace);
-  friend void sSetRendertargetCube(sTextureCube* tex, sTexCubeFace cf, int clearflags, sU32 clearcolor);
+  friend void sSetRendertargetCube(sTextureCube* tex, sTexCubeFace cf, int clearflags, uint32_t clearcolor);
 
   sTexCubeFace  LockedFace;
 #if sRENDERER==sRENDER_DX9
   virtual void OnLostDevice(sBool reinit=sFALSE);
 #endif
 #if sRENDERER==sRENDER_OGL2
-  sU32 GLFBName[6];
+  uint32_t GLFBName[6];
   int LoadMipmap;
   int LoadFace;
 #endif
@@ -1811,9 +1811,9 @@ public:
   void Init(int dim, int flags, int mipmaps=0, sBool force=sFALSE);
   void Clear();
 
-  void BeginLoad(sTexCubeFace cf, sU8*& data, int& pitch, int mipmap=0);
+  void BeginLoad(sTexCubeFace cf, uint8_t*& data, int& pitch, int mipmap=0);
   void EndLoad();
-  void LoadAllMipmaps(sU8 *data);
+  void LoadAllMipmaps(uint8_t *data);
 
   // read only!
   int sSOON_OBSOLETE SizeXY;                    // size of texture
@@ -1835,12 +1835,12 @@ private:
 #endif
 
 public:
-  sTexture3D(int xs, int ys, int zs, sU32 flags);
+  sTexture3D(int xs, int ys, int zs, uint32_t flags);
   virtual ~sTexture3D();
 
-  void BeginLoad(sU8*& data, int& rpitch, int& spitch, int mipmap=0);
+  void BeginLoad(uint8_t*& data, int& rpitch, int& spitch, int mipmap=0);
   void EndLoad();
-  void Load(sU8 *src);
+  void Load(uint8_t *src);
   void sSOON_OBSOLETE GetSize(int &xs,int &ys,int &zs) { xs=SizeX; ys=SizeY; zs=SizeZ; }
 };
 
@@ -1890,8 +1890,8 @@ public:
   void Fix();                                         // check and repear ranges
 
   sVector30 LightDir[sMTRLENV_LIGHTS];                // 4 directional lights
-  sU32 LightColor[sMTRLENV_LIGHTS];                   // color 0x00000000 disables light
-  sU32 AmbientColor;                                  // ambient color.
+  uint32_t LightColor[sMTRLENV_LIGHTS];                   // color 0x00000000 disables light
+  uint32_t AmbientColor;                                  // ambient color.
 
   sMatrix44 Matrix[sMTRLENV_MATRICES];                // general purpose matrices
   sVector4 Color[sMTRLENV_COLORS];                    // general purpose pixel shader colors
@@ -1899,18 +1899,18 @@ public:
   // view effect flags
 
   // fog parameters
-  sF32 FogMax;
-  sF32 FogStart;
-  sF32 FogEnd;
-  sF32 FogDensity;
-  sU32 FogColor;
+  float FogMax;
+  float FogStart;
+  float FogEnd;
+  float FogDensity;
+  uint32_t FogColor;
 
   // depth of field ipp parameters
-  sF32 DOFBlurNear;                                   // near plane with maximal dof blur
-  sF32 DOFFocusNear;                                  // near plane start with zero dof blur
-  sF32 DOFFocusFar;                                   // far plane ending zero dof blur
-  sF32 DOFBlurFar;                                    // far plane with maximal dof blur
-  sF32 DOFBlurMax;                                    // maximal dof blur factor [0..1]
+  float DOFBlurNear;                                   // near plane with maximal dof blur
+  float DOFFocusNear;                                  // near plane start with zero dof blur
+  float DOFFocusFar;                                   // far plane ending zero dof blur
+  float DOFBlurFar;                                    // far plane with maximal dof blur
+  float DOFBlurMax;                                    // maximal dof blur factor [0..1]
 };
 
 // material render state flags
@@ -1919,18 +1919,18 @@ struct sMaterialRS
   sMaterialRS();
 
   // don't change anything here unless you change sMaterial too
-  sU32 Flags;                               // sMTRL_?? flags
-  sU8 FuncFlags[4];                         // FuncFlags[sMFT_??] = sMFF_?? flags for depth test [0], alpha test [1] and stencil test [2]
-  sU32 TFlags[sMTRL_MAXTEX];                // sMTF_?? flags
-  sU32 BlendColor;                          // sMB?_?? flags for color
-  sU32 BlendAlpha;                          // sMB?_?? flags for alpha or sMB_SAMEASCOLOR
-  sU32 BlendFactor;                         // blendfactor 
-  sU8 StencilOps[6];                        // sMSO_??? two sided stencil op flags for FAIL, ZFAIL, PASS (CW, CCW)
-  sU8 StencilRef;														// the stencil reference value
-  sU8 StencilMask;                          //
-  sU8 AlphaRef;                             // reference for alpha test
-  sU8 pad[3];
-  sF32 LodBias[sMTRL_MAXTEX];               // mipmap lod bias. this interface is not final, it does not get saved!
+  uint32_t Flags;                               // sMTRL_?? flags
+  uint8_t FuncFlags[4];                         // FuncFlags[sMFT_??] = sMFF_?? flags for depth test [0], alpha test [1] and stencil test [2]
+  uint32_t TFlags[sMTRL_MAXTEX];                // sMTF_?? flags
+  uint32_t BlendColor;                          // sMB?_?? flags for color
+  uint32_t BlendAlpha;                          // sMB?_?? flags for alpha or sMB_SAMEASCOLOR
+  uint32_t BlendFactor;                         // blendfactor 
+  uint8_t StencilOps[6];                        // sMSO_??? two sided stencil op flags for FAIL, ZFAIL, PASS (CW, CCW)
+  uint8_t StencilRef;														// the stencil reference value
+  uint8_t StencilMask;                          //
+  uint8_t AlphaRef;                             // reference for alpha test
+  uint8_t pad[3];
+  float LodBias[sMTRL_MAXTEX];               // mipmap lod bias. this interface is not final, it does not get saved!
 
   sBool operator==(const sMaterialRS& rs)const;
   sBool operator!=(const sMaterialRS& rs)const { return !((*this)==rs); }
@@ -1961,7 +1961,7 @@ public:
   sShader *ComputeShader;
 #endif
 
-  sU32 validflag;
+  uint32_t validflag;
   bool Validate()
   { if(!VertexShader) return false;
     if(!PixelShader) return false;
@@ -1986,8 +1986,8 @@ protected:
 #if sRENDERER==sRENDER_DX9 || sRENDERER==sRENDER_BLANK
 public: // need access from specialized sToolPlatforms...
   void SetStates(int variant=0);
-  void AddMtrlFlags(sU32 *&data);                     // add Flags and Blend 
-  void AllocStates(const sU32 *data,int count,int var);  // optimise and copy state array from static buffer to material
+  void AddMtrlFlags(uint32_t *&data);                     // add Flags and Blend 
+  void AllocStates(const uint32_t *data,int count,int var);  // optimise and copy state array from static buffer to material
 protected:
 #endif
 
@@ -2039,22 +2039,22 @@ public:
   int NameId;
 
   // sMaterialRS: don't change anything here unless you change sMaterialRS too
-  sU32 Flags;                               // sMTRL_?? flags
-  sU8 FuncFlags[4];                         // FuncFlags[sMFT_??] = sMFF_?? flags for depth test [0], alpha test [1] and stencil test [2]
-  sU32 TFlags[sMTRL_MAXTEX];                // sMTF_?? flags
-  sU32 BlendColor;                          // sMB?_?? flags for color
-  sU32 BlendAlpha;                          // sMB?_?? flags for alpha or sMB_SAMEASCOLOR
-  sU32 BlendFactor;                         // blendfactor 
-  sU8 StencilOps[6];                        // sMSO_??? two sided stencil op flags for FAIL, ZFAIL, PASS (CW, CCW)
-  sU8 StencilRef;														// the stencil reference value
-  sU8 StencilMask;                          //
-  sU8 AlphaRef;                             // reference for alpha test
-  sU8 pad[3];
-  sF32 LodBias[sMTRL_MAXTEX];               // mipmap lod bias. this interface is not final, it does not get saved!
+  uint32_t Flags;                               // sMTRL_?? flags
+  uint8_t FuncFlags[4];                         // FuncFlags[sMFT_??] = sMFF_?? flags for depth test [0], alpha test [1] and stencil test [2]
+  uint32_t TFlags[sMTRL_MAXTEX];                // sMTF_?? flags
+  uint32_t BlendColor;                          // sMB?_?? flags for color
+  uint32_t BlendAlpha;                          // sMB?_?? flags for alpha or sMB_SAMEASCOLOR
+  uint32_t BlendFactor;                         // blendfactor 
+  uint8_t StencilOps[6];                        // sMSO_??? two sided stencil op flags for FAIL, ZFAIL, PASS (CW, CCW)
+  uint8_t StencilRef;														// the stencil reference value
+  uint8_t StencilMask;                          //
+  uint8_t AlphaRef;                             // reference for alpha test
+  uint8_t pad[3];
+  float LodBias[sMTRL_MAXTEX];               // mipmap lod bias. this interface is not final, it does not get saved!
 
   // end of sMaterialRS
 #if sRENDERER==sRENDER_DX9 || sRENDERER==sRENDER_DX11                  // my console friends get angry if i make the material structure any larger...
-  sU16 TBind[sMTRL_MAXTEX];                 // sMTB_?? flags. to which shader and stage is the texture to be mapped?
+  uint16_t TBind[sMTRL_MAXTEX];                 // sMTB_?? flags. to which shader and stage is the texture to be mapped?
 #endif
 };
 
@@ -2378,7 +2378,7 @@ public:
 
 extern int sGFXRendertargetX;
 extern int sGFXRendertargetY;
-extern sF32 sGFXRendertargetAspect;
+extern float sGFXRendertargetAspect;
 extern sALIGNED(sRect, sGFXViewRect, 16);
 
 //extern sMatrix44 sGFXMatrices[sGM_MAX];
@@ -2399,8 +2399,8 @@ extern int sGFXResetScreenY;
 // alpha=sTRUE => use DXT5 (else use DXT1)
 // quality: 0=normal (okay), 1=good (slower)
 //    |128  to enable dithering
-void sCompressDXTBlock(sU8 *dest,const sU32 *src,sBool alpha,int quality);
-void sFastPackDXT(sU8 *d,sU32 *bmp,int xs,int ys,int format,int quality);
+void sCompressDXTBlock(uint8_t *dest,const uint32_t *src,sBool alpha,int quality);
+void sFastPackDXT(uint8_t *d,uint32_t *bmp,int xs,int ys,int format,int quality);
 
 /****************************************************************************/
 

@@ -59,9 +59,9 @@ int sFindHigherPower(int x)
   return y;
 };
 
-sU32 sMakeMask(sU32 max)
+uint32_t sMakeMask(uint32_t max)
 {
-  sU32 mask = max;
+  uint32_t mask = max;
   mask |= mask>>1;
   mask |= mask>>2;
   mask |= mask>>4;
@@ -70,9 +70,9 @@ sU32 sMakeMask(sU32 max)
   return mask;
 }
 
-sU64 sMakeMask(sU64 max)
+uint64_t sMakeMask(uint64_t max)
 {
-  sU64 mask = max;
+  uint64_t mask = max;
   mask |= mask>>1;
   mask |= mask>>2;
   mask |= mask>>4;
@@ -82,7 +82,7 @@ sU64 sMakeMask(sU64 max)
   return mask;
 }
 
-sU32 sPart1By1(sU32 x) // "inserts" a 0 bit between each of the low 16 bits of x
+uint32_t sPart1By1(uint32_t x) // "inserts" a 0 bit between each of the low 16 bits of x
 {
                                     // x = ---- ---- ---- ---- fedc ba98 7654 3210 (bits)
   x = (x ^ (x <<  8)) & 0x00ff00ff; // x = ---- ---- fedc ba98 ---- ---- 7654 3210
@@ -92,7 +92,7 @@ sU32 sPart1By1(sU32 x) // "inserts" a 0 bit between each of the low 16 bits of x
   return x;
 }
 
-sU32 sPart1By2(sU32 x) // "inserts" two 0 bits between each of the low 10 bits of x
+uint32_t sPart1By2(uint32_t x) // "inserts" two 0 bits between each of the low 10 bits of x
 {
                                     // x = ---- ---- ---- ---- ---- --98 7654 3210 (bits)
   x = (x ^ (x << 16)) & 0xff0000ff; // x = ---- --98 ---- ---- ---- ---- 7654 3210
@@ -102,7 +102,7 @@ sU32 sPart1By2(sU32 x) // "inserts" two 0 bits between each of the low 10 bits o
   return x;
 }
 
-sU32 sCompact1By1(sU32 x) // inverse of sPart1By1 - "delete" all odd-indexed bits
+uint32_t sCompact1By1(uint32_t x) // inverse of sPart1By1 - "delete" all odd-indexed bits
 {
   x &= 0x55555555;                  // x = -f-e -d-c -b-a -9-8 -7-6 -5-4 -3-2 -1-0 (bits)
   x = (x ^ (x >>  1)) & 0x33333333; // x = --fe --dc --ba --98 --76 --54 --32 --10
@@ -112,7 +112,7 @@ sU32 sCompact1By1(sU32 x) // inverse of sPart1By1 - "delete" all odd-indexed bit
   return x;
 }
 
-sU32 sCompact1By2(sU32 x) // inverse of sPart1By2 - "delete" two bits after every bit
+uint32_t sCompact1By2(uint32_t x) // inverse of sPart1By2 - "delete" two bits after every bit
 {
   x &= 0x09249249;                  // x = ---- 9--8 --7- -6-- 5--4 --3- -2-- 1--0 (bits)
   x = (x ^ (x >>  2)) & 0x030c30c3; // x = ---- --98 ---- 76-- --54 ---- 32-- --10
@@ -124,14 +124,14 @@ sU32 sCompact1By2(sU32 x) // inverse of sPart1By2 - "delete" two bits after ever
 
 /****************************************************************************/
 
-sU64 sHashStringFNV(const sChar *text)
+uint64_t sHashStringFNV(const sChar *text)
 {
-  sU64 hash = 0x84222325cbf29ce4ULL;
-  const sU64 prime = 0x00000100000001b3ULL;
+  uint64_t hash = 0x84222325cbf29ce4ULL;
+  const uint64_t prime = 0x00000100000001b3ULL;
 
   while(*text)
   {
-    sU16 tmp = (sU16) *text++;
+    uint16_t tmp = (uint16_t) *text++;
 
     hash ^= (tmp >> 0) & 0xff;
     hash *= prime;
@@ -142,17 +142,17 @@ sU64 sHashStringFNV(const sChar *text)
 }
 
 static const int Adler32_Base = 65521;
-static sU32 Adler32_s1=1;
-static sU32 Adler32_s2=0;
+static uint32_t Adler32_s1=1;
+static uint32_t Adler32_s2=0;
 
-sU32 sChecksumAdler32(const sU8 *data,int size)
+uint32_t sChecksumAdler32(const uint8_t *data,int size)
 {
   // this can be optimised, see wikipedia...
 
 
-  sU32 s1 = 1;
-  sU32 s2 = 0;
-  const sU8 *end = data+size;
+  uint32_t s1 = 1;
+  uint32_t s2 = 0;
+  const uint8_t *end = data+size;
   while(data<end)
   {
     s1 = (s1+(*data++)) % Adler32_Base; 
@@ -168,9 +168,9 @@ void sChecksumAdler32Begin()
   Adler32_s2 = 0;
 }
 
-void sChecksumAdler32Add(const sU8 *data,int size)
+void sChecksumAdler32Add(const uint8_t *data,int size)
 {
-  const sU8 *end = data+size;
+  const uint8_t *end = data+size;
   while(data<end)
   {
     Adler32_s1 = (Adler32_s1+(*data++)) % Adler32_Base;
@@ -178,14 +178,14 @@ void sChecksumAdler32Add(const sU8 *data,int size)
   }
 }
 
-sU32 sChecksumAdler32End()
+uint32_t sChecksumAdler32End()
 {
   return (Adler32_s2<<16) + Adler32_s1;
 }
 
 /****************************************************************************/
 
-static sU32 sCRCTable[256] =
+static uint32_t sCRCTable[256] =
 {
   0x00000000L, 0x77073096L, 0xEE0E612CL, 0x990951BAL,
   0x076DC419L, 0x706AF48FL, 0xE963A535L, 0x9E6495A3L,
@@ -253,34 +253,34 @@ static sU32 sCRCTable[256] =
   0xB40BBE37L, 0xC30C8EA1L, 0x5A05DF1BL, 0x2D02EF8DL
 };
 
-sU32 sChecksumCRC32(const sU8 *data,int size)
+uint32_t sChecksumCRC32(const uint8_t *data,int size)
 {
-  sU32 crc = 0xffffffff;
+  uint32_t crc = 0xffffffff;
 
-  const sU8 *end = data+size;
+  const uint8_t *end = data+size;
   while(data<end)
     crc = sCRCTable[(crc ^ *data++) & 0xff] ^ (crc>>8);
 
   return crc ^ 0xfffffffe;
 }
 
-sU32 sChecksumRandomByte(const sU8 *data,int size)
+uint32_t sChecksumRandomByte(const uint8_t *data,int size)
 {
-  sU32 csum = 0;
+  uint32_t csum = 0;
 
-  const sU8 *end = data+size;
+  const uint8_t *end = data+size;
   while(data<end)
     csum = sCRCTable[*data++] ^ csum;
 
   return csum;
 }
 
-sU32 sChecksumMurMur(const sU32 *data,int words)
+uint32_t sChecksumMurMur(const uint32_t *data,int words)
 {
-  const sU32 m = 0x5bd1e995;
+  const uint32_t m = 0x5bd1e995;
 
-	sU32 h = m;
-	sU32 k;
+	uint32_t h = m;
+	uint32_t k;
 
 	for(int i=0;i<words;i++)
 	{
@@ -298,80 +298,80 @@ sU32 sChecksumMurMur(const sU32 *data,int words)
 
 /****************************************************************************/
 
-void sChecksumMD5::Block(const sU8 *data)
+void sChecksumMD5::Block(const uint8_t *data)
 {
-  sU32 a = Hash[0];
-  sU32 b = Hash[1];
-  sU32 c = Hash[2];
-  sU32 d = Hash[3];
+  uint32_t a = Hash[0];
+  uint32_t b = Hash[1];
+  uint32_t c = Hash[2];
+  uint32_t d = Hash[3];
 
-  f( a, b, c, d,  0,  7, 0xd76aa478,(sU32 *)data  ); 
-  f( d, a, b, c,  1, 12, 0xe8c7b756,(sU32 *)data  ); 
-  f( c, d, a, b,  2, 17, 0x242070db,(sU32 *)data  ); 
-  f( b, c, d, a,  3, 22, 0xc1bdceee,(sU32 *)data  ); 
-  f( a, b, c, d,  4,  7, 0xf57c0faf,(sU32 *)data  ); 
-  f( d, a, b, c,  5, 12, 0x4787c62a,(sU32 *)data  ); 
-  f( c, d, a, b,  6, 17, 0xa8304613,(sU32 *)data  ); 
-  f( b, c, d, a,  7, 22, 0xfd469501,(sU32 *)data  ); 
-  f( a, b, c, d,  8,  7, 0x698098d8,(sU32 *)data  ); 
-  f( d, a, b, c,  9, 12, 0x8b44f7af,(sU32 *)data  ); 
-  f( c, d, a, b, 10, 17, 0xffff5bb1,(sU32 *)data  ); 
-  f( b, c, d, a, 11, 22, 0x895cd7be,(sU32 *)data  ); 
-  f( a, b, c, d, 12,  7, 0x6b901122,(sU32 *)data  ); 
-  f( d, a, b, c, 13, 12, 0xfd987193,(sU32 *)data  ); 
-  f( c, d, a, b, 14, 17, 0xa679438e,(sU32 *)data  ); 
-  f( b, c, d, a, 15, 22, 0x49b40821,(sU32 *)data  ); 
+  f( a, b, c, d,  0,  7, 0xd76aa478,(uint32_t *)data  ); 
+  f( d, a, b, c,  1, 12, 0xe8c7b756,(uint32_t *)data  ); 
+  f( c, d, a, b,  2, 17, 0x242070db,(uint32_t *)data  ); 
+  f( b, c, d, a,  3, 22, 0xc1bdceee,(uint32_t *)data  ); 
+  f( a, b, c, d,  4,  7, 0xf57c0faf,(uint32_t *)data  ); 
+  f( d, a, b, c,  5, 12, 0x4787c62a,(uint32_t *)data  ); 
+  f( c, d, a, b,  6, 17, 0xa8304613,(uint32_t *)data  ); 
+  f( b, c, d, a,  7, 22, 0xfd469501,(uint32_t *)data  ); 
+  f( a, b, c, d,  8,  7, 0x698098d8,(uint32_t *)data  ); 
+  f( d, a, b, c,  9, 12, 0x8b44f7af,(uint32_t *)data  ); 
+  f( c, d, a, b, 10, 17, 0xffff5bb1,(uint32_t *)data  ); 
+  f( b, c, d, a, 11, 22, 0x895cd7be,(uint32_t *)data  ); 
+  f( a, b, c, d, 12,  7, 0x6b901122,(uint32_t *)data  ); 
+  f( d, a, b, c, 13, 12, 0xfd987193,(uint32_t *)data  ); 
+  f( c, d, a, b, 14, 17, 0xa679438e,(uint32_t *)data  ); 
+  f( b, c, d, a, 15, 22, 0x49b40821,(uint32_t *)data  ); 
 
-  g( a, b, c, d,  1,  5, 0xf61e2562,(sU32 *)data  );
-  g( d, a, b, c,  6,  9, 0xc040b340,(sU32 *)data  );
-  g( c, d, a, b, 11, 14, 0x265e5a51,(sU32 *)data  );
-  g( b, c, d, a,  0, 20, 0xe9b6c7aa,(sU32 *)data  );
-  g( a, b, c, d,  5,  5, 0xd62f105d,(sU32 *)data  );
-  g( d, a, b, c, 10,  9, 0x02441453,(sU32 *)data  );
-  g( c, d, a, b, 15, 14, 0xd8a1e681,(sU32 *)data  );
-  g( b, c, d, a,  4, 20, 0xe7d3fbc8,(sU32 *)data  );
-  g( a, b, c, d,  9,  5, 0x21e1cde6,(sU32 *)data  );
-  g( d, a, b, c, 14,  9, 0xc33707d6,(sU32 *)data  );
-  g( c, d, a, b,  3, 14, 0xf4d50d87,(sU32 *)data  );
-  g( b, c, d, a,  8, 20, 0x455a14ed,(sU32 *)data  );
-  g( a, b, c, d, 13,  5, 0xa9e3e905,(sU32 *)data  );
-  g( d, a, b, c,  2,  9, 0xfcefa3f8,(sU32 *)data  );
-  g( c, d, a, b,  7, 14, 0x676f02d9,(sU32 *)data  );
-  g( b, c, d, a, 12, 20, 0x8d2a4c8a,(sU32 *)data  );
+  g( a, b, c, d,  1,  5, 0xf61e2562,(uint32_t *)data  );
+  g( d, a, b, c,  6,  9, 0xc040b340,(uint32_t *)data  );
+  g( c, d, a, b, 11, 14, 0x265e5a51,(uint32_t *)data  );
+  g( b, c, d, a,  0, 20, 0xe9b6c7aa,(uint32_t *)data  );
+  g( a, b, c, d,  5,  5, 0xd62f105d,(uint32_t *)data  );
+  g( d, a, b, c, 10,  9, 0x02441453,(uint32_t *)data  );
+  g( c, d, a, b, 15, 14, 0xd8a1e681,(uint32_t *)data  );
+  g( b, c, d, a,  4, 20, 0xe7d3fbc8,(uint32_t *)data  );
+  g( a, b, c, d,  9,  5, 0x21e1cde6,(uint32_t *)data  );
+  g( d, a, b, c, 14,  9, 0xc33707d6,(uint32_t *)data  );
+  g( c, d, a, b,  3, 14, 0xf4d50d87,(uint32_t *)data  );
+  g( b, c, d, a,  8, 20, 0x455a14ed,(uint32_t *)data  );
+  g( a, b, c, d, 13,  5, 0xa9e3e905,(uint32_t *)data  );
+  g( d, a, b, c,  2,  9, 0xfcefa3f8,(uint32_t *)data  );
+  g( c, d, a, b,  7, 14, 0x676f02d9,(uint32_t *)data  );
+  g( b, c, d, a, 12, 20, 0x8d2a4c8a,(uint32_t *)data  );
 
-  h( a, b, c, d,  5,  4, 0xfffa3942,(sU32 *)data  );
-  h( d, a, b, c,  8, 11, 0x8771f681,(sU32 *)data  );
-  h( c, d, a, b, 11, 16, 0x6d9d6122,(sU32 *)data  );
-  h( b, c, d, a, 14, 23, 0xfde5380c,(sU32 *)data  );
-  h( a, b, c, d,  1,  4, 0xa4beea44,(sU32 *)data  );
-  h( d, a, b, c,  4, 11, 0x4bdecfa9,(sU32 *)data  );
-  h( c, d, a, b,  7, 16, 0xf6bb4b60,(sU32 *)data  );
-  h( b, c, d, a, 10, 23, 0xbebfbc70,(sU32 *)data  );
-  h( a, b, c, d, 13,  4, 0x289b7ec6,(sU32 *)data  );
-  h( d, a, b, c,  0, 11, 0xeaa127fa,(sU32 *)data  );
-  h( c, d, a, b,  3, 16, 0xd4ef3085,(sU32 *)data  );
-  h( b, c, d, a,  6, 23, 0x04881d05,(sU32 *)data  );
-  h( a, b, c, d,  9,  4, 0xd9d4d039,(sU32 *)data  );
-  h( d, a, b, c, 12, 11, 0xe6db99e5,(sU32 *)data  );
-  h( c, d, a, b, 15, 16, 0x1fa27cf8,(sU32 *)data  );
-  h( b, c, d, a,  2, 23, 0xc4ac5665,(sU32 *)data  );
+  h( a, b, c, d,  5,  4, 0xfffa3942,(uint32_t *)data  );
+  h( d, a, b, c,  8, 11, 0x8771f681,(uint32_t *)data  );
+  h( c, d, a, b, 11, 16, 0x6d9d6122,(uint32_t *)data  );
+  h( b, c, d, a, 14, 23, 0xfde5380c,(uint32_t *)data  );
+  h( a, b, c, d,  1,  4, 0xa4beea44,(uint32_t *)data  );
+  h( d, a, b, c,  4, 11, 0x4bdecfa9,(uint32_t *)data  );
+  h( c, d, a, b,  7, 16, 0xf6bb4b60,(uint32_t *)data  );
+  h( b, c, d, a, 10, 23, 0xbebfbc70,(uint32_t *)data  );
+  h( a, b, c, d, 13,  4, 0x289b7ec6,(uint32_t *)data  );
+  h( d, a, b, c,  0, 11, 0xeaa127fa,(uint32_t *)data  );
+  h( c, d, a, b,  3, 16, 0xd4ef3085,(uint32_t *)data  );
+  h( b, c, d, a,  6, 23, 0x04881d05,(uint32_t *)data  );
+  h( a, b, c, d,  9,  4, 0xd9d4d039,(uint32_t *)data  );
+  h( d, a, b, c, 12, 11, 0xe6db99e5,(uint32_t *)data  );
+  h( c, d, a, b, 15, 16, 0x1fa27cf8,(uint32_t *)data  );
+  h( b, c, d, a,  2, 23, 0xc4ac5665,(uint32_t *)data  );
 
-  i( a, b, c, d,  0,  6, 0xf4292244,(sU32 *)data  );
-  i( d, a, b, c,  7, 10, 0x432aff97,(sU32 *)data  );
-  i( c, d, a, b, 14, 15, 0xab9423a7,(sU32 *)data  );
-  i( b, c, d, a,  5, 21, 0xfc93a039,(sU32 *)data  );
-  i( a, b, c, d, 12,  6, 0x655b59c3,(sU32 *)data  );
-  i( d, a, b, c,  3, 10, 0x8f0ccc92,(sU32 *)data  );
-  i( c, d, a, b, 10, 15, 0xffeff47d,(sU32 *)data  );
-  i( b, c, d, a,  1, 21, 0x85845dd1,(sU32 *)data  );
-  i( a, b, c, d,  8,  6, 0x6fa87e4f,(sU32 *)data  );
-  i( d, a, b, c, 15, 10, 0xfe2ce6e0,(sU32 *)data  );
-  i( c, d, a, b,  6, 15, 0xa3014314,(sU32 *)data  );
-  i( b, c, d, a, 13, 21, 0x4e0811a1,(sU32 *)data  );
-  i( a, b, c, d,  4,  6, 0xf7537e82,(sU32 *)data  );
-  i( d, a, b, c, 11, 10, 0xbd3af235,(sU32 *)data  );
-  i( c, d, a, b,  2, 15, 0x2ad7d2bb,(sU32 *)data  );
-  i( b, c, d, a,  9, 21, 0xeb86d391,(sU32 *)data  );
+  i( a, b, c, d,  0,  6, 0xf4292244,(uint32_t *)data  );
+  i( d, a, b, c,  7, 10, 0x432aff97,(uint32_t *)data  );
+  i( c, d, a, b, 14, 15, 0xab9423a7,(uint32_t *)data  );
+  i( b, c, d, a,  5, 21, 0xfc93a039,(uint32_t *)data  );
+  i( a, b, c, d, 12,  6, 0x655b59c3,(uint32_t *)data  );
+  i( d, a, b, c,  3, 10, 0x8f0ccc92,(uint32_t *)data  );
+  i( c, d, a, b, 10, 15, 0xffeff47d,(uint32_t *)data  );
+  i( b, c, d, a,  1, 21, 0x85845dd1,(uint32_t *)data  );
+  i( a, b, c, d,  8,  6, 0x6fa87e4f,(uint32_t *)data  );
+  i( d, a, b, c, 15, 10, 0xfe2ce6e0,(uint32_t *)data  );
+  i( c, d, a, b,  6, 15, 0xa3014314,(uint32_t *)data  );
+  i( b, c, d, a, 13, 21, 0x4e0811a1,(uint32_t *)data  );
+  i( a, b, c, d,  4,  6, 0xf7537e82,(uint32_t *)data  );
+  i( d, a, b, c, 11, 10, 0xbd3af235,(uint32_t *)data  );
+  i( c, d, a, b,  2, 15, 0x2ad7d2bb,(uint32_t *)data  );
+  i( b, c, d, a,  9, 21, 0xeb86d391,(uint32_t *)data  );
 
 
   Hash[0] += a;
@@ -389,9 +389,9 @@ void sChecksumMD5::CalcBegin()
   Hash[3] = 0x10325476;
 }
 
-int sChecksumMD5::CalcAdd(const sU8 *data,int size)
+int sChecksumMD5::CalcAdd(const uint8_t *data,int size)
 {
-  const sU8* ptr = data;
+  const uint8_t* ptr = data;
   int left = size;
   while(left>=64)
   {
@@ -402,13 +402,13 @@ int sChecksumMD5::CalcAdd(const sU8 *data,int size)
   return ptr-data;
 }
 
-void sChecksumMD5::CalcEnd(const sU8 *data, int size, int sizeall)
+void sChecksumMD5::CalcEnd(const uint8_t *data, int size, int sizeall)
 {
   int done = CalcAdd(data,size);
   data += done;
   size -= done;
 
-  sU8 buffer[64];
+  uint8_t buffer[64];
   sClear(buffer);
   sCopyMem(buffer,data,size);
   
@@ -418,7 +418,7 @@ void sChecksumMD5::CalcEnd(const sU8 *data, int size, int sizeall)
     Block(buffer);
     sClear(buffer);
   }
-  *((sU64 *)(buffer+56)) = sizeall*8;
+  *((uint64_t *)(buffer+56)) = sizeall*8;
   Block(buffer);
 
   // correct md5 swapping
@@ -428,13 +428,13 @@ void sChecksumMD5::CalcEnd(const sU8 *data, int size, int sizeall)
   sSwapEndianI(Hash[3]);
 }
 
-void sChecksumMD5::Calc(const sU8 *data,int size)
+void sChecksumMD5::Calc(const uint8_t *data,int size)
 {
   Hash[0] = 0x67452301;
   Hash[1] = 0xEFCDAB89;
   Hash[2] = 0x98BADCFE;
   Hash[3] = 0x10325476;
-  sU8 buffer[64];
+  uint8_t buffer[64];
 
   int left = size;
   while(left>=64)
@@ -452,7 +452,7 @@ void sChecksumMD5::Calc(const sU8 *data,int size)
     left = 0;
     sClear(buffer);
   }
-  *((sU64 *)(buffer+56)) = size*8;
+  *((uint64_t *)(buffer+56)) = size*8;
   Block(buffer);
 
   // correct md5 swapping
@@ -462,7 +462,7 @@ void sChecksumMD5::Calc(const sU8 *data,int size)
   sSwapEndianI(Hash[3]);
 }
 
-sBool sChecksumMD5::Check(const sU8 *data,int size)
+sBool sChecksumMD5::Check(const uint8_t *data,int size)
 {
   sChecksumMD5 c;
   c.Calc(data,size);
@@ -489,10 +489,10 @@ sFormatStringBuffer& operator% (sFormatStringBuffer &f, const sChecksumMD5 &md5)
   if(info.Format != 'x' && info.Format != 'X')
     info.Format = 'x';
 
-  f.PrintInt<sU32>(info,md5.Hash[0],0);
-  f.PrintInt<sU32>(info,md5.Hash[1],0);
-  f.PrintInt<sU32>(info,md5.Hash[2],0);
-  f.PrintInt<sU32>(info,md5.Hash[3],0);
+  f.PrintInt<uint32_t>(info,md5.Hash[0],0);
+  f.PrintInt<uint32_t>(info,md5.Hash[1],0);
+  f.PrintInt<uint32_t>(info,md5.Hash[2],0);
+  f.PrintInt<uint32_t>(info,md5.Hash[3],0);
   f.Fill();
 
   return f;
@@ -511,7 +511,7 @@ sCOMPILEERROR("need msc inline assembly");
 #endif
 
 
-sF64 sFMod(sF64 a,sF64 b)
+double sFMod(double a,double b)
 {
   __asm
   {
@@ -526,7 +526,7 @@ sF64 sFMod(sF64 a,sF64 b)
   return a;
 }
 
-sF64 sFPow(sF64 a,sF64 b)
+double sFPow(double a,double b)
 {
 	__asm
 	{
@@ -555,7 +555,7 @@ zero:
 	return a;
 }
 
-sF64 sFExp(sF64 f)
+double sFExp(double f)
 {
 	__asm
 	{
@@ -585,10 +585,10 @@ sF64 sFExp(sF64 f)
 /***                                                                      ***/
 /****************************************************************************/
 
-void sFloatInfo::FloatToAscii(sU32 fu,int digits)
+void sFloatInfo::FloatToAscii(uint32_t fu,int digits)
 {
   int e2 = ((fu&0x7f800000)>>23);
-  sU32 man = fu & 0x007fffff;
+  uint32_t man = fu & 0x007fffff;
   int e10 = 0;
   const int shift=28;
   
@@ -698,10 +698,10 @@ void sFloatInfo::FloatToAscii(sU32 fu,int digits)
   Exponent = e10;
 }
 
-void sFloatInfo::DoubleToAscii(sU64 fu,int digits)
+void sFloatInfo::DoubleToAscii(uint64_t fu,int digits)
 {
   int e2 = ((fu&0x7ff0000000000000ULL)>>52);
-  sU64 man = fu &0x000fffffffffffffULL;
+  uint64_t man = fu &0x000fffffffffffffULL;
   int e10 = 0;
   const int shift=60;
   
@@ -787,16 +787,16 @@ void sFloatInfo::DoubleToAscii(sU64 fu,int digits)
   Exponent = e10;
 }
 
-sU32 sFloatInfo::AsciiToFloat()
+uint32_t sFloatInfo::AsciiToFloat()
 {
-  sU64 man;
+  uint64_t man;
   int e10;
   int e2;
   const int shift=60;
-  const sU64 highmask = ~((1ULL<<shift)-1);
-  const sU64 highmask1 = ~((1ULL<<(shift-1))-1);
-  const sU64 highmask0 = ~((1ULL<<(shift+1))-1);
-  sU32 fu;
+  const uint64_t highmask = ~((1ULL<<shift)-1);
+  const uint64_t highmask1 = ~((1ULL<<(shift-1))-1);
+  const uint64_t highmask0 = ~((1ULL<<(shift+1))-1);
+  uint32_t fu;
 
   // simple cases
 
@@ -923,16 +923,16 @@ ende:
   return fu;
 }
 
-sU64 sFloatInfo::AsciiToDouble()
+uint64_t sFloatInfo::AsciiToDouble()
 {
-  sU64 man;
+  uint64_t man;
   int e10;
   int e2;
   const int shift=60;
-  const sU64 highmask = ~((1ULL<<shift)-1);
-  const sU64 highmask1 = ~((1ULL<<(shift-1))-1);
-  const sU64 highmask0 = ~((1ULL<<(shift+1))-1);
-  sU64 fu;
+  const uint64_t highmask = ~((1ULL<<shift)-1);
+  const uint64_t highmask1 = ~((1ULL<<(shift-1))-1);
+  const uint64_t highmask0 = ~((1ULL<<(shift+1))-1);
+  uint64_t fu;
 
   // simple cases
 
@@ -1041,7 +1041,7 @@ sU64 sFloatInfo::AsciiToDouble()
 
   // puzzle
 
-  fu |= 0x7ff0000000000000ULL & (sU64(e2)<<52);
+  fu |= 0x7ff0000000000000ULL & (uint64_t(e2)<<52);
   fu |= 0x000fffffffffffffULL & ((man+((1ULL<<(shift-53))-1))>>(shift-52));
 
 ende:
@@ -1684,13 +1684,13 @@ sBool sExtractPathDrive(const sChar *path, const sStringDesc &drive)
 void sExtractPath(const sChar *a, const sStringDesc &path)
 {
   const sChar *b=sFindFileWithoutPath(a);
-  sCopyString(path.Buffer,a,sMin<sDInt>(path.Size,b-a+1));
+  sCopyString(path.Buffer,a,sMin<ptrdiff_t>(path.Size,b-a+1));
 }
 
 void sExtractPath(const sChar *a, const sStringDesc &path, const sStringDesc &filename)
 {
   const sChar *b=sFindFileWithoutPath(a);
-  sCopyString(path.Buffer,a,sMin<sDInt>(path.Size,b-a+1));
+  sCopyString(path.Buffer,a,sMin<ptrdiff_t>(path.Size,b-a+1));
   sCopyString(filename,b);
 }
 
@@ -1991,7 +1991,7 @@ sBool sMatchWildcard(const sChar *wild,const sChar *text,sBool casesensitive,sBo
 
 /****************************************************************************/
 
-void sReadString(sU32 *&data,sChar *buffer,int size)
+void sReadString(uint32_t *&data,sChar *buffer,int size)
 {
   int len = *data++;
   int chars = sMin(len,size-1);
@@ -2002,7 +2002,7 @@ void sReadString(sU32 *&data,sChar *buffer,int size)
   data += (len+1)/2;
 }
 
-void sWriteString(sU32 *&data,const sChar *buffer)
+void sWriteString(uint32_t *&data,const sChar *buffer)
 {
   int len = sGetStringLen(buffer);
   sVERIFY(len<0x7ffe);
@@ -2025,9 +2025,9 @@ sBool sIsName(const sChar *s)
   return 1;
 }
 
-sU32 sHashString(const sChar *string)
+uint32_t sHashString(const sChar *string)
 {
-	sU32 crc = 0xffffffff;
+	uint32_t crc = 0xffffffff;
 
   while(*string)
   {
@@ -2037,9 +2037,9 @@ sU32 sHashString(const sChar *string)
   return crc ^ 0xfffffffe;
 }
 
-sU32 sHashString(const sChar *string,int len)
+uint32_t sHashString(const sChar *string,int len)
 {
-	sU32 crc = 0xffffffff;
+	uint32_t crc = 0xffffffff;
 
   while(len>0)
   {
@@ -2054,10 +2054,10 @@ sU32 sHashString(const sChar *string,int len)
 
 sBool sScanInt(const sChar *&s,int &result)
 {
-  sU32 val = 0;
+  uint32_t val = 0;
   sBool sign = 0;
   int overflow = 0;
-  sU32 digit;
+  uint32_t digit;
 
   // scan sign
 
@@ -2104,12 +2104,12 @@ sBool sScanInt(const sChar *&s,int &result)
 }
 
 #if sCONFIG_64BIT
-sBool sScanInt(const sChar *&s,sDInt &result)
+sBool sScanInt(const sChar *&s,ptrdiff_t &result)
 {
-  sU64 val = 0;
+  uint64_t val = 0;
   sBool sign = 0;
   int overflow = 0;
-  sU64 digit;
+  uint64_t digit;
 
   // scan sign
 
@@ -2156,10 +2156,10 @@ sBool sScanInt(const sChar *&s,sDInt &result)
 }
 #endif
 
-sBool sScanFloat(const sChar *&s,sF32 &result)
+sBool sScanFloat(const sChar *&s,float &result)
 {
-  sF64 val = 0;
-  sF64 dec = 1;
+  double val = 0;
+  double dec = 1;
   int sign = 1;
 
   // scan sign
@@ -2224,7 +2224,7 @@ sBool sScanFloat(const sChar *&s,sF32 &result)
 
   // apply sign and write out
 
-  result = sF32(val * sign);
+  result = float(val * sign);
 
   // done
 
@@ -2233,7 +2233,7 @@ sBool sScanFloat(const sChar *&s,sF32 &result)
 
 sBool sScanHex(const sChar *&s,int &result, int maxlen)
 {
-  sU32 val;
+  uint32_t val;
   int c;
 
   if(!sIsHex(*s)) return 0;
@@ -2315,7 +2315,7 @@ sBool sFormatString(const sStringDesc &desc,const sChar *s,const sChar **fp)
   int arg;
   int sign;
   int i;
-  sF64 fval;
+  double fval;
 
   sChar *d = desc.Buffer;
   int left = desc.Size;
@@ -2449,7 +2449,7 @@ sBool sFormatString(const sStringDesc &desc,const sChar *s,const sChar **fp)
         }
         else if(c=='d' || c=='i')
         {          
-          if(sU32(val)==0x80000000)
+          if(uint32_t(val)==0x80000000)
           {
             val = val/10;
             buffer[len++] = '8';
@@ -2542,7 +2542,7 @@ sBool sFormatString(const sStringDesc &desc,const sChar *s,const sChar **fp)
       }
       else if(c=='s')
       {
-        string = (sChar * )(sDInt)sVARARG(fp,arg);arg++;
+        string = (sChar * )(ptrdiff_t)sVARARG(fp,arg);arg++;
         len = sGetStringLen(string);
         if(field0<=len)
           field0=len;
@@ -2953,7 +2953,7 @@ void sFormatStringBuffer::PrintInt(const sFormatStringInfo &info,Type val,sBool 
   }
 }
 
-void sFormatStringBuffer::PrintFloat(const sFormatStringInfo &info,sF32 v)
+void sFormatStringBuffer::PrintFloat(const sFormatStringInfo &info,float v)
 {
   sFloatInfo fi;
   sString<256> buf;
@@ -2965,7 +2965,7 @@ void sFormatStringBuffer::PrintFloat(const sFormatStringInfo &info,sF32 v)
   case 'F':
   case 'E':
     {
-      fi.FloatToAscii(sRawCast<sU32,sF32>(v));
+      fi.FloatToAscii(sRawCast<uint32_t,float>(v));
       int sign = fi.Negative;
       fi.Negative = 0;
 
@@ -2996,19 +2996,19 @@ void sFormatStringBuffer::PrintFloat(const sFormatStringInfo &info,sF32 v)
 
   default:
     if(v>=0)
-      PrintInt(info,sU64(v),0);
+      PrintInt(info,uint64_t(v),0);
     else
-      PrintInt(info,sU64(-v),1);
+      PrintInt(info,uint64_t(-v),1);
     break;
   }
 }
 
-void sFormatStringBuffer::PrintFloat(const sFormatStringInfo &info,sF64 v)
+void sFormatStringBuffer::PrintFloat(const sFormatStringInfo &info,double v)
 {
   sFloatInfo fi;
   sString<256> buf;
 
-  fi.DoubleToAscii(sRawCast<sU64,sF64>(v));
+  fi.DoubleToAscii(sRawCast<uint64_t,double>(v));
   int sign = fi.Negative;
   fi.Negative = 0;
 
@@ -3069,13 +3069,13 @@ sFormatStringBuffer& operator% (sFormatStringBuffer &f,int val)
   sFormatStringInfo info;
 
   f.GetInfo(info);
-  f.PrintInt<sU32>(info,sU32(val),sign);
+  f.PrintInt<uint32_t>(info,uint32_t(val),sign);
   f.Fill();
 
   return f;
 }
 
-sFormatStringBuffer& operator% (sFormatStringBuffer &f,sU32 val)
+sFormatStringBuffer& operator% (sFormatStringBuffer &f,uint32_t val)
 {
   if (!*f.Format)
     return f;
@@ -3083,13 +3083,13 @@ sFormatStringBuffer& operator% (sFormatStringBuffer &f,sU32 val)
   sFormatStringInfo info;
 
   f.GetInfo(info);
-  f.PrintInt<sU32>(info,val,0);
+  f.PrintInt<uint32_t>(info,val,0);
   f.Fill();
 
   return f;
 }
 
-sFormatStringBuffer& operator% (sFormatStringBuffer &f,sU64 val)
+sFormatStringBuffer& operator% (sFormatStringBuffer &f,uint64_t val)
 {
   if (!*f.Format)
     return f;
@@ -3097,13 +3097,13 @@ sFormatStringBuffer& operator% (sFormatStringBuffer &f,sU64 val)
   sFormatStringInfo info;
 
   f.GetInfo(info);
-  f.PrintInt<sU64>(info,val,0);
+  f.PrintInt<uint64_t>(info,val,0);
   f.Fill();
 
   return f;
 }
 
-sFormatStringBuffer& operator% (sFormatStringBuffer &f,sS64 val)
+sFormatStringBuffer& operator% (sFormatStringBuffer &f,int64_t val)
 {
   if (!*f.Format)
     return f;
@@ -3114,7 +3114,7 @@ sFormatStringBuffer& operator% (sFormatStringBuffer &f,sS64 val)
   sFormatStringInfo info;
 
   f.GetInfo(info);
-  f.PrintInt<sU64>(info,sU64(val),sign);
+  f.PrintInt<uint64_t>(info,uint64_t(val),sign);
   f.Fill();
 
   return f;
@@ -3130,13 +3130,13 @@ sFormatStringBuffer& operator% (sFormatStringBuffer &f,void *ptr)
   f.GetInfo(info);
   info.Null = 1;
   info.Field = sCONFIG_64BIT ? 16 : 8;
-  f.PrintInt<sU64>(info,sU64(ptr),0);
+  f.PrintInt<uint64_t>(info,uint64_t(ptr),0);
   f.Fill();
 
   return f;
 }
 
-sFormatStringBuffer& operator% (sFormatStringBuffer &f,sF32 v)
+sFormatStringBuffer& operator% (sFormatStringBuffer &f,float v)
 {
   if (!*f.Format)
     return f;
@@ -3150,7 +3150,7 @@ sFormatStringBuffer& operator% (sFormatStringBuffer &f,sF32 v)
   return f;
 }
 
-sFormatStringBuffer& operator% (sFormatStringBuffer &f,sF64 v)
+sFormatStringBuffer& operator% (sFormatStringBuffer &f,double v)
 {
   if (!*f.Format)
     return f;
@@ -3318,16 +3318,16 @@ sFormatStringBuffer& operator% (sFormatStringBuffer &f, const sRect &r)
   sBool sign;
 
   sign = (r.x0<0);
-  f.PrintInt<sU32>(info,sign?-r.x0:r.x0,sign);
+  f.PrintInt<uint32_t>(info,sign?-r.x0:r.x0,sign);
   f.Print(L" ");
   sign = (r.y0<0);
-  f.PrintInt<sU32>(info,sign?-r.y0:r.y0,sign);
+  f.PrintInt<uint32_t>(info,sign?-r.y0:r.y0,sign);
   f.Print(L"-");
   sign = (r.x1<0);
-  f.PrintInt<sU32>(info,sign?-r.x1:r.x1,sign);
+  f.PrintInt<uint32_t>(info,sign?-r.x1:r.x1,sign);
   f.Print(L" ");
   sign = (r.y1<0);
-  f.PrintInt<sU32>(info,sign?-r.y1:r.y1,sign);
+  f.PrintInt<uint32_t>(info,sign?-r.y1:r.y1,sign);
   f.Print(L" ");
   f.Fill();
 
@@ -3371,7 +3371,7 @@ sRect sFRectToRect(const sFRect &src)
 
 /****************************************************************************/
 
-void sRandom::Seed(sU32 seed)
+void sRandom::Seed(uint32_t seed)
 {
   kern = seed+seed*17+seed*121+(seed*121/17);
   Int32();  
@@ -3383,17 +3383,17 @@ void sRandom::Seed(sU32 seed)
   Int32();  
 }
 
-sU32 sRandom::Step()
+uint32_t sRandom::Step()
 {
-  const sU32 a = 1103515245;
-  const sU32 c = 12345;
+  const uint32_t a = 1103515245;
+  const uint32_t c = 12345;
   kern = a*kern+c;
   return kern & 0x7fffffff;
 }
 
-sU32 sRandom::Int32()
+uint32_t sRandom::Int32()
 {
-  sU32 r0,r1;
+  uint32_t r0,r1;
   r0 = Step();
   r1 = Step();
 
@@ -3404,10 +3404,10 @@ int sRandom::Int(int max_)
 {
   sVERIFY(max_>=1);
 
-  sU32 max = sU32(max_-1);
-  sU32 mask = sMakeMask(max);
+  uint32_t max = uint32_t(max_-1);
+  uint32_t mask = sMakeMask(max);
 
-  sU32 v;
+  uint32_t v;
   do
   {
     v = Int32()&mask;    
@@ -3417,21 +3417,21 @@ int sRandom::Int(int max_)
   return v;
 }
 
-sF32 sRandom::Float(sF32 max)
+float sRandom::Float(float max)
 {
   return (0x7fffffff & Int32())*max/(0x8000*65536.0f);
 }
 
 /****************************************************************************/
 
-sU32 sRandomMT::Step()
+uint32_t sRandomMT::Step()
 {
   if(Index==Count)
   {
     Reload();
     Index = 0;
   }
-  sU32 v = State[Index++];
+  uint32_t v = State[Index++];
   v ^= (v>>11);
   v ^= (v<< 7)&0x9d2c5680UL;
   v ^= (v<<15)&0xefc60000UL;
@@ -3439,14 +3439,14 @@ sU32 sRandomMT::Step()
   return v;
 }
 
-static sU32 mtwist(sU32 m,sU32 s0,sU32 s1)
+static uint32_t mtwist(uint32_t m,uint32_t s0,uint32_t s1)
 {
-  return m ^ ((s0&0x80000000)|(s1&0x7fffffff)) ^ (sU32(-int(s1&1))&0x9908b0dfUL);
+  return m ^ ((s0&0x80000000)|(s1&0x7fffffff)) ^ (uint32_t(-int(s1&1))&0x9908b0dfUL);
 }
 
 void sRandomMT::Reload()
 {
-  sU32 *p = State;
+  uint32_t *p = State;
   for(int i=0;i<Count-Period;i++)
     p[i] = mtwist(p[i+Period],p[i+0],p[i+1]);
   for(int i=Count-Period;i<Count-1;i++)
@@ -3454,7 +3454,7 @@ void sRandomMT::Reload()
   p[Count-1] = mtwist(p[Period-1],p[Count-1],State[0]);
 }
 
-void sRandomMT::Seed(sU32 seed)
+void sRandomMT::Seed(uint32_t seed)
 {
   for(int i=0;i<Count;i++)
   {
@@ -3468,10 +3468,10 @@ int sRandomMT::Int(int max_)
 {
   sVERIFY(max_>=1);
 
-  sU32 max = sU32(max_-1);
-  sU32 mask = sMakeMask(max);
+  uint32_t max = uint32_t(max_-1);
+  uint32_t mask = sMakeMask(max);
 
-  sU32 v;
+  uint32_t v;
   do
   {
     v = Step()&mask;
@@ -3481,29 +3481,29 @@ int sRandomMT::Int(int max_)
   return v;
 }
 
-sF32 sRandomMT::Float(sF32 max)
+float sRandomMT::Float(float max)
 {
   return Step()*max/(65536.0f*65536.0f);
 }
 
 /****************************************************************************/
 
-sU32 sRandomKISS::Step()
+uint32_t sRandomKISS::Step()
 {
-  sU64 t;
-  sU64 a = 698769069ull;
+  uint64_t t;
+  uint64_t a = 698769069ull;
   x = 69069*x+12345;
   y ^= y<<13; 
   y ^= y>>17; 
   y ^= y<<5;
   t = a*z+c; 
   c = t>>32;
-  z = (sU32) t;
+  z = (uint32_t) t;
 
   return x+y+z; 
 }
 
-void sRandomKISS::Seed(sU32 seed)
+void sRandomKISS::Seed(uint32_t seed)
 {
   x = seed + 123456789;
   y = seed + 362436000; 
@@ -3512,7 +3512,7 @@ void sRandomKISS::Seed(sU32 seed)
   c = 7654321;
 }
 
-sF32 sRandomKISS::Float(sF32 max)
+float sRandomKISS::Float(float max)
 {
   return Step()*max/(65536.0f*65536.0f);
 }
@@ -3522,10 +3522,10 @@ int sRandomKISS::Int(int max_)
 {
   sVERIFY(max_>=1);
 
-  sU32 max = sU32(max_-1);
-  sU32 mask = sMakeMask(max);
+  uint32_t max = uint32_t(max_-1);
+  uint32_t mask = sMakeMask(max);
 
-  sU32 v;
+  uint32_t v;
   do
   {
     v = Step()&mask;
@@ -3599,14 +3599,14 @@ void sTiming::StopMeasure(int time)
   }
 }
 
-sF32 sTiming::GetAverageDelta() const
+float sTiming::GetAverageDelta() const
 {
-  sF32 avg = 0;
+  float avg = 0;
 
   if(HistoryCount>0)
   {
     for(int i=0;i<HistoryCount;i++)
-      avg += sF32(History[i]);
+      avg += float(History[i]);
 
     avg = avg / HistoryCount;
   }
@@ -3621,7 +3621,7 @@ sF32 sTiming::GetAverageDelta() const
 /***                                                                      ***/
 /****************************************************************************/
 
-sU32 sMulColor(sU32 a,sU32 b)
+uint32_t sMulColor(uint32_t a,uint32_t b)
 {
   return ((((a>> 0)&255)*((b>> 0)&255)>>8)<< 0)
        + ((((a>> 8)&255)*((b>> 8)&255)>>8)<< 8)
@@ -3629,7 +3629,7 @@ sU32 sMulColor(sU32 a,sU32 b)
        + ((((a>>24)&255)*((b>>24)&255)>>8)<<24);
 }
 
-sU32 sScaleColor(sU32 a,int scale)
+uint32_t sScaleColor(uint32_t a,int scale)
 {
   return (((((a>> 0)&255)*scale)>>16)<< 0)
        + (((((a>> 8)&255)*scale)>>16)<< 8)
@@ -3637,15 +3637,15 @@ sU32 sScaleColor(sU32 a,int scale)
        + (((((a>>24)&255)*scale)>>16)<<24);
 }
 
-sU32 sScaleColorFast(sU32 a,int scale)
+uint32_t sScaleColorFast(uint32_t a,int scale)
 {
-  sU32 ag = (a&0xff00ff00)>>8;
-  sU32 rb = a&0x00ff00ff;
-  sU32 col = ((ag*scale)&0xff00ff00) | (((rb*scale)>>8)&0x00ff00ff);
+  uint32_t ag = (a&0xff00ff00)>>8;
+  uint32_t rb = a&0x00ff00ff;
+  uint32_t col = ((ag*scale)&0xff00ff00) | (((rb*scale)>>8)&0x00ff00ff);
   return col;
 }
 
-sU32 sAddColor(sU32 a,sU32 b)
+uint32_t sAddColor(uint32_t a,uint32_t b)
 {
   return (sClamp<int>(((a>> 0)&255)+((b>> 0)&255),0,255)<< 0)
        + (sClamp<int>(((a>> 8)&255)+((b>> 8)&255),0,255)<< 8)
@@ -3653,7 +3653,7 @@ sU32 sAddColor(sU32 a,sU32 b)
        + (sClamp<int>(((a>>24)&255)+((b>>24)&255),0,255)<<24);
 }
 
-sU32 sSubColor(sU32 a,sU32 b)
+uint32_t sSubColor(uint32_t a,uint32_t b)
 {
   return (sClamp<int>(((a>> 0)&255)-((b>> 0)&255),0,255)<< 0)
        + (sClamp<int>(((a>> 8)&255)-((b>> 8)&255),0,255)<< 8)
@@ -3661,7 +3661,7 @@ sU32 sSubColor(sU32 a,sU32 b)
        + (sClamp<int>(((a>>24)&255)-((b>>24)&255),0,255)<<24);
 }
 
-sU32 sMadColor(sU32 mul1,sU32 mul2,sU32 add)
+uint32_t sMadColor(uint32_t mul1,uint32_t mul2,uint32_t add)
 {
   return (sClamp<int>((((mul1>> 0)&255)*((mul2>> 0)&255)>>8)+((add>> 0)&255),0,255)<< 0)
        + (sClamp<int>((((mul1>> 8)&255)*((mul2>> 8)&255)>>8)+((add>> 8)&255),0,255)<< 8)
@@ -3669,7 +3669,7 @@ sU32 sMadColor(sU32 mul1,sU32 mul2,sU32 add)
        + (sClamp<int>((((mul1>>24)&255)*((mul2>>24)&255)>>8)+((add>>24)&255),0,255)<<24);
 }
 
-sU32 sFadeColor(int fade,sU32 a,sU32 b)
+uint32_t sFadeColor(int fade,uint32_t a,uint32_t b)
 {
   int f1 = fade;
   int f0 = 0x10000-fade;
@@ -3681,57 +3681,57 @@ sU32 sFadeColor(int fade,sU32 a,sU32 b)
 
 /****************************************************************************/
 
-sU32 sColorFade (sU32 a, sU32 b, sF32 f)
+uint32_t sColorFade (uint32_t a, uint32_t b, float f)
 {
-  sU32 f1 = sU32(f*256);
-  sU32 f0 = 256-sU32(f*256);
+  uint32_t f1 = uint32_t(f*256);
+  uint32_t f0 = 256-uint32_t(f*256);
 
-  return (sClamp((((a>>24)&0xff)*f0+((b>>24)&0xff)*f1)/256,sU32(0),sU32(255)) << 24) |
-         (sClamp((((a>>16)&0xff)*f0+((b>>16)&0xff)*f1)/256,sU32(0),sU32(255)) << 16) |
-         (sClamp((((a>> 8)&0xff)*f0+((b>> 8)&0xff)*f1)/256,sU32(0),sU32(255)) <<  8) |
-         (sClamp((((a>> 0)&0xff)*f0+((b>> 0)&0xff)*f1)/256,sU32(0),sU32(255)) <<  0);
+  return (sClamp((((a>>24)&0xff)*f0+((b>>24)&0xff)*f1)/256,uint32_t(0),uint32_t(255)) << 24) |
+         (sClamp((((a>>16)&0xff)*f0+((b>>16)&0xff)*f1)/256,uint32_t(0),uint32_t(255)) << 16) |
+         (sClamp((((a>> 8)&0xff)*f0+((b>> 8)&0xff)*f1)/256,uint32_t(0),uint32_t(255)) <<  8) |
+         (sClamp((((a>> 0)&0xff)*f0+((b>> 0)&0xff)*f1)/256,uint32_t(0),uint32_t(255)) <<  0);
 }
 
-sU32 sPMAlphaFade (sU32 c, sF32 f)
+uint32_t sPMAlphaFade (uint32_t c, float f)
 {
-  sU32 f0 = sU32(f*255);
+  uint32_t f0 = uint32_t(f*255);
   return (((((c>> 0)&255)*f0)>>8)<< 0)
        + (((((c>> 8)&255)*f0)>>8)<< 8)
        + (((((c>>16)&255)*f0)>>8)<<16)
        + (((((c>>24)&255)*f0)>>8)<<24);  
 }
 
-sU32 sAlphaFade (sU32 c, sF32 f)
+uint32_t sAlphaFade (uint32_t c, float f)
 {
-  sU32 f0 = sU32(f*256);
-  return (sClamp((((c >> 24) & 0xff)*f0)/256,sU32(0),sU32(255)) << 24)|(c&0xffffff);
+  uint32_t f0 = uint32_t(f*256);
+  return (sClamp((((c >> 24) & 0xff)*f0)/256,uint32_t(0),uint32_t(255)) << 24)|(c&0xffffff);
 }
 
-sF32 sScaleFade(sF32 a, sF32 b, sF32 f)
+float sScaleFade(float a, float b, float f)
 {
   if (f <= 0.0f)
     return a;
   if (f >= 1.0f)
     return b;
-  sF32 la = sLog(a);
+  float la = sLog(a);
   return sExp(la+(sLog(b) - la)*f);
 }
 
-sF32 sDegreeDiff(sF32 alpha, sF32 beta)
+float sDegreeDiff(float alpha, float beta)
 {
   return sAngleDiff(alpha/360.0f,beta/360.0f) * 360.0f;
 }
 
-sF32 sRadianDiff(sF32 alpha, sF32 beta)
+float sRadianDiff(float alpha, float beta)
 {
   return sAngleDiff(alpha/sPI2F, beta/sPI2F) * sPI2F;
 }
 
-sF32 sAngleDiff(sF32 alpha, sF32 beta)
+float sAngleDiff(float alpha, float beta)
 {
-  sF32 a=sFrac(alpha); 
-  sF32 b=sFrac(beta);
-  sF32 r=a-b;
+  float a=sFrac(alpha); 
+  float b=sFrac(beta);
+  float r=a-b;
   if (r<-0.5f) r+=1;
   if (r>0.5f) r-=1;
   return r;
@@ -3928,8 +3928,8 @@ sBool sAddShellParameter(const sChar *opt, const sChar *val)
   // get end of ShellParaBuffer
   sChar *d = ShellParaBufferEnd;
   
-  sDInt spaceLeft    = sCOUNTOF(ShellParaBuffer) - (d-ShellParaBuffer);
-  sDInt neededSpace  = sGetStringLen(opt) + sGetStringLen(val) + 2; // 2 trailing zeroes
+  ptrdiff_t spaceLeft    = sCOUNTOF(ShellParaBuffer) - (d-ShellParaBuffer);
+  ptrdiff_t neededSpace  = sGetStringLen(opt) + sGetStringLen(val) + 2; // 2 trailing zeroes
 
   // is there enough space and entries left
   result = (spaceLeft>=neededSpace) && (ShellParaCount < sCOUNTOF(ShellParaVal));
@@ -3998,11 +3998,11 @@ int sGetShellParameterInt(const sChar *opt,int n,int def)
 
 /****************************************************************************/
 
-sF32 sGetShellParameterFloat(const sChar *opt,int n,sF32 def)
+float sGetShellParameterFloat(const sChar *opt,int n,float def)
 {
   const sChar *s = sGetShellParameter(opt,n);
 
-  sF32 val;
+  float val;
   if (s && sScanFloat(s, val))
     return val;
   return def;
@@ -4010,13 +4010,13 @@ sF32 sGetShellParameterFloat(const sChar *opt,int n,sF32 def)
 
 /****************************************************************************/
 
-sU32 sGetShellParameterHex(const sChar *opt, int n, sU32 def)
+uint32_t sGetShellParameterHex(const sChar *opt, int n, uint32_t def)
 {
   const sChar *s = sGetShellParameter(opt,n);
 
   int val;
   if (s && sScanHex(s, val))
-    return (sU32)val;
+    return (uint32_t)val;
   return def;
 }
 
@@ -4102,15 +4102,15 @@ sFormatStringBuffer& operator% (sFormatStringBuffer &f, const sGUID &guid)
   if(info.Format != 'x' && info.Format != 'X')
     info.Format = 'x';
 
-  f.PrintInt<sU32>(info,guid.Data32,0);
+  f.PrintInt<uint32_t>(info,guid.Data32,0);
   f.Print(L"-");
   for (int i=0; i<3; i++)
   {
-    f.PrintInt<sU16>(info,guid.Data16[i],0);
+    f.PrintInt<uint16_t>(info,guid.Data16[i],0);
     f.Print(L"-");
   }
   for (int i=0; i<6; i++)
-    f.PrintInt<sU8>(info,guid.Data8[i],0);
+    f.PrintInt<uint8_t>(info,guid.Data8[i],0);
 
   f.Fill();
   return f;
@@ -4119,7 +4119,7 @@ sFormatStringBuffer& operator% (sFormatStringBuffer &f, const sGUID &guid)
 sGUID sGetGUIDFromString(const sChar *str)
 {
   sChecksumMD5 md5;
-  md5.Calc((const sU8 *)str,2*sGetStringLen(str));
+  md5.Calc((const uint8_t *)str,2*sGetStringLen(str));
   sGUID guid;
   guid.Data32=md5.Hash[0];
   guid.Data16[0]=md5.Hash[1]>>16;
@@ -4137,7 +4137,7 @@ sGUID sGetGUIDFromString(const sChar *str)
 
 void sHexDump(const void *data,int bytes)
 {
-  const sU32 *ptr = (sU32 *)(sDInt(data)&~3);
+  const uint32_t *ptr = (uint32_t *)(ptrdiff_t(data)&~3);
   for(int i=0;i<bytes;i+=32)
   {
     sDPrintF(L"%08x   %08x %08x %08x %08x  %08x %08x %08x %08x\n",
@@ -4148,7 +4148,7 @@ void sHexDump(const void *data,int bytes)
 
 void sHexByteDump(const void *data,int bytes)
 {
-  const sU8 *ptr = (sU8*)data;
+  const uint8_t *ptr = (uint8_t*)data;
   for(int i=0;i<bytes;i+=8)
   {
     sDPrintF(L"%08x   %02x %02x %02x %02x  %02x %02x %02x %02x\n",
@@ -4323,7 +4323,7 @@ struct sMemoryMarkStruct
     sClear(*this);
   }
 
-  sU32 Hash;              // hash of the memorysituation
+  uint32_t Hash;              // hash of the memorysituation
   int Taken;             // shows if a hash was taken
   int Reset;             // flags that a reset should be performed
   int AllocId;           // allocId when the first memmark was taken
@@ -4345,13 +4345,13 @@ static int sMemoryHandlerMax;
 int sOutOfMemory=0; // set to heap id upon out of memory condition
 
 #if !sSTRIPPED
-static sF32 sMemFailProbability = 0;
+static float sMemFailProbability = 0;
 static sRandom sMemFailRandom;
-void sSetAllocFailTest(sF32 prob) { sMemFailProbability=prob; }
-sF32 sGetAllocFailTest() { return sMemFailProbability; }
+void sSetAllocFailTest(float prob) { sMemFailProbability=prob; }
+float sGetAllocFailTest() { return sMemFailProbability; }
 #else
-void sSetAllocFailTest(sF32) {}
-sF32 sGetAllocFailTest() { return 0.0f; }
+void sSetAllocFailTest(float) {}
+float sGetAllocFailTest() { return 0.0f; }
 #endif
 
 /****************************************************************************/
@@ -4528,7 +4528,7 @@ void sDumpMemoryMap()
   {
     sMemoryHandler *h = sMemoryHandlers[i];
     if(h)
-      sLogF(L"mem",L"%02d: %08x..%08x (%Kb)\n",i,h->Start,h->End,(sU64)h->GetSize());
+      sLogF(L"mem",L"%02d: %08x..%08x (%Kb)\n",i,h->Start,h->End,(uint64_t)h->GetSize());
   }
 }
 
@@ -4714,11 +4714,11 @@ void *sAllocMem_(sPtr size,int align,int flags)
       {
         static sChar oomfile[1024];
         sCopyString(oomfile,tagfile,1023);
-        sFatal(L"%s(%d): out of mem: tried %K, align %d, flags %08x\n(free: %K of %K, largest: %K)",oomfile,tagline,size,align,flags,(sU64)free,(sU64)hsize,(sU64)largest);
+        sFatal(L"%s(%d): out of mem: tried %K, align %d, flags %08x\n(free: %K of %K, largest: %K)",oomfile,tagline,size,align,flags,(uint64_t)free,(uint64_t)hsize,(uint64_t)largest);
       }
       else
 #endif
-        sFatal(L"out of mem - tried %K, align %d, flags %08x\n(free: %K of %K, largest: %K)",size,align,flags,(sU64)free,(sU64)hsize,(sU64)largest);
+        sFatal(L"out of mem - tried %K, align %d, flags %08x\n(free: %K of %K, largest: %K)",size,align,flags,(uint64_t)free,(uint64_t)hsize,(uint64_t)largest);
     }
   }
 #if sCONFIG_DEBUGMEM
@@ -4847,7 +4847,7 @@ void sResetMemChecksum()
 
 void sMemMark(sBool fatal/*=sTRUE*/)
 {
-  sU32 hash;
+  uint32_t hash;
 
   sMemFlushHook->Call(sMemoryMarkFlushVertexFormat);
   sMemoryMarkFlushVertexFormat = sTRUE;
@@ -5004,10 +5004,10 @@ static sPtr sMemDmaPtr[2]={0,0};
 static sPtr sMemDmaUsed;
 static int sMemDmaToggle;
 static sPtr sMemDmaWasted;
-static sU64 sMemFlipFrame;
+static uint64_t sMemFlipFrame;
 
-sDInt sMemStatMaxFrameUsed=0;
-sDInt sMemStatMaxDMAUsed=0;
+ptrdiff_t sMemStatMaxFrameUsed=0;
+ptrdiff_t sMemStatMaxDMAUsed=0;
 
 //void sRender3DFlush();
 
@@ -5366,7 +5366,7 @@ nonborrowed:
 }
 
 
-sU32 sAllocDmaEstimateAvailable (void)
+uint32_t sAllocDmaEstimateAvailable (void)
 //////////////////////////////////////
 // Returns an estimate of the available DMA memory. 
 // This function underestimates in case some of the memory has been borrowed but will
@@ -5376,7 +5376,7 @@ sU32 sAllocDmaEstimateAvailable (void)
     sFatal(L"please use sPartitionMemory() in sMain() to allocate dma memory");
   return (sMemDmaPtr[sMemDmaToggle]+sMemDmaSize) - sMemDmaUsed;
 }
-sU32 sDMAMemSize(void)
+uint32_t sDMAMemSize(void)
 { return sMemDmaSize;
 }
 
@@ -5480,7 +5480,7 @@ void sFlipMem()
 {
   if (sMemFrameUsed)
   {
-    sDInt used = sMemFrameUsed-sMemFramePtr[sMemFrameToggle];
+    ptrdiff_t used = sMemFrameUsed-sMemFramePtr[sMemFrameToggle];
     if(used>sMemStatMaxFrameUsed)
     {
       sMemStatMaxFrameUsed = used;
@@ -5489,7 +5489,7 @@ void sFlipMem()
   }
   if (sMemDmaUsed)
   {
-    sDInt used = sMemDmaUsed-sMemDmaPtr[sMemDmaToggle];
+    ptrdiff_t used = sMemDmaUsed-sMemDmaPtr[sMemDmaToggle];
     if(used>sMemStatMaxDMAUsed)
     {
       sMemStatMaxDMAUsed = used;
@@ -5517,7 +5517,7 @@ void sFlipMem()
 
 sMemoryPool::sMemoryPoolBuffer::sMemoryPoolBuffer(sPtr size,int flags)
 {
-  Start = (sU8 *)sAllocMem(size,16,flags);
+  Start = (uint8_t *)sAllocMem(size,16,flags);
   Current = Start;
   End = Start + size;
   Next = 0;
@@ -5571,9 +5571,9 @@ void sMemoryPool::Reset()
   sPopMemType(AllocFlags);
 }
 
-sU8 *sMemoryPool::Alloc(sPtr size,int align)
+uint8_t *sMemoryPool::Alloc(sPtr size,int align)
 {
-  sU8 *result;
+  uint8_t *result;
   if(size>DefaultSize/2)          // special case: very large object.
   {
     sPushMemType(AllocFlags);
@@ -5871,7 +5871,7 @@ void sPushMemLeakDesc(const sChar *desc)
   tc->MemLeakDescBuffer[tc->MLDBPos]=0;
   tc->MemLeakDescBuffer2[tc->MLDBPos]=0;
   tc->MLDBPos++;
-  tc->MLDBCRC=sChecksumRandomByte((const sU8*)tc->MemLeakDescBuffer2,2*tc->MLDBPos);
+  tc->MLDBCRC=sChecksumRandomByte((const uint8_t*)tc->MemLeakDescBuffer2,2*tc->MLDBPos);
 }
 
 void sPopMemLeakDesc()
@@ -5895,7 +5895,7 @@ void sPopMemLeakDesc()
   tc->MemLeakDescBuffer[tc->MLDBPos]=0;
   tc->MemLeakDescBuffer2[tc->MLDBPos]=0;
   if (tc->MLDBPos) tc->MLDBPos++;
-  tc->MLDBCRC=sChecksumRandomByte((const sU8*)tc->MemLeakDescBuffer2,2*tc->MLDBPos);
+  tc->MLDBCRC=sChecksumRandomByte((const uint8_t*)tc->MemLeakDescBuffer2,2*tc->MLDBPos);
 }
 
 #endif
@@ -6019,8 +6019,8 @@ static sBool cmp(sMemoryLeakTracker2::LeakLoc *loc,int line,int heapid,const cha
 
 static int sMemoryLeakTracker2Hash(void *ptr,int hashSize)
 {
-  sDInt ptrInt = (sDInt) ptr;
-  sU64 nHashVal    = 0x84222325cbf29ce4ULL,
+  ptrdiff_t ptrInt = (ptrdiff_t) ptr;
+  uint64_t nHashVal    = 0x84222325cbf29ce4ULL,
        nMagicPrime = 0x00000100000001b3ULL;
 
   nHashVal ^= ((ptrInt >>  0) & 0xffff);
@@ -6037,7 +6037,7 @@ static int sMemoryLeakTracker2Hash(void *ptr,int hashSize)
   return nHashVal & (hashSize-1);
 }
 
-void sMemoryLeakTracker2::AddLeak( void *ptr,sPtr size,const char *file,int line,int allocid,int heapid, const sChar *descstr, sU32 descCRC )
+void sMemoryLeakTracker2::AddLeak( void *ptr,sPtr size,const char *file,int line,int allocid,int heapid, const sChar *descstr, uint32_t descCRC )
 {
   if (!Pool) return;
 
@@ -6117,7 +6117,7 @@ void sMemoryLeakTracker2::AddLeak( void *ptr,sPtr size,const char *file,int line
   loc->Leaks.AddTail(leak);
 
   hash = sMemoryLeakTracker2Hash(ptr,LeakHashSize);
-  //hash = ((sDInt(ptr)>>4)|(sDInt(ptr)>>16)) & (LeakHashSize-1);
+  //hash = ((ptrdiff_t(ptr)>>4)|(ptrdiff_t(ptr)>>16)) & (LeakHashSize-1);
   leak->NextHash = LeakHash[hash];
   LeakHash[hash] = leak;
   
@@ -6133,7 +6133,7 @@ void sMemoryLeakTracker2::RemLeak(void *ptr)
   Lock->Lock();
 
   int hash = sMemoryLeakTracker2Hash(ptr,LeakHashSize);
-  //int hash = ((sDInt(ptr)>>4)|(sDInt(ptr)>>16)) & (LeakHashSize-1);
+  //int hash = ((ptrdiff_t(ptr)>>4)|(ptrdiff_t(ptr)>>16)) & (LeakHashSize-1);
   Leak **leakp = &LeakHash[hash];
   Leak *leak = *leakp;
   while(leak)
@@ -6387,7 +6387,7 @@ sMemoryHeap::sMemoryHeap()
   Clear = MEMVERBOSE;
 }
 
-void sMemoryHeap::Init(sU8 *start,sPtr size)
+void sMemoryHeap::Init(uint8_t *start,sPtr size)
 {
   sVERIFY(start);
   Start = sPtr(start);
@@ -6462,7 +6462,7 @@ void sMemoryHeap::DumpStats(int verbose)
   if(count==0)
     smallest = 0;
 
-  sU32 hash = MakeSnapshot();
+  uint32_t hash = MakeSnapshot();
   sLogF(L"mem",L"HeapStats: %08x..%08x, HASH %08x\n",Start,End,hash);
   sLogF(L"mem",L"%08x(%5K) Free in %d nodes\n",free,free,count);
   sLogF(L"mem",L"%08x(%5K) Largest\n",largest,largest);
@@ -6473,7 +6473,7 @@ void sMemoryHeap::DumpStats(int verbose)
     sLogF(L"mem",L"Heap Corrupted! (%08x free, %08x should)\n",free,TotalFree);
 }
 
-sU32 sMemoryHeap::MakeSnapshot()
+uint32_t sMemoryHeap::MakeSnapshot()
 {
   sMemoryHeapFreeNode *node;
 
@@ -6482,7 +6482,7 @@ sU32 sMemoryHeap::MakeSnapshot()
   sLogF(L"mem", L"starting snapshot\n");
   sFORALL_LIST(FreeList,node)
   {
-    sChecksumAdler32Add((const sU8 *)node,sizeof(*node));
+    sChecksumAdler32Add((const uint8_t *)node,sizeof(*node));
     // use this for verbose debugging
     //sLogF(L"mem", L"0x%08x : node = 0x%08x  size = %d\n", (int)node, (int)&node->Node, node->Size);
     freeNodeCount++;
@@ -6500,8 +6500,8 @@ sBool sMemoryHeap::IsFree(const void *ptr) const
 
   sFORALL_LIST(FreeList,node)
   {
-    sU8 *ns = (sU8 *)node;
-    sU8 *ne = ns + node->Size;
+    uint8_t *ns = (uint8_t *)node;
+    uint8_t *ne = ns + node->Size;
     if(ptr>=ns && ptr<ne) 
       return 1;
   }
@@ -6566,12 +6566,12 @@ void sMemoryHeap::ClearFree()
 
   Validate();
 
-  sU8 pattern=0x00;
+  uint8_t pattern=0x00;
 
   sLogF(L"mem",L"clearing mem with 0x%02x\n",pattern);
 
   sFORALL_LIST(FreeList,node)
-    sSetMem(((sU8 *)node)+sizeof(sMemoryHeapFreeNode),pattern,node->Size-sizeof(sMemoryHeapFreeNode));
+    sSetMem(((uint8_t *)node)+sizeof(sMemoryHeapFreeNode),pattern,node->Size-sizeof(sMemoryHeapFreeNode));
 }
 
 /****************************************************************************/
@@ -6665,7 +6665,7 @@ void *sMemoryHeap::Alloc(sPtr bytes,int align,int flags)
 
     sAtomicAdd(&sMemoryUsed,size);
     
-    return (sU8 *) (as+HEADER);
+    return (uint8_t *) (as+HEADER);
   }
 
   return 0;
@@ -6688,9 +6688,9 @@ sBool sMemoryHeap::Free(void *ptr)
   if(MEMVERBOSE) Validate();
   if(MEMVERBOSE) sVERIFYRELEASE(!IsFree(ptr));
 
-  sAtomicAdd(&sMemoryUsed,-(sDInt)size);
+  sAtomicAdd(&sMemoryUsed,-(ptrdiff_t)size);
 
-  if(Clear) sSetMem((void *)(((sU8 *)ptr)-HEADER),0xee,size);
+  if(Clear) sSetMem((void *)(((uint8_t *)ptr)-HEADER),0xee,size);
 
   sVERIFY(bs>=Start && be<=End);
 
@@ -6837,7 +6837,7 @@ sGpuHeap::~sGpuHeap()
   delete[] NodeMem;
 }
 
-void sGpuHeap::Init(sU8 *start,sPtr size,int maxallocations)
+void sGpuHeap::Init(uint8_t *start,sPtr size,int maxallocations)
 {
   Start = sPtr(start);
   End = Start+size;
@@ -6881,7 +6881,7 @@ void sGpuHeap::Exit()
 
 void sGpuHeap::AddNode(sGpuHeapUsedNode *l)
 {
-  sU32 hash = ((l->Data>>4) ^ (l->Data>>(4+HashShift))) & HashMask;
+  uint32_t hash = ((l->Data>>4) ^ (l->Data>>(4+HashShift))) & HashMask;
   l->Next = HashTable[hash];
   HashTable[hash] = l;
 }
@@ -6889,7 +6889,7 @@ void sGpuHeap::AddNode(sGpuHeapUsedNode *l)
 sGpuHeapUsedNode *sGpuHeap::FindNode(sPtr data,sBool remove)
 {
   sGpuHeapUsedNode *l,**p;
-  sU32 hash = ((data>>4) ^ (data>>(4+HashShift))) & HashMask;
+  uint32_t hash = ((data>>4) ^ (data>>(4+HashShift))) & HashMask;
   p = &HashTable[hash];
   while(*p)
   {
@@ -6934,7 +6934,7 @@ void sGpuHeap::SetDebug(sBool clear,int memwall)
   Clear = clear;
 }
 
-sU32 sGpuHeap::MakeSnapshot()
+uint32_t sGpuHeap::MakeSnapshot()
 {
   sGpuHeapFreeNode *node;
 
@@ -6945,7 +6945,7 @@ sU32 sGpuHeap::MakeSnapshot()
   {
     data[0] = node->Data;
     data[1] = node->Size;
-    sChecksumAdler32Add((const sU8 *)data,sizeof(sPtr)*2);
+    sChecksumAdler32Add((const uint8_t *)data,sizeof(sPtr)*2);
   }
   return sChecksumAdler32End();
 }
@@ -7122,7 +7122,7 @@ void *sGpuHeap::Alloc(sPtr bytes,int align,int flags)
 
     sAtomicAdd(&sMemoryUsed,size);
 
-    return (sU8 *) (as);
+    return (uint8_t *) (as);
   }
 
   return 0;
@@ -7156,7 +7156,7 @@ sBool sGpuHeap::Free(void *ptr)
   old->Size = size;
   old->Data = sPtr(ptr);
 
-  sAtomicAdd(&sMemoryUsed,-(sDInt)size);
+  sAtomicAdd(&sMemoryUsed,-(ptrdiff_t)size);
 
   if(Clear) sSetMem((void *)ptr,0xee,size);
 
@@ -7230,11 +7230,11 @@ sPtr sGpuHeap::MemSize(void *ptr)
 sSimpleMemPool::sSimpleMemPool(int size)
 {
   DeleteMe = 1;
-  Start = Current = sPtr(new sU8[size]);
+  Start = Current = sPtr(new uint8_t[size]);
   End = Start+size;
 }
 
-sSimpleMemPool::sSimpleMemPool(sU8 *data,int size)
+sSimpleMemPool::sSimpleMemPool(uint8_t *data,int size)
 {
   DeleteMe = 0;
   Start = Current = sPtr(data);
@@ -7244,13 +7244,13 @@ sSimpleMemPool::sSimpleMemPool(sU8 *data,int size)
 sSimpleMemPool::~sSimpleMemPool()
 {
   if(DeleteMe)
-    delete[] (sU8 *)Start;
+    delete[] (uint8_t *)Start;
 }
 
-sU8 *sSimpleMemPool::Alloc(int size,int align)
+uint8_t *sSimpleMemPool::Alloc(int size,int align)
 {
   Current = sAlign(Current,align);
-  sU8 *result = (sU8 *) Current;
+  uint8_t *result = (uint8_t *) Current;
   Current+=size;
   sVERIFY(Current<=End);
   return result;
@@ -7279,7 +7279,7 @@ void sSimpleMemPool::Reset()
 //
 /****************************************************************************/
 
-sBool sCompES(sU8 *s,sU8 *d,int ssize,int &dsize,int scan)
+sBool sCompES(uint8_t *s,uint8_t *d,int ssize,int &dsize,int scan)
 {
   int si;                        // source index  
   int di;                        // destination index
@@ -7293,7 +7293,7 @@ sBool sCompES(sU8 *s,sU8 *d,int ssize,int &dsize,int scan)
   int pos;                       // offset for equal sequence (absolute)
   int dpos;                      // offset for equal sequence (as written)
   int write;                     // bytes needed to write pattern (approx.)
-  sU16 seq;                       // first two characters of sequence to look for
+  uint16_t seq;                       // first two characters of sequence to look for
 
 
   si=0;                           // initialize (important)
@@ -7327,11 +7327,11 @@ sBool sCompES(sU8 *s,sU8 *d,int ssize,int &dsize,int scan)
       jmin = ri+si-scan;
       if(jmin<0)
         jmin = 0;
-      seq = ((sU16 *) (s+ri+si))[0];
+      seq = ((uint16_t *) (s+ri+si))[0];
 
       while(j>=jmin)
       {
-        if(((sU16 *)(s+j))[0]==seq)
+        if(((uint16_t *)(s+j))[0]==seq)
         {
           i=0;
           imax = 255+4;
@@ -7441,7 +7441,7 @@ sBool sCompES(sU8 *s,sU8 *d,int ssize,int &dsize,int scan)
 
 /****************************************************************************/
 
-sBool sDeCompES(sU8 *s,sU8 *d,int ssize,int &dsize,sBool verify)
+sBool sDeCompES(uint8_t *s,uint8_t *d,int ssize,int &dsize,sBool verify)
 {
   int val;                       // code byte    
   int si;                        // source stream index
@@ -7649,48 +7649,48 @@ int sCmpMem(const void *dd,const void *ss,int c) { return memcmp(dd,ss,c); }
 // int
 
 #ifndef sHASINTRINSIC_MULDIV
-int sMulDiv(int a,int b,int c)  { return sS64(a)*b/c; }
+int sMulDiv(int a,int b,int c)  { return int64_t(a)*b/c; }
 #endif
 
 #ifndef sHASINTRINSIC_MULDIVU
-sU32 sMulDivU(sU32 a,sU32 b,sU32 c)  { return sU64(a)*b/c; }
+uint32_t sMulDivU(uint32_t a,uint32_t b,uint32_t c)  { return uint64_t(a)*b/c; }
 #endif
 
 #ifndef sHASINTRINSIC_MULSHIFT
-int sMulShift(int a,int b)  { return (sS64(a)*b)>>16; }
+int sMulShift(int a,int b)  { return (int64_t(a)*b)>>16; }
 #endif
 
 #ifndef sHASINTRINSIC_MULSHIFTU
-sU32 sMulShiftU(sU32 a,sU32 b)  { return (sU64(a)*b)>>16; }
+uint32_t sMulShiftU(uint32_t a,uint32_t b)  { return (uint64_t(a)*b)>>16; }
 #endif
 
 #ifndef sHASINTRINSIC_DIVSHIFT
-int sDivShift(int a,int b)  { return (sS64(a)<<16)/b; }
+int sDivShift(int a,int b)  { return (int64_t(a)<<16)/b; }
 #endif
 
 // float fiddling
 
 #ifndef sHASINTRINSIC_ABSF
-sF32 sAbs(sF32 f)               { return fabs(f); }
+float sAbs(float f)               { return fabs(f); }
 #endif
 
 #ifndef sHASINTRINSIC_MINF
-sF32 sMinF(sF32 a,sF32 b)       { return sMin(a,b); }
+float sMinF(float a,float b)       { return sMin(a,b); }
 #endif
 
 #ifndef sHASINTRINSIC_MAXF
-sF32 sMaxF(sF32 a,sF32 b)       { return sMax(a,b); }
+float sMaxF(float a,float b)       { return sMax(a,b); }
 #endif
 
 #ifndef sHASINTRINSIC_MOD
-sF32 sMod(sF32 over,sF32 under) { return fmod(over,under); }
+float sMod(float over,float under) { return fmod(over,under); }
 #endif
 
 int sAbsMod(int over,int under) { return (over >= 0)?(over % under):(under-(-over % under)); }
-sF32 sAbsMod(sF32 over,sF32 under) { return (over >= 0.0f)?sMod(over,under):(under-sMod(-over,under)); }
+float sAbsMod(float over,float under) { return (over >= 0.0f)?sMod(over,under):(under-sMod(-over,under)); }
 
 #ifndef sHASINTRINSIC_DIVMOD
-void sDivMod(sF32 over,sF32 under,sF32 &div,sF32 &mod)  
+void sDivMod(float over,float under,float &div,float &mod)  
 { 
   div = over/under; 
   mod = sMod(over,under); 
@@ -7722,238 +7722,238 @@ void sSetFloat()
 }
 
 #ifndef sHASINTRINSIC_FRAC_FF
-void sFrac(sF32 val,sF32 &frac,sF32 &full)
+void sFrac(float val,float &frac,float &full)
 {
   frac = modff(val,&full);
 }
 #endif
 
 #ifndef sHASINTRINSIC_FRAC_FI
-void sFrac(sF32 val,sF32 &frac,int &full)        
+void sFrac(float val,float &frac,int &full)        
 {
-  sF32 f;
+  float f;
   frac = modff(val,&f);
   full = int(f);
 }
 #endif
 
 #ifndef sHASINTRINSIC_FRAC
-sF32 sFrac(sF32 val)
+float sFrac(float val)
 { 
-  sF32 f;
+  float f;
   return modff(val,&f);
 }
 #endif
 
 #ifndef sHASINTRINSIC_ROUNDDOWN
-sF32 sRoundDown(sF32 f)         { return floorf(f); }
+float sRoundDown(float f)         { return floorf(f); }
 #endif
 
 #ifndef sHASINTRINSIC_ROUNDUP
-sF32 sRoundUp(sF32 f)           { return ceilf(f); }
+float sRoundUp(float f)           { return ceilf(f); }
 #endif
 
 #ifndef sHASINTRINSIC_ROUNDZERO
-sF32 sRoundZero(sF32 f)         { return (f>=0.0f)?sFFloor(f):sFCeil(f); }
+float sRoundZero(float f)         { return (f>=0.0f)?sFFloor(f):sFCeil(f); }
 #endif
 
 #ifndef sHASINTRINSIC_ROUNDNEAR
-sF32 sRoundNear(sF32 f)         { return floorf(f+0.5f); }
+float sRoundNear(float f)         { return floorf(f+0.5f); }
 #endif
 
 #ifndef sHASINTRINSIC_ROUNDDOWNI
-int sRoundDownInt(sF32 f)      { return int(floorf(f)); }
+int sRoundDownInt(float f)      { return int(floorf(f)); }
 #endif
 
 #ifndef sHASINTRINSIC_ROUNDUPI
-int sRoundUpInt(sF32 f)        { return int(ceilf(f)); }
+int sRoundUpInt(float f)        { return int(ceilf(f)); }
 #endif
 
 #ifndef sHASINTRINSIC_ROUNDZEROI
-int sRoundZeroInt(sF32 f)      { return int(f); }
+int sRoundZeroInt(float f)      { return int(f); }
 #endif
 
 #ifndef sHASINTRINSIC_ROUNDNEARI
-int sRoundNearInt(sF32 f)      { return int(floorf(f+0.5f)); }
+int sRoundNearInt(float f)      { return int(floorf(f+0.5f)); }
 #endif
 
 #ifndef sHASINTRINSIC_SELECT
 #ifndef sHASINTRINSIC_SELECTEQ
-sF32 sSelectEQ(sF32 a,sF32 b,sF32 t,sF32 f)   { return (a==b) ? t : f; }
+float sSelectEQ(float a,float b,float t,float f)   { return (a==b) ? t : f; }
 #endif
 
 #ifndef sHASINTRINSIC_SELECTNE
-sF32 sSelectNE(sF32 a,sF32 b,sF32 t,sF32 f)   { return (a!=b) ? t : f; }
+float sSelectNE(float a,float b,float t,float f)   { return (a!=b) ? t : f; }
 #endif
 
 #ifndef sHASINTRINSIC_SELECTGT
-sF32 sSelectGT(sF32 a,sF32 b,sF32 t,sF32 f)   { return (a>=b) ? t : f; }
+float sSelectGT(float a,float b,float t,float f)   { return (a>=b) ? t : f; }
 #endif
 
 #ifndef sHASINTRINSIC_SELECTGE
-sF32 sSelectGE(sF32 a,sF32 b,sF32 t,sF32 f)   { return (a> b) ? t : f; }
+float sSelectGE(float a,float b,float t,float f)   { return (a> b) ? t : f; }
 #endif
 
 #ifndef sHASINTRINSIC_SELECTLT
-sF32 sSelectLT(sF32 a,sF32 b,sF32 t,sF32 f)   { return (a<=b) ? t : f; }
+float sSelectLT(float a,float b,float t,float f)   { return (a<=b) ? t : f; }
 #endif
 
 #ifndef sHASINTRINSIC_SELECTLE
-sF32 sSelectLE(sF32 a,sF32 b,sF32 t,sF32 f)   { return (a< b) ? t : f; }
+float sSelectLE(float a,float b,float t,float f)   { return (a< b) ? t : f; }
 #endif
 #endif
 
 #ifndef sHASINTRINSIC_SELECT0
 #ifndef sHASINTRINSIC_SELECTEQ0
-sF32 sSelectEQ(sF32 a,sF32 b,sF32 t)          { return (a==b) ? t : 0; }
+float sSelectEQ(float a,float b,float t)          { return (a==b) ? t : 0; }
 #endif
 
 #ifndef sHASINTRINSIC_SELECTNE0
-sF32 sSelectNE(sF32 a,sF32 b,sF32 t)          { return (a!=b) ? t : 0; }
+float sSelectNE(float a,float b,float t)          { return (a!=b) ? t : 0; }
 #endif
 
 #ifndef sHASINTRINSIC_SELECTGT0
-sF32 sSelectGT(sF32 a,sF32 b,sF32 t)          { return (a>=b) ? t : 0; }
+float sSelectGT(float a,float b,float t)          { return (a>=b) ? t : 0; }
 #endif
 
 #ifndef sHASINTRINSIC_SELECTGE0
-sF32 sSelectGE(sF32 a,sF32 b,sF32 t)          { return (a> b) ? t : 0; }
+float sSelectGE(float a,float b,float t)          { return (a> b) ? t : 0; }
 #endif
 
 #ifndef sHASINTRINSIC_SELECTLT0
-sF32 sSelectLT(sF32 a,sF32 b,sF32 t)          { return (a<=b) ? t : 0; }
+float sSelectLT(float a,float b,float t)          { return (a<=b) ? t : 0; }
 #endif
 
 #ifndef sHASINTRINSIC_SELECTLE0
-sF32 sSelectLE(sF32 a,sF32 b,sF32 t)          { return (a< b) ? t : 0; }
+float sSelectLE(float a,float b,float t)          { return (a< b) ? t : 0; }
 #endif
 #endif
 
 // non-trivial float
 
 #ifndef sHASINTRINSIC_SQRT
-sF32 sSqrt(sF32 f)        { return sqrtf(f); }
+float sSqrt(float f)        { return sqrtf(f); }
 #endif
 
 #ifndef sHASINTRINSIC_RSQRT
-sF32 sRSqrt(sF32 f)       { return 1.0f/sqrtf(f); }
+float sRSqrt(float f)       { return 1.0f/sqrtf(f); }
 #endif
 
 #ifndef sHASINTRINSIC_LOG
-sF32 sLog(sF32 f)         { return logf(f); }
+float sLog(float f)         { return logf(f); }
 #endif
 
 #ifndef sHASINTRINSIC_LOG2
-sF32 sLog2(sF32 f)        { return logf(f)/0.69314718055994530941723212145818f; }
+float sLog2(float f)        { return logf(f)/0.69314718055994530941723212145818f; }
 #endif
 
 #ifndef sHASINTRINSIC_LOG10
-sF32 sLog10(sF32 f)       { return log10f(f); }
+float sLog10(float f)       { return log10f(f); }
 #endif
 
 #ifndef sHASINTRINSIC_EXP
-sF32 sExp(sF32 f)         { return expf(f); }
+float sExp(float f)         { return expf(f); }
 #endif
 
 #ifndef sHASINTRINSIC_POW
-sF32 sPow(sF32 a,sF32 b)  { return powf(a,b); }
+float sPow(float a,float b)  { return powf(a,b); }
 #endif
 
 
 #ifndef sHASINTRINSIC_SIN
-sF32 sSin(sF32 f)         { return sinf(f); }
+float sSin(float f)         { return sinf(f); }
 
 #endif
 
 #ifndef sHASINTRINSIC_COS
-sF32 sCos(sF32 f)         { return cosf(f); }
+float sCos(float f)         { return cosf(f); }
 #endif
 
 #ifndef sHASINTRINSIC_TAN
-sF32 sTan(sF32 f)         { return tanf(f); }
+float sTan(float f)         { return tanf(f); }
 #endif
 
 #ifndef sHASINTRINSIC_SINCOS
-void sSinCos(sF32 f,sF32 &s,sF32 &c)  { s=sinf(f); c=cosf(f); }
+void sSinCos(float f,float &s,float &c)  { s=sinf(f); c=cosf(f); }
 #endif
 
 #ifndef sHASINTRINSIC_ASIN
-sF32 sASin(sF32 f)        { return asinf(f); }
+float sASin(float f)        { return asinf(f); }
 #endif
 
 #ifndef sHASINTRINSIC_ACOS
-sF32 sACos(sF32 f)        { return acosf(f); }
+float sACos(float f)        { return acosf(f); }
 #endif
 
 #ifndef sHASINTRINSIC_ATAN
-sF32 sATan(sF32 f)        { return (sF32) atan(f); }
+float sATan(float f)        { return (float) atan(f); }
 #endif
 
 #ifndef sHASINTRINSIC_ATAN2
-sF32 sATan2(sF32 a,sF32 b){ return (sF32) atan2(a,b); }
+float sATan2(float a,float b){ return (float) atan2(a,b); }
 #endif
 
 // non-trivial float, fast
 
 #ifndef sHASINTRINSIC_FSQRT
-sF32 sFSqrt(sF32 f)       { return sqrtf(f); }
+float sFSqrt(float f)       { return sqrtf(f); }
 #endif
 
 #ifndef sHASINTRINSIC_FRSQRT
-sF32 sFRSqrt(sF32 f)      { return 1.0f/sqrtf(f); }
+float sFRSqrt(float f)      { return 1.0f/sqrtf(f); }
 #endif
 
 #ifndef sHASINTRINSIC_FLOG
-sF32 sFLog(sF32 f)        { return logf(f); }
+float sFLog(float f)        { return logf(f); }
 #endif
 
 #ifndef sHASINTRINSIC_FLOG2
-sF32 sFLog2(sF32 f)       { return logf(f)/0.69314718055994530941723212145818f; }
+float sFLog2(float f)       { return logf(f)/0.69314718055994530941723212145818f; }
 #endif
 
 #ifndef sHASINTRINSIC_FLOG10
-sF32 sFLog10(sF32 f)      { return log10f(f); }
+float sFLog10(float f)      { return log10f(f); }
 #endif
 
 #ifndef sHASINTRINSIC_FEXP
-sF32 sFExp(sF32 f)        { return expf(f); }
+float sFExp(float f)        { return expf(f); }
 #endif
 
 #ifndef sHASINTRINSIC_FPOW
-sF32 sFPow(sF32 a,sF32 b) { return powf(a,b); }
+float sFPow(float a,float b) { return powf(a,b); }
 #endif
 
 
 #ifndef sHASINTRINSIC_FSIN
-sF32 sFSin(sF32 f)        { return sinf(f); }
+float sFSin(float f)        { return sinf(f); }
 #endif
 
 #ifndef sHASINTRINSIC_FCOS
-sF32 sFCos(sF32 f)        { return cosf(f); }
+float sFCos(float f)        { return cosf(f); }
 #endif
 
 #ifndef sHASINTRINSIC_FTAN
-sF32 sFTan(sF32 f)        { return tanf(f); }
+float sFTan(float f)        { return tanf(f); }
 #endif
 
 #ifndef sHASINTRINSIC_FSINCOS
-void sFSinCos(sF32 f,sF32 &s,sF32 &c)  { s=sinf(f); c=cosf(f); }
+void sFSinCos(float f,float &s,float &c)  { s=sinf(f); c=cosf(f); }
 #endif
 
 #ifndef sHASINTRINSIC_FASIN
-sF32 sFASin(sF32 f)       { return asinf(f); }
+float sFASin(float f)       { return asinf(f); }
 #endif
 
 #ifndef sHASINTRINSIC_FACOS
-sF32 sFACos(sF32 f)       { return acosf(f); }
+float sFACos(float f)       { return acosf(f); }
 #endif
 
 #ifndef sHASINTRINSIC_FATAN
-sF32 sFATan(sF32 f)       { return atanf(f); }
+float sFATan(float f)       { return atanf(f); }
 #endif
 
 #ifndef sHASINTRINSIC_FATAN2
-sF32 sFATan2(sF32 a,sF32 b){ return atan2f(a,b); }
+float sFATan2(float a,float b){ return atan2f(a,b); }
 #endif
 #endif
 /****************************************************************************/

@@ -203,7 +203,7 @@ void sTabBorderBase::OnPaint2D()
   font->SetColor(sGC_TEXT,sGC_BACK);
 }
 
-sBool sTabBorderBase::OnKey(sU32 key)
+sBool sTabBorderBase::OnKey(uint32_t key)
 {
   if(key & sKEYQ_SHIFT) key |= sKEYQ_SHIFT;
   if(key & sKEYQ_CTRL) key |= sKEYQ_CTRL;

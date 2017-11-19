@@ -76,7 +76,7 @@ public:
   sBool HasInput();
   sBool GetInput(sMidiEvent &e);
   void Output(sMidiEvent &e);
-  void Output(sU8 dev,sU8 chan,sU8 msg,sU8 val);
+  void Output(uint8_t dev,uint8_t chan,uint8_t msg,uint8_t val);
 };
 
 sMidiHandler_ *sMidiHandler;
@@ -86,7 +86,7 @@ sMidiHandler_ *sMidiHandler;
 void CALLBACK sMidiInProc(HMIDIIN in,UINT msg,DWORD inst,DWORD p0,DWORD p1)
 {
   if(sMidiLog)
-    sLogF(L"midi",L"in  %08x %08x %08x %08x %08x\n",sPtr(in),sU32(msg),sU32(inst),sU32(p0),sU32(p1));
+    sLogF(L"midi",L"in  %08x %08x %08x %08x %08x\n",sPtr(in),uint32_t(msg),uint32_t(inst),uint32_t(p0),uint32_t(p1));
   if(sMidiHandler)
   {
     sMidiHandlerWin *mh = (sMidiHandlerWin *) sMidiHandler;
@@ -106,7 +106,7 @@ void CALLBACK sMidiInProc(HMIDIIN in,UINT msg,DWORD inst,DWORD p0,DWORD p1)
 void CALLBACK sMidiOutProc(HMIDIOUT out,UINT msg,DWORD inst,DWORD p0,DWORD p1)
 {
   if(sMidiLog)
-    sLogF(L"midi",L"out %08x %08x %08x %08x %08x\n",sPtr(out),sU32(msg),sU32(inst),sU32(p0),sU32(p1));
+    sLogF(L"midi",L"out %08x %08x %08x %08x %08x\n",sPtr(out),uint32_t(msg),uint32_t(inst),uint32_t(p0),uint32_t(p1));
 }
 
 
@@ -209,7 +209,7 @@ sBool sMidiHandlerWin::GetInput(sMidiEvent &e)
   return InQueue.RemHead(e);
 }
 
-void sMidiHandlerWin::Output(sU8 dev,sU8 stat,sU8 val1,sU8 val2)
+void sMidiHandlerWin::Output(uint8_t dev,uint8_t stat,uint8_t val1,uint8_t val2)
 {
   midiOutShortMsg(Out[dev].Handle,stat|(val1<<8)|(val2<<16));
 }

@@ -118,7 +118,7 @@ void sButtonControl::InitCheckmark(int *ptr,int val)
 }
 
 
-void sButtonControl::MakeShortcut(sString<64> &buffer,sU32 Shortcut)
+void sButtonControl::MakeShortcut(sString<64> &buffer,uint32_t Shortcut)
 {
   sChar s[2];
 
@@ -335,7 +335,7 @@ void sButtonControl::OnDrag(const sWindowDrag &dd)
 }
 
 
-sBool sButtonControl::OnKey(sU32 key)
+sBool sButtonControl::OnKey(uint32_t key)
 {
   if(!(Style&sBCS_STATIC))
   {
@@ -621,7 +621,7 @@ void sChoiceControl::OnDrag(const sWindowDrag &dd)
   }
 }
 
-sBool sChoiceControl::OnKey(sU32 key)
+sBool sChoiceControl::OnKey(uint32_t key)
 {
   if(!(Style&sBCS_STATIC))
   {
@@ -721,7 +721,7 @@ void sChoiceControl::Dropdown()
   FakeDropdown(Client.x0,Client.y1);
 }
 
-void sChoiceControl::SetValue(sDInt newval)
+void sChoiceControl::SetValue(ptrdiff_t newval)
 {
   ChoiceMulti *cm;
   sBool changed = 0;
@@ -950,7 +950,7 @@ void sStringControl::OnPaint2D()
   sClipPop();
 }
 
-sBool sStringControl::OnKey(sU32 key)
+sBool sStringControl::OnKey(uint32_t key)
 {
   int len;
   sBool update;
@@ -1359,9 +1359,9 @@ sBool sStringControl::ParseBuffer()
 
 template <> const sChar *sByteControl::ClassName() { return L"sByteControl"; }
 
-template <> void sValueControl<sU8>::MoreInit() { RightStep = 0.25f; }
+template <> void sValueControl<uint8_t>::MoreInit() { RightStep = 0.25f; }
 
-template <> sBool sValueControl<sU8>::MakeBuffer(sBool unconditional)
+template <> sBool sValueControl<uint8_t>::MakeBuffer(sBool unconditional)
 {
   if(unconditional || *Value != OldValue)
   { 
@@ -1375,7 +1375,7 @@ template <> sBool sValueControl<sU8>::MakeBuffer(sBool unconditional)
   } 
 }
 
-template <> sBool sValueControl<sU8>::ParseBuffer()
+template <> sBool sValueControl<uint8_t>::ParseBuffer()
 {
   const sChar *s = String;
   int val;
@@ -1413,18 +1413,18 @@ template <> sBool sValueControl<sU8>::ParseBuffer()
   // assign and return
 
   if(ok)
-    *Value = OldValue = sU8(val);
+    *Value = OldValue = uint8_t(val);
 
   return ok;
 }
 
-template <> void sValueControl<sU8>::OnPaint2D()
+template <> void sValueControl<uint8_t>::OnPaint2D()
 {
   if(ColorPtr)
   {
     BackColor = 0xff000000|(ColorPtr[2]<<16)|(ColorPtr[1]<<8)|(ColorPtr[0]<<0);
   }
-  Percent = sF32(*Value-Min)/(Max-Min);
+  Percent = float(*Value-Min)/(Max-Min);
 
   sStringControl::OnPaint2D();
 }
@@ -1437,9 +1437,9 @@ template <> void sValueControl<sU8>::OnPaint2D()
 
 template <> const sChar *sWordControl::ClassName() { return L"sWordControl"; }
 
-template <> void sValueControl<sU16>::MoreInit() { RightStep = 0.25f; }
+template <> void sValueControl<uint16_t>::MoreInit() { RightStep = 0.25f; }
 
-template <> sBool sValueControl<sU16>::MakeBuffer(sBool unconditional)
+template <> sBool sValueControl<uint16_t>::MakeBuffer(sBool unconditional)
 {
   if(unconditional || *Value != OldValue)
   { 
@@ -1453,7 +1453,7 @@ template <> sBool sValueControl<sU16>::MakeBuffer(sBool unconditional)
   } 
 }
 
-template <> sBool sValueControl<sU16>::ParseBuffer()
+template <> sBool sValueControl<uint16_t>::ParseBuffer()
 {
   const sChar *s = String;
   int val;
@@ -1491,18 +1491,18 @@ template <> sBool sValueControl<sU16>::ParseBuffer()
   // assign and return
 
   if(ok)
-    *Value = OldValue = sU16(val);
+    *Value = OldValue = uint16_t(val);
 
   return ok;
 }
 
-template <> void sValueControl<sU16>::OnPaint2D()
+template <> void sValueControl<uint16_t>::OnPaint2D()
 {
   if(ColorPtr)
   {
     BackColor = 0xff000000|(ColorPtr[2]<<16)|(ColorPtr[1]<<8)|(ColorPtr[0]<<0);
   }
-  Percent = sF32(*Value-Min)/(Max-Min);
+  Percent = float(*Value-Min)/(Max-Min);
 
   sStringControl::OnPaint2D();
 }
@@ -1585,7 +1585,7 @@ template <> void sValueControl<int>::OnPaint2D()
   {
     BackColor = 0xff000000|(ColorPtr[0]<<16)|(ColorPtr[1]<<8)|(ColorPtr[2]<<0);
   }
-  Percent = sF32(*Value-Min)/(Max-Min);
+  Percent = float(*Value-Min)/(Max-Min);
 
   sStringControl::OnPaint2D();
 }
@@ -1598,9 +1598,9 @@ template <> void sValueControl<int>::OnPaint2D()
 
 template <> const sChar *sFloatControl::ClassName() { return L"sFloatControl"; }
 
-template <> void sValueControl<sF32>::MoreInit() { RightStep = 0.125f; }
+template <> void sValueControl<float>::MoreInit() { RightStep = 0.125f; }
 
-template <> sBool sValueControl<sF32>::MakeBuffer(sBool unconditional)
+template <> sBool sValueControl<float>::MakeBuffer(sBool unconditional)
 {
   if(unconditional || *Value != OldValue)
   { 
@@ -1614,10 +1614,10 @@ template <> sBool sValueControl<sF32>::MakeBuffer(sBool unconditional)
   } 
 }
 
-template <> sBool sValueControl<sF32>::ParseBuffer()
+template <> sBool sValueControl<float>::ParseBuffer()
 {
   const sChar *s = String;
-  sF32 val;
+  float val;
   sBool ok = 1;
   
   // scan sign
@@ -1645,7 +1645,7 @@ template <> sBool sValueControl<sF32>::ParseBuffer()
 }
 
 
-template <> void sValueControl<sF32>::OnPaint2D()
+template <> void sValueControl<float>::OnPaint2D()
 {
   if(ColorPtr)
   {
@@ -1654,7 +1654,7 @@ template <> void sValueControl<sF32>::OnPaint2D()
     int b= sClamp(int(ColorPtr[2]*255),0,255);
     BackColor = 0xff000000|(r<<16)|(g<<8)|(b<<0);
   }
-  Percent = sF32(*Value-Min)/(Max-Min);
+  Percent = float(*Value-Min)/(Max-Min);
 
   sStringControl::OnPaint2D();
 }
@@ -1807,7 +1807,7 @@ sProgressBarControl::sProgressBarControl()
   Percentage = 0.0f;
 }
 
-void sProgressBarControl::SetPercentage(sF32 percentage)
+void sProgressBarControl::SetPercentage(float percentage)
 {
   Percentage = sClamp(percentage,0.0f,1.0f);
   Update();
@@ -1840,11 +1840,11 @@ sBitmaskControl::sBitmaskControl()
   Val = 0;
 }
 
-void sBitmaskControl::Init(sU8 *val)
+void sBitmaskControl::Init(uint8_t *val)
 {
   Val = val;
   ClearNotify();
-  AddNotify(Val,sizeof(sU8));
+  AddNotify(Val,sizeof(uint8_t));
 }
 
 void sBitmaskControl::OnCalcSize()

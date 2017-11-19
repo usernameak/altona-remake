@@ -423,7 +423,7 @@ void sMenuFrame::Kill()
   Close();
 }
 
-sBool sMenuFrame::OnShortcut(sU32 key)
+sBool sMenuFrame::OnShortcut(uint32_t key)
 {
   Item *item;
   if(key==sKEY_ESCAPE)
@@ -461,7 +461,7 @@ sBool sMenuFrame::OnCommand(int cmd)
 }
 */
 
-void sMenuFrame::CmdPressed(sDInt id)
+void sMenuFrame::CmdPressed(ptrdiff_t id)
 {
   Item *item;
 
@@ -471,7 +471,7 @@ void sMenuFrame::CmdPressed(sDInt id)
   Kill();
 }
 
-void sMenuFrame::CmdPressedNoKill(sDInt id)
+void sMenuFrame::CmdPressedNoKill(ptrdiff_t id)
 {
   Item *item;
 
@@ -502,7 +502,7 @@ void sMenuFrame::OnPaint2D()
 
 /****************************************************************************/
 
-void sMenuFrame::AddItem(const sChar *name,const sMessage &msg,sU32 Shortcut,int len,int column,sU32 backcol)
+void sMenuFrame::AddItem(const sChar *name,const sMessage &msg,uint32_t Shortcut,int len,int column,uint32_t backcol)
 {
   sButtonControl *con;
   Item *item;
@@ -524,7 +524,7 @@ void sMenuFrame::AddItem(const sChar *name,const sMessage &msg,sU32 Shortcut,int
   item->Window = con;
 }
 
-void sMenuFrame::AddCheckmark(const sChar *name,const sMessage &msg,sU32 Shortcut,int *checkref,int checkvalue,int len,int column,sU32 backcol,int buttonstyle)
+void sMenuFrame::AddCheckmark(const sChar *name,const sMessage &msg,uint32_t Shortcut,int *checkref,int checkvalue,int len,int column,uint32_t backcol,int buttonstyle)
 {
   sButtonControl *con;
   Item *item;
@@ -1071,7 +1071,7 @@ void sGridFrame::AddLabel(const sChar *str,int x,int y,int xs,int ys,int flags)
   lay->GridRect.Init(x,y,x+xs,y+ys);
 }
 
-sBool sGridFrame::OnKey(sU32 key)
+sBool sGridFrame::OnKey(uint32_t key)
 {
   int inc = 0;
   key = key & ~sKEYQ_CAPS;
@@ -1490,7 +1490,7 @@ sTextWindow *sGridFrameHelper::Text(sTextBuffer *tb,int lines,int width)
   return tw;
 }
 
-sByteControl *sGridFrameHelper::Byte(sU8 *val,int min,int max,sF32 step,sU8 *colptr)
+sByteControl *sGridFrameHelper::Byte(uint8_t *val,int min,int max,float step,uint8_t *colptr)
 {
   if(Left+ControlWidth>Right) NextLine();
   sByteControl *con = new sByteControl(val,min,max,step,colptr);
@@ -1503,7 +1503,7 @@ sByteControl *sGridFrameHelper::Byte(sU8 *val,int min,int max,sF32 step,sU8 *col
   return con;
 }
 
-sWordControl *sGridFrameHelper::Word(sU16 *val,int min,int max,sF32 step,sU16 *colptr)
+sWordControl *sGridFrameHelper::Word(uint16_t *val,int min,int max,float step,uint16_t *colptr)
 {
   if(Left+ControlWidth>Right) NextLine();
   sWordControl *con = new sWordControl(val,min,max,step,colptr);
@@ -1516,7 +1516,7 @@ sWordControl *sGridFrameHelper::Word(sU16 *val,int min,int max,sF32 step,sU16 *c
   return con;
 }
 
-sIntControl *sGridFrameHelper::Int(int *val,int min,int max,sF32 step,int *colptr,const sChar *format)
+sIntControl *sGridFrameHelper::Int(int *val,int min,int max,float step,int *colptr,const sChar *format)
 {
   if(Left+ControlWidth>Right) NextLine();
   sIntControl *con = new sIntControl(val,min,max,step,colptr);
@@ -1534,7 +1534,7 @@ sIntControl *sGridFrameHelper::Int(int *val,int min,int max,sF32 step,int *colpt
   return con;
 }
 
-sFloatControl *sGridFrameHelper::Float(sF32 *val,sF32 min,sF32 max,sF32 step,sF32 *colptr)
+sFloatControl *sGridFrameHelper::Float(float *val,float min,float max,float step,float *colptr)
 {
   if(Left+ControlWidth>Right) NextLine();
   sFloatControl *con = new sFloatControl(val,min,max,step,colptr);
@@ -1547,9 +1547,9 @@ sFloatControl *sGridFrameHelper::Float(sF32 *val,sF32 min,sF32 max,sF32 step,sF3
   return con;
 }
   
-void sGridFrameHelper::Color(sU32 *ptr,const sChar *config)
+void sGridFrameHelper::Color(uint32_t *ptr,const sChar *config)
 {
-  sU8 *byte = (sU8 *)ptr;
+  uint8_t *byte = (uint8_t *)ptr;
   sByteControl *conr=0,*cong=0,*conb=0,*cona=0;
   if(Left+ControlWidth*sGetStringLen(config)>Right) NextLine();
   while(*config)
@@ -1593,7 +1593,7 @@ void sGridFrameHelper::Color(sU32 *ptr,const sChar *config)
   }
 }
 
-void sGridFrameHelper::ColorF(sF32 *ptr,const sChar *config)
+void sGridFrameHelper::ColorF(float *ptr,const sChar *config)
 {
   sFloatControl *conr=0,*cong=0,*conb=0,*cona=0;
   if(Left+ControlWidth*sGetStringLen(config)>Right) NextLine();
@@ -1640,11 +1640,11 @@ class sColorPickerInfo : public sObject
 {
 public:
   sCLASSNAME_NONEW(sColorPickerInfo);
-  sColorPickerInfo(sU32 *u,sF32 *f,sObject *ref,sBool alpha,sMessage &msg);
+  sColorPickerInfo(uint32_t *u,float *f,sObject *ref,sBool alpha,sMessage &msg);
   void Tag();
 
-  sU32 *UPtr;
-  sF32 *FPtr;
+  uint32_t *UPtr;
+  float *FPtr;
   sObject *TagRef;
   int Alpha;
   sMessage ChangeMsg;
@@ -1652,7 +1652,7 @@ public:
   void CmdOpen();
 };
 
-sColorPickerInfo::sColorPickerInfo(sU32 *u,sF32 *f,sObject *ref,sBool alpha,sMessage &msg)
+sColorPickerInfo::sColorPickerInfo(uint32_t *u,float *f,sObject *ref,sBool alpha,sMessage &msg)
 {
   UPtr = u;
   FPtr = f;
@@ -1682,7 +1682,7 @@ void sColorPickerInfo::CmdOpen()
 }
 
 
-void sGridFrameHelper::ColorPick(sU32 *ptr,const sChar *config,sObject *tagref)
+void sGridFrameHelper::ColorPick(uint32_t *ptr,const sChar *config,sObject *tagref)
 {
   sBool alpha = sFindLastChar(config,'a')!=-1;
   sColorPickerInfo *info = new sColorPickerInfo(ptr,0,tagref,alpha,ChangeMsg);
@@ -1690,7 +1690,7 @@ void sGridFrameHelper::ColorPick(sU32 *ptr,const sChar *config,sObject *tagref)
   Box(L"^",sMessage(info,&sColorPickerInfo::CmdOpen));
 }
 
-void sGridFrameHelper::ColorPickF(sF32 *ptr,const sChar *config,sObject *tagref)
+void sGridFrameHelper::ColorPickF(float *ptr,const sChar *config,sObject *tagref)
 {
   sBool alpha = sFindLastChar(config,'a')!=-1;
   sColorPickerInfo *info = new sColorPickerInfo(0,ptr,tagref,alpha,ChangeMsg);
@@ -1710,7 +1710,7 @@ sColorGradientControl *sGridFrameHelper::Gradient(class sColorGradient *g,sBool 
 }
 
 
-void sGridFrameHelper::Bitmask(sU8 *x,int width)
+void sGridFrameHelper::Bitmask(uint8_t *x,int width)
 {
   if(Left>Right-BoxWidth) NextLine();
   sBitmaskControl *con = new sBitmaskControl();
@@ -1795,7 +1795,7 @@ void sGridFrameTemplate::Init()
 
 sBool sGridFrameTemplate::Condition(void *obj_)
 {
-  sU8 *obj = (sU8 *) obj_;
+  uint8_t *obj = (uint8_t *) obj_;
 
   int val = (*(int *)(obj+ConditionOffset)) & ConditionMask;
   sBool cond = (val == ConditionValue);
@@ -1806,7 +1806,7 @@ sBool sGridFrameTemplate::Condition(void *obj_)
 
 void sGridFrameTemplate::Add(sGridFrameHelper &gh,void *obj_,const sMessage &changemsg,const sMessage &relayoutmsg)
 {
-  sU8 *obj = (sU8 *) obj_;
+  uint8_t *obj = (uint8_t *) obj_;
 
   if((Flags & sGFF_CONDHIDE) && !Condition(obj_))
     return;
@@ -1850,17 +1850,17 @@ void sGridFrameTemplate::Add(sGridFrameHelper &gh,void *obj_,const sMessage &cha
     break;
   case sGFT_FLOAT:
     for(int i=0;i<Count;i++)
-      gh.Float((sF32 *)(obj+Offset+i*sizeof(sF32)),Min,Max,Step);
+      gh.Float((float *)(obj+Offset+i*sizeof(float)),Min,Max,Step);
     break;
   case sGFT_BYTE:
     for(int i=0;i<Count;i++)
-      gh.Byte((sU8 *)(obj+Offset+i*sizeof(sU8)),int(Min),int(Max),Step);
+      gh.Byte((uint8_t *)(obj+Offset+i*sizeof(uint8_t)),int(Min),int(Max),Step);
     break;
   case sGFT_COLOR:
-    gh.Color((sU32 *)(obj+Offset),Choices);
+    gh.Color((uint32_t *)(obj+Offset),Choices);
     break;
   case sGFT_COLORF:
-    gh.ColorF((sF32 *)(obj+Offset),Choices);
+    gh.ColorF((float *)(obj+Offset),Choices);
     break;
   }
 }
@@ -1963,7 +1963,7 @@ sGridFrameTemplate * sGridFrameTemplate::InitString(const sChar *label,int offse
   return this;
 }
 
-sGridFrameTemplate * sGridFrameTemplate::InitFloat(const sChar *label,int offset,int count,sF32 min,sF32 max,sF32 step)
+sGridFrameTemplate * sGridFrameTemplate::InitFloat(const sChar *label,int offset,int count,float min,float max,float step)
 {
   Init();
   Type = sGFT_FLOAT;
@@ -1976,7 +1976,7 @@ sGridFrameTemplate * sGridFrameTemplate::InitFloat(const sChar *label,int offset
   return this;
 }
 
-sGridFrameTemplate * sGridFrameTemplate::InitInt(const sChar *label,int offset,int count,int min,int max,sF32 step)
+sGridFrameTemplate * sGridFrameTemplate::InitInt(const sChar *label,int offset,int count,int min,int max,float step)
 {
   Init();
   Type = sGFT_INT;
@@ -1989,7 +1989,7 @@ sGridFrameTemplate * sGridFrameTemplate::InitInt(const sChar *label,int offset,i
   return this;
 }
 
-sGridFrameTemplate * sGridFrameTemplate::InitByte(const sChar *label,int offset,int count,int min,int max,sF32 step)
+sGridFrameTemplate * sGridFrameTemplate::InitByte(const sChar *label,int offset,int count,int min,int max,float step)
 {
   Init();
   Type = sGFT_BYTE;

@@ -94,7 +94,7 @@ class sStaticListWindow : public sWireClientWindow    // static list: can't sele
   friend class sListWindow2Header;
   sArray<sListWindow2Field *> Fields;
   sArray<sListWindow2Column> Columns;
-  sArray<sU8> SelectionCopy;
+  sArray<uint8_t> SelectionCopy;
   int Height;
   int DragHighlight;
   int DragMode;
@@ -156,11 +156,11 @@ public:
 
   void AddField(sListWindow2Field *field,int width);
   sListWindow2Field *AddField(const sChar *label,int flags,int width,int id,int size);    // custom field. set width to add field, too
-  sListWindow2Field *AddField(const sChar *label,int flags,int width,sMemberPtr<int> ref,int min=0,int max=255,sF32 step=0.25f);   // int
-  sListWindow2Field *AddField(const sChar *label,int flags,int width,sMemberPtr<sF32> ref,sF32 min=0,sF32 max=1,sF32 step=0.001f);   // float
-  sListWindow2Field *AddFieldColor(const sChar *label,int flags,int width,sMemberPtr<sU32> ref);   // rgba color
+  sListWindow2Field *AddField(const sChar *label,int flags,int width,sMemberPtr<int> ref,int min=0,int max=255,float step=0.25f);   // int
+  sListWindow2Field *AddField(const sChar *label,int flags,int width,sMemberPtr<float> ref,float min=0,float max=1,float step=0.001f);   // float
+  sListWindow2Field *AddFieldColor(const sChar *label,int flags,int width,sMemberPtr<uint32_t> ref);   // rgba color
   sListWindow2Field *AddFieldChoice(const sChar *label,int flags,int width,sMemberPtr<int> ref,const sChar *choices);   // choice
-  sListWindow2Field *AddFieldProgress(const sChar *label,int flags,int width,sMemberPtr<sF32> ref); // progress
+  sListWindow2Field *AddFieldProgress(const sChar *label,int flags,int width,sMemberPtr<float> ref); // progress
 //  sListWindow2Field *AddField(const sChar *label,int flags,int width,const sChar *sObject::*ref); // const string
   sListWindow2Field *AddField(const sChar *label,int flags,int width,sMemberPtr<sChar> ref,int size); // string
   sListWindow2Field *AddField(const sChar *label,int flags,int width,sMemberPtr<sPoolString> ref);   // pool string
@@ -168,11 +168,11 @@ public:
 
   template <int n> sListWindow2Field *AddField(const sChar *label,int flags,int width,sMemberPtr<sString<n> > ref) { return AddField(label,flags,width,sMemberPtr<sChar>(ref.Offset),n); }
   /*
-  template <class T> sListWindow2Field *AddField(const sChar *label,int flags,int width,int T::*ref,int min=0,int max=255,sF32 step=0.25f) { return AddField(label,flags,width,(int sObject::*) ref,min,max); }
-  template <class T> sListWindow2Field *AddField(const sChar *label,int flags,int width,sF32 T::*ref,sF32 min=0,sF32 max=1,sF32 step=0.001f) { return AddField(label,flags,width,(sF32 sObject::*) ref,min,max); }
-  template <class T> sListWindow2Field *AddFieldColor(const sChar *label,int flags,int width,sU32 T::*ref) { return AddFieldColor(label,flags,width,(sU32 sObject::*) ref); }
+  template <class T> sListWindow2Field *AddField(const sChar *label,int flags,int width,int T::*ref,int min=0,int max=255,float step=0.25f) { return AddField(label,flags,width,(int sObject::*) ref,min,max); }
+  template <class T> sListWindow2Field *AddField(const sChar *label,int flags,int width,float T::*ref,float min=0,float max=1,float step=0.001f) { return AddField(label,flags,width,(float sObject::*) ref,min,max); }
+  template <class T> sListWindow2Field *AddFieldColor(const sChar *label,int flags,int width,uint32_t T::*ref) { return AddFieldColor(label,flags,width,(uint32_t sObject::*) ref); }
   template <class T> sListWindow2Field *AddFieldChoice(const sChar *label,int flags,int width,int T::*ref,const sChar *choices) { return AddFieldChoice(label,flags,width,(int sObject::*) ref,choices); }
-  template <class T> sListWindow2Field *AddFieldProgress(const sChar *label,int flags,int width,sF32 T::*ref) { return AddFieldProgress(label,flags,width,(sF32 sObject::*) ref); }
+  template <class T> sListWindow2Field *AddFieldProgress(const sChar *label,int flags,int width,float T::*ref) { return AddFieldProgress(label,flags,width,(float sObject::*) ref); }
 //  template <class T> sListWindow2Field *AddField(const sChar *label,int flags,int width,(const sChar *)T::*ref) { return AddField(label,flags,width,((const sChar *)sObject::*) ref,0); }
   template <class T,int n> sListWindow2Field *AddField(const sChar *label,int flags,int width,sString<n> T::*ref) { return AddField(label,flags,width,(sChar sObject::*) ref,n); } // this cast is totally illegal, but it gives the right result!
   template <class T> sListWindow2Field *AddField(const sChar *label,int flags,int width,sPoolString T::*ref) { return AddField(label,flags,width,(sPoolString sObject::*) ref); }
@@ -186,17 +186,17 @@ public:
   int ForceEditField(int line,int column);
 
   void DragSelectSingle(const sWindowDrag &dd);
-  void DragSelectMulti(const sWindowDrag &dd,sDInt mode);
+  void DragSelectMulti(const sWindowDrag &dd,ptrdiff_t mode);
   void DragEdit(const sWindowDrag &dd);
-  void CmdDelete(sDInt mode=0);
-  void CmdSelUp(sDInt mode);
-  void CmdSelDown(sDInt mode);
+  void CmdDelete(ptrdiff_t mode=0);
+  void CmdSelUp(ptrdiff_t mode);
+  void CmdSelDown(ptrdiff_t mode);
   void CmdSelectAll();
-  void CmdMoveUp(sDInt mode);
-  void CmdMoveDown(sDInt mode);
+  void CmdMoveUp(ptrdiff_t mode);
+  void CmdMoveDown(ptrdiff_t mode);
   void CmdMoveLeft();
   void CmdMoveRight();
-  void CmdOpenClose(sDInt mode);
+  void CmdOpenClose(ptrdiff_t mode);
 };
 
 template <class Type> 

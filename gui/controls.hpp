@@ -24,7 +24,7 @@ public:
   void Tag();
 
   int Style;
-  sU32 BackColor;
+  uint32_t BackColor;
   sMessage DoneMsg;
   sMessage ChangeMsg;
 
@@ -52,7 +52,7 @@ public:
   const sChar *Label;
   int LabelLength;               // length of label string, set to -1
   int Width;                     // usually, the width is calculated automatic. set this != 0 to override!
-  sU32 Shortcut;                  // shortcutkey, will be displayed inside button. this is just for display in sBCS_NOBORDER mode
+  uint32_t Shortcut;                  // shortcutkey, will be displayed inside button. this is just for display in sBCS_NOBORDER mode
   sMessage DoubleClickMsg;
 
   int GetRadioValue() { return RadioValue; }
@@ -60,10 +60,10 @@ public:
   void OnCalcSize();
   void OnPaint2D();
   void OnDrag(const sWindowDrag &dd);
-  sBool OnKey(sU32 key);
+  sBool OnKey(uint32_t key);
   sBool OnCommand(int cmd);
 
-  static void MakeShortcut(sString<64> &buffer,sU32 shortcut);    // this is awfully useful and belongs to gui.hpp or types.hpp
+  static void MakeShortcut(sString<64> &buffer,uint32_t shortcut);    // this is awfully useful and belongs to gui.hpp or types.hpp
 };
 
 enum sButtonControlStyle
@@ -139,13 +139,13 @@ public:
   void OnCalcSize();
   void OnPaint2D();
   void OnDrag(const sWindowDrag &dd);
-  sBool OnKey(sU32 key);
+  sBool OnKey(uint32_t key);
   sBool OnCommand(int cmd);
   void FakeDropdown(int x,int y);
 private:
   void Next();
   void Dropdown();
-  void SetValue(sDInt newval);
+  void SetValue(ptrdiff_t newval);
   void SetDefaultValue();
   sArray<ChoiceMulti> Values;
 };
@@ -197,12 +197,12 @@ public:
   virtual sBool MakeBuffer(sBool unconditional);   // if buffer needs to be updated, do that and return 1
   virtual sBool ParseBuffer();  // if buffer is valid, update value and return 1
 
-  sU32 BackColor;
-  sF32 Percent;
+  uint32_t BackColor;
+  float Percent;
 
   void OnCalcSize();
   void OnPaint2D();
-  sBool OnKey(sU32 key);
+  sBool OnKey(uint32_t key);
   void OnDrag(const sWindowDrag &dd);
   sBool OnCommand(int cmd);
 
@@ -223,8 +223,8 @@ public:
   Type Max;
   Type OldValue;
   Type Default;
-  sF32 Step;
-  sF32 RightStep;
+  float Step;
+  float RightStep;
   Type DragStart;
   const sChar *Format;
   int DisplayShift;      // for int only: shift before display
@@ -234,7 +234,7 @@ public:
   static const sChar *ClassName();
   void MoreInit();
   const sChar *GetClassName() { return ClassName(); }
-  void InitValue(Type *val,Type min,Type max,sF32 step=0.0f,Type *colptr=0)
+  void InitValue(Type *val,Type min,Type max,float step=0.0f,Type *colptr=0)
   {
     Min = min;  Max = max;  Value = val; Step = step;
     if(min<=0 && max>=0)
@@ -252,7 +252,7 @@ public:
     AddNotify(ColorPtr,sizeof(Type)*3);
     MoreInit();
   }
-  sValueControl(Type *val,Type min,Type max,sF32 step=0.0f,Type *colptr=0)
+  sValueControl(Type *val,Type min,Type max,float step=0.0f,Type *colptr=0)
   {
     InitString(String); InitValue(val,min,max,step,colptr);
     Format=L"%f"; MakeBuffer(1);
@@ -266,7 +266,7 @@ public:
   {
     ReqSizeY = sGui->PropFont->GetHeight()+4;
   }
-  sBool OnKey(sU32 key)
+  sBool OnKey(uint32_t key)
   {
     if(Style & sSCS_STATIC) return 0;
     sStringControl *tie;
@@ -295,7 +295,7 @@ public:
     if(Style & sSCS_STATIC) return;
     if(Step!=0)
     {
-      sF32 step = (dd.Buttons&2)?RightStep:Step; 
+      float step = (dd.Buttons&2)?RightStep:Step; 
       switch(dd.Mode)
       {
       case sDD_START:   
@@ -310,12 +310,12 @@ public:
         else
           SetCharPos(dd.StartX-Inner.x0);
         if(!(dd.Flags&sDDF_DOUBLECLICK))
-        { sF64 val = DragStart;
+        { double val = DragStart;
           if(step>=0)
             val = val + dd.HardDeltaX/2*step;
           else
-            val = (val==0) ? 0.0001f : sExp(sLog(sF32(val))-dd.HardDeltaX/2*step);
-          *Value = Type(sClamp<sF64>(val,Min,Max));
+            val = (val==0) ? 0.0001f : sExp(sLog(float(val))-dd.HardDeltaX/2*step);
+          *Value = Type(sClamp<double>(val,Min,Max));
           if(MakeBuffer(0)) { Update(); PostChange(); Changed=1; sGui->Notify(Value,sizeof(Type)); }
         } 
         if((sGetKeyQualifier()&sKEYQ_CTRL))
@@ -344,10 +344,10 @@ public:
   sBool ParseBuffer();
 };
 
-typedef sValueControl<sU8> sByteControl;
-typedef sValueControl<sU16> sWordControl;
+typedef sValueControl<uint8_t> sByteControl;
+typedef sValueControl<uint16_t> sWordControl;
 typedef sValueControl<int> sIntControl;
-typedef sValueControl<sF32> sFloatControl;
+typedef sValueControl<float> sFloatControl;
 
 /****************************************************************************/
 
@@ -381,13 +381,13 @@ public:
 
 class sProgressBarControl : public sControl
 {
-  sF32 Percentage;
+  float Percentage;
 
 public:
   sCLASSNAME(sProgressBarControl);
   sProgressBarControl();
 
-  void SetPercentage(sF32 percentage);
+  void SetPercentage(float percentage);
 
   void OnCalcSize();
   void OnPaint2D();
@@ -398,7 +398,7 @@ public:
 class sBitmaskControl : public sControl
 {
   int X[9];
-  sU8 *Val;
+  uint8_t *Val;
 public:
   sCLASSNAME(sBitmaskControl);
   sBitmaskControl();
@@ -407,7 +407,7 @@ public:
   void OnPaint2D();
   void OnDrag(const sWindowDrag &dd);
 
-  void Init(sU8 *val);
+  void Init(uint8_t *val);
 };
 
 /****************************************************************************/

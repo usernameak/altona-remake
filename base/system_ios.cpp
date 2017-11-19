@@ -30,7 +30,7 @@ void InitGFX(int flags,int xs,int ys);
 void ExitGFX();
 
 static int IOS_TimeMs;
-static sU64 IOS_TimeUs;
+static uint64_t IOS_TimeUs;
 
 IOS_TouchData IOS_Touches[IOS_MaxTouches];
 int IOS_TouchCount;
@@ -144,8 +144,8 @@ void sTriggerEvent(int e)
 /***                                                                      ***/
 /****************************************************************************/
 
-sU8 *sMainHeapBase;
-sU8 *sDebugHeapBase;
+uint8_t *sMainHeapBase;
+uint8_t *sDebugHeapBase;
 class sMemoryHeap sMainHeap;
 class sMemoryHeap sDebugHeap;
 
@@ -154,7 +154,7 @@ class sLibcHeap_ : public sMemoryHandler
 public:
   void *Alloc(sPtr size,int align,int flags)
   {
-    //    sAtomicAdd(&sMemoryUsed, (sDInt)size);
+    //    sAtomicAdd(&sMemoryUsed, (ptrdiff_t)size);
     void *ptr;
 //    align = sMax<int>(align,sizeof(void*));
 //    sVERIFY(align<=4);
@@ -164,7 +164,7 @@ public:
   }
   sBool Free(void *ptr)
   {
-    //    sAtomicAdd(&sMemoryUsed, -(sDInt)size);
+    //    sAtomicAdd(&sMemoryUsed, -(ptrdiff_t)size);
     free(ptr);
     return 1;
   }
@@ -187,7 +187,7 @@ void sInitMem1()
     if (flags & sIMF_NORTL)
     {
       int size = DebugHeapSize;
-      sDebugHeapBase = (sU8 *) malloc(size);
+      sDebugHeapBase = (uint8_t *) malloc(size);
       sVERIFY(sDebugHeapBase);
       sDebugHeap.Init(sDebugHeapBase,size);
       sRegisterMemHandler(sAMF_DEBUG,&sDebugHeap);
@@ -197,7 +197,7 @@ void sInitMem1()
   }
   if((flags & sIMF_NORTL) && sMemoryInitSize>0)
   {
-    sMainHeapBase = (sU8 *) malloc(sMemoryInitSize);
+    sMainHeapBase = (uint8_t *) malloc(sMemoryInitSize);
     sVERIFY(sMainHeapBase);
     if(flags & sIMF_CLEAR)
       sSetMem(sMainHeapBase,0x77,sMemoryInitSize);
@@ -312,7 +312,7 @@ sThread::sThread(void (*code)(sThread *,void *),int pri,int stacksize,void *user
   int result = pthread_create((pthread_t*)ThreadHandle, sNULL, sThreadTrunk_pthread, this);
   sVERIFY(result==0);
   
-  ThreadId = sU64(*(pthread_t*)ThreadHandle);
+  ThreadId = uint64_t(*(pthread_t*)ThreadHandle);
   
   // clone(sThreadTrunk, StackMemory + stacksize - 1,  CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_VM|CLONE_THREAD ,this);
   
@@ -435,16 +435,16 @@ sBool sThreadEvent::Wait(int timeout)
     }
     
     int start = sGetTime();
-    sU32 tDiff;
+    uint32_t tDiff;
     sBool okay = sFALSE;
     do
     {
       okay = Signaled;
-      tDiff = sU32(sGetTime()-start);
-      if(!okay && sU32(timeout) > tDiff) // not signaled, not yet timed out
+      tDiff = uint32_t(sGetTime()-start);
+      if(!okay && uint32_t(timeout) > tDiff) // not signaled, not yet timed out
         sched_yield();
     }
-    while(!okay && sU32(timeout) > tDiff);
+    while(!okay && uint32_t(timeout) > tDiff);
     
     return okay;
   }
@@ -452,7 +452,7 @@ sBool sThreadEvent::Wait(int timeout)
   {
     if(timeout == -1) // okay, just wait forever
     {
-      sU32 gotit;
+      uint32_t gotit;
       while((gotit = sAtomicSwap(&Signaled,0)) == 0)
         sched_yield();
       
@@ -460,15 +460,15 @@ sBool sThreadEvent::Wait(int timeout)
     }
     
     int start = sGetTime();
-    sU32 tDiff,gotit;
+    uint32_t tDiff,gotit;
     do
     {
       gotit = sAtomicSwap(&Signaled,0);
-      tDiff = sU32(sGetTime()-start);
-      if(!gotit && sU32(timeout) > tDiff) // haven't got it, not timed out
+      tDiff = uint32_t(sGetTime()-start);
+      if(!gotit && uint32_t(timeout) > tDiff) // haven't got it, not timed out
         sched_yield();
     }
-    while(!gotit && sU32(timeout) > tDiff);
+    while(!gotit && uint32_t(timeout) > tDiff);
     
     return gotit == 1;
   }
@@ -492,7 +492,7 @@ void sThreadEvent::Reset()
 /***                                                                      ***/
 /****************************************************************************/
 
-sU64 sGetTimeUS()
+uint64_t sGetTimeUS()
 {
   return IOS_TimeUs;
 }
@@ -525,10 +525,10 @@ void sGetMouse(sMouseData&,int,int)
 /****************************************************************************/
 /*
 sBool sCheckFile(const sChar *name);
-sU8 *sLoadFile(const sChar *name);
-sU8 *sLoadFile(const sChar *name,sDInt &size);
-sBool sSaveFile(const sChar *name,const void *data,sDInt bytes);
-sBool sSaveFileFailsafe(const sChar *name,const void *data,sDInt bytes);
+uint8_t *sLoadFile(const sChar *name);
+uint8_t *sLoadFile(const sChar *name,ptrdiff_t &size);
+sBool sSaveFile(const sChar *name,const void *data,ptrdiff_t bytes);
+sBool sSaveFileFailsafe(const sChar *name,const void *data,ptrdiff_t bytes);
 sChar *sLoadText(const sChar *name);
 //sStream *sOpenText(const sChar *name);
 sBool sSaveTextAnsi(const sChar *name,const sChar *data);
@@ -552,11 +552,11 @@ sBool sFindFile(sChar *foundname, int foundnamesize, const sChar *path,const sCh
 { sFatal(L"not implemented"); return 0; }
 sBool sLoadDir(sArray<sDirEntry> &list,const sChar *path,const sChar *pattern)
 { sFatal(L"not implemented"); return 0; }
-sDateAndTime sFromFileTime(sU64 fileTime) // OS specific times, e.g. LastWriteTime
+sDateAndTime sFromFileTime(uint64_t fileTime) // OS specific times, e.g. LastWriteTime
 { sFatal(L"not implemented"); return sDateAndTime(); }
-sU64 sToFileTime(sDateAndTime time)
+uint64_t sToFileTime(sDateAndTime time)
 { sFatal(L"not implemented"); return 0; }
-sBool sSetFileTime(const sChar *name, sU64 lastwritetime)
+sBool sSetFileTime(const sChar *name, uint64_t lastwritetime)
 { sFatal(L"not implemented"); return 0; }
 sBool sChangeDir(const sChar *name)
 { sFatal(L"not implemented"); return 0; }
@@ -566,7 +566,7 @@ void  sGetTempDir(const sStringDesc &str)
 { sFatal(L"not implemented"); }
 sBool sGetFileInfo(const sChar *name,sDirEntry *)
 { sFatal(L"not implemented"); return 0; }
-sBool sGetDiskSizeInfo(const sChar *path, sS64 &availablesize, sS64 &totalsize)
+sBool sGetDiskSizeInfo(const sChar *path, int64_t &availablesize, int64_t &totalsize)
 { sFatal(L"not implemented"); return 0; }
 sBool sMakeDir(const sChar *)          // make one directory
 { sFatal(L"not implemented"); return 0; }

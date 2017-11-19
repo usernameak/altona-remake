@@ -140,7 +140,7 @@ void PrintTextShader(class sTextBuffer& tb, const sChar8 *shader,sBool skipcomme
 
 /****************************************************************************/
 
-void PrintShaderU8(class sTextBuffer& tb, const sU8 *shader,int size)
+void PrintShaderU8(class sTextBuffer& tb, const uint8_t *shader,int size)
 {
   for (int i=0; i<size; i++)
   {
@@ -151,7 +151,7 @@ void PrintShaderU8(class sTextBuffer& tb, const sU8 *shader,int size)
   tb.Print(L"\n");
 }
 
-void PrintShaderU32(class sTextBuffer& tb, const sU32 *shader,int size)
+void PrintShaderU32(class sTextBuffer& tb, const uint32_t *shader,int size)
 {
   for (int i=0; i<(size+3)/4; i++)
   {
@@ -192,10 +192,10 @@ void PrintCreateShader(sTextBuffer &CPP,int type,const sChar *name,const sChar *
   }
 
   CPP.Print(L"#if sRENDERER==sRENDER_DX9 || sRENDERER==sRENDER_DX11\n");
-  CPP.PrintF(L"  %s sCreateShaderRaw(%s,(const sU8 *)%s,sizeof(%s));\n",result,types,name,name);
+  CPP.PrintF(L"  %s sCreateShaderRaw(%s,(const uint8_t *)%s,sizeof(%s));\n",result,types,name,name);
   CPP.Print(L"#endif\n");
   CPP.Print(L"#if sRENDERER==sRENDER_OGL2\n");
-  CPP.PrintF(L"  %s sCreateShaderRaw(%s,(const sU8 *)%s,sizeof(%s));\n",result,types,name,name);
+  CPP.PrintF(L"  %s sCreateShaderRaw(%s,(const uint8_t *)%s,sizeof(%s));\n",result,types,name,name);
   CPP.Print(L"#endif\n");
   CPP.Print(L"#if sRENDERER==sRENDER_BLANK\n");
   CPP.PrintF(L"  %s sCreateShaderRaw(%s,0,0);\n",result,types);
@@ -225,9 +225,9 @@ static void sPrintNewShaderData(sTextBuffer &CPP,const sChar *name,NewCode *code
   if(code->DX9Code)
   {
     CPP.PrintF(L"#if sRENDERER==sRENDER_DX9\n");
-    CPP.PrintF(L"  static const sU32 %s[] = \n",name);
+    CPP.PrintF(L"  static const uint32_t %s[] = \n",name);
     CPP.PrintF(L"  {\n");
-    sPrintShader(CPP,(const sU32 *)code->DX9Code,sPSF_CARRAY|sPSF_NOCOMMENTS);
+    sPrintShader(CPP,(const uint32_t *)code->DX9Code,sPSF_CARRAY|sPSF_NOCOMMENTS);
     CPP.PrintF(L"  };\n");
     CPP.PrintF(L"#endif\n");
     if (ifor) sAppendString(ifdef,L" ||");
@@ -237,7 +237,7 @@ static void sPrintNewShaderData(sTextBuffer &CPP,const sChar *name,NewCode *code
   if(code->DX11Code)
   {
     CPP.PrintF(L"#if sRENDERER==sRENDER_DX11\n");
-    CPP.PrintF(L"  static const sU8 %s[] = \n",name);
+    CPP.PrintF(L"  static const uint8_t %s[] = \n",name);
     CPP.PrintF(L"  {\n");
     PrintShaderU8(CPP,code->DX11Code,code->DX11Size);
     CPP.PrintF(L"  };\n");
@@ -249,7 +249,7 @@ static void sPrintNewShaderData(sTextBuffer &CPP,const sChar *name,NewCode *code
   if(code->GLSLCode)
   {
     CPP.PrintF(L"#if sRENDERER==sRENDER_OGL2\n");
-    CPP.PrintF(L"  static const sU8 %s[] = \n",name);
+    CPP.PrintF(L"  static const uint8_t %s[] = \n",name);
     PrintTextShader(CPP,(const sChar8 *)code->GLSLCode,1);
     CPP.PrintF(L"#endif\n");
     if (ifor) sAppendString(ifdef,L" ||");
@@ -274,15 +274,15 @@ void sPrintNewShaderCode(sTextBuffer &CPP,const sChar *name,const sChar *size,Ne
   }
 
   CPP.PrintF(L"#if sRENDERER==sRENDER_DX11\n");
-  CPP.PrintF(L"  return sCreateShaderRaw(%s|sSTF_HLSL45,(const sU8 *)%s,%s);\n",st,name,size);
+  CPP.PrintF(L"  return sCreateShaderRaw(%s|sSTF_HLSL45,(const uint8_t *)%s,%s);\n",st,name,size);
   if(!Level11)
   {
     CPP.PrintF(L"#elif sRENDERER==sRENDER_DX9\n");
-    CPP.PrintF(L"  return sCreateShaderRaw(%s|sSTF_HLSL23,(const sU8 *)%s,%s);\n",st,name,size);
+    CPP.PrintF(L"  return sCreateShaderRaw(%s|sSTF_HLSL23,(const uint8_t *)%s,%s);\n",st,name,size);
     if(sCONFIG_SDK_CG && !PcOnly)
     {
       CPP.PrintF(L"#elif sRENDERER==sRENDER_OGL2\n");
-      CPP.PrintF(L"  return sCreateShaderRaw(%s|sSTF_NVIDIA,(const sU8 *)%s,%s);\n",st,name,size);
+      CPP.PrintF(L"  return sCreateShaderRaw(%s|sSTF_NVIDIA,(const uint8_t *)%s,%s);\n",st,name,size);
     }
   }
   CPP.PrintF(L"#else\n");
@@ -524,14 +524,14 @@ void Compiler::OutputShader(NewShader *ns)
     if(ifdef.IsEmpty())
       sAppendString(ifdef,L" 0");
     CPP.PrintF(L"#if%s\n",ifdef);
-    CPP.PrintF(L"  static const sU8 *codes[] =\n");
+    CPP.PrintF(L"  static const uint8_t *codes[] =\n");
     CPP.Print(L"  {\n");
     for(int i=0;i<ns->PermuteCount;i++)
     {
       if(ns->Permutes[i])
       {
         sSPrintF(buffer,L"data_%04x",i);
-        CPP.PrintF(L"    (const sU8 *)%s,\n",buffer);
+        CPP.PrintF(L"    (const uint8_t *)%s,\n",buffer);
       }
       else
       {
@@ -539,7 +539,7 @@ void Compiler::OutputShader(NewShader *ns)
       }
     }
     CPP.Print(L"  };\n");
-    CPP.PrintF(L"  static sDInt sizes[] =\n");
+    CPP.PrintF(L"  static ptrdiff_t sizes[] =\n");
     CPP.Print(L"  {\n");
     for(int i=0;i<ns->PermuteCount;i++)
     {

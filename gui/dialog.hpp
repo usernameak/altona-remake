@@ -50,7 +50,7 @@ private:
   {
     sPoolString Text;
     sMessage Cmd;
-    sU32 Shortcut;
+    uint32_t Shortcut;
     sRect Rect;
   };
   sArray<Item> Items;
@@ -64,10 +64,10 @@ public:
   ~sMultipleChoiceDialog();
   void OnPaint2D();
   void OnCalcSize();
-  sBool OnKey(sU32 key);
+  sBool OnKey(uint32_t key);
   void OnDrag(const sWindowDrag &dd);
 
-  void AddItem(const sChar *text,const sMessage &,sU32 shortcut);
+  void AddItem(const sChar *text,const sMessage &,uint32_t shortcut);
   void Start();
 };
 
@@ -82,15 +82,15 @@ class sProgressDialog
 {
   struct Bracket
   {
-    sF32 Start,End;
+    float Start,End;
 
     Bracket() {}
-    Bracket(sF32 st,sF32 en) : Start(st), End(en) {}
+    Bracket(float st,float en) : Start(st), End(en) {}
   };
 
   sString<256> Title;
   sString<256> Text;
-  sF32 Percentage;
+  float Percentage;
   int LastUpdate;
 
   sRect WindowRect;
@@ -112,12 +112,12 @@ public:
   static sBool Close(); // returns sFALSE if user pressed cancel
 
   static void SetText(const sChar *message,sBool forceUpdate=sTRUE);
-  static sBool SetProgress(sF32 percentage); // returns sFALSE if user pressed cancel
+  static sBool SetProgress(float percentage); // returns sFALSE if user pressed cancel
 
   // Use PushLevel when starting a sub-operation that would by itself call SetProgress();
   // you can "nest" progress bars this way. After push level, a progress of [0,1] will map to
   // [start,end] relative to the parent.
-  static void PushLevel(sF32 start,sF32 end);
+  static void PushLevel(float start,float end);
 
   // Same as PushLevel, for the common case where you're iterating over a collection of stuff.
   static void PushLevelCounter(int current,int max);

@@ -26,7 +26,7 @@ void MyWindow::OnPaint2D()
   //sLine2D(Client.x0,Client.y0,Client.x1-1,Client.y1-1,sGC_DRAW);
   //sLine2D(Client.x0,Client.y1-1,Client.x1-1,Client.y0,sGC_DRAW);
   
-  sF32 width = 1.5f;
+  float width = 1.5f;
 
   int sx = Client.SizeX();
   int sy = Client.SizeY();

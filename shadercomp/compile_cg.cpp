@@ -93,7 +93,7 @@ error:
   return 0;
 }
 
-sBool sShaderCompileCG(const sChar *source,const sChar *profile,const sChar *main,sU8 *&data_,int &size_,int flags,sTextBuffer *errors)
+sBool sShaderCompileCG(const sChar *source,const sChar *profile,const sChar *main,uint8_t *&data_,int &size_,int flags,sTextBuffer *errors)
 {
   sChar8 *source8=0;
   const sChar8 *out8 = 0;
@@ -133,7 +133,7 @@ sBool sShaderCompileCG(const sChar *source,const sChar *profile,const sChar *mai
   }
   size_=0; while(out8[size_]) size_++;
   size_++;
-  data_ = new sU8[size_];
+  data_ = new uint8_t[size_];
   sCopyMem(data_,out8,size_);
 
   delete[] source8;
@@ -147,7 +147,7 @@ error:
 
 #else
 
-sBool sShaderCompileCG(const sChar *source,const sChar *profile,const sChar *main,sU8 *&data_,int &size_,int flags,sTextBuffer *errors)
+sBool sShaderCompileCG(const sChar *source,const sChar *profile,const sChar *main,uint8_t *&data_,int &size_,int flags,sTextBuffer *errors)
 {
   return 0;
 }

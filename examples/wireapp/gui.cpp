@@ -143,7 +143,7 @@ void WinCube::Paint(sViewport &view,const sTargetSpec &spec)
   Mtrl->Set(&cb);
 
   sVertexStandard *vp;
-  sU16 *ip;
+  uint16_t *ip;
   Geo->BeginLoad(sVertexFormatStandard,sGF_TRILIST|sGF_INDEX16,sGD_STREAM,8,6*6,(void **)&vp,(void **)&ip);
   vp[0].Init(-1,-1,-1, -1,-1,-1, 0,0);
   vp[1].Init( 1,-1,-1,  1,-1,-1, 1,0);
@@ -164,7 +164,7 @@ void WinCube::Paint(sViewport &view,const sTargetSpec &spec)
 
   PaintGrid();
 
-  sF32 avg = Timer.GetAverageDelta();
+  float avg = Timer.GetAverageDelta();
   Painter->SetTarget(Client);
   Painter->Begin();
   Painter->SetPrint(0,~0,1);

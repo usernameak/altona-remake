@@ -344,7 +344,7 @@ static sINLINE sBool IsLineSpace(sChar ch)
   return ch == ' ' || ch == '\t';
 }
 
-sBool sTextWindow::OnKey(sU32 key)
+sBool sTextWindow::OnKey(uint32_t key)
 {
   if(key&sKEYQ_SHIFT) key|=sKEYQ_SHIFT;
   if(key&sKEYQ_CTRL) key|=sKEYQ_CTRL;

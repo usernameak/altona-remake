@@ -43,7 +43,7 @@ public:
 
   // Rasterize everything currently specified with the given fill convention and color.
   // This also clears all active draw commands.
-  void RasterizeAll(sU32 color, int fillConvention); 
+  void RasterizeAll(uint32_t color, int fillConvention); 
 
 private:
   struct EdgeRec

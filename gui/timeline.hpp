@@ -102,8 +102,8 @@ class sMusicTimeline : public sTimelineInterface
   int MusicSamples;
 
 
-  friend void sMusicTimelineSoundHandler(sS16 *samples,int count);
-  void SoundHandler(sS16 *samples,int count);
+  friend void sMusicTimelineSoundHandler(int16_t *samples,int count);
+  void SoundHandler(int16_t *samples,int count);
 public:
   sMusicTimeline(sMusicPlayer *music);
   ~sMusicTimeline();

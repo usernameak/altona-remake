@@ -9,7 +9,7 @@
 #include "util/image.hpp"
 #include "base/serialize.hpp"
 
-sF32 sColorPickerWindow::PaletteColors[32][4] = 
+float sColorPickerWindow::PaletteColors[32][4] = 
 {
   { 0.0f,0.0f,0.0f,1.0f },
   { 1.0f,0.0f,0.0f,1.0f },
@@ -92,14 +92,14 @@ void sColorGradient::Serialize(sWriter &stream) { Serialize_(stream); }
 
 /****************************************************************************/
 
-void sColorGradient::AddKey(sF32 time,sU32 col)
+void sColorGradient::AddKey(float time,uint32_t col)
 {
   sColorGradientKey *key = Keys.AddMany(1);
   key->Time = time;
   key->Color.InitColor(col);
 }
 
-void sColorGradient::AddKey(sF32 time,const sVector4 &col)
+void sColorGradient::AddKey(float time,const sVector4 &col)
 {
   sColorGradientKey *key = Keys.AddMany(1);
   key->Time = time;
@@ -111,7 +111,7 @@ void sColorGradient::Sort()
   sSortUp(Keys,&sColorGradientKey::Time);
 }
 
-void sColorGradient::Calc(sF32 time,sVector4 &col)
+void sColorGradient::Calc(float time,sVector4 &col)
 {
   if(Gamma<0.0001f)
     col = Keys[Keys.GetCount()-1].Color;
@@ -119,7 +119,7 @@ void sColorGradient::Calc(sF32 time,sVector4 &col)
     CalcUnwarped(sFPow(time,Gamma),col);
 }
 
-void sColorGradient::CalcUnwarped(sF32 time,sVector4 &col)
+void sColorGradient::CalcUnwarped(float time,sVector4 &col)
 {
   int max = Keys.GetCount();
   int pos;
@@ -142,8 +142,8 @@ void sColorGradient::CalcUnwarped(sF32 time,sVector4 &col)
 
     sVector4 dif(Keys[pos+1].Color-Keys[pos].Color);
     sVector4 d0,d1;
-    sF32 tdif = Keys[pos+1].Time-Keys[pos].Time;
-    sF32 t = (time-Keys[pos].Time)/tdif;
+    float tdif = Keys[pos+1].Time-Keys[pos].Time;
+    float t = (time-Keys[pos].Time)/tdif;
 
     if(pos==0)
     {
@@ -213,11 +213,11 @@ void sColorGradientControl::OnPaint2D()
   int xs = cl.SizeX();
   if(xs!=Bar->SizeX)
     Bar->Init(xs,1);
-  sU32 *d = Bar->Data;
+  uint32_t *d = Bar->Data;
   sVector4 col;
   for(int i=0;i<xs;i++)
   {
-    Gradient->Calc(sF32(i)/(xs-1),col);
+    Gradient->Calc(float(i)/(xs-1),col);
     *d++ = col.GetColor();
   }
 
@@ -244,7 +244,7 @@ void sColorGradientControl::OnDrag(const sWindowDrag &dd)
 /***                                                                      ***/
 /****************************************************************************/
 
-sF32 Mod1(sF32 f)
+float Mod1(float f)
 {
 
   f = sFMod(f,1);
@@ -302,7 +302,7 @@ void sColorPickerWindow::Tag()
 
 /****************************************************************************/
 
-void sColorPickerWindow::Init(sF32 *f,sObject *tagref,sBool alpha)
+void sColorPickerWindow::Init(float *f,sObject *tagref,sBool alpha)
 {
   TagRef = tagref;
   FPtr = f;
@@ -318,10 +318,10 @@ void sColorPickerWindow::Init(sF32 *f,sObject *tagref,sBool alpha)
   MakeGui();
 }
 
-void sColorPickerWindow::Init(sU32 *u,sObject *tagref,sBool alpha)
+void sColorPickerWindow::Init(uint32_t *u,sObject *tagref,sBool alpha)
 {
   TagRef = tagref;
-  UPtr = (sU8 *)u;
+  UPtr = (uint8_t *)u;
   Red   = UPtr[2]/255.0f;
   Green = UPtr[1]/255.0f;
   Blue  = UPtr[0]/255.0f;
@@ -357,7 +357,7 @@ void sColorPickerWindow::MakeGui()
   sGridFrameHelper gh(Grid);
   Grid->Columns = 4;
   gh.LabelWidth = 2;
-  const sF32 step = 0.002f;
+  const float step = 0.002f;
 
   if(Gradient)
   {
@@ -404,7 +404,7 @@ void sColorPickerWindow::ChangeGradient()
 
 void sColorPickerWindow::ChangeRGB()
 {
-	sF32 min,max,delta;
+	float min,max,delta;
 
   min = sMin(Red,sMin(Green,Blue));
 	max = sMax(Red,sMax(Green,Blue));
@@ -432,7 +432,7 @@ void sColorPickerWindow::ChangeRGB()
 	if(Hue < 0)
 		Hue += 360;
 
-  sGui->Notify(&Hue,3*sizeof(sF32));
+  sGui->Notify(&Hue,3*sizeof(float));
   GradientChanged = 1;
 
   ChangeMsg.Post();
@@ -442,10 +442,10 @@ void sColorPickerWindow::ChangeRGB()
 void sColorPickerWindow::ChangeHSV()
 {
 	int i;
-	sF32 f, p, q, t;
-  sF32 *r = &Red;
-  sF32 *g = &Green;
-  sF32 *b = &Blue;
+	float f, p, q, t;
+  float *r = &Red;
+  float *g = &Green;
+  float *b = &Blue;
 
 	if(Sat == 0) 
   {
@@ -453,7 +453,7 @@ void sColorPickerWindow::ChangeHSV()
 	}
   else
   {
-	  sF32 h = Mod1(Hue/360.0f)*6;
+	  float h = Mod1(Hue/360.0f)*6;
 	  i = int(sFFloor(h));
 	  f = h - i;
 	  p = Value * (1 - Sat);
@@ -495,20 +495,20 @@ void sColorPickerWindow::ChangeHSV()
     }
 	}
 
-  sGui->Notify(&Red,3*sizeof(sF32));
+  sGui->Notify(&Red,3*sizeof(float));
   GradientChanged = 1;
 
   ChangeMsg.Post();
   UpdateOutput();
 }
 
-void IntHSV(sU8 *dest,int h,int s,int v)
+void IntHSV(uint8_t *dest,int h,int s,int v)
 {
 	int i;
 	int f, p, q, t;
-  sU8 *r = dest+2;
-  sU8 *g = dest+1;
-  sU8 *b = dest+0;
+  uint8_t *r = dest+2;
+  uint8_t *g = dest+1;
+  uint8_t *b = dest+0;
 
 	if(s == 0) 
   {
@@ -563,7 +563,7 @@ void sColorPickerWindow::UpdateOutput()
 {
   if(FPtr)
   {
-    sGui->Notify(FPtr,sizeof(sF32)*(3+AlphaEnable));
+    sGui->Notify(FPtr,sizeof(float)*(3+AlphaEnable));
     FPtr[0] = sClamp(Red  ,0.0f,1.0f);
     FPtr[1] = sClamp(Green,0.0f,1.0f);
     FPtr[2] = sClamp(Blue ,0.0f,1.0f);
@@ -572,7 +572,7 @@ void sColorPickerWindow::UpdateOutput()
   }
   if(UPtr)
   {
-    sGui->Notify(UPtr,sizeof(sU8)*(3+AlphaEnable));
+    sGui->Notify(UPtr,sizeof(uint8_t)*(3+AlphaEnable));
     UPtr[2] = sClamp(int(Red  *255),0,255);
     UPtr[1] = sClamp(int(Green*255),0,255);
     UPtr[0] = sClamp(int(Blue *255),0,255);
@@ -596,7 +596,7 @@ void sColorPickerWindow::OnPaint2D()
   }
   if(PickSat!=Sat || PickHue!=Hue)
   {
-    sU8 *d=(sU8 *)PickImage->Data;
+    uint8_t *d=(uint8_t *)PickImage->Data;
     int v=sClamp(int(Value*255),0,255);
     for(int s=0;s<PickImage->SizeY;s++)
     {
@@ -624,13 +624,13 @@ void sColorPickerWindow::OnPaint2D()
     GradientChanged = 0;
     Gradient->Sort();
     sVector4 col;
-    sU32 *d=GradientImage->Data;
-    sU32 *w=WarpImage->Data;
+    uint32_t *d=GradientImage->Data;
+    uint32_t *w=WarpImage->Data;
     for(int x=0;x<GradientImage->SizeX;x++)
     {
-      Gradient->CalcUnwarped(sF32(x)/(GradientImage->SizeX-1),col);
+      Gradient->CalcUnwarped(float(x)/(GradientImage->SizeX-1),col);
       *d++ =col.GetColor();
-      Gradient->Calc(sF32(x)/(GradientImage->SizeX-1),col);
+      Gradient->Calc(float(x)/(GradientImage->SizeX-1),col);
       *w++ =col.GetColor();
     }
   }
@@ -664,7 +664,7 @@ void sColorPickerWindow::OnPaint2D()
       {
         int i = y*8+x;
         sVector4 v(PaletteColors[i][0],PaletteColors[i][1],PaletteColors[i][2],0);
-        sU32 col = v.GetColor();
+        uint32_t col = v.GetColor();
         sSetColor2D(sGC_MAX,col);
         PaletteBoxes[i].Init(r.x0+w*x/8,r.y0+1+y*h,r.x0+w*(x+1)/8-1,r.y0+(y+1)*h);
         sRect2D(PaletteBoxes[i],sGC_MAX);
@@ -780,7 +780,7 @@ void sColorPickerWindow::SelectKey(int nr)
 
 void sColorPickerWindow::OnDrag(const sWindowDrag &dd)
 {
-  sU32 qual = sGetKeyQualifier();
+  uint32_t qual = sGetKeyQualifier();
   switch(dd.Mode)
   {
   case sDD_START:
@@ -813,7 +813,7 @@ void sColorPickerWindow::OnDrag(const sWindowDrag &dd)
       else if(dd.Buttons == 2)
       {
         sColorGradientKey *key;
-        sF32 time = sF32(dd.MouseX-Client.x0)/(Client.SizeX()-1);
+        float time = float(dd.MouseX-Client.x0)/(Client.SizeX()-1);
         sVector4 col;
         Gradient->Sort();
         Gradient->Calc(time,col);
@@ -862,14 +862,14 @@ void sColorPickerWindow::OnDrag(const sWindowDrag &dd)
     if(DragMode==1)
     {
       Hue = sFMod((dd.MouseX-PickRect.x0)*360.0f/PickRect.SizeX(),360);
-      Sat = sClamp<sF32>((dd.MouseY-PickRect.y0)*1.0f/PickRect.SizeY(),0.0f,1.0f);
+      Sat = sClamp<float>((dd.MouseY-PickRect.y0)*1.0f/PickRect.SizeY(),0.0f,1.0f);
       sGui->Notify(Hue);
       sGui->Notify(Sat);
       ChangeHSV();
     }
     if(Gradient && DragMode==2)
     {
-      sF32 time = sClamp(DragStart + sF32(dd.DeltaX)/(Client.SizeX()-1),0.0f,1.0f);
+      float time = sClamp(DragStart + float(dd.DeltaX)/(Client.SizeX()-1),0.0f,1.0f);
       if(Gradient->Keys[DragKey].Time!=time)
       {
         Gradient->Keys[DragKey].Time = time;      
@@ -885,7 +885,7 @@ void sColorPickerWindow::OnDrag(const sWindowDrag &dd)
   }
 }
 
-sBool sColorPickerWindow::OnKey(sU32 key)
+sBool sColorPickerWindow::OnKey(uint32_t key)
 {
   switch(key & (sKEYQ_BREAK|sKEYQ_MASK))
   {

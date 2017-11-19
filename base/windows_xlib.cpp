@@ -36,7 +36,7 @@ extern Display *sXDisplay();
 #define MAX_CLIPS   64
 
 static Cursor Cursors[sMP_MAX];
-static sU32 Color[MAX_COLORS][2]; // [0]=X color index, [1]=RGB color
+static uint32_t Color[MAX_COLORS][2]; // [0]=X color index, [1]=RGB color
 static XftColor ColorXFT[MAX_COLORS];
 static Region EmptyRegion,UpdateRegion;
 static sBool UpdateRegionGC,UpdateRegionXft,UpdateRegionXR;
@@ -326,7 +326,7 @@ void sSetClipboard(const sChar *text,int len)
   if(len==-1) len=sGetStringLen(text);
 
   char *dest = new char[(len*4)+1];
-  sU32 *convBuffer = new sU32[len+1];
+  uint32_t *convBuffer = new uint32_t[len+1];
   for(int i=0;i<len;i++) // fake-wchar16-to-wchar32 (argh!)
     convBuffer[i] = text[i];
   
@@ -499,7 +499,7 @@ static void sForeground(int colid)
   }
 }
 
-void sSetColor2D(int colid,sU32 color)
+void sSetColor2D(int colid,uint32_t color)
 {
   sVERIFY(colid>=0 && colid<MAX_COLORS);
   
@@ -527,7 +527,7 @@ void sSetColor2D(int colid,sU32 color)
   }
 }
 
-sU32 sGetColor2D(int colid)
+uint32_t sGetColor2D(int colid)
 {
   sVERIFY(colid>=0 && colid<MAX_COLORS);
   return Color[colid][1];
@@ -611,7 +611,7 @@ void sLineList2D(int *list,int count,int colid)
     XDrawLine(sXDisplay(),sXWnd,sXGC,list[i*4+0],list[i*4+1],list[i*4+2],list[i*4+3]);
 }
 
-static void sPicturePixmapFromRawData(Picture &pic,Pixmap &pixmap,const sU32 *data,int w,int h,int stride)
+static void sPicturePixmapFromRawData(Picture &pic,Pixmap &pixmap,const uint32_t *data,int w,int h,int stride)
 {
   XRenderPictureAttributes attr;
 
@@ -636,7 +636,7 @@ static void sPicturePixmapFromRawData(Picture &pic,Pixmap &pixmap,const sU32 *da
   }
 }
 
-void sBlit2D(const sU32 *data,int width,const sRect &dest)
+void sBlit2D(const uint32_t *data,int width,const sRect &dest)
 {
   Pixmap pixmap;
   Picture pict;
@@ -654,7 +654,7 @@ void sBlit2D(const sU32 *data,int width,const sRect &dest)
   }
 }
 
-void sStretch2D(const sU32 *data,int width,const sRect &source,const sRect &dest)
+void sStretch2D(const uint32_t *data,int width,const sRect &source,const sRect &dest)
 {
   Pixmap pixmap;
   Picture pict;
@@ -731,12 +731,12 @@ void sRender2DEnd()
   Render2DMode = 0;
 }
 
-void sRender2DSet(sU32 *data)
+void sRender2DSet(uint32_t *data)
 {
   sLogF(L"xlib",L"sRender2DSet\n");
 }
 
-void sRender2DGet(sU32 *data)
+void sRender2DGet(uint32_t *data)
 {
   sLogF(L"xlib",L"sRender2DGet\n");
 }
@@ -747,7 +747,7 @@ void sRender2DGet(sU32 *data)
 /***                                                                      ***/
 /****************************************************************************/
 
-sImage2D::sImage2D(int xs,int ys,sU32 *data)
+sImage2D::sImage2D(int xs,int ys,uint32_t *data)
 {
   prv = new sImage2DPrivate;
   prv->xs = xs;
@@ -774,7 +774,7 @@ int sImage2D::GetSizeY()
   return prv->ys;
 }
 
-void sImage2D::Update(sU32 *data)
+void sImage2D::Update(uint32_t *data)
 {
   sLogF(L"xlib",L"sImage2D::Update\n");
 }
@@ -998,7 +998,7 @@ void sFont2D::PrintMarked(int flags,const sRect *rc,int x,int y,const sChar *tex
         text += i;
       }
 
-      sU32 oldbackcolor=prv->BackColor;
+      uint32_t oldbackcolor=prv->BackColor;
       if (pi->SelectBackColor!=~0u)
         prv->BackColor=pi->SelectBackColor;
       else

@@ -54,11 +54,11 @@ static int DXScreenSizeX[MAXSCREENS];
 static int DXScreenSizeY[MAXSCREENS];
 static HWND DXDummyWindow[MAXSCREENS];
 static IDXGIOutput *DXSyncOutput;
-static sU32 DXLastFrame;
+static uint32_t DXLastFrame;
 static int DXFrameTime;
-static sU64 DXFrameTimeU64;
-static sU64 PerfCountFreq;
-static sU64 PerfCountStart;
+static uint64_t DXFrameTimeU64;
+static uint64_t PerfCountFreq;
+static uint64_t PerfCountStart;
 static IDXGISurface1 *DXGISurface;
 static ID3D11Device *DXDev;
 static int DXRendering;
@@ -148,13 +148,13 @@ void PrintBlob(ID3D10Blob *b)
 }
 
 #if sSTRIPPED
-void DXError(sU32 err);
+void DXError(uint32_t err);
 
-#define DXErr(hr) { sU32 err=hr; if(FAILED(err)) DXError(err); }
+#define DXErr(hr) { uint32_t err=hr; if(FAILED(err)) DXError(err); }
 #else
-void DXError(sU32 err,const sChar *file,int line,const sChar *system);
+void DXError(uint32_t err,const sChar *file,int line,const sChar *system);
 
-#define DXErr(hr) { sU32 err=hr; if(FAILED(err)) DXError(err,sTXT(__FILE__),__LINE__,L"d3d"); }
+#define DXErr(hr) { uint32_t err=hr; if(FAILED(err)) DXError(err,sTXT(__FILE__),__LINE__,L"d3d"); }
 #endif
 
 
@@ -168,7 +168,7 @@ static sGraphicsStats DisabledStats;
 static sBool StatsEnable;
 
 static int RenderClippingFlag;
-static sU32 RenderClippingData[4096];
+static uint32_t RenderClippingData[4096];
 
 /****************************************************************************/
 /***                                                                      ***/
@@ -176,7 +176,7 @@ static sU32 RenderClippingData[4096];
 /***                                                                      ***/
 /****************************************************************************/
 
-void ConvertFlags(sU32 flags,int &mm,D3D11_BIND_FLAG &bind,D3D11_USAGE &usage,DXGI_FORMAT &fmt_res,DXGI_FORMAT &fmt_tex,DXGI_FORMAT &fmt_view,sBool &ds);
+void ConvertFlags(uint32_t flags,int &mm,D3D11_BIND_FLAG &bind,D3D11_USAGE &usage,DXGI_FORMAT &fmt_res,DXGI_FORMAT &fmt_tex,DXGI_FORMAT &fmt_view,sBool &ds);
 
 LRESULT WINAPI MsgProcMultiscreen(HWND win,UINT msg,WPARAM wparam,LPARAM lparam)
 {
@@ -216,14 +216,14 @@ void PreInitGFX(int &flags,int &xs,int &ys)
     if(flags & sISF_REFRAST)      DXScreenMode.Flags |= sSM_REFRAST;
     DXScreenMode.ScreenX = xs;
     DXScreenMode.ScreenY = ys;
-    DXScreenMode.Aspect = sF32(DXScreenMode.ScreenX) / sF32(DXScreenMode.ScreenY);
+    DXScreenMode.Aspect = float(DXScreenMode.ScreenX) / float(DXScreenMode.ScreenY);
   }
   else
   {
     xs = DXScreenMode.ScreenX;
     ys = DXScreenMode.ScreenY;
     if(DXScreenMode.Aspect==0)
-      DXScreenMode.Aspect = sF32(DXScreenMode.ScreenX) / sF32(DXScreenMode.ScreenY);
+      DXScreenMode.Aspect = float(DXScreenMode.ScreenX) / float(DXScreenMode.ScreenY);
     if(DXScreenMode.Flags & sSM_FULLSCREEN)
       flags |= sISF_FULLSCREEN;
   }
@@ -399,7 +399,7 @@ void InitGFX(int flags_,int xs_,int ys_)
 
     if(1)
     {
-      sU16 *ql = new sU16[0x10000/4*6];
+      uint16_t *ql = new uint16_t[0x10000/4*6];
       for(int i=0;i<0x10000/4;i++)
       {
         ql[i*6+0] = i*4+0;
@@ -431,7 +431,7 @@ void InitGFX(int flags_,int xs_,int ys_)
     {
       UINT n;
       DXErr(DXDev->CheckMultisampleQualityLevels(DXGI_FORMAT_R8G8B8A8_UNORM,i,&n));
-      for(sU32 j=0;j<n;j++)
+      for(uint32_t j=0;j<n;j++)
       {
         if(i>1)
         {
@@ -511,7 +511,7 @@ void InitGFX(int flags_,int xs_,int ys_)
   DXAdapter->GetDesc(&adesc);
   sCopyString(caps.AdapterName,adesc.Description);
 
-  sU64 avail = sGetAvailTextureFormats();
+  uint64_t avail = sGetAvailTextureFormats();
   for(int i=0;i<64;i++)
   {
     if((1ULL<<i)&avail)
@@ -659,7 +659,7 @@ void ResizeGFX(int x,int y)  // this is called when the windows size changes
     DXScreenMode.ScreenX = x;
     DXScreenMode.ScreenY = y;
     if (!(DXScreenMode.Flags & sSM_FULLSCREEN))
-      DXScreenMode.Aspect = sF32(x)/sF32(y);
+      DXScreenMode.Aspect = float(x)/float(y);
     DXRestore = 1;
   }
 }
@@ -756,7 +756,7 @@ void sSetRenderClipping(sRect *r,int count)
   sVERIFY(count*sizeof(sRect)+sizeof(RGNDATAHEADER)<=sizeof(RenderClippingData));
 
   hdr = (RGNDATAHEADER *) RenderClippingData;
-  rd = (sRect *) (((sU8 *)RenderClippingData)+(sizeof(RGNDATAHEADER)));
+  rd = (sRect *) (((uint8_t *)RenderClippingData)+(sizeof(RGNDATAHEADER)));
 
   hdr->dwSize = sizeof(RGNDATAHEADER);
   hdr->iType = RDH_RECTANGLES;
@@ -836,8 +836,8 @@ void sRender3DEnd(sBool flip)
       }
       DXLastFrame = stat.SyncRefreshCount;
       
-      sF64 tick = sF64(stat.SyncQPCTime.QuadPart-PerfCountStart)/sF64(PerfCountFreq);
-      DXFrameTimeU64 = sU64(tick*1000000);
+      double tick = double(stat.SyncQPCTime.QuadPart-PerfCountStart)/double(PerfCountFreq);
+      DXFrameTimeU64 = uint64_t(tick*1000000);
       DXFrameTime = int(tick*1000);
     }
   }
@@ -860,7 +860,7 @@ void sRender3DFlush()
 
 /****************************************************************************/
 
-void sSetDesiredFrameRate(sF32 rate)
+void sSetDesiredFrameRate(float rate)
 {
 }
 
@@ -899,7 +899,7 @@ sBool sSetOversizeScreen(int xs,int ys,int fsaa,sBool mayfail)
   return 1;
 }
 
-void sGetScreenSafeArea(sF32 &xs, sF32 &ys)
+void sGetScreenSafeArea(float &xs, float &ys)
 {
   xs=ys=1;
 }
@@ -926,7 +926,7 @@ int sGetFrameTime()
     return sGetTime();
 }
 
-sU64 sGetFrameMicroSecond()
+uint64_t sGetFrameMicroSecond()
 {
   return DXFrameTimeU64;
 }
@@ -1030,7 +1030,7 @@ void sGetScreenInfo(sScreenInfo &si,int flags,int display)
           info->PosY = od.DesktopCoordinates.top;
           info->CurrentXSize = od.DesktopCoordinates.right - od.DesktopCoordinates.left;
           info->CurrentYSize = od.DesktopCoordinates.bottom - od.DesktopCoordinates.top;          
-          info->CurrentAspect = sF32(info->CurrentXSize) / info->CurrentYSize;
+          info->CurrentAspect = float(info->CurrentXSize) / info->CurrentYSize;
           info->MultisampleLevels = msaa;
 
           DXGI_OUTPUT_DESC odesc;
@@ -1231,7 +1231,7 @@ void sSetTarget(const sTargetPara &para)
   sGFXRendertargetX = para.Window.SizeX();
   sGFXRendertargetY = para.Window.SizeY();
   if(para.Aspect==0)
-    sGFXRendertargetAspect = sF32(sGFXRendertargetX)/sGFXRendertargetY;
+    sGFXRendertargetAspect = float(sGFXRendertargetX)/sGFXRendertargetY;
   else
     sGFXRendertargetAspect = para.Aspect;
 
@@ -1318,7 +1318,7 @@ void sEnlargeRTDepthBuffer(int x, int y)
 /****************************************************************************/
 
 static ID3D11Texture2D *DXReadTexture;
-void sBeginReadTexture(const sU8*& data, sS32& pitch, enum sTextureFlags& flags,sTexture2D *tex)
+void sBeginReadTexture(const uint8_t*& data, int32_t& pitch, enum sTextureFlags& flags,sTexture2D *tex)
 {
   sVERIFY(DXReadTexture == 0);
   sVERIFY((tex->Flags & sTEX_TYPE_MASK)==sTEX_2D); 
@@ -1344,7 +1344,7 @@ void sBeginReadTexture(const sU8*& data, sS32& pitch, enum sTextureFlags& flags,
   GTC->DXCtx->CopySubresourceRegion(tex->DXReadTex,0,0,0,0,tex->DXTex2D,0,0);
   D3D11_MAPPED_SUBRESOURCE map;
   GTC->DXCtx->Map(tex->DXReadTex,0,D3D11_MAP_READ,0,&map);
-  data = (sU8 *) map.pData;
+  data = (uint8_t *) map.pData;
   pitch = map.RowPitch;
   flags = (enum sTextureFlags) (tex->Flags & sTEX_FORMAT);
 }
@@ -1410,7 +1410,7 @@ void sGpuToCpu::CopyFrom(sTexture2D *tex,int miplevel)
     GTC->DXCtx->CopySubresourceRegion(Dest,0,0,0,0,tex->DXTex2D,miplevel,0);
 }
 
-const void *sGpuToCpu::BeginRead(sDInt &pitch)
+const void *sGpuToCpu::BeginRead(ptrdiff_t &pitch)
 {
   sVERIFY(!Locked);
   Locked = 1;
@@ -1485,12 +1485,12 @@ void sSetScreen(class sTexture2D *tex, sGrabFilterFlags filter, const sRect *dst
   sFatal(L"sSetScreen() not implemented");
 }
 
-void sSetScreen(const sRect &rect,sU32 *data)
+void sSetScreen(const sRect &rect,uint32_t *data)
 {
   sFatal(L"sSetScreen() not implemented");
 }
 
-void sBeginSaveRT(const sU8*& data, sS32& pitch, enum sTextureFlags& flags)
+void sBeginSaveRT(const uint8_t*& data, int32_t& pitch, enum sTextureFlags& flags)
 {
   sFatal(L"sBeginSaveRT() not implemented");
 }
@@ -1742,12 +1742,12 @@ void sSetPSParam(int o, int count, const sVector4* psf)
   sFatal(L"sSetPSParam() not implemented");
 }
 
-void sSetVSBool(sU32 bits,sU32 mask)
+void sSetVSBool(uint32_t bits,uint32_t mask)
 {
   sFatal(L"sSetVSBool() not implemented");
 }
 
-void sSetPSBool(sU32 bits,sU32 mask)
+void sSetPSBool(uint32_t bits,uint32_t mask)
 {
   sFatal(L"sSetPSBool() not implemented");
 }
@@ -2070,7 +2070,7 @@ sCBufferBase *sGetCurrentCBuffer(int slot)
 /***                                                                      ***/
 /****************************************************************************/
 
-sGeoBuffer11::sGeoBuffer11(sDInt bytes)
+sGeoBuffer11::sGeoBuffer11(ptrdiff_t bytes)
 {
   Alloc = bytes;
   Used = 0;
@@ -2143,7 +2143,7 @@ void sGeoBufferManager::Flush()
 
 /****************************************************************************/
 
-void sGeoBufferManager::Map(sGeoMapHandle &map,sDInt bytes)
+void sGeoBufferManager::Map(sGeoMapHandle &map,ptrdiff_t bytes)
 {
   sGeoBuffer11 *gb = 0;
 
@@ -2208,7 +2208,7 @@ void sGeoBufferManager::Map(sGeoMapHandle &map,sDInt bytes)
   {
     D3D11_MAPPED_SUBRESOURCE mr;
     DXErr(GTC->DXCtx->Map(gb->DXBuffer,0,D3D11_MAP_WRITE_NO_OVERWRITE,0,&mr));
-    gb->MapPtr = (sU8 *)mr.pData;
+    gb->MapPtr = (uint8_t *)mr.pData;
   }
   map.Ptr = gb->MapPtr+gb->Used;
   map.Buffer = gb;
@@ -2636,7 +2636,7 @@ sBool sReadTexture(sReader &s, sTextureBase *&tex)
 
 /****************************************************************************/
 
-void ConvertFlags(sU32 flags,int &mm,D3D11_BIND_FLAG &bind,D3D11_USAGE &usage,DXGI_FORMAT &fmt_res,DXGI_FORMAT &fmt_tex,DXGI_FORMAT &fmt_view,sBool &ds)
+void ConvertFlags(uint32_t flags,int &mm,D3D11_BIND_FLAG &bind,D3D11_USAGE &usage,DXGI_FORMAT &fmt_res,DXGI_FORMAT &fmt_tex,DXGI_FORMAT &fmt_view,sBool &ds)
 {
   ds = 0;
   fmt_tex = DXGI_FORMAT_UNKNOWN;
@@ -2720,7 +2720,7 @@ void ConvertFlags(sU32 flags,int &mm,D3D11_BIND_FLAG &bind,D3D11_USAGE &usage,DX
 
 /****************************************************************************/
 
-sU64 sGetAvailTextureFormats()
+uint64_t sGetAvailTextureFormats()
 {
   return
     (1ULL<<sTEX_ARGB8888) |
@@ -2749,7 +2749,7 @@ sU64 sGetAvailTextureFormats()
 
 /****************************************************************************/
 
-void sPackDXT(sU8 *d,sU32 *bmp,int xs,int ys,int format,sBool dither)
+void sPackDXT(uint8_t *d,uint32_t *bmp,int xs,int ys,int format,sBool dither)
 {
 //  int formatflags = format;
   format &= sTEX_FORMAT;
@@ -2820,14 +2820,14 @@ void sOccQuery::End()
 
 void sOccQuery::Poll()
 {
-  sU64 pixels;
+  uint64_t pixels;
   sOccQueryNode *qn = Queries.GetHead();
   while(!Queries.IsEnd(qn))
   {
     sOccQueryNode *next = Queries.GetNext(qn);
     if(GTC->DXCtx->GetData(qn->Query,&pixels,sizeof(pixels),0)==S_OK)
     {
-      Last = sF32(pixels)/qn->Pixels;
+      Last = float(pixels)/qn->Pixels;
       Average = (1-Filter)*Average + Filter*Last;
       Queries.Rem(qn);
       FreeOccQueryNodes->AddTail(qn);
@@ -3003,7 +3003,7 @@ void sTexture2D::Destroy2()
   sVERIFY(!LoadPtr); // forgot EndLoad()
 }
 
-void sTexture2D::BeginLoad(sU8 *&data,int &pitch,int mipmap)
+void sTexture2D::BeginLoad(uint8_t *&data,int &pitch,int mipmap)
 {
   sVERIFY(LoadPtr==0);
   sVERIFY(LoadMipmap==-1);
@@ -3014,20 +3014,20 @@ void sTexture2D::BeginLoad(sU8 *&data,int &pitch,int mipmap)
   {
     D3D11_MAPPED_SUBRESOURCE subres;
     GTC->DXCtx->Map(DXTex2D,LoadMipmap,D3D11_MAP_WRITE_DISCARD,0,&subres);
-    data=(sU8*)subres.pData;
+    data=(uint8_t*)subres.pData;
     pitch=subres.RowPitch;
   }
   else
   {
-    sDInt size = (sU64(SizeX)*SizeY*BitsPerPixel)>>(3+2*mipmap);
-    data = LoadPtr = new sU8[size];
+    ptrdiff_t size = (uint64_t(SizeX)*SizeY*BitsPerPixel)>>(3+2*mipmap);
+    data = LoadPtr = new uint8_t[size];
     pitch = (SizeX*BitsPerPixel)>>(3+mipmap);
     if(sIsBlockCompression(Flags))
       pitch *= 4;
   }
 }
 
-void sTexture2D::BeginLoadPartial(const sRect &rect,sU8 *&data,int &pitch,int mipmap)
+void sTexture2D::BeginLoadPartial(const sRect &rect,uint8_t *&data,int &pitch,int mipmap)
 {
   sVERIFYFALSE;
 }
@@ -3160,15 +3160,15 @@ void sTextureCube::Destroy2()
   sVERIFY(!LoadPtr); // forgot EndLoad()
 }
 
-void sTextureCube::BeginLoad(sTexCubeFace cf, sU8*& data, int& pitch, int mipmap/*=0*/)
+void sTextureCube::BeginLoad(sTexCubeFace cf, uint8_t*& data, int& pitch, int mipmap/*=0*/)
 {
   sVERIFY(LoadPtr==0);
   sVERIFY(LoadMipmap==-1);
 
   LoadMipmap = mipmap;
   LoadCubeFace = cf;
-  sDInt size = (sU64(SizeXY)*SizeXY*BitsPerPixel)>>(3+2*mipmap);
-  data = LoadPtr = new sU8[size];
+  ptrdiff_t size = (uint64_t(SizeXY)*SizeXY*BitsPerPixel)>>(3+2*mipmap);
+  data = LoadPtr = new uint8_t[size];
   pitch = (SizeXY*BitsPerPixel)>>(3+mipmap);
 }
 
@@ -3189,7 +3189,7 @@ void sTextureCube::EndLoad()
 /***                                                                      ***/
 /****************************************************************************/
 
-sTexture3D::sTexture3D(int xs, int ys, int zs, sU32 flags)
+sTexture3D::sTexture3D(int xs, int ys, int zs, uint32_t flags)
 {
   SizeX = xs;
   SizeY = ys;
@@ -3273,14 +3273,14 @@ sTexture3D::~sTexture3D()
   sVERIFY(!LoadPtr); // forgot EndLoad()
 }
 
-void sTexture3D::BeginLoad(sU8*& data, int& rpitch, int& spitch, int mipmap/*=0*/)
+void sTexture3D::BeginLoad(uint8_t*& data, int& rpitch, int& spitch, int mipmap/*=0*/)
 {
   sVERIFY(LoadPtr==0);
   sVERIFY(LoadMipmap==-1);
 
   LoadMipmap = mipmap;
-  sDInt size = (sU64(SizeX)*SizeY*SizeZ*BitsPerPixel)>>(3+3*mipmap);
-  data = LoadPtr = new sU8[size];
+  ptrdiff_t size = (uint64_t(SizeX)*SizeY*SizeZ*BitsPerPixel)>>(3+3*mipmap);
+  data = LoadPtr = new uint8_t[size];
   rpitch = (SizeX*BitsPerPixel)>>(3+mipmap);
   spitch = (SizeX*SizeY*BitsPerPixel)>>(3+2*mipmap);
 }
@@ -3295,7 +3295,7 @@ void sTexture3D::EndLoad()
   sDelete(LoadPtr);
 }
 
-void sTexture3D::Load(sU8 *data)
+void sTexture3D::Load(uint8_t *data)
 {
   sVERIFYFALSE;
 }
@@ -3697,7 +3697,7 @@ void sMaterial::SetVariant(int var)
 
       sd.MipLODBias = LodBias[i];
       sd.MaxAnisotropy = 8;
-      sF32 bc = (TFlags[i] & sMTF_BCOLOR_WHITE) ? 1 : 0;
+      float bc = (TFlags[i] & sMTF_BCOLOR_WHITE) ? 1 : 0;
       sd.BorderColor[0] = bc;
       sd.BorderColor[1] = bc;
       sd.BorderColor[2] = bc;
@@ -3963,7 +3963,7 @@ void sComputeShader::SetUAV(int n,sTextureBase *tex,sBool clear)
   DXuavp[n] = 0;
   if(tex)
     DXuavp[n] = tex->DXTexUAV;
-  DXuavc[n] = clear ? 0 : sU32(-1);
+  DXuavc[n] = clear ? 0 : uint32_t(-1);
 }
 
 void sComputeShader::Draw(int xs,int ys,int zs,sCBufferBase *cb0,sCBufferBase *cb1,sCBufferBase *cb2,sCBufferBase *cb3)
@@ -3986,7 +3986,7 @@ void sComputeShader::Draw(int xs,int ys,int zs,int cbcount,sCBufferBase **cbs)
   // clear it 
 
   ID3D11UnorderedAccessView *uavp[MaxUAV];
-  sU32 uavc[MaxUAV];
+  uint32_t uavc[MaxUAV];
   sClear(uavp);
   for(int i=0;i<MaxUAV;i++)
     uavc[i] = UINT(-1);

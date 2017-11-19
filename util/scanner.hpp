@@ -74,7 +74,7 @@ class sScannerSourceFile : public sScannerSource
   sFile *File;
   sChar *ScanBuffer;                 // buffer for portion of file
   int UnicodeConversion;            // when loading from file: 1=ascii->unicode, 2=unicode byteswap
-  sS64 CharsLeftInFile;
+  int64_t CharsLeftInFile;
 public:
   sScannerSourceFile();
   ~sScannerSourceFile();
@@ -102,7 +102,7 @@ private:
     File *File;
     sChar *ScanBuffer;                 // buffer for portion of file
     const sChar *ScanPtr;
-    sS64 CharsLeftInFile;
+    int64_t CharsLeftInFile;
     int Line;
     void Init(const sChar *text);
     sBool InitFile(const sChar *filename);
@@ -153,7 +153,7 @@ public:
 
   int Token;
   int ValI;
-  sF32 ValF;
+  float ValF;
   sPoolString Name;
   sPoolString String;
   sString<256> ValueString;       // exact character representation of sTOK_INT or sTOK_FLOAT
@@ -173,7 +173,7 @@ public:
   // these functions scan a token and issue an error if that was not found
 
   int ScanInt();
-  sF32 ScanFloat();
+  float ScanFloat();
   int ScanChar();
   sBool ScanRaw(sPoolString &, int opentoken, int closetoken);
   sBool ScanRaw(sTextBuffer &, int opentoken, int closetoken);
@@ -265,7 +265,7 @@ namespace sScannerUtil
   sBool IntProp(sScanner *scan,const sChar *name,int &tgt);
 
   // Float property
-  sBool FloatProp(sScanner *scan,const sChar *name,sF32 &tgt);
+  sBool FloatProp(sScanner *scan,const sChar *name,float &tgt);
 
   // GUID property (name="{bla-bla-blah-blah}";)
   sBool GUIDProp(sScanner *scan,const sChar *name,sGUID &tgt);

@@ -18,7 +18,7 @@
 
 /****************************************************************************/
 
-void sSoundHandlerNull(sS16 *data,int count)
+void sSoundHandlerNull(int16_t *data,int count)
 {
   for(int i=0;i<count;i++)
   {
@@ -31,7 +31,7 @@ void sSoundHandlerNull(sS16 *data,int count)
 static int phase0,phase1;
 static int mod=0x4000;
 
-void sSoundHandlerTest(sS16 *data,int count)
+void sSoundHandlerTest(int16_t *data,int count)
 {
   for(int i=0;i<count;i++)
   {

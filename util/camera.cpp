@@ -35,7 +35,7 @@ sCamera::~sCamera()
 {
 }
 
-void sCamera::OnKey(sU32)
+void sCamera::OnKey(uint32_t)
 {
 }
 
@@ -125,10 +125,10 @@ void sFreeCamera::OnFrame(int delta,sViewport &vp)
 {
   // joypad
   if (JoypadControl) {
-    sF32 x = Scheme.Analog(INPUT_LX);
-    sF32 y = Scheme.Analog(INPUT_LY);
-    sF32 x2 = Scheme.Analog(INPUT_RX);
-    sF32 y2 = Scheme.Analog(INPUT_RY);
+    float x = Scheme.Analog(INPUT_LX);
+    float y = Scheme.Analog(INPUT_LY);
+    float x2 = Scheme.Analog(INPUT_RX);
+    float y2 = Scheme.Analog(INPUT_RY);
 
     DirLook += 0.04f*sFPow(x2,5);
     DirPitch += 0.04f*sFPow(y2,5);
@@ -174,7 +174,7 @@ void sFreeCamera::OnFrame(int delta,sViewport &vp)
   vp.Camera.l = Pos;
 }
 
-void sFreeCamera::OnKey(sU32 key)
+void sFreeCamera::OnKey(uint32_t key)
 {
   switch(key)
   {
@@ -265,7 +265,7 @@ void sCameraXSI::OnDrag(const sMouseData &md)
   mtx.l -= mtx.k * Distance;
 
 
-  sU32 KeyMask = KeyMaskCurrent;
+  uint32_t KeyMask = KeyMaskCurrent;
   
   if (StickyMode)
   {
@@ -289,7 +289,7 @@ void sCameraXSI::OnDrag(const sMouseData &md)
         DollyActive = sTRUE;
       }
 
-      sF32 speed = md.MouseButtons==4 ? 0.5f :
+      float speed = md.MouseButtons==4 ? 0.5f :
                    md.MouseButtons==2 ? 2.0f : 1.0f;
 
       Distance = Distance - DollyStep * md.DeltaY * speed;
@@ -309,7 +309,7 @@ void sCameraXSI::OnDrag(const sMouseData &md)
       DollyActive = sTRUE;
     }
 
-    sF32 speed = 1.0f;
+    float speed = 1.0f;
 
     Distance = Distance - DollyStep * md.DeltaY * speed;
     if (Distance<0.1f)
@@ -361,7 +361,7 @@ void sCameraXSI::OnDrag(const sMouseData &md)
 
 /****************************************************************************/
 
-void sCameraXSI::OnKey(sU32 key)
+void sCameraXSI::OnKey(uint32_t key)
 {
   switch(key)
   {

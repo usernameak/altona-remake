@@ -44,24 +44,24 @@ class sGeoBuffer11
 {
 public:
   sDNode Node;
-  sGeoBuffer11(sDInt);
+  sGeoBuffer11(ptrdiff_t);
   ~sGeoBuffer11();
 
   struct ID3D11Buffer *DXBuffer;
 
-  sDInt Alloc;
-  sDInt Used;
-  sDInt Free;
+  ptrdiff_t Alloc;
+  ptrdiff_t Used;
+  ptrdiff_t Free;
 
   int MappedCount;
-  sU8 *MapPtr;
+  uint8_t *MapPtr;
 };
 
 struct sGeoMapHandle
 {
   sGeoBuffer11 *Buffer;
   void *Ptr;                // pointer where to write (including offset)
-  sDInt Offset;             // offset for when using the buffer
+  ptrdiff_t Offset;             // offset for when using the buffer
 };
 
 class sGeoBufferManager
@@ -76,7 +76,7 @@ public:
   sGeoBufferManager();
   ~sGeoBufferManager();
 
-  void Map(sGeoMapHandle &hnd,sDInt bytes);
+  void Map(sGeoMapHandle &hnd,ptrdiff_t bytes);
   void Unmap(sGeoMapHandle &hnd);
   void Flush();
 };
@@ -94,7 +94,7 @@ protected:
     struct ID3D11Buffer *DXBuffer;
     struct ID3D11Buffer *GetBuffer()
     { return DynMap.Buffer ? DynMap.Buffer->DXBuffer : DXBuffer; }
-    sDInt GetOffset()
+    ptrdiff_t GetOffset()
     { return DynMap.Offset; }
     sBool IsEmpty()
     { return ElementCount==0; }
@@ -157,7 +157,7 @@ protected:
   void *DataPersist;
   void **DataPtr;
   sCBufferMap Map;
-  sU64 Mask;
+  uint64_t Mask;
 };
 
 /****************************************************************************/
@@ -186,7 +186,7 @@ class sTextureBasePrivate
   friend void ResizeGFX(int x,int y);
   friend void sSetTarget(const struct sTargetPara &para);
   friend void sCopyTexture(const struct sCopyTexturePara &para);
-  friend void sBeginReadTexture(const sU8*& data, sS32& pitch, enum sTextureFlags& flags,class sTexture2D *tex);
+  friend void sBeginReadTexture(const uint8_t*& data, int32_t& pitch, enum sTextureFlags& flags,class sTexture2D *tex);
   friend class sGpuToCpu;
   friend class sComputeShader;
   friend class sGeometry;
@@ -202,7 +202,7 @@ protected:
   struct ID3D11RenderTargetView *DXRenderView;
   struct ID3D11DepthStencilView *DXDepthView;
   struct ID3D11RenderTargetView *DXCubeRenderView[6];
-  sU8 *LoadPtr;
+  uint8_t *LoadPtr;
   sBool Dynamic;
   int LoadMipmap;
   int LoadCubeFace;
@@ -291,7 +291,7 @@ protected:
   struct ID3D11SamplerState *Sampler[MaxTexture];
   ID3D11ShaderResourceView *DXsrv[MaxTexture];
   ID3D11UnorderedAccessView *DXuavp[MaxUAV];
-  sU32 DXuavc[MaxUAV];
+  uint32_t DXuavc[MaxUAV];
 };
 
 /****************************************************************************/

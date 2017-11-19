@@ -71,7 +71,7 @@ public:
   void InitWire(const sChar *name);
   void OnPaint2D();
   void OnDragMove(const sWindowDrag &dd);
-  void OnDragDraw(const sWindowDrag &dd,sDInt mode);
+  void OnDragDraw(const sWindowDrag &dd,ptrdiff_t mode);
   void OnDragSelect(const sWindowDrag &dd);
 
   void OnCmdDelete();

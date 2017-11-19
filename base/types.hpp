@@ -18,6 +18,8 @@
 #pragma once
 #endif
 
+#include <cstdint>
+
 #ifndef NN_COMPILER_RVCT
 ; // if this semicolon causes an error, then something is wrong BEFORE
   // you include types.hpp (or anything else)
@@ -289,8 +291,8 @@
 
 // type switching
 
-#define sCONFIG_NATIVEINT         int _w64                // sDInt: an int of the same size as a pointer
-#define sCONFIG_INT64             __int64                 // sS64, sU64: a 64 bit int
+#define sCONFIG_NATIVEINT         int _w64                // ptrdiff_t: an int of the same size as a pointer
+#define sCONFIG_INT64             __int64                 // int64_t, uint64_t: a 64 bit int
 #define sCONFIG_UNICODETYPE       wchar_t                 // sChar: an unicode character
 #define sCONFIG_SIZET             size_t
 #define sINLINE                   __forceinline           // use this to inline
@@ -369,14 +371,14 @@ extern "C" void *_alloca(sCONFIG_SIZET size);
 #define sCONFIG_32BIT             1
 #define sCONFIG_64BIT             0
 #define sCONFIG_NATIVEINT         int
-#define sCONFIG_PTHREAD_T_SIZE    (sizeof(sU32))
+#define sCONFIG_PTHREAD_T_SIZE    (sizeof(uint32_t))
 
 #else
 
 #define sCONFIG_32BIT             0
 #define sCONFIG_64BIT             1
 #define sCONFIG_NATIVEINT         long long
-#define sCONFIG_PTHREAD_T_SIZE    (sizeof(sU64))
+#define sCONFIG_PTHREAD_T_SIZE    (sizeof(uint64_t))
 
 #endif
 
@@ -469,7 +471,7 @@ void __debugbreak();
 #define sCONFIG_32BIT             1
 #define sCONFIG_64BIT             0
 #define sCONFIG_NATIVEINT         int
-#define sCONFIG_PTHREAD_T_SIZE    (sizeof(sU32))
+#define sCONFIG_PTHREAD_T_SIZE    (sizeof(uint32_t))
 
 // type switching
 
@@ -516,7 +518,7 @@ void __debugbreak();
 #define sCONFIG_32BIT             1
 #define sCONFIG_64BIT             0
 #define sCONFIG_NATIVEINT         int
-#define sCONFIG_PTHREAD_T_SIZE    (sizeof(sU64))
+#define sCONFIG_PTHREAD_T_SIZE    (sizeof(uint64_t))
 
 // type switching
 
@@ -632,26 +634,26 @@ void __debugbreak();
 /***                                                                      ***/
 /****************************************************************************/
 
-typedef unsigned char             sU8;      // for packed arrays
-typedef unsigned short            sU16;     // for packed arrays
-typedef unsigned int              sU32;     // for packed arrays and bitfields
-typedef unsigned sCONFIG_INT64    sU64;     // use as needed
-typedef signed char               sS8;      // for packed arrays
-typedef short                     sS16;     // for packed arrays
-typedef int                       sS32;     // for packed arrays
-typedef signed sCONFIG_INT64      sS64;     // use as needed
-typedef float                     sF32;     // basic floatingpoint
-typedef double                    sF64;     // use as needed
-//typedef int                       int;     // use this most!
+//typedef unsigned char             sU8;      // for packed arrays
+//typedef unsigned short            sU16;     // for packed arrays
+//typedef unsigned int              sU32;     // for packed arrays and bitfields
+//typedef unsigned sCONFIG_INT64    sU64;     // use as needed
+//typedef signed char               int8_t;      // for packed arrays
+/*typedef short                     int16_t;     // for packed arrays
+typedef int                       int32_t;     // for packed arrays
+typedef signed sCONFIG_INT64      int64_t;     // use as needed*/
+//typedef float                     float;     // basic floatingpoint
+//typedef double                    double;     // use as needed
+//typedef int                       sInt;     // use this most!
 typedef unsigned sCONFIG_NATIVEINT sPtr;    // type for pointer
-typedef signed sCONFIG_NATIVEINT  sDInt;    // type for pointer diff
+//typedef signed sCONFIG_NATIVEINT  ptrdiff_t;    // type for pointer diff
 typedef sCONFIG_UNICODETYPE       sChar;    // type for strings (UNICODE!)
-typedef sS64                      sSize;    // size of a file = something possibly larger than memory
+typedef int64_t                      sSize;    // size of a file = something possibly larger than memory
 
 typedef char                      sChar8;   // only use where the API requires ascii
 typedef int                       sBool;    // use for boolean function results
 
-typedef sCONFIG_SSE               sSSE ;   // 4 x sF32
+typedef sCONFIG_SSE               sSSE ;   // 4 x float
 
 /****************************************************************************/
 
@@ -672,12 +674,12 @@ typedef sCONFIG_SSE               sSSE ;   // 4 x sF32
 #define sMIN_F32   (1E-37)
 
 #define sVARARG(p,i) (((int *)(p))[(i)+1])               // don't use varargs at all if possible
-#define sVARARGF(p,i) (*(sF64*)&(((int *)(p))[(i)+1]))
+#define sVARARGF(p,i) (*(double*)&(((int *)(p))[(i)+1]))
 #define sALLOCSTACK(type,count)  ((type *) sCONFIG_ALLOCA((count)*sizeof(type)))   // this has to be a macro because is MUST be inlined!
-#define sALLOCALIGNEDSTACK(type,count,ba)  ((type *) ((sDInt(sCONFIG_ALLOCA((count)*sizeof(type)+ba-1))+ba-1)&~(ba-1)))   // this has to be a macro because is MUST be inlined!
+#define sALLOCALIGNEDSTACK(type,count,ba)  ((type *) ((ptrdiff_t(sCONFIG_ALLOCA((count)*sizeof(type)+ba-1))+ba-1)&~(ba-1)))   // this has to be a macro because is MUST be inlined!
 #define sMAKE2(a,b) (((b)<<16)|(a))
 #define sMAKE4(a,b,c,d) (((d)<<24)|((c)<<16)|((b)<<8)|(a))
-#define sCOUNTOF(x) sDInt(sizeof(x)/sizeof(*(x)))    // #elements of array, usefull for unicode strings
+#define sCOUNTOF(x) ptrdiff_t(sizeof(x)/sizeof(*(x)))    // #elements of array, usefull for unicode strings
 #define sINDEXVALID(index,arrayVar) (((unsigned) (index)) < ((unsigned) sCOUNTOF(arrayVar))) 
 
 #define sTXT2(y) L ## y
@@ -696,16 +698,16 @@ typedef sCONFIG_SSE               sSSE ;   // 4 x sF32
     #define sOFFSET(TYPE, MEMBER) __builtin_offsetof(TYPE,MEMBER)
   #else
     #define sOFFSET(TYPE, MEMBER)					\
-    (__offsetof__ (reinterpret_cast <sDInt>			\
+    (__offsetof__ (reinterpret_cast <ptrdiff_t>			\
                  (&reinterpret_cast <const volatile char &>	\
                   (static_cast<TYPE *> (0)->MEMBER))))
   #endif
 #else
-  #define sOFFSET(t,m) (((sDInt)(&((t*)64)->m))-64)
+  #define sOFFSET(t,m) (((ptrdiff_t)(&((t*)64)->m))-64)
 #endif
 
-#define sOFFSETO(o,m) ((sDInt)(((sU8 *)(&(o)->m))-((sU8 *)(o))))    // offset from object
-#define sOFFSETOMP(o,m) ((sDInt)(((sU8 *)(&((o)->*(m))))-((sU8 *)(o))))  // offset from object, member pointer
+#define sOFFSETO(o,m) ((ptrdiff_t)(((uint8_t *)(&(o)->m))-((uint8_t *)(o))))    // offset from object
+#define sOFFSETOMP(o,m) ((ptrdiff_t)(((uint8_t *)(&((o)->*(m))))-((uint8_t *)(o))))  // offset from object, member pointer
 
 // experimental!
 // in the presence of virtual functions, i can't cast pointer to member
@@ -715,24 +717,24 @@ typedef sCONFIG_SSE               sSSE ;   // 4 x sF32
 // mp = sMemberPtr<membertype>(sOFFSET(classtype,member));
 template<typename ElementType> struct sMemberPtr
 {
-  sDInt Offset;
+  ptrdiff_t Offset;
   sMemberPtr() { Offset=0; }
-  sMemberPtr(sDInt o) { Offset=o; }
+  sMemberPtr(ptrdiff_t o) { Offset=o; }
   typedef ElementType Type;
-  ElementType &Ref(void *obj) { return *(ElementType *)(((sU8 *)obj)+Offset); }
+  ElementType &Ref(void *obj) { return *(ElementType *)(((uint8_t *)obj)+Offset); }
 };
 // abstract version: cast as you like
 struct sVoidMemberPtr
 {
-  sDInt Offset;
+  ptrdiff_t Offset;
   sVoidMemberPtr() { Offset=0; }
-  sVoidMemberPtr(sDInt o) { Offset=o; }
-  template<typename ElementType> ElementType &Ref(void *obj) { return *(ElementType *)(((sU8 *)obj)+Offset); }
+  sVoidMemberPtr(ptrdiff_t o) { Offset=o; }
+  template<typename ElementType> ElementType &Ref(void *obj) { return *(ElementType *)(((uint8_t *)obj)+Offset); }
 };
 
 
 template<typename MemberType,typename ClassType> 
-sMemberPtr<MemberType> sMakeMemberPtr(MemberType ClassType::*,sDInt o) 
+sMemberPtr<MemberType> sMakeMemberPtr(MemberType ClassType::*,ptrdiff_t o) 
 { return sMemberPtr<MemberType>(o); }
 
 #define sMEMBERPTR(classtype,membername) sMakeMemberPtr(&classtype::membername,sOFFSET(classtype,membername))
@@ -765,16 +767,16 @@ template <class Type> sINLINE Type sClamp(Type a,Type min,Type max) {return (a>=
 template <class Type> sINLINE sBool sIsInRangeIncl(Type a,Type min,Type max) {return (min<=a) && (a<=max);}
 template <class Type> sINLINE sBool sIsInRangeExcl(Type a,Type min,Type max) {return (min<=a) && (a<max);}
 template <class Type> sINLINE void sSwap(Type &a,Type &b)           {Type s=a; a=b; b=s;}
-template <class Type> sINLINE Type sAlign(Type a,int b)            {typedef int check[(sizeof(Type)<=sizeof(sDInt))?1:-1]; return (Type)((((sDInt)a)+b-1)&(~(b-1)));} // doesn't work correctly if sizeof(sDInt)<sizeof(Type)
-sINLINE sS64 sAlign(sS64 a,int b)                                  {return ((a+b-1)&(~(b-1)));}
-sINLINE sU64 sAlign(sU64 a,int b)                                  {return ((a+b-1)&(~(b-1)));}
+template <class Type> sINLINE Type sAlign(Type a,int b)            {typedef int check[(sizeof(Type)<=sizeof(ptrdiff_t))?1:-1]; return (Type)((((ptrdiff_t)a)+b-1)&(~(b-1)));} // doesn't work correctly if sizeof(ptrdiff_t)<sizeof(Type)
+sINLINE int64_t sAlign(int64_t a,int b)                                  {return ((a+b-1)&(~(b-1)));}
+sINLINE uint64_t sAlign(uint64_t a,int b)                                  {return ((a+b-1)&(~(b-1)));}
 
 
 template <class Type> sINLINE Type sSquare(Type a)                  {return a*a;}
 int sFindLowerPower(int x);
 int sFindHigherPower(int x);
-sU32 sMakeMask(sU32 max);
-sU64 sMakeMask(sU64 max);
+uint32_t sMakeMask(uint32_t max);
+uint64_t sMakeMask(uint64_t max);
 inline sBool sIsPower2(int x)                                      {return (x&(x-1)) == 0;}
 inline int sDivDown(int a,int b)                                 {return a>0?a/b:-(-a/b);}
 
@@ -783,64 +785,64 @@ template <class Type> sINLINE void sDeleteArray(Type &a)            {if(a) delet
 template <class Type> sINLINE void sRelease(Type &a)                {if(a) a->Release(); a=0;}
 template <class Type> sINLINE void sAddRef(Type &a)                 {if(a) a->AddRef();}
 
-template <class Type> sINLINE Type sFade(sF32 f,Type a,Type b)      {return (Type)(a+(b-a)*f);}
-template <class Type> sINLINE Type sFadeBilin(sF32 u,sF32 v,Type x00,Type x01,Type x10,Type x11) { return sFade(v,sFade(u,x00,x01),sFade(u,x10,x11)); }
+template <class Type> sINLINE Type sFade(float f,Type a,Type b)      {return (Type)(a+(b-a)*f);}
+template <class Type> sINLINE Type sFadeBilin(float u,float v,Type x00,Type x01,Type x10,Type x11) { return sFade(v,sFade(u,x00,x01),sFade(u,x10,x11)); }
 
 // the endian API will change - do not use yet!
 // it also needs inline assembly
 // LE assumes IA32 processor, where unaligned loads/stores do not crash
 
-inline sU32 sSwapEndian(sU32 a)                                     {return ((a&0xff000000)>>24)|((a&0x00ff0000)>>8)|((a&0x0000ff00)<<8)|((a&0x000000ff)<<24); }
-inline sU16 sSwapEndian(sU16 a)                                     {return ((a&0xff00)>>8)|((a&0x00ff)<<8); }
-inline sU64 sSwapEndian(sU64 a)
+inline uint32_t sSwapEndian(uint32_t a)                                     {return ((a&0xff000000)>>24)|((a&0x00ff0000)>>8)|((a&0x0000ff00)<<8)|((a&0x000000ff)<<24); }
+inline uint16_t sSwapEndian(uint16_t a)                                     {return ((a&0xff00)>>8)|((a&0x00ff)<<8); }
+inline uint64_t sSwapEndian(uint64_t a)
 {
   return ((a>>56)&0xff)|(((a>>48)&0xff)<<8)|(((a>>40)&0xff)<<16)|(((a>>32)&0xff)<<24)|(((a>>24)&0xff)<<32)|(((a>>16)&0xff)<<40)|(((a>>8 )&0xff)<<48)|((a&0xff)<<56);
 }
-inline void sSwapEndianI(sU32 &a)                                   {a= ((a&0xff000000)>>24)|((a&0x00ff0000)>>8)|((a&0x0000ff00)<<8)|((a&0x000000ff)<<24); }
-inline void sSwapEndianI(sU16 &a)                                   {a= ((a&0xff00)>>8)|((a&0x00ff)<<8); }
-inline void sSwapEndianI(sU64 &a)                                   {a= sSwapEndian(a); }
-inline int sSwapEndian(int a)                                     {sU32 tmp = *(sU32*)&a; sSwapEndianI(tmp); a = *(int*)&tmp; return a;}
-inline sF32 sSwapEndian(sF32 a)                                     {sU32 tmp = *(sU32*)&a; sSwapEndianI(tmp); a = *(sF32*)&tmp; return a;}
+inline void sSwapEndianI(uint32_t &a)                                   {a= ((a&0xff000000)>>24)|((a&0x00ff0000)>>8)|((a&0x0000ff00)<<8)|((a&0x000000ff)<<24); }
+inline void sSwapEndianI(uint16_t &a)                                   {a= ((a&0xff00)>>8)|((a&0x00ff)<<8); }
+inline void sSwapEndianI(uint64_t &a)                                   {a= sSwapEndian(a); }
+inline int sSwapEndian(int a)                                     {uint32_t tmp = *(uint32_t*)&a; sSwapEndianI(tmp); a = *(int*)&tmp; return a;}
+inline float sSwapEndian(float a)                                     {uint32_t tmp = *(uint32_t*)&a; sSwapEndianI(tmp); a = *(float*)&tmp; return a;}
 #if sCONFIG_BE
-inline sU32 sSwapIfBE(sU32 a)                                       {return ((a&0xff000000)>>24)|((a&0x00ff0000)>>8)|((a&0x0000ff00)<<8)|((a&0x000000ff)<<24); }
-inline sU32 sSwapIfLE(sU32 a)                                       {return a;}
-inline sU16 sSwapIfBE(sU16 a)                                       {return ((a&0xff00)>>8)|((a&0x00ff)<<8); }
-inline sU16 sSwapIfLE(sU16 a)                                       {return a;}
-inline sU64 sSwapIfBE(sU64 a)                                       {return sU64(sSwapEndian(sU32(a)))<<32 | sU64(sSwapEndian(sU32(a>>32))); }
-inline sU64 sSwapIfLE(sU64 a)                                       {return a;}
+inline uint32_t sSwapIfBE(uint32_t a)                                       {return ((a&0xff000000)>>24)|((a&0x00ff0000)>>8)|((a&0x0000ff00)<<8)|((a&0x000000ff)<<24); }
+inline uint32_t sSwapIfLE(uint32_t a)                                       {return a;}
+inline uint16_t sSwapIfBE(uint16_t a)                                       {return ((a&0xff00)>>8)|((a&0x00ff)<<8); }
+inline uint16_t sSwapIfLE(uint16_t a)                                       {return a;}
+inline uint64_t sSwapIfBE(uint64_t a)                                       {return uint64_t(sSwapEndian(uint32_t(a)))<<32 | uint64_t(sSwapEndian(uint32_t(a>>32))); }
+inline uint64_t sSwapIfLE(uint64_t a)                                       {return a;}
 inline int sSwapIfBE(int a)                                       {return sSwapEndian(a);}
 inline int sSwapIfLE(int a)                                       {return a;}
-inline sF32 sSwapIfBE(sF32 a)                                       {return sSwapEndian(a);}
-inline sF32 sSwapIfLE(sF32 a)                                       {return a;}
+inline float sSwapIfBE(float a)                                       {return sSwapEndian(a);}
+inline float sSwapIfLE(float a)                                       {return a;}
 
-inline void sUnalignedLittleEndianStore16(sU8 *p,sU16 v)            { p[0]=sU8(v); p[1]=sU8(v>>8);}
-inline void sUnalignedLittleEndianStore32(sU8 *p,sU32 v)            { p[0]=sU8(v); p[1]=sU8(v>>8); p[2]=sU8(v>>16); p[3]=sU8(v>>24);}
-inline void sUnalignedLittleEndianStore64(sU8 *p,sU64 v)            { p[0]=sU8(v); p[1]=sU8(v>>8); p[2]=sU8(v>>16); p[3]=sU8(v>>24); p[0]=sU8(v>>32); p[1]=sU8(v>>40); p[2]=sU8(v>>48); p[3]=sU8(v>>56);}
-inline void sUnalignedLittleEndianLoad16(const sU8 *p,sU16 &v)      { sU8 *s=(sU8*)&v;  s[0]=p[1]; s[1]=p[0]; }
-inline void sUnalignedLittleEndianLoad32(const sU8 *p,sU32 &v)      { sU8 *s=(sU8*)&v;  s[0]=p[3]; s[1]=p[2];  s[2]=p[1];  s[3]=p[0]; }
-inline void sUnalignedLittleEndianLoad64(const sU8 *p,sU64 &v)      { sU8 *s=(sU8*)&v;  s[0]=p[7]; s[1]=p[6];  s[2]=p[5];  s[3]=p[4];  s[4]=p[3]; s[5]=p[2];  s[6]=p[1];  s[7]=p[0]; }
+inline void sUnalignedLittleEndianStore16(uint8_t *p,uint16_t v)            { p[0]=uint8_t(v); p[1]=uint8_t(v>>8);}
+inline void sUnalignedLittleEndianStore32(uint8_t *p,uint32_t v)            { p[0]=uint8_t(v); p[1]=uint8_t(v>>8); p[2]=uint8_t(v>>16); p[3]=uint8_t(v>>24);}
+inline void sUnalignedLittleEndianStore64(uint8_t *p,uint64_t v)            { p[0]=uint8_t(v); p[1]=uint8_t(v>>8); p[2]=uint8_t(v>>16); p[3]=uint8_t(v>>24); p[0]=uint8_t(v>>32); p[1]=uint8_t(v>>40); p[2]=uint8_t(v>>48); p[3]=uint8_t(v>>56);}
+inline void sUnalignedLittleEndianLoad16(const uint8_t *p,uint16_t &v)      { uint8_t *s=(uint8_t*)&v;  s[0]=p[1]; s[1]=p[0]; }
+inline void sUnalignedLittleEndianLoad32(const uint8_t *p,uint32_t &v)      { uint8_t *s=(uint8_t*)&v;  s[0]=p[3]; s[1]=p[2];  s[2]=p[1];  s[3]=p[0]; }
+inline void sUnalignedLittleEndianLoad64(const uint8_t *p,uint64_t &v)      { uint8_t *s=(uint8_t*)&v;  s[0]=p[7]; s[1]=p[6];  s[2]=p[5];  s[3]=p[4];  s[4]=p[3]; s[5]=p[2];  s[6]=p[1];  s[7]=p[0]; }
 
 #else
-inline sU32 sSwapIfBE(sU32 a)                                       {return a; }
-inline sU32 sSwapIfLE(sU32 a)                                       {return ((a&0xff000000)>>24)|((a&0x00ff0000)>>8)|((a&0x0000ff00)<<8)|((a&0x000000ff)<<24); }
-inline sU16 sSwapIfBE(sU16 a)                                       {return a;}
-inline sU16 sSwapIfLE(sU16 a)                                       {return ((a&0xff00)>>8)|((a&0x00ff)<<8); }
-inline sU64 sSwapIfBE(sU64 a)                                       {return a;}
-inline sU64 sSwapIfLE(sU64 a)                                       {return sU64(sSwapEndian(sU32(a)))<<32 | sU64(sSwapEndian(sU32(a>>32))); }
+inline uint32_t sSwapIfBE(uint32_t a)                                       {return a; }
+inline uint32_t sSwapIfLE(uint32_t a)                                       {return ((a&0xff000000)>>24)|((a&0x00ff0000)>>8)|((a&0x0000ff00)<<8)|((a&0x000000ff)<<24); }
+inline uint16_t sSwapIfBE(uint16_t a)                                       {return a;}
+inline uint16_t sSwapIfLE(uint16_t a)                                       {return ((a&0xff00)>>8)|((a&0x00ff)<<8); }
+inline uint64_t sSwapIfBE(uint64_t a)                                       {return a;}
+inline uint64_t sSwapIfLE(uint64_t a)                                       {return uint64_t(sSwapEndian(uint32_t(a)))<<32 | uint64_t(sSwapEndian(uint32_t(a>>32))); }
 inline int sSwapIfBE(int a)                                       {return a;}
 inline int sSwapIfLE(int a)                                       {return sSwapEndian(a);}
-inline sF32 sSwapIfBE(sF32 a)                                       {return a;}
-inline sF32 sSwapIfLE(sF32 a)                                       {return sSwapEndian(a);}
-inline void sUnalignedLittleEndianStore16(sU8 *p,sU16 v)            {*(sU16 *)p = v;}
-inline void sUnalignedLittleEndianStore32(sU8 *p,sU32 v)            {*(sU32 *)p = v;}
-inline void sUnalignedLittleEndianLoad16(const sU8 *p,sU16 &v)      {v = *(sU16 *)p;}
-inline void sUnalignedLittleEndianLoad32(const sU8 *p,sU32 &v)      {v = *(sU32 *)p;}
+inline float sSwapIfBE(float a)                                       {return a;}
+inline float sSwapIfLE(float a)                                       {return sSwapEndian(a);}
+inline void sUnalignedLittleEndianStore16(uint8_t *p,uint16_t v)            {*(uint16_t *)p = v;}
+inline void sUnalignedLittleEndianStore32(uint8_t *p,uint32_t v)            {*(uint32_t *)p = v;}
+inline void sUnalignedLittleEndianLoad16(const uint8_t *p,uint16_t &v)      {v = *(uint16_t *)p;}
+inline void sUnalignedLittleEndianLoad32(const uint8_t *p,uint32_t &v)      {v = *(uint32_t *)p;}
 #if sCONFIG_UNALIGNEDCRASH
-inline void sUnalignedLittleEndianStore64(sU8 *p,sU64 v)            {((sU32 *)p)[0]=v; ((sU32 *)p)[1]=v>>32;}
-inline void sUnalignedLittleEndianLoad64(const sU8 *p,sU64 &v)      { sU32 a=((sU32*)p)[0],b=((sU32*)p)[1]; v = a+(sU64(b)<<32); }
+inline void sUnalignedLittleEndianStore64(uint8_t *p,uint64_t v)            {((uint32_t *)p)[0]=v; ((uint32_t *)p)[1]=v>>32;}
+inline void sUnalignedLittleEndianLoad64(const uint8_t *p,uint64_t &v)      { uint32_t a=((uint32_t*)p)[0],b=((uint32_t*)p)[1]; v = a+(uint64_t(b)<<32); }
 #else
-inline void sUnalignedLittleEndianStore64(sU8 *p,sU64 v)            {*(sU64 *)p = v;}
-inline void sUnalignedLittleEndianLoad64(const sU8 *p,sU64 &v)      {v = *(sU64 *)p;}
+inline void sUnalignedLittleEndianStore64(uint8_t *p,uint64_t v)            {*(uint64_t *)p = v;}
+inline void sUnalignedLittleEndianLoad64(const uint8_t *p,uint64_t &v)      {v = *(uint64_t *)p;}
 #endif
 #endif
 
@@ -862,9 +864,9 @@ template <typename T0, typename T1> T0 raw_cast(T1 v1) { sRawCastHelper<T0,T1> t
 // if this work on all compilers explicit swap permutations can be removed
 template <typename T, int S> struct sSwapEndianHelper;
 template <typename T> struct sSwapEndianHelper<T,1> { static T Swap(T a) { return a; } };
-template <typename T> struct sSwapEndianHelper<T,2> { static T Swap(T a) { return raw_cast<T>(sSwapEndian(raw_cast<sU16>(a))); } };
-template <typename T> struct sSwapEndianHelper<T,4> { static T Swap(T a) { return raw_cast<T>(sSwapEndian(raw_cast<sU32>(a))); } };
-template <typename T> struct sSwapEndianHelper<T,8> { static T Swap(T a) { return raw_cast<T>(sSwapEndian(raw_cast<sU64>(a))); } };
+template <typename T> struct sSwapEndianHelper<T,2> { static T Swap(T a) { return raw_cast<T>(sSwapEndian(raw_cast<uint16_t>(a))); } };
+template <typename T> struct sSwapEndianHelper<T,4> { static T Swap(T a) { return raw_cast<T>(sSwapEndian(raw_cast<uint32_t>(a))); } };
+template <typename T> struct sSwapEndianHelper<T,8> { static T Swap(T a) { return raw_cast<T>(sSwapEndian(raw_cast<uint64_t>(a))); } };
 
 #if sCONFIG_BE
 template <typename T> T sSwapIfLE(T a) { return a; }
@@ -886,119 +888,119 @@ template<typename TO,typename FROM>TO &sRawCast(const FROM &src) { void *ptr = (
 // int
 
 int sMulDiv(int a,int b,int c);
-sU32 sMulDivU(sU32 a,sU32 b,sU32 c);
+uint32_t sMulDivU(uint32_t a,uint32_t b,uint32_t c);
 int sMulShift(int var_a,int var_b);
-sU32 sMulShiftU(sU32 var_a,sU32 var_b);
+uint32_t sMulShiftU(uint32_t var_a,uint32_t var_b);
 int sDivShift(int var_a,int var_b);
 //int sDivMod(int over,int under,int &div,int &mod); // |over| = div*under+mod
 
 // float fiddling
 
-sF32 sAbs(sF32);                            // specialization for float
-sF32 sMinF(sF32,sF32);                      // specialization for float
-sF32 sMaxF(sF32,sF32);                      // specialization for float
-void sDivMod(sF32 over,sF32 under,sF32 &div,sF32 &mod); // |over| = div*under+mod
-sF32 sMod(sF32 over,sF32 under);
-sF32 sAbsMod(sF32 over,sF32 under);         // values below zero will be modded to 0>=x<under as well.
+float sAbs(float);                            // specialization for float
+float sMinF(float,float);                      // specialization for float
+float sMaxF(float,float);                      // specialization for float
+void sDivMod(float over,float under,float &div,float &mod); // |over| = div*under+mod
+float sMod(float over,float under);
+float sAbsMod(float over,float under);         // values below zero will be modded to 0>=x<under as well.
 int sAbsMod(int over,int under);         // values below zero will be modded to 0>=x<under as well.
 void sSetFloat();                           // set floating point unit into default precision/rounding
-void sFrac(sF32 val,sF32 &frac,sF32 &full); // val = frac+full; 0>=frac>1; full is int
-void sFrac(sF32 val,sF32 &frac,int &full);
-sF32 sFrac(sF32);
-sF32 sRoundDown(sF32);                      // round towards minus infinity
-sF32 sRoundUp(sF32);                        // round towards plus infinity
-sF32 sRoundZero(sF32);                      // round towards zero
-sF32 sRoundNear(sF32);                      // round towards nearest integer, in case of tie round to nearest even integer
-int sRoundDownInt(sF32);
-int sRoundUpInt(sF32);
-int sRoundZeroInt(sF32);
-int sRoundNearInt(sF32);
-sF32 sSelectEQ(sF32 a,sF32 b,sF32 t,sF32 f);// if (a==b) then x=t else x=f;
-sF32 sSelectNE(sF32 a,sF32 b,sF32 t,sF32 f);// if (a!=b) then x=t else x=f;
-sF32 sSelectGT(sF32 a,sF32 b,sF32 t,sF32 f);// if (a>=b) then x=t else x=f;
-sF32 sSelectGE(sF32 a,sF32 b,sF32 t,sF32 f);// if (a> b) then x=t else x=f;
-sF32 sSelectLT(sF32 a,sF32 b,sF32 t,sF32 f);// if (a<=b) then x=t else x=f;
-sF32 sSelectLE(sF32 a,sF32 b,sF32 t,sF32 f);// if (a< b) then x=t else x=f;
-sF32 sSelectEQ(sF32 a,sF32 b,sF32 t);       // if (a==b) then x=t else x=0;
-sF32 sSelectNE(sF32 a,sF32 b,sF32 t);       // if (a!=b) then x=t else x=0;
-sF32 sSelectGT(sF32 a,sF32 b,sF32 t);       // if (a>=b) then x=t else x=0;
-sF32 sSelectGE(sF32 a,sF32 b,sF32 t);       // if (a> b) then x=t else x=0;
-sF32 sSelectLT(sF32 a,sF32 b,sF32 t);       // if (a<=b) then x=t else x=0;
-sF32 sSelectLE(sF32 a,sF32 b,sF32 t);       // if (a< b) then x=t else x=0;
+void sFrac(float val,float &frac,float &full); // val = frac+full; 0>=frac>1; full is int
+void sFrac(float val,float &frac,int &full);
+float sFrac(float);
+float sRoundDown(float);                      // round towards minus infinity
+float sRoundUp(float);                        // round towards plus infinity
+float sRoundZero(float);                      // round towards zero
+float sRoundNear(float);                      // round towards nearest integer, in case of tie round to nearest even integer
+int sRoundDownInt(float);
+int sRoundUpInt(float);
+int sRoundZeroInt(float);
+int sRoundNearInt(float);
+float sSelectEQ(float a,float b,float t,float f);// if (a==b) then x=t else x=f;
+float sSelectNE(float a,float b,float t,float f);// if (a!=b) then x=t else x=f;
+float sSelectGT(float a,float b,float t,float f);// if (a>=b) then x=t else x=f;
+float sSelectGE(float a,float b,float t,float f);// if (a> b) then x=t else x=f;
+float sSelectLT(float a,float b,float t,float f);// if (a<=b) then x=t else x=f;
+float sSelectLE(float a,float b,float t,float f);// if (a< b) then x=t else x=f;
+float sSelectEQ(float a,float b,float t);       // if (a==b) then x=t else x=0;
+float sSelectNE(float a,float b,float t);       // if (a!=b) then x=t else x=0;
+float sSelectGT(float a,float b,float t);       // if (a>=b) then x=t else x=0;
+float sSelectGE(float a,float b,float t);       // if (a> b) then x=t else x=0;
+float sSelectLT(float a,float b,float t);       // if (a<=b) then x=t else x=0;
+float sSelectLE(float a,float b,float t);       // if (a< b) then x=t else x=0;
 
 // non-trivial float
 
-sF32 sSqrt(sF32);
-sF32 sRSqrt(sF32);
-sF32 sLog(sF32);
-sF32 sLog2(sF32);
-sF32 sLog10(sF32);
-sF32 sExp(sF32);
-sF32 sPow(sF32,sF32);
+float sSqrt(float);
+float sRSqrt(float);
+float sLog(float);
+float sLog2(float);
+float sLog10(float);
+float sExp(float);
+float sPow(float,float);
 
-sF32 sSin(sF32);
-sF32 sCos(sF32);
-sF32 sTan(sF32);
-void sSinCos(sF32,sF32 &s,sF32 &c);
-sF32 sASin(sF32);
-sF32 sACos(sF32);
-sF32 sATan(sF32);
-sF32 sATan2(sF32 over,sF32 under);
+float sSin(float);
+float sCos(float);
+float sTan(float);
+void sSinCos(float,float &s,float &c);
+float sASin(float);
+float sACos(float);
+float sATan(float);
+float sATan2(float over,float under);
 
 // non-trivial float, fast
 
-sF32 sFSqrt(sF32);
-sF32 sFRSqrt(sF32);
-sF32 sFLog(sF32);
-sF32 sFLog2(sF32);
-sF32 sFLog10(sF32);
-sF32 sFExp(sF32);
-sF32 sFPow(sF32,sF32);
+float sFSqrt(float);
+float sFRSqrt(float);
+float sFLog(float);
+float sFLog2(float);
+float sFLog10(float);
+float sFExp(float);
+float sFPow(float,float);
 
-sF32 sFSin(sF32);
-sF32 sFCos(sF32);
-sF32 sFTan(sF32);
-void sFSinCos(sF32,sF32 &s,sF32 &c);
-sF32 sFASin(sF32);
-sF32 sFACos(sF32);
-sF32 sFATan(sF32);
-sF32 sFATan2(sF32 over,sF32 under);
+float sFSin(float);
+float sFCos(float);
+float sFTan(float);
+void sFSinCos(float,float &s,float &c);
+float sFASin(float);
+float sFACos(float);
+float sFATan(float);
+float sFATan2(float over,float under);
 
 // some obsolete variants. obsolence not yet confirmed...
 
-sINLINE sF32 /*sOBSOLETE*/ sFMod(sF32 a,sF32 b) { return sMod(a,b); }
-sINLINE sF32 /*sOBSOLETE*/ sFFloor(sF32 a) { return sRoundDown(a); }
-sINLINE sF32 /*sOBSOLETE*/ sFCeil(sF32 a) { return sRoundUp(a); }
-sINLINE sF32 /*sOBSOLETE*/ sFAbs(sF32 a) { return sAbs(a); }
-sINLINE sF32 /*sOBSOLETE*/ sFInvSqrt(sF32 a) { return sRSqrt(a); }
+sINLINE float /*sOBSOLETE*/ sFMod(float a,float b) { return sMod(a,b); }
+sINLINE float /*sOBSOLETE*/ sFFloor(float a) { return sRoundDown(a); }
+sINLINE float /*sOBSOLETE*/ sFCeil(float a) { return sRoundUp(a); }
+sINLINE float /*sOBSOLETE*/ sFAbs(float a) { return sAbs(a); }
+sINLINE float /*sOBSOLETE*/ sFInvSqrt(float a) { return sRSqrt(a); }
 
 // int(floor(log2(abs(x)))) for a float x. Works on all machines with IEEE floating point
 // arithmetic. Significantly faster than a "real" log2 followed by a float->int
 // conversion on all platforms (even those with Load-Hit-Store penalties).
 // If x is 0 or denormal, -127 is returned.
-sINLINE int sFloorLog2(sF32 x) { union { sF32 f; sU32 i; } u; u.f = x; return int(((u.i >> 23) & 0xff) - 127); }
+sINLINE int sFloorLog2(float x) { union { float f; uint32_t i; } u; u.f = x; return int(((u.i >> 23) & 0xff) - 127); }
 
-//sINLINE int sCountBits(sU32 bits) { int count = 0; while(bits) { if(bits&1) count++; bits >>=1; } return count; }
+//sINLINE int sCountBits(uint32_t bits) { int count = 0; while(bits) { if(bits&1) count++; bits >>=1; } return count; }
 // improved version: clear least significant set bit each iteration
-sINLINE int sCountBits(sU32 bits) { int count = 0; while(bits) { bits &= bits-1; count++; } return count; }
+sINLINE int sCountBits(uint32_t bits) { int count = 0; while(bits) { bits &= bits-1; count++; } return count; }
 
 // Bit interleaving helpers
-sU32 sPart1By1(sU32 x);     // "inserts" a 0 bit between each of the low 16 bits of x
-sU32 sPart1By2(sU32 x);     // "inserts" two 0 bits between each of the low 10 bits of x
-sU32 sCompact1By1(sU32 x);  // inverse of sPart1By1 - "delete" all odd-indexed bits
-sU32 sCompact1By2(sU32 x);  // inverse of sPart1By2 - "delete" two bits after every bit
+uint32_t sPart1By1(uint32_t x);     // "inserts" a 0 bit between each of the low 16 bits of x
+uint32_t sPart1By2(uint32_t x);     // "inserts" two 0 bits between each of the low 10 bits of x
+uint32_t sCompact1By1(uint32_t x);  // inverse of sPart1By1 - "delete" all odd-indexed bits
+uint32_t sCompact1By2(uint32_t x);  // inverse of sPart1By2 - "delete" two bits after every bit
 
 // Morton numbers: Bit-interleave two (or three) integer coordinates
-sINLINE sU32 sEncodeMorton2(sU32 x,sU32 y)        { return (sPart1By1(y) << 1) + sPart1By1(x); }
-sINLINE sU32 sEncodeMorton3(sU32 x,sU32 y,sU32 z) { return (sPart1By2(z) << 2) + (sPart1By2(y) << 1) + sPart1By2(x); }
+sINLINE uint32_t sEncodeMorton2(uint32_t x,uint32_t y)        { return (sPart1By1(y) << 1) + sPart1By1(x); }
+sINLINE uint32_t sEncodeMorton3(uint32_t x,uint32_t y,uint32_t z) { return (sPart1By2(z) << 2) + (sPart1By2(y) << 1) + sPart1By2(x); }
 
-sINLINE sU32 sDecodeMorton2X(sU32 index)          { return sCompact1By1(index >> 0); }
-sINLINE sU32 sDecodeMorton2Y(sU32 index)          { return sCompact1By1(index >> 1); }
-sINLINE sU32 sDecodeMorton2(sU32 index,int axis) { return sCompact1By1(index >> axis); }
-sINLINE sU32 sDecodeMorton3X(sU32 index)          { return sCompact1By2(index >> 0); }
-sINLINE sU32 sDecodeMorton3Y(sU32 index)          { return sCompact1By2(index >> 1); }
-sINLINE sU32 sDecodeMorton3Z(sU32 index)          { return sCompact1By2(index >> 2); }
-sINLINE sU32 sDecodeMorton3(sU32 index,int axis) { return sCompact1By2(index >> axis); }
+sINLINE uint32_t sDecodeMorton2X(uint32_t index)          { return sCompact1By1(index >> 0); }
+sINLINE uint32_t sDecodeMorton2Y(uint32_t index)          { return sCompact1By1(index >> 1); }
+sINLINE uint32_t sDecodeMorton2(uint32_t index,int axis) { return sCompact1By1(index >> axis); }
+sINLINE uint32_t sDecodeMorton3X(uint32_t index)          { return sCompact1By2(index >> 0); }
+sINLINE uint32_t sDecodeMorton3Y(uint32_t index)          { return sCompact1By2(index >> 1); }
+sINLINE uint32_t sDecodeMorton3Z(uint32_t index)          { return sCompact1By2(index >> 2); }
+sINLINE uint32_t sDecodeMorton3(uint32_t index,int axis) { return sCompact1By2(index >> axis); }
 
 /****************************************************************************/
 /***                                                                      ***/
@@ -1080,22 +1082,22 @@ sBool sCheckPrefix(const sChar *string,const sChar *prefix);  // ("1234","12") -
 sBool sCheckSuffix(const sChar *string,const sChar *suffix);  // ("1234","34") -> true
 int sReplaceChar(sChar *string, sChar from, sChar to);
 
-void sReadString(sU32 *&data,sChar *buffer,int size);
-inline void sReadString(sU32 *&data,const sStringDesc &desc) { sReadString(data,desc.Buffer,desc.Size); }
-void sWriteString(sU32 *&data,const sChar *buffer);
+void sReadString(uint32_t *&data,sChar *buffer,int size);
+inline void sReadString(uint32_t *&data,const sStringDesc &desc) { sReadString(data,desc.Buffer,desc.Size); }
+void sWriteString(uint32_t *&data,const sChar *buffer);
 
 inline sBool sIsDigit(int i) { return (i>='0' && i<='9'); }
 inline sBool sIsLetter(int i) { return (i>='a' && i<='z') || (i>='A' && i<='Z') || i=='_'; }
 inline sBool sIsSpace(int i) { return i==' ' || i=='\t' || i=='\r' || i=='\n'; }
 inline sBool sIsHex(int i) { return (i>='a' && i<='f') || (i>='A' && i<='F') || (i>='0' && i<='9'); }
 sBool sIsName(const sChar *);   // c conventions: letter followed by letter or digit
-sU32 sHashString(const sChar *string);
-sU32 sHashString(const sChar *string,int len);
+uint32_t sHashString(const sChar *string);
+uint32_t sHashString(const sChar *string,int len);
 sBool sScanInt(const sChar *&scan,int &val);
 #if sCONFIG_64BIT
-sBool sScanInt(const sChar *&scan,sDInt &val);
+sBool sScanInt(const sChar *&scan,ptrdiff_t &val);
 #endif
-sBool sScanFloat(const sChar *&scan,sF32 &val);
+sBool sScanFloat(const sChar *&scan,float &val);
 sBool sScanHex(const sChar *&scan,int &val, int maxlen=0);
 sBool sScanMatch(const sChar *&scan, const sChar *match);
 sBool sScanGUID(const sChar *&str, struct sGUID &guid);
@@ -1124,13 +1126,13 @@ struct sFloatInfo
 
   // float -> ascii -> float roundtrips reproduce bitpattern 100% (at min 9 digits)
 
-  void FloatToAscii(sU32 f,int digits=9);   
-  sU32 AsciiToFloat();
+  void FloatToAscii(uint32_t f,int digits=9);   
+  uint32_t AsciiToFloat();
 
   // double -> ascii -> double roundtips have a maximum error of 2ulp's (at min 17 digits)
 
-  void DoubleToAscii(sU64 f,int digits=17); 
-  sU64 AsciiToDouble();
+  void DoubleToAscii(uint64_t f,int digits=17); 
+  uint64_t AsciiToDouble();
 };
 
 /****************************************************************************/
@@ -1161,23 +1163,24 @@ struct sFormatStringBuffer
   void Add(const sFormatStringInfo &info,const sChar *buffer,sBool sign);
   void Print(const sChar *str);
   template<typename Type> void PrintInt(const sFormatStringInfo &info,Type v,sBool sign);
-  void PrintFloat(const sFormatStringInfo &info,sF32 v);
-  void PrintFloat(const sFormatStringInfo &info,sF64 v);
+  void PrintFloat(const sFormatStringInfo &info,float v);
+  void PrintFloat(const sFormatStringInfo &info,double v);
   const sChar *Get() { return Start; }
 };
 
 sFormatStringBuffer sFormatStringBase(const sStringDesc &buffer,const sChar *format);
 void sFormatStringBaseCtx(sFormatStringBuffer &buf,const sChar *format); // size of buffer is sPRINTBUFFERSIZE
-sFormatStringBuffer& operator% (sFormatStringBuffer &,int);
-sFormatStringBuffer& operator% (sFormatStringBuffer &,sDInt);
-sFormatStringBuffer& operator% (sFormatStringBuffer &,sU32);
-sFormatStringBuffer& operator% (sFormatStringBuffer &,sU64);
-sFormatStringBuffer& operator% (sFormatStringBuffer &,sS64);
+//sFormatStringBuffer& operator% (sFormatStringBuffer &,int);
+//sFormatStringBuffer& operator% (sFormatStringBuffer &,ptrdiff_t);
+//sFormatStringBuffer& operator% (sFormatStringBuffer &,uint32_t);
+sFormatStringBuffer& operator% (sFormatStringBuffer &,uint64_t);
+sFormatStringBuffer& operator% (sFormatStringBuffer &,int64_t);
 sFormatStringBuffer& operator% (sFormatStringBuffer &,void *);
-//inline sFormatStringBuffer& operator% (sFormatStringBuffer & buf,sU32 v)     { return buf%(int)v; }
-sFormatStringBuffer& operator% (sFormatStringBuffer &,sF32);
-sFormatStringBuffer& operator% (sFormatStringBuffer &,sF64);
+//sFormatStringBuffer& operator% (sFormatStringBuffer &,float);
+sFormatStringBuffer& operator% (sFormatStringBuffer &,double);
 sFormatStringBuffer& operator% (sFormatStringBuffer &,const sChar *);
+
+//inline sFormatStringBuffer& operator% (sFormatStringBuffer & buf,uint32_t v)     { return buf%(int)v; }
 
 // we want to get rid of the variable arg thing and have a typesafe solution
 // three examples:
@@ -1457,7 +1460,7 @@ sPRINTING0(sFatal,sFormatStringBuffer buf; sFormatStringBaseCtx(buf,format);buf,
 
 /****************************************************************************/
 /***                                                                      ***/
-/***   NaN and inf traps for sF32                                         ***/
+/***   NaN and inf traps for float                                         ***/
 /***                                                                      ***/
 /****************************************************************************/
 
@@ -1465,11 +1468,11 @@ sPRINTING0(sFatal,sFormatStringBuffer buf; sFormatStringBaseCtx(buf,format);buf,
 // never write code that "fixes" those nans on the fly. write code that
 // does not produce nans or infinites.
 
-#define sF32U32(x) ((*(sU32*)(&(x))))
+#define floatU32(x) ((*(uint32_t*)(&(x))))
 
-inline sBool sIsInfNan(sF32 x) { return ((sF32U32(x)>>23)&0xff) == 0xff; }
-inline sBool sIsNan(sF32 x) { return ((sF32U32(x)>>23)&0xff) == 0xff && (sF32U32(x) & 0x7fffff)!=0; }
-inline sBool sIsInf(sF32 x) { return ((sF32U32(x)>>23)&0xff) == 0xff && (sF32U32(x) & 0x7fffff)==0; }
+inline sBool sIsInfNan(float x) { return ((floatU32(x)>>23)&0xff) == 0xff; }
+inline sBool sIsNan(float x) { return ((floatU32(x)>>23)&0xff) == 0xff && (floatU32(x) & 0x7fffff)!=0; }
+inline sBool sIsInf(float x) { return ((floatU32(x)>>23)&0xff) == 0xff && (floatU32(x) & 0x7fffff)==0; }
 
 #if sDEBUG
 #define sTRAP_INFNAN(x) sVERIFY(!sIsInfNan(x))
@@ -1483,16 +1486,16 @@ inline sBool sIsInf(sF32 x) { return ((sF32U32(x)>>23)&0xff) == 0xff && (sF32U32
 
 // returns ptr to broken float
 #if sDEBUG
-const sF32 *sCheckFloatArray(const sF32 *ptr, int count);
+const float *sCheckFloatArray(const float *ptr, int count);
 #else
-  sINLINE const sF32 *sCheckFloatArray(const sF32 *, int ) { return sNULL; }
+  sINLINE const float *sCheckFloatArray(const float *, int ) { return sNULL; }
 #endif
 
 template<typename T>
-const sF32 *sCheckFloats(const T &t)
+const float *sCheckFloats(const T &t)
 {
 #if sDEBUG
-  return sCheckFloatArray((const sF32 *)&t, sizeof(T)/sizeof(sF32));
+  return sCheckFloatArray((const float *)&t, sizeof(T)/sizeof(float));
 #else
   return sNULL;
 #endif
@@ -1502,13 +1505,13 @@ template<typename T>
 inline void sCheckFloatsFatal(const T &t, const sChar *message=sNULL)
 {
 #if sDEBUG
-  const sF32 *src = (const sF32 *)&t;
-  const sF32 *ptr = sCheckFloatArray(src, sizeof(T)/sizeof(sF32));
+  const float *src = (const float *)&t;
+  const float *ptr = sCheckFloatArray(src, sizeof(T)/sizeof(float));
   if (ptr)
   {
     sString<64> messageDef;
     int index = (int)(ptr - src);
-    messageDef.PrintF(L"Inf/NaN in data. (float[%d] at 0x%x (+0x%x) )\n", index, (sPtr)src, index * (int)sizeof(sF32));
+    messageDef.PrintF(L"Inf/NaN in data. (float[%d] at 0x%x (+0x%x) )\n", index, (sPtr)src, index * (int)sizeof(float));
     sLogF(L"chkflt", messageDef);
     sFatal(message ? message : (const sChar*)messageDef);
   }
@@ -1589,7 +1592,7 @@ public:
   virtual sBool Free(void *)=0;   // free mem
   virtual sPtr MemSize(void *) { return 0; } // exact size of allocation
   virtual void Validate() {}      // check integrity of memory lists
-  virtual sU32 MakeSnapshot() { return 0; }
+  virtual uint32_t MakeSnapshot() { return 0; }
 
   // statistics
   virtual sCONFIG_SIZET GetSize() { return End-Start; }
@@ -1654,8 +1657,8 @@ void sBreakOnAllocation(int n);   // one id for all
 int sGetMemoryAllocId();          // usefull for monitoring allocations per frame
 void sCheckMem_();                 // check memory lists for inconsistencies 
 void sDumpMemoryMap();             // print a summary of all memory handlers
-void sSetAllocFailTest(sF32 probability); // set probability that allocs from "may fail" heaps fail randomly.
-sF32 sGetAllocFailTest();           // return fail probabality
+void sSetAllocFailTest(float probability); // set probability that allocs from "may fail" heaps fail randomly.
+float sGetAllocFailTest();           // return fail probabality
 
 //! memory heaps assert when freeing locked memory ranges 
 //! enable this with sCFG_MEMDBG_LOCKING define in types.cpp for heap corruption debugging
@@ -1669,7 +1672,7 @@ sBool sMemDbgCheckLock(void *ptr);
 #else
 struct sScopeNoMemFailTest_
 {
-  sF32 Probality;
+  float Probality;
   sScopeNoMemFailTest_() { Probality = sGetAllocFailTest(); sSetAllocFailTest(0.0f); }
   ~sScopeNoMemFailTest_() { sSetAllocFailTest(Probality); }
 };
@@ -1786,8 +1789,8 @@ void *sAllocDmaBegin(int size, int align=16);
 void sAllocDmaEnd(void *);
 void sFlipMem();                    // perform double buffering of the dma buffers
 
-sU32 sAllocDmaEstimateAvailable (void); // Return an estimate of the available DMA memory.
-sU32 sDMAMemSize(void); 
+uint32_t sAllocDmaEstimateAvailable (void); // Return an estimate of the available DMA memory.
+uint32_t sDMAMemSize(void); 
 
 template <typename T> sINLINE T* sAllocFrameNew(int count=1, int align=sALLOCFRAMEALIGN)
 {
@@ -1849,8 +1852,8 @@ template <class Type> struct sBaseRect
   void Move(Type x, Type y)                       { x0+=x; x1+=x; y0+=y; y1+=y; }
   void Scale(Type s)                              { x0*=s; x1*=s; y0*=s; y1*=s; }
   void Scale(Type x, Type y)                      { x0*=x; x1*=x; y0*=y; y1*=y; }
-  void ScaleCenter(sF32 x, sF32 y)                { Type sx = SizeX()/2; Type sy = SizeY()/2; Type cx = CenterX(); Type cy = CenterY(); x0 = Type(cx-sx*x); y0 = Type(cy-sy*y); x1 = Type(cx+sx*x); y1 = Type(cy+sy*y); }
-  void ScaleCenter(sF32 s)                        { ScaleCenter(s,s); }
+  void ScaleCenter(float x, float y)                { Type sx = SizeX()/2; Type sy = SizeY()/2; Type cx = CenterX(); Type cy = CenterY(); x0 = Type(cx-sx*x); y0 = Type(cy-sy*y); x1 = Type(cx+sx*x); y1 = Type(cy+sy*y); }
+  void ScaleCenter(float s)                        { ScaleCenter(s,s); }
   void MoveCenter(Type cx, Type cy)               { Type sx = SizeX()/2; Type sy = SizeY()/2; x0=cx-sx;x1=cx+sx;y0=cy-sy;y1=cy+sy; }
   void MoveCenterX(Type cx)                       { Type sx = SizeX()/2; x0=cx-sx;x1=cx+sx; }
   void MoveCenterY(Type cy)                       { Type sy = SizeY()/2; y0=cy-sy;y1=cy+sy; }
@@ -1871,13 +1874,13 @@ template <class Type> struct sBaseRect
   void Swap() { SwapX(); SwapY(); }
   void Fix() { if (x1 < x0) SwapX(); if (y1 < y0) SwapY(); }
 
-  void Blend(const sBaseRect &l, const sBaseRect &r, sF32 n) { sF32 m=1-n; x0 = l.x0 * m + r.x0 * n; x1 = l.x1 * m + r.x1 * n; y0 = l.y0 * m + r.y0 * n; y1 = l.y1 * m + r.y1 * n; }
+  void Blend(const sBaseRect &l, const sBaseRect &r, float n) { float m=1-n; x0 = l.x0 * m + r.x0 * n; x1 = l.x1 * m + r.x1 * n; y0 = l.y0 * m + r.y0 * n; y1 = l.y1 * m + r.y1 * n; }
   void Clip(const sBaseRect &c)   { x0 = sClamp(x0,c.x0,c.x1); y0 = sClamp(y0,c.y0,c.y1); x1 = sClamp(x1,c.x0,c.x1); y1 = sClamp(y1,c.y0,c.y1); }
   void Div(Type x, Type y) { x0 /= x; y0 /= y; x1 /= x; y1 /= y; }
 };
 
 typedef sBaseRect<int> sRect;
-typedef sBaseRect<sF32> sFRect;
+typedef sBaseRect<float> sFRect;
 
 sFRect sRectToFRect(const sRect &src);
 sRect sFRectToRect(const sFRect &src);
@@ -1892,18 +1895,18 @@ sFormatStringBuffer& operator% (sFormatStringBuffer &f, const sFRect &r);
 class sRandom                               
 {
 private:
-  sU32 kern;
-  sU32 Step();
+  uint32_t kern;
+  uint32_t Step();
 public:
   sRandom() { Seed(0); }
-  sRandom(sU32 seed) { Seed(seed); }
+  sRandom(uint32_t seed) { Seed(seed); }
   void Init() { Seed(0); }
-  void Seed(sU32 seed);
+  void Seed(uint32_t seed);
   int Int(int max);
   int Int16() { return Step()&0xffff; }
-  sU32 Int32();
-  sF32 Float(sF32 max);
-  inline sF32 FloatSigned(sF32 max) { return Float(2.0f*max)-max; }
+  uint32_t Int32();
+  float Float(float max);
+  inline float FloatSigned(float max) { return Float(2.0f*max)-max; }
 };
 
 //  Mersenne twister (pretty good and fast)
@@ -1916,21 +1919,21 @@ private:
     Count = 624,
     Period = 397,
   };
-  sU32 State[Count];
+  uint32_t State[Count];
   int Index;
 
-  sU32 Step();
+  uint32_t Step();
   void Reload();
 public:
   sRandomMT() { Seed(0); }
-  sRandomMT(sU32 seed) { Seed(seed); }
+  sRandomMT(uint32_t seed) { Seed(seed); }
   void Init() { Seed(0); }
-  void Seed(sU32 seed);
+  void Seed(uint32_t seed);
   int Int(int max);
   int Int16() { return Step()&0xffff; }
-  sU32 Int32() { return Step(); }
-  sF32 Float(sF32 max);
-  inline sF32 FloatSigned(sF32 max) { return Float(2.0f*max)-max; }
+  uint32_t Int32() { return Step(); }
+  float Float(float max);
+  inline float FloatSigned(float max) { return Float(2.0f*max)-max; }
 };
 
 
@@ -1939,18 +1942,18 @@ public:
 class sRandomKISS                           
 {
 private:
-  sU32 x,y,z,c;
-  sU32 Step();
+  uint32_t x,y,z,c;
+  uint32_t Step();
 public:
   sRandomKISS() { Seed(0); }
-  sRandomKISS(sU32 seed) { Seed(seed); }
+  sRandomKISS(uint32_t seed) { Seed(seed); }
   void Init() { Seed(0); }
-  void Seed(sU32 seed);
+  void Seed(uint32_t seed);
   int Int(int max);
   int Int16() { return Step()&0xffff; }
-  sU32 Int32() { return Step(); }
-  sF32 Float(sF32 max);
-  inline sF32 FloatSigned(sF32 max) { return Float(2.0f*max)-max; }
+  uint32_t Int32() { return Step(); }
+  float Float(float max);
+  inline float FloatSigned(float max) { return Float(2.0f*max)-max; }
 };
 
 /****************************************************************************/
@@ -1979,7 +1982,7 @@ public:
   int GetSlices() const { return Slices; }      // get number of slices for this frame
   int GetJitter() const { return Jitter; }      // get remaining milliseconds in next slice
   int GetTimeSlice() const { return TimeSlice; }
-  sF32 GetAverageDelta() const;                   // averaged milliseconds of last 64 frames
+  float GetAverageDelta() const;                   // averaged milliseconds of last 64 frames
   void SetHistoryMax(int m) { HistoryMax = sMin(m,(int)sCOUNTOF(History)); HistoryCount=0; HistoryIndex=0; }
   
 
@@ -1996,36 +1999,36 @@ public:
 
 /****************************************************************************/
 
-sU64 sHashStringFNV(const sChar *text);
+uint64_t sHashStringFNV(const sChar *text);
 
-sU32 sChecksumAdler32(const sU8 *data,int size);
-sU32 sChecksumCRC32(const sU8 *data,int size);
-sU32 sChecksumRandomByte(const sU8 *data,int size);
-sU32 sChecksumMurMur(const sU32 *data,int words);
+uint32_t sChecksumAdler32(const uint8_t *data,int size);
+uint32_t sChecksumCRC32(const uint8_t *data,int size);
+uint32_t sChecksumRandomByte(const uint8_t *data,int size);
+uint32_t sChecksumMurMur(const uint32_t *data,int words);
 
 void sChecksumAdler32Begin();
-void sChecksumAdler32Add(const sU8 *data,int size);
-template <typename T> sINLINE void sChecksumAdler32Add(const T &data) { sChecksumAdler32Add((const sU8*)&data,sizeof(T)); }
-sU32 sChecksumAdler32End();
+void sChecksumAdler32Add(const uint8_t *data,int size);
+template <typename T> sINLINE void sChecksumAdler32Add(const T &data) { sChecksumAdler32Add((const uint8_t*)&data,sizeof(T)); }
+uint32_t sChecksumAdler32End();
 
 
 struct sChecksumMD5
 {
 private:
-  inline void f(sU32 &a,sU32 b,sU32 c,sU32 d,int k,int s,sU32 t,sU32 *data) { a += (d^(b&(c^d))) + data[k] + t;  a = ((a<<s)|(a>>(32-s))) + b; }
-  inline void g(sU32 &a,sU32 b,sU32 c,sU32 d,int k,int s,sU32 t,sU32 *data) { a += (c^(d&(b^c))) + data[k] + t;  a = ((a<<s)|(a>>(32-s))) + b; }
-  inline void h(sU32 &a,sU32 b,sU32 c,sU32 d,int k,int s,sU32 t,sU32 *data) { a += (b^c^d)       + data[k] + t;  a = ((a<<s)|(a>>(32-s))) + b; }
-  inline void i(sU32 &a,sU32 b,sU32 c,sU32 d,int k,int s,sU32 t,sU32 *data) { a += (c^(b|~d))    + data[k] + t;  a = ((a<<s)|(a>>(32-s))) + b; }
-  void Block(const sU8 *data);
+  inline void f(uint32_t &a,uint32_t b,uint32_t c,uint32_t d,int k,int s,uint32_t t,uint32_t *data) { a += (d^(b&(c^d))) + data[k] + t;  a = ((a<<s)|(a>>(32-s))) + b; }
+  inline void g(uint32_t &a,uint32_t b,uint32_t c,uint32_t d,int k,int s,uint32_t t,uint32_t *data) { a += (c^(d&(b^c))) + data[k] + t;  a = ((a<<s)|(a>>(32-s))) + b; }
+  inline void h(uint32_t &a,uint32_t b,uint32_t c,uint32_t d,int k,int s,uint32_t t,uint32_t *data) { a += (b^c^d)       + data[k] + t;  a = ((a<<s)|(a>>(32-s))) + b; }
+  inline void i(uint32_t &a,uint32_t b,uint32_t c,uint32_t d,int k,int s,uint32_t t,uint32_t *data) { a += (c^(b|~d))    + data[k] + t;  a = ((a<<s)|(a>>(32-s))) + b; }
+  void Block(const uint8_t *data);
 public:
-  sU32 Hash[4];
+  uint32_t Hash[4];
 
   void CalcBegin();
-  int CalcAdd(const sU8 *data, int size);   // calculate 64 byte blocks, returns consumed bytes
-  void CalcEnd(const sU8 *data, int size, int sizeall);
+  int CalcAdd(const uint8_t *data, int size);   // calculate 64 byte blocks, returns consumed bytes
+  void CalcEnd(const uint8_t *data, int size, int sizeall);
 
-  void Calc(const sU8 *data,int size);
-  sBool Check(const sU8 *data,int size);
+  void Calc(const uint8_t *data,int size);
+  sBool Check(const uint8_t *data,int size);
   sBool operator== (const sChecksumMD5 &)const;
   sBool operator!= (const sChecksumMD5 &md5)const    { return !(*this==md5); }
 };
@@ -2033,30 +2036,30 @@ public:
 sFormatStringBuffer& operator% (sFormatStringBuffer &f, const sChecksumMD5 &md5);
 /****************************************************************************/
 
-sU32 sScaleColor(sU32 a,int scale);          // a*b, scale = 0..0x10000...
-sU32 sScaleColorFast(sU32 a,int scale);    // a*scale, scale = 0..0x100
-sU32 sMulColor(sU32 a,sU32 b);              // a*b
-sU32 sAddColor(sU32 a,sU32 b);              // a+b
-sU32 sSubColor(sU32 a,sU32 b);              // a-b
-sU32 sMadColor(sU32 mul1,sU32 mul2,sU32 add); // mul1*mul2+add
-sU32 sFadeColor(int fade,sU32 a,sU32 b);   // fade=0..0x10000
+uint32_t sScaleColor(uint32_t a,int scale);          // a*b, scale = 0..0x10000...
+uint32_t sScaleColorFast(uint32_t a,int scale);    // a*scale, scale = 0..0x100
+uint32_t sMulColor(uint32_t a,uint32_t b);              // a*b
+uint32_t sAddColor(uint32_t a,uint32_t b);              // a+b
+uint32_t sSubColor(uint32_t a,uint32_t b);              // a-b
+uint32_t sMadColor(uint32_t mul1,uint32_t mul2,uint32_t add); // mul1*mul2+add
+uint32_t sFadeColor(int fade,uint32_t a,uint32_t b);   // fade=0..0x10000
 
-sU32 sColorFade (sU32 a, sU32 b, sF32 f);   // fade=0.0f..1.0f
-sU32 sAlphaFade (sU32 c, sF32 f);           // fade=0.0f..1.0f
-sU32 sPMAlphaFade (sU32 c, sF32 f);         // fade=0.0f..1.0f
-sF32 sScaleFade(sF32 a, sF32 b, sF32 f);    // fade=0.0f..1.0f
+uint32_t sColorFade (uint32_t a, uint32_t b, float f);   // fade=0.0f..1.0f
+uint32_t sAlphaFade (uint32_t c, float f);           // fade=0.0f..1.0f
+uint32_t sPMAlphaFade (uint32_t c, float f);         // fade=0.0f..1.0f
+float sScaleFade(float a, float b, float f);    // fade=0.0f..1.0f
 
 // a-b, angles=0..c, -count/2 > result > count/2
 int sAngleDiff(int alpha, int beta, int count); 
 
 // a-b, angles=0..1, -0.5 > result > 0.5
-sF32 sAngleDiff(sF32 alpha, sF32 beta); 
+float sAngleDiff(float alpha, float beta); 
 
 // a-b, angles=2*pi, -pi > result > pi
-sF32 sRadianDiff(sF32 alpha, sF32 beta); 
+float sRadianDiff(float alpha, float beta); 
 
 // a-b, angles=180, -180 > result > 180
-sF32 sDegreeDiff(sF32 alpha, sF32 beta); 
+float sDegreeDiff(float alpha, float beta); 
 
 /****************************************************************************/
 /***                                                                      ***/
@@ -2065,10 +2068,10 @@ sF32 sDegreeDiff(sF32 alpha, sF32 beta);
 /****************************************************************************/
 extern int sGetTime();
 struct sInput2Event {
-  sInput2Event(sU32 key = 0, int instance = 0, sDInt payload = 0, int timestamp = sGetTime()) { Key = key; Instance = instance; Payload = payload; Timestamp = timestamp; }
-  sU32 Key;          // one of sKEY_*. defines the semantic of Payload
+  sInput2Event(uint32_t key = 0, int instance = 0, ptrdiff_t payload = 0, int timestamp = sGetTime()) { Key = key; Instance = instance; Payload = payload; Timestamp = timestamp; }
+  uint32_t Key;          // one of sKEY_*. defines the semantic of Payload
   int Instance;     // zero-based device Instance
-  sDInt Payload;     // some value. semantic is defined bei Key
+  ptrdiff_t Payload;     // some value. semantic is defined bei Key
   int Timestamp;    // time when event was generated
 };
 
@@ -2087,7 +2090,7 @@ public:
 
   virtual void OnEvent(int id); 
 //  virtual void OnMouse(int buttons,int x,int y);   // obsolete
-//  virtual void OnKey(sU32 key);     // obsolete
+//  virtual void OnKey(uint32_t key);     // obsolete
 
   virtual void GetCaption(const sStringDesc &sd) { sCopyString(sd,L"sApp"); }
 };
@@ -2117,8 +2120,8 @@ sBool sAddShellParameter(const sChar *opt, const sChar *val);
 // omit the '-', like sGetShellSwitch(L"x");
 const sChar *sGetShellParameter(const sChar *opt,int n);
 int sGetShellParameterInt(const sChar *opt,int n,int def);
-sF32 sGetShellParameterFloat(const sChar *opt,int n,sF32 def);
-sU32 sGetShellParameterHex(const sChar *opt,int n,sU32 def);
+float sGetShellParameterFloat(const sChar *opt,int n,float def);
+uint32_t sGetShellParameterHex(const sChar *opt,int n,uint32_t def);
 sBool sGetShellSwitch(const sChar *opt);
 
 // for short and long option, like sGetShellSwitch(L"n",L"-name","dierk2);
@@ -2135,9 +2138,9 @@ int sGetShellInt(const sChar *optshort,const sChar *optlong,int def=0);
 
 struct sGUID
 {
-  sU32 Data32;
-  sU16 Data16[3];
-  sU8  Data8[6];
+  uint32_t Data32;
+  uint16_t Data16[3];
+  uint8_t  Data8[6];
 
   bool operator == (const sGUID &g) const { return !sCmpMem(this,&g,sizeof(sGUID)); }
   bool operator != (const sGUID &g) const { return sCmpMem(this,&g,sizeof(sGUID))!=0; }
@@ -2452,7 +2455,7 @@ protected:
   virtual void ReAlloc(int max) { sVERIFY(max<=sStaticArray<T>::Alloc); }
   virtual void Reset() { sStaticArray<T>::Clear(); }
 public:
-  template <sDInt SIZE> sExternalArray(T (&array)[SIZE]) { sStaticArray<T>::Data = array; sStaticArray<T>::Alloc = SIZE; sStaticArray<T>::Used = SIZE; }
+  template <ptrdiff_t SIZE> sExternalArray(T (&array)[SIZE]) { sStaticArray<T>::Data = array; sStaticArray<T>::Alloc = SIZE; sStaticArray<T>::Used = SIZE; }
   sExternalArray(T* data, int count) { sStaticArray<T>::Data = data; sStaticArray<T>::Alloc = count; sStaticArray<T>::Used = count; }
   virtual ~sExternalArray() { sStaticArray<T>::Data = 0; }
 };
@@ -3154,11 +3157,11 @@ template <class Type,sDNode Type::*Offset> class sDList
   sDNode First;
   sDNode Last;
 
-  const sDNode *GetNode(const Type* e) const   { return &(e->*Offset); } //{ return (sDNode *)(((sU8*)e)+Offset); }
-  const Type* GetType(const sDNode *n) const   { return (const Type*) (((sU8*)n)-sOFFSETOMP((Type *)0,Offset)); }
+  const sDNode *GetNode(const Type* e) const   { return &(e->*Offset); } //{ return (sDNode *)(((uint8_t*)e)+Offset); }
+  const Type* GetType(const sDNode *n) const   { return (const Type*) (((uint8_t*)n)-sOFFSETOMP((Type *)0,Offset)); }
 
-  sDNode *GetNode(Type* e)                     { return &(e->*Offset); } // (sDNode *)(((sU8*)e)+Offset); }
-  Type* GetType(sDNode *n)                     { return (Type*) (((sU8*)n)-sOFFSETOMP((Type *)0,Offset)); }
+  sDNode *GetNode(Type* e)                     { return &(e->*Offset); } // (sDNode *)(((uint8_t*)e)+Offset); }
+  Type* GetType(sDNode *n)                     { return (Type*) (((uint8_t*)n)-sOFFSETOMP((Type *)0,Offset)); }
 
 public:
   //! Element Type
@@ -3174,13 +3177,13 @@ public:
   sBool IsEmpty() const           { return (First.Next==&Last); }
 
   //! get next element in list
-  const Type* GetNext(const Type* e) const            { return GetType(GetNode(e)->Next); } // { return (Type*) (((sU8*)(GetNode(e)->Next))-MO(Offset)); }
+  const Type* GetNext(const Type* e) const            { return GetType(GetNode(e)->Next); } // { return (Type*) (((uint8_t*)(GetNode(e)->Next))-MO(Offset)); }
   //! get prev element in list
-  const Type* GetPrev(const Type* e) const            { return GetType(GetNode(e)->Prev); } // { return (Type*) (((sU8*)(GetNode(e)->Prev))-MO(Offset)); }
+  const Type* GetPrev(const Type* e) const            { return GetType(GetNode(e)->Prev); } // { return (Type*) (((uint8_t*)(GetNode(e)->Prev))-MO(Offset)); }
   //! get next element in list
-  Type* GetNext(Type* e)                              { return GetType(GetNode(e)->Next); } // { return (Type*) (((sU8*)(GetNode(e)->Next))-MO(Offset)); }
+  Type* GetNext(Type* e)                              { return GetType(GetNode(e)->Next); } // { return (Type*) (((uint8_t*)(GetNode(e)->Next))-MO(Offset)); }
   //! get prev element in list
-  Type* GetPrev(Type* e)                              { return GetType(GetNode(e)->Prev); } // { return (Type*) (((sU8*)(GetNode(e)->Prev))-MO(Offset)); }
+  Type* GetPrev(Type* e)                              { return GetType(GetNode(e)->Prev); } // { return (Type*) (((uint8_t*)(GetNode(e)->Prev))-MO(Offset)); }
   //! check if first element in list
   sBool IsFirst(const Type* e) const     { return (GetNode(e)->Prev->Prev==0); }
   //! check if last element in list
@@ -3255,10 +3258,10 @@ template <class Type> class sDList2
   sDNode Last;
 
   const sDNode *GetNode(const Type* e) const   { return &(e->Node); } 
-  const Type* GetType(const sDNode *n) const   { return (const Type*) (((sU8*)n)-sOFFSETOMP((Type *)0,&Type::Node)); }
+  const Type* GetType(const sDNode *n) const   { return (const Type*) (((uint8_t*)n)-sOFFSETOMP((Type *)0,&Type::Node)); }
 
   sDNode *GetNode(Type* e)                     { return &(e->Node); } 
-  Type* GetType(sDNode *n)                     { return (Type*) (((sU8*)n)-sOFFSETOMP((Type *)0,&Type::Node)); }
+  Type* GetType(sDNode *n)                     { return (Type*) (((uint8_t*)n)-sOFFSETOMP((Type *)0,&Type::Node)); }
 
 public:
   typedef typename sRemovePtrType<Type>::Type ElementType;
@@ -3268,10 +3271,10 @@ public:
   int GetCount() const            { int count=0; for (const Type* iter = GetHead(); !IsEnd(iter); iter=GetNext(iter), ++count) {} return count;}
   sBool IsEmpty() const           { return (First.Next==&Last); }
 
-  const Type* GetNext(const Type* e) const            { return GetType(GetNode(e)->Next); } // { return (Type*) (((sU8*)(GetNode(e)->Next))-MO(Offset)); }
-  const Type* GetPrev(const Type* e) const            { return GetType(GetNode(e)->Prev); } // { return (Type*) (((sU8*)(GetNode(e)->Prev))-MO(Offset)); }
-  Type* GetNext(Type* e)                              { return GetType(GetNode(e)->Next); } // { return (Type*) (((sU8*)(GetNode(e)->Next))-MO(Offset)); }
-  Type* GetPrev(Type* e)                              { return GetType(GetNode(e)->Prev); } // { return (Type*) (((sU8*)(GetNode(e)->Prev))-MO(Offset)); }
+  const Type* GetNext(const Type* e) const            { return GetType(GetNode(e)->Next); } // { return (Type*) (((uint8_t*)(GetNode(e)->Next))-MO(Offset)); }
+  const Type* GetPrev(const Type* e) const            { return GetType(GetNode(e)->Prev); } // { return (Type*) (((uint8_t*)(GetNode(e)->Prev))-MO(Offset)); }
+  Type* GetNext(Type* e)                              { return GetType(GetNode(e)->Next); } // { return (Type*) (((uint8_t*)(GetNode(e)->Next))-MO(Offset)); }
+  Type* GetPrev(Type* e)                              { return GetType(GetNode(e)->Prev); } // { return (Type*) (((uint8_t*)(GetNode(e)->Prev))-MO(Offset)); }
   sBool IsFirst(const Type* e) const     { return (GetNode(e)->Prev->Prev==0); }
   sBool IsLast(const Type* e) const      { return (GetNode(e)->Next->Next==0); }
   sBool IsEnd(const Type* e) const       { return (GetNode(e)->Next==0); }
@@ -3336,7 +3339,7 @@ template <class Type> sINLINE void sDeleteAll (sDList2<Type> &list)
 
 class sBlob
 {
-  sU32 *Ptr;
+  uint32_t *Ptr;
   void AddRef() { if (Ptr) Ptr[1]++; }
 
 public:
@@ -3347,11 +3350,11 @@ public:
   sBlob(const sBlob &blob) { Ptr=blob.Ptr; AddRef(); }
 
   // c++ stuff
-  sBlob & operator = (const sBlob &blob) { sU32 *oldPtr = Ptr; Ptr=blob.Ptr; AddRef(); Ptr=oldPtr; Release(); Ptr=blob.Ptr; return *this; }
+  sBlob & operator = (const sBlob &blob) { uint32_t *oldPtr = Ptr; Ptr=blob.Ptr; AddRef(); Ptr=oldPtr; Release(); Ptr=blob.Ptr; return *this; }
   ~sBlob() { Release(); }
 
   // creation/deletion
-  void Create(int bytes) { Release(); Ptr = new sU32[(bytes+sizeof(sU32)-1)/sizeof(sU32)+2]; Ptr[0]=bytes; Ptr[1]=1; }
+  void Create(int bytes) { Release(); Ptr = new uint32_t[(bytes+sizeof(uint32_t)-1)/sizeof(uint32_t)+2]; Ptr[0]=bytes; Ptr[1]=1; }
   void Release() { if (Ptr && !--Ptr[1]) { delete[] Ptr; Ptr=0; } }
 
   // resizing (only smaller and memory usage will stay the same)
@@ -3388,7 +3391,7 @@ protected:
 
 public:
   sMemoryHeap();
-  void Init(sU8 *start,sPtr size);
+  void Init(uint8_t *start,sPtr size);
   void SetDebug(sBool clear,int memwall);
 
   sCONFIG_SIZET GetFree();
@@ -3402,7 +3405,7 @@ public:
   sBool Free(void *);
   sPtr MemSize(void *);
   void Validate();
-  sU32 MakeSnapshot();
+  uint32_t MakeSnapshot();
 };
 
 /****************************************************************************/
@@ -3448,7 +3451,7 @@ protected:
 public:
   sGpuHeap();
   ~sGpuHeap();
-  void Init(sU8 *start,sPtr size,int maxallocations=0x1000);
+  void Init(uint8_t *start,sPtr size,int maxallocations=0x1000);
   void Exit();
 
   void SetDebug(sBool clear,int memwall);
@@ -3460,7 +3463,7 @@ public:
   void *Alloc(sPtr bytes,int align,int flags=0);
   sBool Free(void *);
   sPtr MemSize(void *);
-  sU32 MakeSnapshot();
+  uint32_t MakeSnapshot();
 };
 
 /****************************************************************************/
@@ -3485,9 +3488,9 @@ class sSimpleMemPool
 public:
 
   sSimpleMemPool(int defaultsize = 65536);
-  sSimpleMemPool(sU8 *data,int size);
+  sSimpleMemPool(uint8_t *data,int size);
   ~sSimpleMemPool();
-  sU8 *Alloc(int size,int align);
+  uint8_t *Alloc(int size,int align);
   void Reset();     // frees all reserved memory after the first default size block
   template <typename T> T *Alloc(int n=1) { return (T*) Alloc(sizeof(T)*n,sALIGNOF(T)); }
 };
@@ -3516,9 +3519,9 @@ class sMemoryPool
   int AllocFlags;
   struct sMemoryPoolBuffer
   {
-    sU8 *Start;
-    sU8 *Current;
-    sU8 *End;
+    uint8_t *Start;
+    uint8_t *Current;
+    uint8_t *End;
     sMemoryPoolBuffer *Next;
     sMemoryPoolBuffer(sPtr size,int flags);
     ~sMemoryPoolBuffer();
@@ -3530,14 +3533,14 @@ class sMemoryPool
   struct sStackItem
   {
     sMemoryPoolBuffer *CBuffer;
-    sU8 *CPtr;
+    uint8_t *CPtr;
   };
   sStaticArray<sStackItem> Stack;
 public:
 
   sMemoryPool(sPtr defaultsize = 65536,int allocflags=sAMF_HEAP, int maxstacksize=16);
   ~sMemoryPool();
-  sU8 *Alloc(sPtr size,int align);
+  uint8_t *Alloc(sPtr size,int align);
 
   sPtr BytesAllocated() const;
   sPtr BytesReserved() const;
@@ -3557,8 +3560,8 @@ public:
 /***                                                                      ***/
 /****************************************************************************/
 
-sBool sCompES(sU8 *s, sU8 *d, int ssize, int &dsize, int scan);
-sBool sDeCompES(sU8 *s, sU8 *d, int ssize, int &dsize, sBool verify);
+sBool sCompES(uint8_t *s, uint8_t *d, int ssize, int &dsize, int scan);
+sBool sDeCompES(uint8_t *s, uint8_t *d, int ssize, int &dsize, sBool verify);
 
 /****************************************************************************/
 /***                                                                      ***/
@@ -3639,24 +3642,24 @@ private:
     sPtr Ptr;
     const sChar8 *File;
     int Size;
-    sU16 Line;
-    sU16 Next;
+    uint16_t Line;
+    uint16_t Next;
 
-    void Init(sDInt ptr, int size, const sChar8 *file, sU16 line, sU16 next);
+    void Init(ptrdiff_t ptr, int size, const sChar8 *file, uint16_t line, uint16_t next);
   };
 
   Item ItemPool[sMEMSEG_DBGINFOMAX];
   int ItemCount;
-  sU16 FreeList;
+  uint16_t FreeList;
 public:
 
-  sU16 Add(sU16 id, sPtr ptr, int size, const sChar8 *file, sU16 line);
-  sU16 Free(sU16 id, sPtr ptr);
-  Item *Get(sU16 id);
+  uint16_t Add(uint16_t id, sPtr ptr, int size, const sChar8 *file, uint16_t line);
+  uint16_t Free(uint16_t id, sPtr ptr);
+  Item *Get(uint16_t id);
 
-  void FlushDump(sU16 id);
-  void StatisticDump(sU16 id=0xffff);   // choose valid id for dumping only selected segment
-  int GetAllocSize(sU16 id);
+  void FlushDump(uint16_t id);
+  void StatisticDump(uint16_t id=0xffff);   // choose valid id for dumping only selected segment
+  int GetAllocSize(uint16_t id);
 
   sMemDebugInfo();
   void Init();
@@ -3683,15 +3686,15 @@ public:
     void *Ptr;
     sPtr Size;
     const sChar8 *File;
-    sU16 Line;
-    sU8 HeapId;
-    sU8 pad;
+    uint16_t Line;
+    uint8_t HeapId;
+    uint8_t pad;
     int AllocId;
 
     int Duplicates;      // temporary
     sPtr TotalBytes;
 
-    sU32 Hash() const { return Line; }
+    uint32_t Hash() const { return Line; }
     bool operator==(const LeakCheck &b) const
     { if(Line!=b.Line) return 0; 
       for(int i=0;File[i] || b.File[i];i++) 
@@ -3819,7 +3822,7 @@ public:
 
   void DumpLeaks(const sChar *message,int minallocid=0, int heapid=0);
   
-  void AddLeak(void *ptr,sPtr size,const char *file,int line,int allocid,int heapid, const sChar *desc, sU32 descCRC);
+  void AddLeak(void *ptr,sPtr size,const char *file,int line,int allocid,int heapid, const sChar *desc, uint32_t descCRC);
   void RemLeak(void *ptr);
   sBool HasLeak() const { return LeakCount!=0; }
   int GetLeakCount() const { return LeakCount; }
@@ -3897,12 +3900,12 @@ sINLINE void sCopyMem(void *dd,const void *ss,int c)      { memcpy(dd,ss,c); }
 sINLINE int sCmpMem(const void *dd,const void *ss,int c) { return (int)memcmp(dd,ss,c); }
 
 sINLINE int sMulDiv(int a,int b,int c)      { return int(__emul(a,b)/c); }
-sINLINE sU32 sMulDivU(sU32 a,sU32 b,sU32 c)     { return sU32(__emulu(a,b)/c); }
+sINLINE uint32_t sMulDivU(uint32_t a,uint32_t b,uint32_t c)     { return uint32_t(__emulu(a,b)/c); }
 sINLINE int sMulShift(int a,int b)           { return int(__emul(a,b)>>16); }
-sINLINE sU32 sMulShiftU(sU32 a,sU32 b)           { return sU32(__emulu(a,b)>>16); }
+sINLINE uint32_t sMulShiftU(uint32_t a,uint32_t b)           { return uint32_t(__emulu(a,b)>>16); }
 
-sINLINE int sDivShift(int a,int b)           { return int((sS64(a)<<16)/b); }
-sINLINE sF32 sAbs(sF32 f)                       { return fabs(f); }
+sINLINE int sDivShift(int a,int b)           { return int((int64_t(a)<<16)/b); }
+sINLINE float sAbs(float f)                       { return fabs(f); }
 
 #define sHASINTRINSIC_ABSI
 #define sHASINTRINSIC_SETMEM
@@ -3917,34 +3920,34 @@ sINLINE sF32 sAbs(sF32 f)                       { return fabs(f); }
 
 #pragma intrinsic (atan,atan2,cos,exp,log,log10,sin,sqrt,tan)
 
-sINLINE sF32 sATan(sF32 f)                      { return (sF32)atan(f); }
-sINLINE sF32 sATan2(sF32 over,sF32 under)       { return (sF32)atan2(over,under); }
-sINLINE sF32 sCos(sF32 f)                       { return (sF32)cos(f); }
-sINLINE sF32 sExp(sF32 f)                       { return (sF32)exp(f); }
-sINLINE sF32 sLog(sF32 f)                       { return (sF32)log(f); }
-sINLINE sF32 sLog10(sF32 f)                     { return (sF32)log10(f); }
-sINLINE sF32 sSin(sF32 f)                       { return (sF32)sin(f); }
-sINLINE sF32 sSqrt(sF32 f)                      { return (sF32)sqrtf(f); }
-sINLINE sF32 sRSqrt(sF32 f)                     { return 1.0f/(sF32)sqrt(f); }
-sINLINE sF32 sTan(sF32 f)                       { return (sF32)tan(f); }
+sINLINE float sATan(float f)                      { return (float)atan(f); }
+sINLINE float sATan2(float over,float under)       { return (float)atan2(over,under); }
+sINLINE float sCos(float f)                       { return (float)cos(f); }
+sINLINE float sExp(float f)                       { return (float)exp(f); }
+sINLINE float sLog(float f)                       { return (float)log(f); }
+sINLINE float sLog10(float f)                     { return (float)log10(f); }
+sINLINE float sSin(float f)                       { return (float)sin(f); }
+sINLINE float sSqrt(float f)                      { return (float)sqrtf(f); }
+sINLINE float sRSqrt(float f)                     { return 1.0f/(float)sqrt(f); }
+sINLINE float sTan(float f)                       { return (float)tan(f); }
 
-sINLINE sF32 sFATan(sF32 f)                      { return (sF32)atan(f); }
-sINLINE sF32 sFATan2(sF32 over,sF32 under)       { return (sF32)atan2(over,under); }
-sINLINE sF32 sFCos(sF32 f)                       { return (sF32)cos(f); }
-sINLINE sF32 sFExp(sF32 f)                       { return (sF32)exp(f); }
-sINLINE sF32 sFLog(sF32 f)                       { return (sF32)log(f); }
-sINLINE sF32 sFLog10(sF32 f)                     { return (sF32)log10(f); }
-sINLINE sF32 sFSin(sF32 f)                       { return (sF32)sin(f); }
-sINLINE sF32 sFTan(sF32 f)                       { return (sF32)tan(f); }
+sINLINE float sFATan(float f)                      { return (float)atan(f); }
+sINLINE float sFATan2(float over,float under)       { return (float)atan2(over,under); }
+sINLINE float sFCos(float f)                       { return (float)cos(f); }
+sINLINE float sFExp(float f)                       { return (float)exp(f); }
+sINLINE float sFLog(float f)                       { return (float)log(f); }
+sINLINE float sFLog10(float f)                     { return (float)log10(f); }
+sINLINE float sFSin(float f)                       { return (float)sin(f); }
+sINLINE float sFTan(float f)                       { return (float)tan(f); }
 
 // Intel SSE seems to be too unpreceise which leads to jittering errors in animation code.
 #if sRELEASE && 0
-//sINLINE sF32 sFSqrt(sF32 f)                      { sF32 x; _mm_store_ss(&x,_mm_sqrt_ss(_mm_load_ss(&f))); return x; }
-//sINLINE sF32 sFRSqrt(sF32 f)                     { sF32 x; _mm_store_ss(&x,_mm_rsqrt_ss(_mm_load_ss(&f))); return x; }
+//sINLINE float sFSqrt(float f)                      { float x; _mm_store_ss(&x,_mm_sqrt_ss(_mm_load_ss(&f))); return x; }
+//sINLINE float sFRSqrt(float f)                     { float x; _mm_store_ss(&x,_mm_rsqrt_ss(_mm_load_ss(&f))); return x; }
 #else
 // VS2005 has a bug where SSE intrinsics break debugging now and then. therefore...
-sINLINE sF32 sFSqrt(sF32 f)                      { return (sF32)sqrtf(f); }
-sINLINE sF32 sFRSqrt(sF32 f)                     { return 1.0f/(sF32)sqrt(f); }
+sINLINE float sFSqrt(float f)                      { return (float)sqrtf(f); }
+sINLINE float sFRSqrt(float f)                     { return 1.0f/(float)sqrt(f); }
 #endif
 
 #define sHASINTRINSIC_ATAN
@@ -3986,12 +3989,12 @@ sINLINE int sAbs(int i)                                  { return __builtin_abs(
 sINLINE void sSetMem(void *dd,int s,int c)               { __builtin_memset(dd,s,c); }
 sINLINE void sCopyMem(void *dd,const void *ss,int c)      { __builtin_memcpy(dd,ss,c); }
 sINLINE int sCmpMem(const void *aa,const void *bb,int c) { return __builtin_memcmp(aa,bb,c); }
-sINLINE int sMulDiv(int a,int b,int c)      { return sS64(a)*b/c; }
-sINLINE sU32 sMulDivU(sU32 a,sU32 b,sU32 c)      { return sU64(a)*b/c; }
-sINLINE int sMulShift(int a,int b)           { return (sS64(a)*b)>>16; }
-sINLINE sU32 sMulShiftU(sU32 a,sU32 b)           { return (sU64(a)*b)>>16; }
-sINLINE int sDivShift(int a,int b)           { return (sS64(a)<<16)/b; }
-sINLINE sF32 sAbs(sF32 f)                       { return __builtin_fabsf(f); }
+sINLINE int sMulDiv(int a,int b,int c)      { return int64_t(a)*b/c; }
+sINLINE uint32_t sMulDivU(uint32_t a,uint32_t b,uint32_t c)      { return uint64_t(a)*b/c; }
+sINLINE int sMulShift(int a,int b)           { return (int64_t(a)*b)>>16; }
+sINLINE uint32_t sMulShiftU(uint32_t a,uint32_t b)           { return (uint64_t(a)*b)>>16; }
+sINLINE int sDivShift(int a,int b)           { return (int64_t(a)<<16)/b; }
+sINLINE float sAbs(float f)                       { return __builtin_fabsf(f); }
 
 #define sHASINTRINSIC_ABSI
 #define sHASINTRINSIC_SETMEM
@@ -4004,12 +4007,12 @@ sINLINE sF32 sAbs(sF32 f)                       { return __builtin_fabsf(f); }
 #define sHASINTRINSIC_DIVSHIFT
 #define sHASINTRINSIC_ABSF
 
-sINLINE sF32 sCos(sF32 f)                       { return __builtin_cosf(f); }
-sINLINE sF32 sSin(sF32 f)                       { return __builtin_sinf(f); }
-sINLINE sF32 sSqrt(sF32 f)                      { return __builtin_sqrtf(f); }
-sINLINE sF32 sFSqrt(sF32 f)                     { return __builtin_sqrtf(f); }
-sINLINE sF32 sRSqrt(sF32 f)                     { return 1.0f/__builtin_sqrtf(f); }
-sINLINE sF32 sFRSqrt(sF32 f)                    { return 1.0f/__builtin_sqrtf(f); }
+sINLINE float sCos(float f)                       { return __builtin_cosf(f); }
+sINLINE float sSin(float f)                       { return __builtin_sinf(f); }
+sINLINE float sSqrt(float f)                      { return __builtin_sqrtf(f); }
+sINLINE float sFSqrt(float f)                     { return __builtin_sqrtf(f); }
+sINLINE float sRSqrt(float f)                     { return 1.0f/__builtin_sqrtf(f); }
+sINLINE float sFRSqrt(float f)                    { return 1.0f/__builtin_sqrtf(f); }
 
 #define sHASINTRINSIC_COS
 #define sHASINTRINSIC_SIN
@@ -4018,11 +4021,11 @@ sINLINE sF32 sFRSqrt(sF32 f)                    { return 1.0f/__builtin_sqrtf(f)
 #define sHASINTRINSIC_RSQRT
 #define sHASINTRINSIC_FRSQRT
 
-sINLINE sF32 sLog(sF32 x)                       { return __builtin_logf(x); }
-sINLINE sF32 sExp(sF32 x)                       { return __builtin_expf(x); }
+sINLINE float sLog(float x)                       { return __builtin_logf(x); }
+sINLINE float sExp(float x)                       { return __builtin_expf(x); }
 
-sINLINE sF32 sFLog(sF32 x)                       { return __builtin_logf(x); }
-sINLINE sF32 sFExp(sF32 x)                       { return __builtin_expf(x); }
+sINLINE float sFLog(float x)                       { return __builtin_logf(x); }
+sINLINE float sFExp(float x)                       { return __builtin_expf(x); }
 
 #define sHASINTRINSIC_LOG
 #define sHASINTRINSIC_EXP
@@ -4102,7 +4105,7 @@ struct sPair
 
 A simple array of bits with a predefined size.
 
-Use this for bitmasks larger than 64 bits. Otherwise, simply use an sU64 
+Use this for bitmasks larger than 64 bits. Otherwise, simply use an uint64_t 
 or int.
 
 */ /*************************************************************************/
@@ -4111,7 +4114,7 @@ template<int bits>
 class sStaticBitArray
 {
   static const int bytes = (bits+7)/8;
-  sU8 Data[bytes];
+  uint8_t Data[bytes];
 public:
   //! constructor. initalize full array with zero
   sStaticBitArray() { ClearAll(); }
@@ -4138,18 +4141,18 @@ public:
 
 struct sHalfFloat // don't try to make a fully featured halffloat class, you don't want to accidentally use it...
 {                 // Seee EEEE EMMM MMMM  MMMm mmmm mmmm mmmm  (32 bit, e-127)
-  sU16 Val;       //                      SEEE EEMM MMMM MMMM  (16 bit, e-15)
-  void Set(sF32 f)
+  uint16_t Val;       //                      SEEE EEMM MMMM MMMM  (16 bit, e-15)
+  void Set(float f)
   {
-    sU32 i = sRawCast<sU32, sF32>(f);
-    Val = sU16(((i & 0x80000000) >> 16) | (((i & 0x7f800000) >> 13) - (127 << 10) + (15 << 10)) | ((i & 0x007fe000) >> 13));
+    uint32_t i = sRawCast<uint32_t, float>(f);
+    Val = uint16_t(((i & 0x80000000) >> 16) | (((i & 0x7f800000) >> 13) - (127 << 10) + (15 << 10)) | ((i & 0x007fe000) >> 13));
   } // do not care about special cases :-(
 
   // ...but we want to be able to read halffloats (we do not handle NaN & co)
-  sF32 Get() const
+  float Get() const
   {
-    const sU32 f = ((Val & 0x8000) << 16) | (((Val & 0x7c00) + 0x1C000) << 13) | ((Val & 0x03FF) << 13);
-    return sRawCast<sF32, sU32>(f);
+    const uint32_t f = ((Val & 0x8000) << 16) | (((Val & 0x7c00) + 0x1C000) << 13) | ((Val & 0x03FF) << 13);
+    return sRawCast<float, uint32_t>(f);
   }
 };
 

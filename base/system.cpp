@@ -85,7 +85,7 @@ void sApp::OnInit()
 void sLinuxFromWide(char *dest, const sChar *src, int size)
 {
   int len = sGetStringLen(src);
-  sU32 *convBuffer = sALLOCSTACK(sU32,len+1);
+  uint32_t *convBuffer = sALLOCSTACK(uint32_t,len+1);
   for(int i=0;i<=len;i++) // fake-wchar16-to-wchar32 (argh!)
     convBuffer[i] = src[i];
   
@@ -107,7 +107,7 @@ char *sLinuxFromWide(const sChar *str)
 
 void sLinuxToWide(sChar *dest, const char *src, int size)
 {
-  sU32 *convBuffer = sALLOCSTACK(sU32, size);
+  uint32_t *convBuffer = sALLOCSTACK(uint32_t, size);
   size_t nconv = mbstowcs((wchar_t *)convBuffer, src, size);
   if (nconv == (size_t)-1)
     nconv = 0;
@@ -268,11 +268,11 @@ int sGetRunlevel()
 
 #if sDEBUG
 
-const sF32 *sCheckFloatArray(const sF32 *ptr, int count)
+const float *sCheckFloatArray(const float *ptr, int count)
 {
   for (int i=0; i<count; i++)
   {
-    sU32 v=*(sU32*)ptr;
+    uint32_t v=*(uint32_t*)ptr;
     int exp=(v&0x7f800000)>>23;
     if (exp==0xff)
       return ptr;
@@ -311,10 +311,10 @@ int sDateAndTime::Compare(const sDateAndTime &x) const
 }
 
 #if sPLATFORM != sPLAT_WINDOWS && sPLATFORM != sPLAT_LINUX
-sU8 sGetFirstDayOfWeek()
+uint8_t sGetFirstDayOfWeek()
 {
-  const sU8 SUNDAY=0;
-  const sU8 MONDAY=1;
+  const uint8_t SUNDAY=0;
+  const uint8_t MONDAY=1;
 
   int region = sGetRegionCodes();
   switch(sGetLanguage())
@@ -342,7 +342,7 @@ sU8 sGetFirstDayOfWeek()
 }
 #endif
 
-sBool sIsLeapYear(sU16 year)
+sBool sIsLeapYear(uint16_t year)
 {
   // Every 4th year is a leap year.
   // Years that are multiple of 100 are special. Only those that are multiple of 400 are leap years.
@@ -350,17 +350,17 @@ sBool sIsLeapYear(sU16 year)
   return (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0));
 }
 
-int sGetDaysInMonth(sU16 year, sU8 month)
+int sGetDaysInMonth(uint16_t year, uint8_t month)
 {
   sVERIFY((year >= 1 || year <= sMAX_U16) && (month >= 1 || month <= 12));
   if (month == 2 && !sIsLeapYear(year))
     return 28;
 
-  static const sU8 daysInMonth[] = { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+  static const uint8_t daysInMonth[] = { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
   return daysInMonth[month - 1];
 }
 
-sBool sIsDateValid(sU16 year, sU8 month, sU8 day)
+sBool sIsDateValid(uint16_t year, uint8_t month, uint8_t day)
 {
   if (year < 1 || year > sMAX_U16) return sFALSE;
   if (month < 1 || month > 12) return sFALSE;
@@ -373,14 +373,14 @@ sBool sIsDateValid(const sDateAndTime &date)
   return sIsDateValid(date.Year, date.Month, date.Day);
 }
 
-sU8 sGetDayOfWeek(const sDateAndTime &date)
+uint8_t sGetDayOfWeek(const sDateAndTime &date)
 {
   // Calculates the day of the week using Zeller's congruence (http://www.ietf.org/rfc/rfc3339.txt).
-  sU16 year = date.Year;
-  sU8 month = date.Month;
-  sU8 day = date.Day;
+  uint16_t year = date.Year;
+  uint8_t month = date.Month;
+  uint8_t day = date.Day;
   sVERIFY(sIsDateValid(year, month, day));
-  sU8 a = (14 - month) / 12;
+  uint8_t a = (14 - month) / 12;
   year -= a;
   return (day + year + 31 * (month + 12 * a - 2) / 12 + year / 4 - year / 100 + year / 400) % 7;
 }
@@ -408,42 +408,42 @@ sBool sFile::Close()
   return 0;
 }
 
-sBool sFile::Read(void *data,sDInt size)
+sBool sFile::Read(void *data,ptrdiff_t size)
 {
   return 0;
 }
 
-sBool sFile::Write(const void *data,sDInt size)
+sBool sFile::Write(const void *data,ptrdiff_t size)
 {
   return 0;
 }
 
-sU8 *sFile::Map(sS64 offset,sDInt size)
+uint8_t *sFile::Map(int64_t offset,ptrdiff_t size)
 {
   return 0;
 }
 
-sBool sFile::SetOffset(sS64 offset)
+sBool sFile::SetOffset(int64_t offset)
 {
   return 0;
 }
 
-sS64 sFile::GetOffset()
+int64_t sFile::GetOffset()
 {
   return 0;
 }
 
-sBool sFile::SetSize(sS64)
+sBool sFile::SetSize(int64_t)
 {
   return 0;
 }
 
-sS64 sFile::GetSize()
+int64_t sFile::GetSize()
 {
   return 0;
 }
 
-sFileReadHandle sFile::BeginRead(sS64 offset,sDInt size, void *destbuffer, sFilePriorityFlags prio)
+sFileReadHandle sFile::BeginRead(int64_t offset,ptrdiff_t size, void *destbuffer, sFilePriorityFlags prio)
 {
   sFatal(L"asynchronous io not supported");
   return 0;
@@ -466,30 +466,30 @@ void *sFile::GetData(sFileReadHandle handle)
   return 0;
 }
 
-sU64 sFile::GetPhysicalPosition(sS64 offset)
+uint64_t sFile::GetPhysicalPosition(int64_t offset)
 {
   sFatal(L"physical positions not supported");
   return 0;
 }
 
-sU8 *sFile::MapAll()
+uint8_t *sFile::MapAll()
 {
   if(MapFakeMem) 
     return MapFakeMem;
 
-  sDInt size = GetSize();
+  ptrdiff_t size = GetSize();
   if(size>0x7fffffff)
     return 0;
 
-  sU8 *map = Map(0,size);
+  uint8_t *map = Map(0,size);
 
   if(map==0)
   {
 #if sPLATFORM==sPLAT_WINDOWS
     sLogF(L"sys",L"file mapping failed\n");
 #endif
-    map = MapFakeMem = (sU8 *)sAllocMem(size,16,sAMF_ALT);
-    if(!Read(MapFakeMem,sDInt(size)))
+    map = MapFakeMem = (uint8_t *)sAllocMem(size,16,sAMF_ALT);
+    if(!Read(MapFakeMem,ptrdiff_t(size)))
     {
       sDeleteArray(MapFakeMem);
       return 0;
@@ -506,17 +506,17 @@ int sFile::CopyFrom(sFile *f)
   return CopyFrom(f,~0ull >> 1);
 }
 
-int sFile::CopyFrom(sFile *f, sS64 max)
+int sFile::CopyFrom(sFile *f, int64_t max)
 {
   if (!f) return 0;
   max=sMin(max,f->GetSize()-f->GetOffset());
 
 #if sPLATFORM==sPLAT_WINDOWS || sPLATFORM==sPLAT_LINUX
-  static const sS64 CHUNK=4*1024*1024;
+  static const int64_t CHUNK=4*1024*1024;
 #else
-  static const sS64 CHUNK=65536;
+  static const int64_t CHUNK=65536;
 #endif
-  sU8 *buffer=new sU8[CHUNK];
+  uint8_t *buffer=new uint8_t[CHUNK];
   int done=0;
 
   while (max)
@@ -661,32 +661,32 @@ sADDSUBSYSTEM(FileHandlers,0x20,sInitFileHandlers,sExitFileHandlers);
 
 class sMemFile : public sFile
 {
-  sU8 *Data;
-  sDInt Size;
+  uint8_t *Data;
+  ptrdiff_t Size;
   sBool Ownage;
-  sDInt Used;
-  sDInt Offset;
+  ptrdiff_t Used;
+  ptrdiff_t Offset;
   int BlockSize;
   sFileAccess Access;
 public:
-  sMemFile(const void *data,sDInt size,sBool owndata,int bsize=1);
-  sMemFile(void *data,sDInt size,sBool owndata,int bsize=1,sFileAccess access=sFA_READ);
+  sMemFile(const void *data,ptrdiff_t size,sBool owndata,int bsize=1);
+  sMemFile(void *data,ptrdiff_t size,sBool owndata,int bsize=1,sFileAccess access=sFA_READ);
   ~sMemFile();
-  sBool Read(void *data,sDInt size);  // read bytes
-  sBool Write(const void *data,sDInt size); // write bytes, may change mapping.
-  sU8 *Map(sS64 offset,sDInt size);  // map file (from offset) (may fail)  
-  sBool SetOffset(sS64 offset);       // seek to offset
-  sS64 GetOffset();                   // get offset
-  sS64 GetSize();                     // get size
+  sBool Read(void *data,ptrdiff_t size);  // read bytes
+  sBool Write(const void *data,ptrdiff_t size); // write bytes, may change mapping.
+  uint8_t *Map(int64_t offset,ptrdiff_t size);  // map file (from offset) (may fail)  
+  sBool SetOffset(int64_t offset);       // seek to offset
+  int64_t GetOffset();                   // get offset
+  int64_t GetSize();                     // get size
 
-  sFileReadHandle BeginRead(sS64 offset,sDInt size,void *destbuffer, sFilePriorityFlags prio/*=0*/);
+  sFileReadHandle BeginRead(int64_t offset,ptrdiff_t size,void *destbuffer, sFilePriorityFlags prio/*=0*/);
   sBool DataAvailable(sFileReadHandle handle);
   void EndRead(sFileReadHandle handle);
 };
 
-sMemFile::sMemFile(const void *data,sDInt size,sBool owndata,int bsize/*=1*/)
+sMemFile::sMemFile(const void *data,ptrdiff_t size,sBool owndata,int bsize/*=1*/)
 {
-  Data = (sU8*)data;  // loose const, but only allow reading
+  Data = (uint8_t*)data;  // loose const, but only allow reading
   Size = size;
   Ownage = owndata;
   Used = 0;
@@ -695,9 +695,9 @@ sMemFile::sMemFile(const void *data,sDInt size,sBool owndata,int bsize/*=1*/)
   Access = sFA_READ;
 }
 
-sMemFile::sMemFile(void *data,sDInt size,sBool owndata,int bsize/*=1*/,sFileAccess access/*=sFA_READ*/)
+sMemFile::sMemFile(void *data,ptrdiff_t size,sBool owndata,int bsize/*=1*/,sFileAccess access/*=sFA_READ*/)
 {
-  Data = (sU8*)data;
+  Data = (uint8_t*)data;
   Size = size;
   Ownage = owndata;
   Used = 0;
@@ -712,7 +712,7 @@ sMemFile::~sMemFile()
     delete[] Data;
 }
 
-sBool sMemFile::Read(void *data,sDInt size)
+sBool sMemFile::Read(void *data,ptrdiff_t size)
 {
   if(Offset+size<=Size && (Access==sFA_READ || Access==sFA_READRANDOM || Access==sFA_READWRITE))
   {
@@ -724,7 +724,7 @@ sBool sMemFile::Read(void *data,sDInt size)
   return 0;
 }
 
-sBool sMemFile::Write(const void *data,sDInt size)
+sBool sMemFile::Write(const void *data,ptrdiff_t size)
 {
   if(Offset+size <= Size && (Access==sFA_WRITE || Access==sFA_WRITEAPPEND || Access==sFA_READWRITE))
   {
@@ -745,19 +745,19 @@ sBool sMemFile::Write(const void *data,sDInt size)
   return 0;
 }
 
-sU8 *sMemFile::Map(sS64 offset,sDInt size)
+uint8_t *sMemFile::Map(int64_t offset,ptrdiff_t size)
 {
   if(offset>=0 && offset+size<=Size)
-    return (sU8 *)(Data+offset);   // loose const!
+    return (uint8_t *)(Data+offset);   // loose const!
   else
     return 0;
 }
 
-sBool sMemFile::SetOffset(sS64 offset)
+sBool sMemFile::SetOffset(int64_t offset)
 {
   if(offset>=0 && offset<=Size)
   {
-    Offset = sDInt(offset);
+    Offset = ptrdiff_t(offset);
     return 1;
   }
   else
@@ -767,18 +767,18 @@ sBool sMemFile::SetOffset(sS64 offset)
   }
 }
 
-sS64 sMemFile::GetOffset()
+int64_t sMemFile::GetOffset()
 {
   return Offset;
 }
 
 
-sS64 sMemFile::GetSize()
+int64_t sMemFile::GetSize()
 {
   return Size;
 }
 
-sFileReadHandle sMemFile::BeginRead(sS64 offset,sDInt size,void *destbuffer, sFilePriorityFlags prio)
+sFileReadHandle sMemFile::BeginRead(int64_t offset,ptrdiff_t size,void *destbuffer, sFilePriorityFlags prio)
 {
   sVERIFY(destbuffer);
 
@@ -787,7 +787,7 @@ sFileReadHandle sMemFile::BeginRead(sS64 offset,sDInt size,void *destbuffer, sFi
   {                                                   // over size border
     int size2 = Size-offset;
     sCopyMem(destbuffer,Data+offset,size2);
-    sSetMem(((sU8*)destbuffer)+size2,0,size-size2);
+    sSetMem(((uint8_t*)destbuffer)+size2,0,size-size2);
     return 1;
   }
 
@@ -808,12 +808,12 @@ void sMemFile::EndRead(sFileReadHandle handle)
 
 /****************************************************************************/
 
-sFile *sCreateMemFile(const void *data,sDInt size,sBool owndata,int blocksize/*=1*/)
+sFile *sCreateMemFile(const void *data,ptrdiff_t size,sBool owndata,int blocksize/*=1*/)
 {
   return new sMemFile(data,size,owndata,blocksize);
 }
 
-sFile *sCreateMemFile(void *data,sDInt size,sBool owndata,int blocksize/*=1*/,sFileAccess access/*=sFA_READ*/)
+sFile *sCreateMemFile(void *data,ptrdiff_t size,sBool owndata,int blocksize/*=1*/,sFileAccess access/*=sFA_READ*/)
 {
   return new sMemFile(data,size,owndata,blocksize,access);
 }
@@ -824,8 +824,8 @@ sFile *sCreateMemFile(const sChar *name)
 
   if(!file) return 0;
 
-  sDInt size = file->GetSize();
-  sU8* data = new sU8[size];
+  ptrdiff_t size = file->GetSize();
+  uint8_t* data = new uint8_t[size];
   if(!file->Read(data,size))
   {
     sDelete(file);
@@ -841,26 +841,26 @@ sFile *sCreateMemFile(const sChar *name)
 
 class sGrowMemFile : public sFile
 {
-  sU8 *Data;
-  sDInt Used;
-  sDInt Alloc;
-  sDInt Offset;
+  uint8_t *Data;
+  ptrdiff_t Used;
+  ptrdiff_t Alloc;
+  ptrdiff_t Offset;
 public:
   sGrowMemFile();
   ~sGrowMemFile();
-  sBool Read(void *data,sDInt size);
-  sBool Write(const void *data,sDInt size);
-  sU8 *Map(sS64 offset,sDInt size);
-  sBool SetOffset(sS64 offset);
-  sS64 GetOffset();
-  sS64 GetSize();
+  sBool Read(void *data,ptrdiff_t size);
+  sBool Write(const void *data,ptrdiff_t size);
+  uint8_t *Map(int64_t offset,ptrdiff_t size);
+  sBool SetOffset(int64_t offset);
+  int64_t GetOffset();
+  int64_t GetSize();
 };
 
 sGrowMemFile::sGrowMemFile()
 {
   Alloc = 0x10000;
   Used = 0;
-  Data = new sU8[Alloc];
+  Data = new uint8_t[Alloc];
   Offset = 0;
 }
 
@@ -869,7 +869,7 @@ sGrowMemFile::~sGrowMemFile()
   delete[] Data;
 }
 
-sBool sGrowMemFile::Read(void *data,sDInt size)
+sBool sGrowMemFile::Read(void *data,ptrdiff_t size)
 {
   if(Offset+size<=Used)
   {
@@ -883,14 +883,14 @@ sBool sGrowMemFile::Read(void *data,sDInt size)
   }
 }
 
-sBool sGrowMemFile::Write(const void *data,sDInt size)
+sBool sGrowMemFile::Write(const void *data,ptrdiff_t size)
 {
   // enlarge buffer
 
   if(Offset+size > Alloc)
   {
     int newsize = sMax(Alloc*2,Offset+size);
-    sU8 *newdata = new sU8[newsize];
+    uint8_t *newdata = new uint8_t[newsize];
     sCopyMem(newdata,Data,Used);
     delete[] Data;
     Data = newdata;
@@ -913,7 +913,7 @@ sBool sGrowMemFile::Write(const void *data,sDInt size)
   return 1;
 }
 
-sU8 *sGrowMemFile::Map(sS64 offset,sDInt size)
+uint8_t *sGrowMemFile::Map(int64_t offset,ptrdiff_t size)
 {
   if(offset>=0 && offset+size<=Used)
     return Data+offset;
@@ -921,18 +921,18 @@ sU8 *sGrowMemFile::Map(sS64 offset,sDInt size)
     return 0;
 }
 
-sBool sGrowMemFile::SetOffset(sS64 offset)
+sBool sGrowMemFile::SetOffset(int64_t offset)
 {
-  Offset = sDInt(offset);
+  Offset = ptrdiff_t(offset);
   return 1;
 }
 
-sS64 sGrowMemFile::GetOffset()
+int64_t sGrowMemFile::GetOffset()
 {
   return Offset;
 }
 
-sS64 sGrowMemFile::GetSize()
+int64_t sGrowMemFile::GetSize()
 {
   return Used;
 }
@@ -981,16 +981,16 @@ sBool sCalcMD5File::Close()
   return sTRUE;
 }
 
-sBool sCalcMD5File::Read(void *data,sDInt size)
+sBool sCalcMD5File::Read(void *data,ptrdiff_t size)
 {
   sFatal(L"sFileMakeMD5::Read not supported");
   return sFALSE;
 }
 
-sBool sCalcMD5File::Write(const void *data,sDInt size)
+sBool sCalcMD5File::Write(const void *data,ptrdiff_t size)
 {
-  const sU8 *ptr = (const sU8*) data;
-  sDInt count = size;
+  const uint8_t *ptr = (const uint8_t*) data;
+  ptrdiff_t count = size;
   int done = 0;
 
   if(TempCount)
@@ -1035,29 +1035,29 @@ sBool sCalcMD5File::Write(const void *data,sDInt size)
   return sTRUE;
 }
 
-sU8 *sCalcMD5File::Map(sS64 offset,sDInt size)
+uint8_t *sCalcMD5File::Map(int64_t offset,ptrdiff_t size)
 {
   return 0;
 }
 
-sBool sCalcMD5File::SetOffset(sS64 offset)
+sBool sCalcMD5File::SetOffset(int64_t offset)
 {
   sFatal(L"sFileMakeMD5::SetOffset not supported\n");
   return sFALSE;
 }
 
-sS64 sCalcMD5File::GetOffset()
+int64_t sCalcMD5File::GetOffset()
 {
   return TotalCount;
 }
 
-sBool sCalcMD5File::SetSize(sS64)
+sBool sCalcMD5File::SetSize(int64_t)
 {
   sFatal(L"sFileMakeMD5::SetOffset not supported\n");
   return sFALSE;
 }
 
-sS64 sCalcMD5File::GetSize()
+int64_t sCalcMD5File::GetSize()
 {
   return TotalCount;
 }
@@ -1068,13 +1068,13 @@ sS64 sCalcMD5File::GetSize()
 /***                                                                      ***/
 /****************************************************************************/
 
-sU8 *sLoadFile(const sChar *name)
+uint8_t *sLoadFile(const sChar *name)
 {
-  sDInt size;
+  ptrdiff_t size;
   return sLoadFile(name,size);
 }
 
-sU8 *sLoadFile(const sChar *name,sDInt &size)
+uint8_t *sLoadFile(const sChar *name,ptrdiff_t &size)
 {
   sFile *file = sCreateFile(name,sFA_READ);
   if(file==0)
@@ -1083,7 +1083,7 @@ sU8 *sLoadFile(const sChar *name,sDInt &size)
   sVERIFY(size<=0x7fffffff);
 
   const int align = 16;
-  sU8 *mem = (sU8 *)sAllocMem(size,align,0);
+  uint8_t *mem = (uint8_t *)sAllocMem(size,align,0);
 
   if(!file->Read(mem,size))
     sDeleteArray(mem);
@@ -1093,12 +1093,12 @@ sU8 *sLoadFile(const sChar *name,sDInt &size)
 
 sChar *sLoadText(const sChar *name)
 {
-  sDInt size;
+  ptrdiff_t size;
   sChar *mem,*d,*s16;
   int count;
-  sU8 *s8;
+  uint8_t *s8;
 
-  sU8 *data = sLoadFile(name,size);
+  uint8_t *data = sLoadFile(name,size);
   s16 = (sChar *) data;
 
   if(!data) return 0;
@@ -1139,7 +1139,7 @@ sChar *sLoadText(const sChar *name)
   {
     d = mem = (sChar *) sAllocMem((size-3+1)*sizeof(sChar),2,sAMF_ALT);
     s8 = data+3;
-    const sU8 *e = data+size;
+    const uint8_t *e = data+size;
 
     // this does not check for overlong encodings, but checks for other invalid utf8
 
@@ -1214,7 +1214,7 @@ sChar *sLoadText(const sChar *name)
 }
 
 
-sBool sSaveFile(const sChar *name,const void *data,sDInt bytes)
+sBool sSaveFile(const sChar *name,const void *data,ptrdiff_t bytes)
 {
   sFile *file=sCreateFile(name,sFA_WRITE);
   if (!file) return 0;
@@ -1223,7 +1223,7 @@ sBool sSaveFile(const sChar *name,const void *data,sDInt bytes)
   return ret;
 }
 
-sBool sSaveFileFailsafe(const sChar *name,const void *data,sDInt bytes)
+sBool sSaveFileFailsafe(const sChar *name,const void *data,ptrdiff_t bytes)
 {
   sFile *file = sCreateFailsafeFile(name,sFA_WRITE);
   if(!file) return 0;
@@ -1237,7 +1237,7 @@ sBool sSaveTextUnicode(const sChar *name,const sChar *data)
 {
   sFile *file=sCreateFile(name,sFA_WRITE);
   if (!file) return 0;
-  sU16 code = 0xfeff;
+  uint16_t code = 0xfeff;
   file->Write(&code,2);
   sBool ret=file->Write(data,sGetStringLen(data)*2);
   delete file;
@@ -1247,9 +1247,9 @@ sBool sSaveTextUnicode(const sChar *name,const sChar *data)
 sBool sSaveTextUTF8(const sChar *name,const sChar *data)
 {
   int len = sGetStringLen(data);
-  sU8 *buffer = new sU8[len*4+4];
+  uint8_t *buffer = new uint8_t[len*4+4];
 
-  sU8 *d = buffer;
+  uint8_t *d = buffer;
   *d++ = 0xef;
   *d++ = 0xbb;
   *d++ = 0xbf;
@@ -1285,7 +1285,7 @@ sBool sSaveTextAnsi(const sChar *name,const sChar *data)
     return 0;
 
   const int BUFFER_SIZE = 2048;
-  sU8 buffer[BUFFER_SIZE];
+  uint8_t buffer[BUFFER_SIZE];
   sBool lastWasCR = sFALSE;
 
   // convert in small chunks
@@ -1365,12 +1365,12 @@ sBool sFilesEqual(const sChar *name1,const sChar *name2)
   }
 
   static const int bufferSize = 1024;
-  sS64 remainingSize = file1->GetSize();
-  sU8 buffer1[bufferSize],buffer2[bufferSize];
+  int64_t remainingSize = file1->GetSize();
+  uint8_t buffer1[bufferSize],buffer2[bufferSize];
 
   while(remainingSize)
   {
-    int chunkSize = (int) sMin<sS64>(remainingSize,bufferSize);
+    int chunkSize = (int) sMin<int64_t>(remainingSize,bufferSize);
     if(!file1->Read(buffer1,chunkSize) || !file2->Read(buffer2,chunkSize))
       break;
 
@@ -1422,13 +1422,13 @@ sBool sBackupFile(const sChar *name)
 sBool sFileCalcMD5(const sChar *name, sChecksumMD5 &md5)
 {
   const int BufSize = 65536;
-  sU8 buffer[BufSize];
+  uint8_t buffer[BufSize];
 
   sFile *file = sCreateFile(name);
   if(file)
   {
     md5.CalcBegin();
-    sS64 size = file->GetSize();
+    int64_t size = file->GetSize();
     int left = size;
     while(left>BufSize)
     {
@@ -1554,7 +1554,7 @@ sBool sMakeDirAll(const sChar *path)
 sDList<sInput2Device, &sInput2Device::DNode> sInputDevice;
 sLockQueue<sInput2Event, INPUT2_EVENT_QUEUE_SIZE>* sInput2EventQueue = 0;
 
-sInput2Device* sFindInput2Device(sU32 type, int id)
+sInput2Device* sFindInput2Device(uint32_t type, int id)
 {
   sVERIFY2((type!=sINPUT2_TYPE_CUSTOM),L"nope, you can't find custom evaluators");
   if (type==sINPUT2_TYPE_CUSTOM) return sNULL;
@@ -1584,7 +1584,7 @@ sInput2Device* sFindInput2Device(sU32 type, int id)
   return sNULL;
 }
 
-int sInput2NumDevices(sU32 type)
+int sInput2NumDevices(uint32_t type)
 {
   int num = 0;
   sInput2Device *dev;
@@ -1675,7 +1675,7 @@ sBool sInput2PeekEvent(sInput2Event& event, int time)
   return sFALSE;
 }
 
-extern sU32 sKeyQual;
+extern uint32_t sKeyQual;
 
 int sInput2CECounter;
 
@@ -1720,7 +1720,7 @@ static const sPtr sTLsMaxSize = sizeof(sThreadContext);
 
 sThreadContext *sCreateThreadContext(sThread *thread)
 {
-  sThreadContext *ctx = (sThreadContext *) new sU8[sTLsMaxSize];
+  sThreadContext *ctx = (sThreadContext *) new uint8_t[sTLsMaxSize];
   sSetMem(ctx,0,sTLsMaxSize);
   ctx->Thread = thread;
   ctx->ThreadName = L"unnamed";

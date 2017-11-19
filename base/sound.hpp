@@ -18,7 +18,7 @@
 
 /****************************************************************************/
 
-typedef void (*sSoundHandler)(sS16 *data,int count);      // 1 count = left+right = 4 bytes
+typedef void (*sSoundHandler)(int16_t *data,int count);      // 1 count = left+right = 4 bytes
 
 // sound out
 
@@ -27,8 +27,8 @@ void sClearSoundHandler();
 int sGetCurrentSample();
 void sClearSoundBuffer();
 
-void sSoundHandlerNull(sS16 *data,int count);
-void sSoundHandlerTest(sS16 *data,int count);
+void sSoundHandlerNull(int16_t *data,int count);
+void sSoundHandlerTest(int16_t *data,int count);
 
 enum sSoundOutFlags
 {

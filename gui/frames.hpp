@@ -78,14 +78,14 @@ class sMenuFrame : public sWindow
   struct Item
   {
     sMessage Message;
-    sU32 Shortcut;
+    uint32_t Shortcut;
     int Column;
     sWindow *Window;
   };
   const static int MaxColumn = 34;
   sArray<Item> Items;
-  void CmdPressed(sDInt);
-  void CmdPressedNoKill(sDInt);
+  void CmdPressed(ptrdiff_t);
+  void CmdPressedNoKill(ptrdiff_t);
   void Kill();
 
   int ColumnWidth[MaxColumn];
@@ -99,11 +99,11 @@ public:
   void OnCalcSize();
   void OnLayout();
   void OnPaint2D();
-  sBool OnShortcut(sU32 key);
+  sBool OnShortcut(uint32_t key);
 //  sBool OnCommand(int cmd);
 
-  void AddItem(const sChar *name,const sMessage &cmd,sU32 Shortcut,int len=-1,int column=0,sU32 backcol=0);
-  void AddCheckmark(const sChar *name,const sMessage &cmd,sU32 Shortcut,int *refptr,int value,int len=-1,int column=0,sU32 backcol=0,int buttonstyle=0);
+  void AddItem(const sChar *name,const sMessage &cmd,uint32_t Shortcut,int len=-1,int column=0,uint32_t backcol=0);
+  void AddCheckmark(const sChar *name,const sMessage &cmd,uint32_t Shortcut,int *refptr,int value,int len=-1,int column=0,uint32_t backcol=0,int buttonstyle=0);
   void AddSpacer(int column=0);
   void AddHeader(sPoolString name,int column=0);
   void AddChoices(const sChar *choices,const sMessage &msg);
@@ -215,7 +215,7 @@ public:
   void OnLayout();
   void OnPaint2D();
   void OnDrag(const sWindowDrag &dd);
-  sBool OnKey(sU32 key);
+  sBool OnKey(uint32_t key);
 
   sArray<sGridFrameLayout> Layout;
   int Columns;
@@ -238,12 +238,12 @@ struct sGridFrameHelper
   sMessage ChangeMsg;             // message to add for "change" event
   sBool Static;                   // create controls as static (if possible)
   
-  sF32 ScaleRange;
-  sF32 RotateRange;
-  sF32 TranslateRange;
-  sF32 ScaleStep;
-  sF32 RotateStep;
-  sF32 TranslateStep;
+  float ScaleRange;
+  float RotateRange;
+  float TranslateRange;
+  float ScaleStep;
+  float RotateStep;
+  float TranslateStep;
 
   // private layut counters
   int Line;                      // current line
@@ -287,16 +287,16 @@ struct sGridFrameHelper
   sStringControl *String(sPoolString *pool,int width=0);
   sStringControl *String(sTextBuffer *tb,int width=0);
   class sTextWindow *Text(sTextBuffer *tb,int lines,int width=0);
-  sFloatControl *Float(sF32 *val,sF32 min,sF32 max,sF32 step=0.25f,sF32 *colptr=0);
-  sIntControl *Int(int *val,int min,int max,sF32 step=0.25f,int *colptr=0,const sChar *format=0);
-  sByteControl *Byte(sU8 *val,int min,int max,sF32 step=0.25f,sU8 *colptr=0);
-  sWordControl *Word(sU16 *val,int min,int max,sF32 step=0.25f,sU16 *colptr=0);
-  void Color(sU32 *,const sChar *config);
-  void ColorF(sF32 *,const sChar *config);
-  void ColorPick(sU32 *,const sChar *config,sObject *tagref);
-  void ColorPickF(sF32 *,const sChar *config,sObject *tagref);
+  sFloatControl *Float(float *val,float min,float max,float step=0.25f,float *colptr=0);
+  sIntControl *Int(int *val,int min,int max,float step=0.25f,int *colptr=0,const sChar *format=0);
+  sByteControl *Byte(uint8_t *val,int min,int max,float step=0.25f,uint8_t *colptr=0);
+  sWordControl *Word(uint16_t *val,int min,int max,float step=0.25f,uint16_t *colptr=0);
+  void Color(uint32_t *,const sChar *config);
+  void ColorF(float *,const sChar *config);
+  void ColorPick(uint32_t *,const sChar *config,sObject *tagref);
+  void ColorPickF(float *,const sChar *config,sObject *tagref);
   class sColorGradientControl *Gradient(class sColorGradient *,sBool alpha);
-  void Bitmask(sU8 *x,int width = 1);
+  void Bitmask(uint8_t *x,int width = 1);
 
   // complex composites
 
@@ -320,9 +320,9 @@ struct sGridFrameTemplate
   const sChar *Choices;           // RADIO,CHOICE,FLAGS: choices ; COLOR,COLORF: rgb or rgba
   int Offset;                    // byte-offset to value 
   int Count;                     // INT,FLOAT,BYTE: number of controls ; STRING: number of chars
-  sF32 Min;                       // INT,FLOAT,BYTE: minimum value
-  sF32 Max;                       // INT,FLOAT,BYTE: maximum value
-  sF32 Step;                      // INT,FLOAT,BYTE: step for dragging
+  float Min;                       // INT,FLOAT,BYTE: minimum value
+  float Max;                       // INT,FLOAT,BYTE: maximum value
+  float Step;                      // INT,FLOAT,BYTE: step for dragging
   int ConditionOffset;           // if((obj[offset] & mask) == value)
   int ConditionMask;
   int ConditionValue;
@@ -345,9 +345,9 @@ struct sGridFrameTemplate
   sGridFrameTemplate *InitChoice(const sChar *label,int offset,const sChar *choices=L"off|on");
   sGridFrameTemplate *InitFlags (const sChar *label,int offset,const sChar *choices=L"off|on");
   sGridFrameTemplate *InitString(const sChar *label,int offset,int count);
-  sGridFrameTemplate *InitFloat (const sChar *label,int offset,int count,sF32 min,sF32 max,sF32 step=0.25f);
-  sGridFrameTemplate *InitInt   (const sChar *label,int offset,int count,int min,int max,sF32 step=0.25f);
-  sGridFrameTemplate *InitByte  (const sChar *label,int offset,int count,int min,int max,sF32 step=0.25f);
+  sGridFrameTemplate *InitFloat (const sChar *label,int offset,int count,float min,float max,float step=0.25f);
+  sGridFrameTemplate *InitInt   (const sChar *label,int offset,int count,int min,int max,float step=0.25f);
+  sGridFrameTemplate *InitByte  (const sChar *label,int offset,int count,int min,int max,float step=0.25f);
   sGridFrameTemplate *InitColor (const sChar *label,int offset,const sChar *config);
   sGridFrameTemplate *InitColorF(const sChar *label,int offset,const sChar *config);
 };

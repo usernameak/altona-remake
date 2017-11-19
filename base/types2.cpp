@@ -376,7 +376,7 @@ sTextBuffer& sTextBuffer::operator=(const sChar* t)
 
 template <class streamer> void sTextBuffer::Serialize_(streamer &s)
 {
-  sVERIFY(sizeof(sChar)==sizeof(sU16));
+  sVERIFY(sizeof(sChar)==sizeof(uint16_t));
   int len = Used;
   s | len;
   if(s.IsReading())
@@ -384,7 +384,7 @@ template <class streamer> void sTextBuffer::Serialize_(streamer &s)
     SetSize(len+1);
     Used = len;
   }
-  s.ArrayU16((sU16*)Buffer, Used);
+  s.ArrayU16((uint16_t*)Buffer, Used);
   s.Align();
   Buffer[Used] = 0;
 }
@@ -602,7 +602,7 @@ void sTextFileWriter::Begin(const sChar *filename)
 void sTextFileWriter::Flush()
 {
   const int BUFFER_SIZE = 2048;
-  sU8 buffer[BUFFER_SIZE];
+  uint8_t buffer[BUFFER_SIZE];
   sBool lastWasCR = sFALSE;
 
   // convert in small chunks
@@ -678,7 +678,7 @@ public:
     sStringPoolEntry *e;
     sStringPoolEntry **hp;
 
-    sU32 hash = sHashString(s,len);
+    uint32_t hash = sHashString(s,len);
 
     hp = &HashTable[hash & (HashSize-1)]; 
     e = *hp;
@@ -806,14 +806,14 @@ void sHashTableBase::Add(const void *key,void *value)
   Node *n = AllocNode();
   n->Value = value;
   n->Key = key;
-  sU32 hash = HashKey(key) & HashMask;
+  uint32_t hash = HashKey(key) & HashMask;
   n->Next = HashTable[hash];
   HashTable[hash] = n;
 }
 
 void *sHashTableBase::Find(const void *key)
 {
-  sU32 hash = HashKey(key) & HashMask;
+  uint32_t hash = HashKey(key) & HashMask;
   Node *n = HashTable[hash];
   while(n)
   {
@@ -826,7 +826,7 @@ void *sHashTableBase::Find(const void *key)
 
 void *sHashTableBase::Rem(const void *key)
 {
-  sU32 hash = HashKey(key) & HashMask;
+  uint32_t hash = HashKey(key) & HashMask;
   Node *n = HashTable[hash];
   Node **l = &HashTable[hash];
   while(n)
@@ -852,7 +852,7 @@ void sHashTableBase::ClearAndDeleteValues()
     n = HashTable[i];
     while(n)
     {
-      delete (sU8 *)n->Value;
+      delete (uint8_t *)n->Value;
       n = n->Next;
     }
   }
@@ -867,7 +867,7 @@ void sHashTableBase::ClearAndDeleteKeys()
     n = HashTable[i];
     while(n)
     {
-      delete (sU8 *)n->Key;
+      delete (uint8_t *)n->Key;
       n = n->Next;
     }
   }
@@ -882,8 +882,8 @@ void sHashTableBase::ClearAndDelete()
     n = HashTable[i];
     while(n)
     {
-      delete (sU8 *)n->Value;
-      delete (sU8 *)n->Key;
+      delete (uint8_t *)n->Value;
+      delete (uint8_t *)n->Key;
       n = n->Next;
     }
   }
@@ -1034,9 +1034,9 @@ void sStringMap_::Clear ()
 
 /****************************************************************************/
 
-sU32 sStringMap_::Hash (const sChar * key) const
+uint32_t sStringMap_::Hash (const sChar * key) const
 {
-  sU32 hash = 0;
+  uint32_t hash = 0;
 
   for (int i = 0; key[i]; i++)
   {
@@ -1193,7 +1193,7 @@ void sStringMap_::Dump () const
     {
       while (1)
       {
-        sPrintF(L"%s->%x ", slot->key, (sDInt)slot->value);
+        sPrintF(L"%s->%x ", slot->key, (ptrdiff_t)slot->value);
 
         if (!slot->next) 
         {
@@ -1228,7 +1228,7 @@ void sBitVector::Resize(int bits)
   sPtr words = ((bits+BITSPERCHUNK-1)/BITSPERCHUNK)*4;
   if(Words<words)
   {
-    sU32 *nd = new sU32[words];
+    uint32_t *nd = new uint32_t[words];
     sCopyMem(nd,Data,Words*BYTESPERWORD);
     sSetMem(nd+Words,NewVal,(words-Words)*BYTESPERWORD);
     delete[] Data;
@@ -1253,7 +1253,7 @@ sBitVector::sBitVector()
 {
   Words = WORDSPERCHUNK;
   NewVal = 0;
-  Data = new sU32[Words];
+  Data = new uint32_t[Words];
   ClearAll();
 }
 
@@ -1299,7 +1299,7 @@ sBool sBitVector::NextBit(int &n)
 
   n++;
   sPtr word = n>>BITSHIFT;
-  sU32 bit = n&BITMASK;
+  uint32_t bit = n&BITMASK;
 
   // check remaining bits of this byte
 

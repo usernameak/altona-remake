@@ -247,8 +247,8 @@ void sGui_::OnInput(const sInput2Event &ie)
     ev.Mode = sIED_MOUSE;
     ev.Key = 0;
 #if !sCONFIG_OPTION_XSI
-    MouseHardX += sS16(ie.Payload >> 16);
-    MouseHardY += sS16(ie.Payload & 0xffff);
+    MouseHardX += int16_t(ie.Payload >> 16);
+    MouseHardY += int16_t(ie.Payload & 0xffff);
 #endif
     break;
   default:
@@ -297,7 +297,7 @@ void sGui_::SendMouse(const sGui_::Event &ie)
   sBool changed;
   int rawkey;
 
-  sU32 key = ie.Key;
+  uint32_t key = ie.Key;
   int mx = ie.MouseX;
   int my = ie.MouseY;
   int hmx = ie.HardX;
@@ -528,7 +528,7 @@ void sGui_::OnPaint3d()
 }
 
 
-sBool sGui_::RecShortcut(sWindow *w,sU32 key)
+sBool sGui_::RecShortcut(sWindow *w,uint32_t key)
 {
   if(w->Parent)
   {
@@ -540,7 +540,7 @@ sBool sGui_::RecShortcut(sWindow *w,sU32 key)
   return 0;
 }
 
-void sGui_::SendKey(sU32 key)
+void sGui_::SendKey(uint32_t key)
 {
   sWindow *w = Focus;
 
@@ -924,7 +924,7 @@ void sGui_::RecPaint(sWindow *w,const sRect &update)
     else
     {
 #if DEBUGOVERDRAW
-      sLogF(L"gui",L"repaint %08x:%s\n",sDInt(w),w->GetClassName());
+      sLogF(L"gui",L"repaint %08x:%s\n",ptrdiff_t(w),w->GetClassName());
 #endif
       w->OnPaint2D();
     }
@@ -1068,7 +1068,7 @@ void sGui_::RecNotify(sWindow *p,const void *start,const void *end)
   {
     sFORALL(p->NotifyList,n)
       if(n->Hit(start,end))
-        p->OnNotify(n->Start,(const sU8*)n->End-(const sU8*)n->Start);
+        p->OnNotify(n->Start,(const uint8_t*)n->End-(const uint8_t*)n->Start);
 
     sFORALL(p->Childs,w)
       RecNotify(w,start,end);
@@ -1077,13 +1077,13 @@ void sGui_::RecNotify(sWindow *p,const void *start,const void *end)
   }
 }
 
-void sGui_::Notify(const void *ptr,sDInt n)
+void sGui_::Notify(const void *ptr,ptrdiff_t n)
 {
   if(Root)
   {
     if(!(Root->Flags & sWF_NOTIFYVALID))
       RecNotifyMake(Root);
-    RecNotify(Root,ptr,((sU8*)ptr)+n);
+    RecNotify(Root,ptr,((uint8_t*)ptr)+n);
   }
 }
 
@@ -1139,7 +1139,7 @@ void sGui_::PaintButtonBorder(sRect &r,sBool pressed) const
   }
 }
 
-void sGui_::PaintButton(const sRect &rect,const sChar *text,int flags,int len,sU32 backcolor) const
+void sGui_::PaintButton(const sRect &rect,const sChar *text,int flags,int len,uint32_t backcolor) const
 {
   sRect r(rect);
 
@@ -1266,10 +1266,10 @@ template <class streamer> void sGuiTheme::Serialize_(streamer &s)
 void sGuiTheme::Serialize(sReader &s) { Serialize_(s); }
 void sGuiTheme::Serialize(sWriter &s) { Serialize_(s); }
 
-void sGuiTheme::Tint(sU32 add,sU32 sub)
+void sGuiTheme::Tint(uint32_t add,uint32_t sub)
 {
-  sU32 addh = sScaleColorFast(add,0x80);
-  sU32 subh = sScaleColorFast(sub,0x80);
+  uint32_t addh = sScaleColorFast(add,0x80);
+  uint32_t subh = sScaleColorFast(sub,0x80);
 
   BackColor   = sAddColor(BackColor  ,add);
   ButtonColor = sAddColor(ButtonColor,add);

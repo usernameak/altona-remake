@@ -56,7 +56,7 @@ enum QualifierEnum
   QUAL_FREEZE     = 0x00000020,     // freeze cursor
   QUAL_DOUBLE     = 0x00000040,     // double-click
   QUAL_GLOBAL     = 0x00000080,     // make this a global shortcut
-  QUAL_ONOFF      = 0x00000100,     // send key-on (sDInt=1) and key-off (sDInt=0)
+  QUAL_ONOFF      = 0x00000100,     // send key-on (ptrdiff_t=1) and key-off (ptrdiff_t=0)
   QUAL_ALLSHIFT   = 0x00000200,     // don't care about shift/ctrl/alt/alt-gr
   QUAL_CURSOR     = 0x00000400,     // for help menu: to cursor column
   QUAL_EXTRA      = 0x00000800,     // for help menu: to extra column
@@ -145,8 +145,8 @@ struct Parameter                // parameter for a form
   sPoolString Symbol;             // symbol name
   sPoolString Text;             // user name
   int Type;                    // sWPT_???
-  sDInt Offset;                 // offset in form
-  sF32 Min,Max,Step;            // for int and float
+  ptrdiff_t Offset;                 // offset in form
+  float Min,Max,Step;            // for int and float
   sPoolString Choices;          // for choices
 
   sMessage Message;
@@ -204,7 +204,7 @@ struct Shortcut                 // some kind of key binding
   CommandBase *Cmd;             // what to do
   FormInstance *Instance;       // with whom. may be 0
   Form *Class;                  // class to bind to. must be set
-  sU32 Key;                     // key to press (may be 0)
+  uint32_t Key;                     // key to press (may be 0)
   int Qual;                    // zus�tzliche wire qualifier
   int Hit;                     // for drags, when QUAL_HIT is set
   int Sets;                    // swithc between command sets, 0 = all sets
@@ -232,7 +232,7 @@ struct RawShortcut
   sPoolString Command;
   sPoolString Label;
   sPoolString Tool;
-  sU32 Key;
+  uint32_t Key;
   int KeyQual;
   int KeyHit;
   int Sets;
@@ -331,7 +331,7 @@ void CommandContext::AddMenu(Shortcut *dummy)
 void CommandCallback::AddMenu(Shortcut *sc)
 {
   sMessage msg = Message;
-  msg.Code = sDInt(sWire->CurrentMenu);
+  msg.Code = ptrdiff_t(sWire->CurrentMenu);
   msg.Send();
 }
 
@@ -465,7 +465,7 @@ void sWireMasterWindow::Tag()
 
 /****************************************************************************/
 /*
-void sWireMasterWindow::ExecuteCommand(sDInt cmdptr)
+void sWireMasterWindow::ExecuteCommand(ptrdiff_t cmdptr)
 {
   CommandBase *cmd = (CommandBase *)cmdptr;
   cmd->OnMenu();
@@ -625,7 +625,7 @@ void sWireMasterWindow::AddChoice(const sChar *classname,const sChar *cmdname,co
   wc->Commands.AddTail(cmd);
 }
 
-void sWireMasterWindow::AddPara1(const sChar *classname,const sChar *commandname,const sMessage &msg,int type,sDInt offset,const sChar *choices,sF32 min,sF32 max,sF32 step)
+void sWireMasterWindow::AddPara1(const sChar *classname,const sChar *commandname,const sMessage &msg,int type,ptrdiff_t offset,const sChar *choices,float min,float max,float step)
 {
   Form *wc;
   Parameter *para;
@@ -784,7 +784,7 @@ void sWireMasterWindow::Popup(const sChar *name)
 }
 
 
-void sWireMasterWindow::CmdSwitchScreen(sDInt screen)
+void sWireMasterWindow::CmdSwitchScreen(ptrdiff_t screen)
 {
   CurrentScreen = screen;
   FullscreenWindow = 0;
@@ -841,7 +841,7 @@ void sWireMasterWindow::CmdMakeMenu(CommandMenu *menu)
       sc->Cmd->AddMenu(sc);
 }
 
-void sWireMasterWindow::CmdMakePopup(sDInt menuptr)
+void sWireMasterWindow::CmdMakePopup(ptrdiff_t menuptr)
 {
   CmdMakeMenu((CommandMenu *) menuptr);
 
@@ -849,7 +849,7 @@ void sWireMasterWindow::CmdMakePopup(sDInt menuptr)
   sWire->CurrentMenu = 0;
 }
 
-void sWireMasterWindow::CmdMakePulldown(sDInt menuptr)
+void sWireMasterWindow::CmdMakePulldown(ptrdiff_t menuptr)
 {
   CmdMakeMenu((CommandMenu *) menuptr);
 
@@ -886,12 +886,12 @@ void sWireMasterWindow::FormChangeTool(sWireNamespace::Form *wc,sWireNamespace::
 
 /****************************************************************************/
 
-sBool sWireMasterWindow::CanBeGlobal(sU32 m) 
+sBool sWireMasterWindow::CanBeGlobal(uint32_t m) 
 {
   return (m & QUAL_GLOBAL) || (m & QUAL_SCOPEMASK); 
 }
 
-sBool sWireMasterWindow::IsGlobal(sU32 m) 
+sBool sWireMasterWindow::IsGlobal(uint32_t m) 
 {
   return (m & QUAL_GLOBAL) || (m & QualScope); 
 }
@@ -902,7 +902,7 @@ void sWireMasterWindow::SwitchScope(int scope)
 }
 
 
-sBool sWireMasterWindow::OnShortcut(sU32 key)
+sBool sWireMasterWindow::OnShortcut(uint32_t key)
 {
   Shortcut *sc;
   if(key&sKEYQ_SHIFT) key |= sKEYQ_SHIFT;
@@ -919,12 +919,12 @@ sBool sWireMasterWindow::OnShortcut(sU32 key)
   return 0;
 }
 
-sBool sWireMasterWindow::HandleKey(sWindow *win,sU32 key)
+sBool sWireMasterWindow::HandleKey(sWindow *win,uint32_t key)
 {
   Form *wc;
   FormInstance *inst;
   Shortcut *sc;
-  sU32 mkey;
+  uint32_t mkey;
 
   key &= ~sKEYQ_CAPS;
   if(key&sKEYQ_SHIFT) key |= sKEYQ_SHIFT;
@@ -963,7 +963,7 @@ sBool sWireMasterWindow::HandleKey(sWindow *win,sU32 key)
   {
     if((sc->Sets & win->WireSets) && (sc->Cmd->Type==CT_TOOL || sc->Tool==wc->CurrentTool))
     {
-      sU32 qkey = key & (sKEYQ_REPEAT|sKEYQ_BREAK|sKEYQ_SHIFT|sKEYQ_CTRL|sKEYQ_ALT|sKEYQ_ALTGR|sKEYQ_MASK);
+      uint32_t qkey = key & (sKEYQ_REPEAT|sKEYQ_BREAK|sKEYQ_SHIFT|sKEYQ_CTRL|sKEYQ_ALT|sKEYQ_ALTGR|sKEYQ_MASK);
       if(sc->Qual & QUAL_REPEAT)
         qkey &= ~sKEYQ_REPEAT;
       if(sc->Qual & QUAL_ONOFF)
@@ -1052,8 +1052,8 @@ sBool sWireMasterWindow::HandleDrag(sWindow *win,const sWindowDrag &dd,int hit)
   CommandDrag *drag;
   Shortcut *sc;
   sBool ok;
-  sU32 key;
-  sU32 keyq;
+  uint32_t key;
+  uint32_t keyq;
 
   if(dd.Mode==sDD_START)
   {
@@ -1258,7 +1258,7 @@ void sWireMasterWindow::Help(sWindow *window)
   {
     if(sc->Sets & sets)
     {
-      sU32 qual = 0;
+      uint32_t qual = 0;
       if(sc->Qual & QUAL_HIT)    qual |= 0x01000000;
       if(sc->Qual & QUAL_MISS)   qual |= 0x02000000;
       if(sc->Qual & QUAL_DOUBLE) qual |= 0x04000000;
@@ -1311,7 +1311,7 @@ void sWireMasterWindow::Help(sWindow *window)
     {
       if(sc->Tool==(CommandTool *) tool->Cmd && (sc->Sets&sets))
       {
-        sU32 qual = 0;
+        uint32_t qual = 0;
         if(sc->Qual & QUAL_HIT)    qual |= 0x01000000;
         if(sc->Qual & QUAL_MISS)   qual |= 0x02000000;
         if(sc->Qual & QUAL_DOUBLE) qual |= 0x04000000;
@@ -1387,7 +1387,7 @@ FormInstance *sWireMasterWindow::_FormName(sBool window)
   return inst;
 }
 
-void sWireMasterWindow::_Key(sU32 &key,int &qual,int &hit)
+void sWireMasterWindow::_Key(uint32_t &key,int &qual,int &hit)
 {
   key = 0;
   qual = 0;
@@ -1718,7 +1718,7 @@ void sWireMasterWindow::_ScreenLevel(sLayoutFrameWindow *parent)
   {
     CommandMenu *menu = _Menu(0);
 
-    sButtonControl *w = new sButtonControl(menu->Text,sMessage(this,&sWireMasterWindow::CmdMakePulldown,sDInt(menu)),sBCS_NOBORDER|sBCS_LABEL);
+    sButtonControl *w = new sButtonControl(menu->Text,sMessage(this,&sWireMasterWindow::CmdMakePulldown,ptrdiff_t(menu)),sBCS_NOBORDER|sBCS_LABEL);
     Windows.AddTail(w);
     lfw = new sLayoutFrameWindow(sLFWM_WINDOW,w,0);
     childs = 0;
@@ -2035,7 +2035,7 @@ void sWireMasterWindow::_Add(RawShortcut &sc)
 
 Shortcut *sWireMasterWindow::MakeShortcut(Form *wc,int type,RawShortcut &raw)
 {
-//  sU32 key = 0;
+//  uint32_t key = 0;
 //  int qual = 0;
 //  int hit = 0;
   CommandBase *cmd = 0;
@@ -2248,7 +2248,7 @@ void sWireMasterWindow::_WindowCmd(sArray<Form *> &windows,int sets)
   else if(Scan->IfName(L"menu"))
   {
     CommandMenu *menu = _Menu(windows[0]);
-    sU32 key;
+    uint32_t key;
     int qual;
     int hit;
 
@@ -2355,7 +2355,7 @@ CommandMenu *sWireMasterWindow::_Menu(Form *form)
     menu->Symbol = symbol;
     menu->Text = text;
     menu->Type = CT_MENU;
-    menu->Message = sMessage(this,&sWireMasterWindow::CmdMakePopup,sDInt(menu));
+    menu->Message = sMessage(this,&sWireMasterWindow::CmdMakePopup,ptrdiff_t(menu));
     Menus.AddTail(menu);
   }
 
@@ -2486,7 +2486,7 @@ sWireClientWindow::~sWireClientWindow()
 {
 }
 
-void sWireClientWindow::DragScroll(const sWindowDrag &dd,sDInt)
+void sWireClientWindow::DragScroll(const sWindowDrag &dd,ptrdiff_t)
 {
   MMBScroll(dd);
 }
@@ -2534,7 +2534,7 @@ void sWireGridFrame::InitWire(const sChar *name)
   sWire->AddKey(name,L"Maximize",sMessage(this,&sWireGridFrame::CmdMaximize));
 }
 
-void sWireGridFrame::DragScroll(const sWindowDrag &dd,sDInt)
+void sWireGridFrame::DragScroll(const sWindowDrag &dd,ptrdiff_t)
 {
   MMBScroll(dd);
 }

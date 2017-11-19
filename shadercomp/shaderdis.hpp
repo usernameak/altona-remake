@@ -21,8 +21,8 @@
 
 #include "base/types.hpp"
 
-void sPrintShader(const sU32 *shader,int flags=0);
-void sPrintShader(class sTextBuffer& tb, const sU32 *shader,int flags=0);
+void sPrintShader(const uint32_t *shader,int flags=0);
+void sPrintShader(class sTextBuffer& tb, const uint32_t *shader,int flags=0);
 void sPrintShader(class sTextBuffer& tb, struct sShaderBlob *blob, int flags=0);
 
 enum sPrintShaderFlags

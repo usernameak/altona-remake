@@ -523,7 +523,7 @@ void sStatusBorder::AddTab(int width,int maxstring)
   item->Color = 0;
 }
 
-void sStatusBorder::Print(int tab,const sChar *string,int len,sU32 color)
+void sStatusBorder::Print(int tab,const sChar *string,int len,uint32_t color)
 {
   if(sCmpString(Items[tab].Buffer.Buffer,string)!=0)
   {
@@ -536,7 +536,7 @@ void sStatusBorder::Print(int tab,const sChar *string,int len,sU32 color)
   }
 }
 
-void sStatusBorder::SetColor(int tab,sU32 col)
+void sStatusBorder::SetColor(int tab,uint32_t col)
 {
   Items[tab].Color = col;
 }

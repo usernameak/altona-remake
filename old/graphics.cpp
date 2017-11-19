@@ -20,7 +20,7 @@
 
 int sGFXRendertargetX=0;
 int sGFXRendertargetY=0;
-sF32 sGFXRendertargetAspect=1.0;
+float sGFXRendertargetAspect=1.0;
 sALIGNED(sRect, sGFXViewRect, 16);
 
 sHooks *sPreFlipHook = 0;
@@ -42,8 +42,8 @@ sHooks *sGraphicsLostHook = 0;
 #if sRENDERER!=sRENDER_DX11 && sRENDERER != sRENDER_OGLES2
 // be sure to keep this 128 bytes aligned for fast clears on some platforms
 sALIGNED(sCBufferBase *, CurrentCBs[sCBUFFER_MAXSLOT*sCBUFFER_SHADERTYPES], 128);
-sALIGNED(sU64, CurrentCBsSlotMask[sCBUFFER_MAXSLOT*sCBUFFER_SHADERTYPES], 128);
-sU64 CurrentCBsMask[sCBUFFER_SHADERTYPES] = { 0 };
+sALIGNED(uint64_t, CurrentCBsSlotMask[sCBUFFER_MAXSLOT*sCBUFFER_SHADERTYPES], 128);
+uint64_t CurrentCBsMask[sCBUFFER_SHADERTYPES] = { 0 };
 #endif
 
 /****************************************************************************/
@@ -78,17 +78,17 @@ sVertexFormatHandle *sVertexFormatTSpace4Anim;
 sVertexFormatHandle *sVertexFormatInstance;
 sVertexFormatHandle *sVertexFormatInstancePlus;
 
-sU32 DeclBasic[]         = { sVF_POSITION,sVF_COLOR0,0 };
-sU32 DeclStandard[]      = { sVF_POSITION,sVF_NORMAL,sVF_UV0,0 };
-sU32 DeclSingle[]        = { sVF_POSITION,sVF_COLOR0,sVF_UV0,0 };
-sU32 DeclDouble[]        = { sVF_POSITION,sVF_COLOR0,sVF_UV0,sVF_UV1,0 };
-sU32 DeclTangent[]       = { sVF_POSITION,sVF_NORMAL,sVF_TANGENT|sVF_F3,sVF_UV0,0 };
-sU32 DeclTSpace[]        = { sVF_POSITION,sVF_NORMAL,sVF_TANGENT|sVF_F3,sVF_COLOR0,sVF_UV0,sVF_UV1,0 };
-sU32 DeclTSpace4[]       = { sVF_POSITION,sVF_NORMAL,sVF_TANGENT|sVF_F4,sVF_COLOR0,sVF_UV0,sVF_UV1,0 };
-sU32 DeclTSpace4_uv3[]   = { sVF_POSITION,sVF_NORMAL,sVF_TANGENT|sVF_F4,sVF_COLOR0,sVF_UV0,sVF_UV1,sVF_UV2,0 };
-sU32 DeclTSpace4Anim[]   = { sVF_POSITION,sVF_NORMAL,sVF_TANGENT|sVF_F4,sVF_BONEINDEX|sVF_I4,sVF_BONEWEIGHT|sVF_C4,sVF_COLOR0,sVF_UV0,sVF_UV1,0 };
-sU32 DeclInstance[]      = { sVF_STREAM1|sVF_UV5|sVF_F4|sVF_INSTANCEDATA , sVF_STREAM1|sVF_UV6|sVF_F4|sVF_INSTANCEDATA , sVF_STREAM1|sVF_UV7|sVF_F4|sVF_INSTANCEDATA,0 };
-sU32 DeclInstancePlus[]  = { sVF_STREAM1|sVF_UV5|sVF_F4|sVF_INSTANCEDATA , sVF_STREAM1|sVF_UV6|sVF_F4|sVF_INSTANCEDATA , sVF_STREAM1|sVF_UV7|sVF_F4|sVF_INSTANCEDATA, sVF_STREAM1|sVF_UV4|sVF_F4|sVF_INSTANCEDATA, 0 };
+uint32_t DeclBasic[]         = { sVF_POSITION,sVF_COLOR0,0 };
+uint32_t DeclStandard[]      = { sVF_POSITION,sVF_NORMAL,sVF_UV0,0 };
+uint32_t DeclSingle[]        = { sVF_POSITION,sVF_COLOR0,sVF_UV0,0 };
+uint32_t DeclDouble[]        = { sVF_POSITION,sVF_COLOR0,sVF_UV0,sVF_UV1,0 };
+uint32_t DeclTangent[]       = { sVF_POSITION,sVF_NORMAL,sVF_TANGENT|sVF_F3,sVF_UV0,0 };
+uint32_t DeclTSpace[]        = { sVF_POSITION,sVF_NORMAL,sVF_TANGENT|sVF_F3,sVF_COLOR0,sVF_UV0,sVF_UV1,0 };
+uint32_t DeclTSpace4[]       = { sVF_POSITION,sVF_NORMAL,sVF_TANGENT|sVF_F4,sVF_COLOR0,sVF_UV0,sVF_UV1,0 };
+uint32_t DeclTSpace4_uv3[]   = { sVF_POSITION,sVF_NORMAL,sVF_TANGENT|sVF_F4,sVF_COLOR0,sVF_UV0,sVF_UV1,sVF_UV2,0 };
+uint32_t DeclTSpace4Anim[]   = { sVF_POSITION,sVF_NORMAL,sVF_TANGENT|sVF_F4,sVF_BONEINDEX|sVF_I4,sVF_BONEWEIGHT|sVF_C4,sVF_COLOR0,sVF_UV0,sVF_UV1,0 };
+uint32_t DeclInstance[]      = { sVF_STREAM1|sVF_UV5|sVF_F4|sVF_INSTANCEDATA , sVF_STREAM1|sVF_UV6|sVF_F4|sVF_INSTANCEDATA , sVF_STREAM1|sVF_UV7|sVF_F4|sVF_INSTANCEDATA,0 };
+uint32_t DeclInstancePlus[]  = { sVF_STREAM1|sVF_UV5|sVF_F4|sVF_INSTANCEDATA , sVF_STREAM1|sVF_UV6|sVF_F4|sVF_INSTANCEDATA , sVF_STREAM1|sVF_UV7|sVF_F4|sVF_INSTANCEDATA, sVF_STREAM1|sVF_UV4|sVF_F4|sVF_INSTANCEDATA, 0 };
 
 /****************************************************************************/
 
@@ -185,7 +185,7 @@ void sSetScreenResolution(int xs,int ys)
   sSetScreenMode(sm);
 }
 
-void sSetScreenResolution(int xs,int ys, sF32 aspectRatio)
+void sSetScreenResolution(int xs,int ys, float aspectRatio)
 {
   sScreenMode sm;
   sGetScreenMode(sm);
@@ -214,7 +214,7 @@ void sGetScreenSize(int &xs,int &ys)
   }
 }
 
-sF32 sGetScreenAspect()
+float sGetScreenAspect()
 {
   sScreenMode sm;
   sGetScreenMode(sm);
@@ -323,7 +323,7 @@ sShaderBlob *sShaderBlob::GetAny(int kind, int platform)
   return blob;
 }
 
-void sSerializeShaderBlob(sU8 *data, int &size, sReader &s)
+void sSerializeShaderBlob(uint8_t *data, int &size, sReader &s)
 {
   int readsize=0;
   s | readsize;
@@ -347,7 +347,7 @@ void sSerializeShaderBlob(sU8 *data, int &size, sReader &s)
   }
 }
 
-void sSerializeShaderBlob(const sU8 *data, int size, sWriter &s)
+void sSerializeShaderBlob(const uint8_t *data, int size, sWriter &s)
 {
   s | size;
   sShaderBlob *blob = 0;
@@ -380,11 +380,11 @@ void sExitShaders()
   sDelete(Shaders);
 }
 
-sShader *sCreateShaderRaw(int type,const sU8 *code,int bytes)
+sShader *sCreateShaderRaw(int type,const uint8_t *code,int bytes)
 {
   sVERIFY(type & sSTF_PLATFORM);        // no more automatic setting of shader platform!
 //  type |= sGetShaderPlatform();
-  sU32 hash;
+  uint32_t hash;
   sShader *sh;
 
   sChecksumAdler32Begin();
@@ -393,13 +393,13 @@ sShader *sCreateShaderRaw(int type,const sU8 *code,int bytes)
   header.Type = type;
   header.Size = bytes;
 
-  sChecksumAdler32Add((sU8*)&header,8);
+  sChecksumAdler32Add((uint8_t*)&header,8);
   sChecksumAdler32Add(code,bytes);
-  sU8 tmp0 = 0;
+  uint8_t tmp0 = 0;
   int tmp1 = sSTF_NONE;
   for(int i=bytes&3;(bytes+i)&3;i++)
     sChecksumAdler32Add(&tmp0,1);
-  sChecksumAdler32Add((sU8*)&tmp1,4);
+  sChecksumAdler32Add((uint8_t*)&tmp1,4);
 
   hash = sChecksumAdler32End();
 
@@ -421,10 +421,10 @@ sShader *sCreateShaderRaw(int type,const sU8 *code,int bytes)
   return new sShader(type,code,bytes,hash,sTRUE);
 }
 
-sShader *sCreateShader(int type,const sU8 *code,int bytes)
+sShader *sCreateShader(int type,const uint8_t *code,int bytes)
 {
   sVERIFY(type & sSTF_PLATFORM);        // no more automatic setting of shader platform!
-  sU32 hash;
+  uint32_t hash;
   sShader *sh;
 
   hash = sChecksumAdler32(code,bytes);
@@ -454,7 +454,7 @@ sShader *sShader::Bind(sVertexFormatHandle *vformat, sShader *pshader)
   return this;
 }
 
-sShader::sShader(int type,const sU8 *data,int length,sU32 hash,sBool raw/*=sFALSE*/)
+sShader::sShader(int type,const uint8_t *data,int length,uint32_t hash,sBool raw/*=sFALSE*/)
 {
   Temp = -1;
 #if sRENDERER == sRENDER_DX9
@@ -471,7 +471,7 @@ sShader::sShader(int type,const sU8 *data,int length,sU32 hash,sBool raw/*=sFALS
   if(raw)
   {
     int blen = ((length+3)&~3)+12;
-    Data = new sU8[blen];
+    Data = new uint8_t[blen];
     sShaderBlob *blob = (sShaderBlob*)Data;
     blob->Type = type;
     blob->Size = length;
@@ -489,7 +489,7 @@ sShader::sShader(int type,const sU8 *data,int length,sU32 hash,sBool raw/*=sFALS
   }
   else
   {
-    Data = new sU8[length];
+    Data = new uint8_t[length];
     Size = length;
     Type = type;
     Hash = hash;
@@ -536,7 +536,7 @@ sBool sShader::CheckKind(int type)
   return (type&sSTF_KIND)==(Type&sSTF_KIND);
 }
 
-const sU8 *sShader::GetCode(int &bytes)
+const uint8_t *sShader::GetCode(int &bytes)
 {
   bytes = Size;
   return Data;
@@ -561,7 +561,7 @@ sBool sCheckShader(sShader * sh,int type)
   return sh->CheckKind(type);
 }
 
-const sU8 *sGetShaderCode(sShader * sh,int &bytes)
+const uint8_t *sGetShaderCode(sShader * sh,int &bytes)
 {
   return sh->GetCode(bytes);
 }
@@ -578,14 +578,14 @@ void sAddRefPS(sShader * psh)
   psh->AddRef();
 }
 
-sShader * sCreateVS(const sU32 *data,int count)
+sShader * sCreateVS(const uint32_t *data,int count)
 {
-  return sCreateShader(sSTF_VERTEX,(const sU8 *) data,count*4);
+  return sCreateShader(sSTF_VERTEX,(const uint8_t *) data,count*4);
 }
 
-sShader * sCreatePS(const sU32 *data,int count)
+sShader * sCreatePS(const uint32_t *data,int count)
 {
-  return sCreateShader(sSTF_PIXEL,(const sU8 *) data,count*4);
+  return sCreateShader(sSTF_PIXEL,(const uint8_t *) data,count*4);
 }
 
 void sDeleteVS(sShader * &handle)
@@ -638,13 +638,13 @@ const int sVertexFormatTypeSizes[]=
 sVertexFormatHandle *VertexFormatHashTable[MAXVFHASH];
 
 
-sVertexFormatHandle *sCreateVertexFormat(const sU32 *disc)
+sVertexFormatHandle *sCreateVertexFormat(const uint32_t *disc)
 {
   sScopeMem(sAMF_HEAP);   // vertex formats are global objects and need to be allocated on heap
  
   int count;
   sVertexFormatHandle *handle;
-  sU32 data[32];
+  uint32_t data[32];
   int hash;
   static const int defaulttypes[32] = 
   {
@@ -670,7 +670,7 @@ sVertexFormatHandle *sCreateVertexFormat(const sU32 *disc)
 
   // find in hashtable
 
-  hash = sChecksumCRC32((sU8 *)data,count*4) & (MAXVFHASH-1);
+  hash = sChecksumCRC32((uint8_t *)data,count*4) & (MAXVFHASH-1);
   handle = VertexFormatHashTable[hash];
   while(handle)
   {
@@ -685,7 +685,7 @@ sVertexFormatHandle *sCreateVertexFormat(const sU32 *disc)
   // not found, create new element
 
   handle = new sVertexFormatHandle;
-  handle->Data = new sU32[count];
+  handle->Data = new uint32_t[count];
   handle->Count = count;
   handle->UseCount = 1;
   handle->AvailMask = 0;
@@ -759,8 +759,8 @@ void sStreamVertexFormat(sWriter &s,const sVertexFormatHandle *vhandle)
 
 void sStreamVertexFormat(sReader &s,sVertexFormatHandle *&vhandle)
 {
-  sU32 vd[16];
-  sU32 count;
+  uint32_t vd[16];
+  uint32_t count;
   
   s | count;
   sVERIFY(count < 16);
@@ -793,12 +793,12 @@ int sVertexFormatHandle::GetOffset(int semantic_and_format)
 {
   int offset = 0;
   int i = 0;
-  const sU32 *data = GetDesc();
+  const uint32_t *data = GetDesc();
   while(data[i])
   {
     sVERIFY((data[i]&sVF_STREAMMASK)==0);
 
-    if( (data[i]&(sVF_USEMASK|sVF_TYPEMASK)) == (sU32)semantic_and_format)
+    if( (data[i]&(sVF_USEMASK|sVF_TYPEMASK)) == (uint32_t)semantic_and_format)
       return offset;
 
     switch(data[i]&sVF_TYPEMASK)
@@ -826,11 +826,11 @@ int sVertexFormatHandle::GetOffset(int semantic_and_format)
 int sVertexFormatHandle::GetDataType(int semantic)const
 {
   semantic &= sVF_USEMASK;
-  const sU32 *desc = Data;
+  const uint32_t *desc = Data;
   while(*desc)
   {
-    sU32 tmp = *desc++;
-    if((tmp&sVF_USEMASK)==(sU32)semantic)
+    uint32_t tmp = *desc++;
+    if((tmp&sVF_USEMASK)==(uint32_t)semantic)
     {
       return int(tmp&sVF_TYPEMASK);
     }
@@ -953,8 +953,8 @@ void sGeometry::Serialize(sReader &s)
     int vc,ic;
     int vs,is;
     int flags;
-    sU32 *ip=0;
-    sU32 *vp=0;
+    uint32_t *ip=0;
+    uint32_t *vp=0;
     sVertexFormatHandle *vhandle;
 
     s | vs | is |vc | ic | flags;
@@ -965,9 +965,9 @@ void sGeometry::Serialize(sReader &s)
       flags |= sGF_INDEX16;
 
     BeginLoad(vhandle,flags,sGD_STATIC,vc,ic,&vp,&ip);
-    s.ArrayU8((sU8 *)vp,vs*vc);  // not endian safe
+    s.ArrayU8((uint8_t *)vp,vs*vc);  // not endian safe
     s.Align(4);
-    s.ArrayU8((sU8 *)ip,is*ic);  // not endian safe
+    s.ArrayU8((uint8_t *)ip,is*ic);  // not endian safe
     s.Align(4);
     EndLoad();
 
@@ -1059,13 +1059,13 @@ void sGeometry::BeginLoad(int vc,int ic,int flags,sVertexFormatHandle *vf,void *
 
 // now this is cheesy...
 
-void sGeometry::LoadCube(sU32 c0,sF32 sx,sF32 sy,sF32 sz,sGeometryDuration gd)
+void sGeometry::LoadCube(uint32_t c0,float sx,float sy,float sz,sGeometryDuration gd)
 {
   struct fat
   {
-    sF32 px,py,pz;
-    sF32 nx,ny,nz;
-    sF32 u,v;
+    float px,py,pz;
+    float nx,ny,nz;
+    float u,v;
   };
   fat src[24] =
   {
@@ -1100,8 +1100,8 @@ void sGeometry::LoadCube(sU32 c0,sF32 sx,sF32 sy,sF32 sz,sGeometryDuration gd)
     {-1, 1, 1, -1, 0, 0, 0,0},
   };
 
-  sF32 *fp;
-  const sU32 *desc;
+  float *fp;
+  const uint32_t *desc;
 
   sx = sx*0.5f;
   sy = sy*0.5f;
@@ -1113,7 +1113,7 @@ void sGeometry::LoadCube(sU32 c0,sF32 sx,sF32 sy,sF32 sz,sGeometryDuration gd)
     desc = GetFormat()->GetDesc();
     while(*desc!=sVF_END)
     {
-      sU32 d = *desc++;
+      uint32_t d = *desc++;
       if((d & sVF_STREAMMASK)==0)
       {
         switch(d)
@@ -1129,10 +1129,10 @@ void sGeometry::LoadCube(sU32 c0,sF32 sx,sF32 sy,sF32 sz,sGeometryDuration gd)
           *fp++ = src[i].nz;
           break;
         case sVF_NORMAL|sVF_I4:
-          ((sU8 *)fp)[0] = sU8(src[i].nx*127.f+128.f);
-          ((sU8 *)fp)[1] = sU8(src[i].ny*127.f+128.f);
-          ((sU8 *)fp)[2] = sU8(src[i].nz*127.f+128.f);
-          ((sU8 *)fp)[3] = 0;
+          ((uint8_t *)fp)[0] = uint8_t(src[i].nx*127.f+128.f);
+          ((uint8_t *)fp)[1] = uint8_t(src[i].ny*127.f+128.f);
+          ((uint8_t *)fp)[2] = uint8_t(src[i].nz*127.f+128.f);
+          ((uint8_t *)fp)[3] = 0;
           fp++;
           break;
         case sVF_TANGENT|sVF_F3:
@@ -1155,7 +1155,7 @@ void sGeometry::LoadCube(sU32 c0,sF32 sx,sF32 sy,sF32 sz,sGeometryDuration gd)
           *fp++ = 0;
           break;
         case sVF_COLOR0|sVF_C4:
-          *(sU32 *)fp = c0;
+          *(uint32_t *)fp = c0;
           fp++;
           break;
         default:
@@ -1171,7 +1171,7 @@ void sGeometry::LoadCube(sU32 c0,sF32 sx,sF32 sy,sF32 sz,sGeometryDuration gd)
   }
   else if(Flags == (sGF_TRILIST|sGF_INDEX16) || Flags == (sGF_PATCHLIST|sGF_INDEX16|3))
   {
-    sU16 *ip;
+    uint16_t *ip;
     BeginLoadIB(6*6,gd,&ip);
     for(int i=0;i<6;i++)
       sQuad(ip,i*4,0,1,2,3);
@@ -1179,7 +1179,7 @@ void sGeometry::LoadCube(sU32 c0,sF32 sx,sF32 sy,sF32 sz,sGeometryDuration gd)
   }
   else if(Flags == (sGF_TRILIST|sGF_INDEX32) || Flags == (sGF_PATCHLIST|sGF_INDEX32|3))
   {
-    sU32 *ip;
+    uint32_t *ip;
     BeginLoadIB(6*6,gd,&ip);
     for(int i=0;i<6;i++)
       sQuad(ip,i*4,0,1,2,3);
@@ -1191,23 +1191,23 @@ void sGeometry::LoadCube(sU32 c0,sF32 sx,sF32 sy,sF32 sz,sGeometryDuration gd)
   }
 }
 
-void sGeometry::LoadTorus(int tx,int ty,sF32 ro,sF32 ri,sGeometryDuration gd,sU32 c0)
+void sGeometry::LoadTorus(int tx,int ty,float ro,float ri,sGeometryDuration gd,uint32_t c0)
 {
-  sF32 *fp;
-  const sU32 *desc;
+  float *fp;
+  const uint32_t *desc;
 
   BeginLoadVB((tx+1)*(ty+1),gd,&fp);
   for(int y=0;y<ty+1;y++)
   {
-    sF32 fy = y*sPI2F/ty;
+    float fy = y*sPI2F/ty;
     for(int x=0;x<tx+1;x++)
     {
-      sF32 fx = x*sPI2F/tx;
+      float fx = x*sPI2F/tx;
 
       desc = GetFormat()->GetDesc();
       while(*desc!=sVF_END)
       {
-        sU32 d = *desc++;
+        uint32_t d = *desc++;
         if((d & sVF_STREAMMASK)==0)
         {
           switch(d)
@@ -1224,13 +1224,13 @@ void sGeometry::LoadTorus(int tx,int ty,sF32 ro,sF32 ri,sGeometryDuration gd,sU3
             break;
           case sVF_NORMAL|sVF_I4:
             {
-              sF32 nx = -sFCos(fy)*sFSin(fx);
-              sF32 ny = sFCos(fx);
-              sF32 nz = sFSin(fy)*sFSin(fx);
-              ((sU8 *)fp)[0] = sU8(nx*127.f+128.f);
-              ((sU8 *)fp)[1] = sU8(ny*127.f+128.f);
-              ((sU8 *)fp)[2] = sU8(nz*127.f+128.f);
-              ((sU8 *)fp)[3] = 0;
+              float nx = -sFCos(fy)*sFSin(fx);
+              float ny = sFCos(fx);
+              float nz = sFSin(fy)*sFSin(fx);
+              ((uint8_t *)fp)[0] = uint8_t(nx*127.f+128.f);
+              ((uint8_t *)fp)[1] = uint8_t(ny*127.f+128.f);
+              ((uint8_t *)fp)[2] = uint8_t(nz*127.f+128.f);
+              ((uint8_t *)fp)[3] = 0;
             }
             fp++;
             break;
@@ -1246,15 +1246,15 @@ void sGeometry::LoadTorus(int tx,int ty,sF32 ro,sF32 ri,sGeometryDuration gd,sU3
             *fp++ = 1;
             break;
           case sVF_UV0|sVF_F2:
-            *fp++ = sF32(x)/tx;
-            *fp++ = sF32(y)/ty;
+            *fp++ = float(x)/tx;
+            *fp++ = float(y)/ty;
             break;
           case sVF_UV1|sVF_F2:
-            *fp++ = sF32(x)/tx;
-            *fp++ = sF32(y)/ty;
+            *fp++ = float(x)/tx;
+            *fp++ = float(y)/ty;
             break;
           case sVF_COLOR0|sVF_C4:
-            *(sU32 *)fp = c0;
+            *(uint32_t *)fp = c0;
             fp++;
             break;
           default:
@@ -1272,14 +1272,14 @@ void sGeometry::LoadTorus(int tx,int ty,sF32 ro,sF32 ri,sGeometryDuration gd,sU3
 
             case sVF_H4:
             case sVF_S4:
-              *(sU32 *)fp = 0;
+              *(uint32_t *)fp = 0;
               fp++;
             case sVF_C4:
             case sVF_I4:
             case sVF_H2:
             case sVF_S2:
             case sVF_SN_11_11_10:
-              *(sU32 *)fp = 0;
+              *(uint32_t *)fp = 0;
               fp++;
               break;
             default:
@@ -1296,7 +1296,7 @@ void sGeometry::LoadTorus(int tx,int ty,sF32 ro,sF32 ri,sGeometryDuration gd,sU3
 
   if(Flags == (sGF_TRILIST|sGF_INDEX16) || Flags == (sGF_PATCHLIST|sGF_INDEX16|3))
   {
-    sU16 *ip;
+    uint16_t *ip;
     BeginLoadIB(tx*ty*6,gd,&ip);
     for(int y=0;y<ty;y++)
       for(int x=0;x<tx;x++)
@@ -1309,7 +1309,7 @@ void sGeometry::LoadTorus(int tx,int ty,sF32 ro,sF32 ri,sGeometryDuration gd,sU3
   }
   else if(Flags == (sGF_TRILIST|sGF_INDEX32) || Flags == (sGF_PATCHLIST|sGF_INDEX32|3))
   {
-    sU32 *ip;
+    uint32_t *ip;
     BeginLoadIB(tx*ty*6,gd,&ip);
     for(int y=0;y<ty;y++)
       for(int x=0;x<tx;x++)
@@ -1421,8 +1421,8 @@ sBool sIsBlockCompression(int texflags)
 }
 
 
-sU32 sAYCoCgtoARGB(sU32 val);
-sU32 sARGBtoAYCoCg(sU32 val)
+uint32_t sAYCoCgtoARGB(uint32_t val);
+uint32_t sARGBtoAYCoCg(uint32_t val)
 {
   int a = (val>>24)&0xff;
   int r = (val>>16)&0xff;
@@ -1437,11 +1437,11 @@ sU32 sARGBtoAYCoCg(sU32 val)
   Co = sClamp(Co,0,255);
   Cg = sClamp(Cg,0,255);
 
-  sU32 result = (sU32(a)<<24)|(sU32(Y)<<16)|(sU32(Co)<<8)|Cg;
+  uint32_t result = (uint32_t(a)<<24)|(uint32_t(Y)<<16)|(uint32_t(Co)<<8)|Cg;
   return result;
 }
 
-sU32 sAYCoCgtoARGB(sU32 val)
+uint32_t sAYCoCgtoARGB(uint32_t val)
 {
   int a = (val>>24)&0xff;
   int Y =  (val>>16)&0xff;
@@ -1457,7 +1457,7 @@ sU32 sAYCoCgtoARGB(sU32 val)
   g = sClamp(g,0,255);
   b = sClamp(b,0,255);
 
-  sU32 result = (sU32(a)<<24)|(sU32(r)<<16)|(sU32(g)<<8)|b;
+  uint32_t result = (uint32_t(a)<<24)|(uint32_t(r)<<16)|(uint32_t(g)<<8)|b;
   return result;
 }
 
@@ -1519,7 +1519,7 @@ sTexture2D::sTexture2D()
 #endif
 }
 
-sTexture2D::sTexture2D(int xs,int ys,sU32 flags,int mipmaps)
+sTexture2D::sTexture2D(int xs,int ys,uint32_t flags,int mipmaps)
 {
   Flags = sTEX_2D;
   Init(xs,ys,flags|sTEX_2D,mipmaps);
@@ -1628,10 +1628,10 @@ void sTexture2D::Init(int xs, int ys, int flags,int mipmaps, sBool force/*=sFALS
   sPopMemLeakDesc();
 }
 
-void sTexture2D::LoadAllMipmaps(sU8 *source)
+void sTexture2D::LoadAllMipmaps(uint8_t *source)
 {
-  sU8 *dest;
-  sU8 *p;
+  uint8_t *dest;
+  uint8_t *p;
   int pitch_source,pitch_dest;
   int xs,ys;
   int blockSize;
@@ -1761,10 +1761,10 @@ void sTextureCube::Clear()
 
 /****************************************************************************/
 
-void sTextureCube::LoadAllMipmaps(sU8 *data)
+void sTextureCube::LoadAllMipmaps(uint8_t *data)
 {
-  sU8 *dest;
-  sU8 *p;
+  uint8_t *dest;
+  uint8_t *p;
   int pitch_source,pitch_dest;
   int level;
 
@@ -2042,7 +2042,7 @@ template <class streamer> static inline void SerializeMaterialRS(sMaterialRS &rs
   s.ArrayU8(rs.FuncFlags,4);
   s.ArrayU32(rs.TFlags,sMin<int>(texcount,sMTRL_MAXTEX));
   if (texcount>sMTRL_MAXTEX) 
-    s.Skip((texcount-sMTRL_MAXTEX)*sizeof(sU32));
+    s.Skip((texcount-sMTRL_MAXTEX)*sizeof(uint32_t));
   s.U32(rs.BlendColor);
   s.U32(rs.BlendAlpha);
   s.U32(rs.BlendFactor);
@@ -2053,7 +2053,7 @@ template <class streamer> static inline void SerializeMaterialRS(sMaterialRS &rs
   s.U32(rs.AlphaRef);
   s.ArrayF32(rs.LodBias,sMin<int>(texcount,sMTRL_MAXTEX));
   if (texcount>sMTRL_MAXTEX) 
-    s.Skip((texcount-sMTRL_MAXTEX)*sizeof(sF32));
+    s.Skip((texcount-sMTRL_MAXTEX)*sizeof(float));
 };
 
 void sMaterialRS::SerializeOld(sReader &s) { SerializeMaterialRSOld(*this,s); }
@@ -2210,7 +2210,7 @@ void sMaterial::InitVariants(int max)
   StateVariants = max;
   VariantFlags = new sMaterialRS[max];
 
-  States = new sU32 *[max];
+  States = new uint32_t *[max];
   StateCount = new int[max];
   for(int i=0;i<max;i++)
   {
@@ -2236,12 +2236,12 @@ void sMaterial::DiscardVariants()
 }
 
 /*#if sRENDERER!=sRENDER_OGL2
-void sMaterial::AllocStates(const sU32 *data,int count,int var)
+void sMaterial::AllocStates(const uint32_t *data,int count,int var)
 {
   sVERIFY(var<StateVariants);
   sVERIFY(States[var]==0);
 
-  States[var] = new sU32[count*2];
+  States[var] = new uint32_t[count*2];
   StateCount[var] = count;
   sCopyMem(States[var],data,count*8);
 }
@@ -2250,8 +2250,8 @@ void sMaterial::SetVariant(int var)
 {
   sVERIFY(var>=0 && var<StateVariants);
 
-  sU32 buffer[512];
-  sU32 *data=buffer;
+  uint32_t buffer[512];
+  uint32_t *data=buffer;
 
   VariantFlags[var] = *(sMaterialRS*)&Flags;
   AddMtrlFlags(data);
@@ -2340,7 +2340,7 @@ void sViewport::SetTarget(sTexture2D *tex)
   {
     TargetSizeX = tex->SizeX;
     TargetSizeY = tex->SizeY;
-    TargetAspect = sF32(tex->SizeX)/sF32(tex->SizeY);
+    TargetAspect = float(tex->SizeX)/float(tex->SizeY);
     Target.Init(0,0,TargetSizeX,TargetSizeY);
   }
   else
@@ -2366,7 +2366,7 @@ void sViewport::SetTargetCurrent(const sRect *rect/*=0*/)
   TargetSizeY = sGFXRendertargetY;
   if(!rect)
     rect = &sGFXViewRect;
-  TargetAspect = sGFXRendertargetAspect*sGFXRendertargetY*sF32(rect->SizeX())/(sF32(rect->SizeY())*sGFXRendertargetX);
+  TargetAspect = sGFXRendertargetAspect*sGFXRendertargetY*float(rect->SizeX())/(float(rect->SizeY())*sGFXRendertargetX);
   Target = *rect;
 }
 
@@ -2379,11 +2379,11 @@ void sViewport::SetTargetScreen(const sRect *rect/*=0*/)
     r.Init(0,0,TargetSizeX,TargetSizeY);
     rect = &r;
   }
-  TargetAspect = sGetScreenAspect()*TargetSizeY*sF32(rect->SizeX())/(sF32(rect->SizeY())*TargetSizeX);
+  TargetAspect = sGetScreenAspect()*TargetSizeY*float(rect->SizeX())/(float(rect->SizeY())*TargetSizeX);
   Target = *rect;
 }
 
-void sViewport::SetZoom(sF32 aspect,sF32 zoom)
+void sViewport::SetZoom(float aspect,float zoom)
 {
   ZoomX = zoom;
   ZoomY = zoom;
@@ -2393,17 +2393,17 @@ void sViewport::SetZoom(sF32 aspect,sF32 zoom)
     ZoomX /= aspect;
 }
 
-sF32 sViewport::GetZoom() const
+float sViewport::GetZoom() const
 {
   return TargetAspect<1.0f ? ZoomX : ZoomY;
 }
 
-void sViewport::SetZoom(sF32 zoom)
+void sViewport::SetZoom(float zoom)
 {
   SetZoom(TargetAspect,zoom);
 }
 
-void sViewport::SetDepthOffset(sF32 cs_distance, sF32 cs_offset)
+void sViewport::SetDepthOffset(float cs_distance, float cs_offset)
 {
   cs_distance = sMax(cs_distance,0.001f);
   cs_offset = sClamp(cs_offset,0.001f,cs_distance-0.0001f);
@@ -2423,13 +2423,13 @@ void sViewport::Prepare(int update)
   if(update&(sVUF_PROJ|sVUF_WINDOW))
   {
     sMatrix44 mat(sDontInitialize);
-    //sF32 xs = sF32(Target.SizeX())/TargetSizeX;
-    //sF32 ys = sF32(Target.SizeY())/TargetSizeY;
-    //sF32 xo = sF32(Target.CenterX()-0.5f)/TargetSizeX*2-1.0f;
-    //sF32 yo = sF32(Target.CenterY()-0.5f)/TargetSizeY*2-1.0f;
+    //float xs = float(Target.SizeX())/TargetSizeX;
+    //float ys = float(Target.SizeY())/TargetSizeY;
+    //float xo = float(Target.CenterX()-0.5f)/TargetSizeX*2-1.0f;
+    //float yo = float(Target.CenterY()-0.5f)/TargetSizeY*2-1.0f;
 
-    sF32 xs = 1.0f;
-    sF32 ys = 1.0f;
+    float xs = 1.0f;
+    float ys = 1.0f;
 
     switch(Orthogonal)
     {
@@ -2437,13 +2437,13 @@ void sViewport::Prepare(int update)
     case sVO_PROJECTIVE_CLIPFAR:
       {
 #if sRENDERER==sRENDER_DX11
-        sF32 xo = 0;
-        sF32 yo = 0;
+        float xo = 0;
+        float yo = 0;
 #else
-        sF32 xo = sF32(TargetSizeX/2-0.5f)/TargetSizeX*2-1.0f;
-        sF32 yo = sF32(TargetSizeY/2-0.5f)/TargetSizeY*2-1.0f;
+        float xo = float(TargetSizeX/2-0.5f)/TargetSizeX*2-1.0f;
+        float yo = float(TargetSizeY/2-0.5f)/TargetSizeY*2-1.0f;
 #endif
-        sF32 q = 1/(ClipFar-ClipNear);
+        float q = 1/(ClipFar-ClipNear);
         
         mat.i.x = xs * ZoomX;
         mat.i.y = 0;
@@ -2467,7 +2467,7 @@ void sViewport::Prepare(int update)
 
         if(Orthogonal==sVO_PROJECTIVE_CLIPFAR)
         {
-          const sF32 epsilon = 0.0000005f;
+          const float epsilon = 0.0000005f;
           mat.k.z = 1.0f-epsilon;
           mat.l.z = 0.0f;          
         }
@@ -2520,7 +2520,7 @@ void sViewport::Prepare(int update)
       break;
     case sVO_ORTHOGONAL:
       {
-        sF32 q = 1/(ClipFar-ClipNear);
+        float q = 1/(ClipFar-ClipNear);
 
         mat.i.x = ZoomX;
         mat.i.y = 0;
@@ -2599,13 +2599,13 @@ sBool sViewport::Transform(const sVector31 &p,int &ix,int &iy) const
 }
 
 
-sBool sViewport::Transform(const sVector31 &p,sF32 &ix,sF32 &iy) const
+sBool sViewport::Transform(const sVector31 &p,float &ix,float &iy) const
 {
   sVector4 s = p * ModelScreen;
   if(s.z>0)
   {
-    ix = ((s.x/s.w)*0.5f+0.5f) - (sF32)Target.x0 / TargetSizeX;
-    iy = (0.5f-(s.y/s.w)*0.5f) - (sF32)Target.y0 / TargetSizeY; 
+    ix = ((s.x/s.w)*0.5f+0.5f) - (float)Target.x0 / TargetSizeX;
+    iy = (0.5f-(s.y/s.w)*0.5f) - (float)Target.y0 / TargetSizeY; 
     return 1;
   }
   else
@@ -2618,8 +2618,8 @@ sBool sViewport::Transform(const sVector31 &p,sF32 &ix,sF32 &iy) const
 
 void sViewport::MakeRayPixel(int ix,int iy,sRay &ray) const
 {
-  sF32 mx = (ix-Target.x0) / sF32(Target.SizeX());
-  sF32 my = (iy-Target.y0) / sF32(Target.SizeY());
+  float mx = (ix-Target.x0) / float(Target.SizeX());
+  float my = (iy-Target.y0) / float(Target.SizeY());
   mx = mx*2-1;
   my = 1-my*2;
   ray.Dir = Camera.k + Camera.i*mx/ZoomX + Camera.j*my/ZoomY;
@@ -2627,18 +2627,18 @@ void sViewport::MakeRayPixel(int ix,int iy,sRay &ray) const
   ray.Dir.Unit();
 }
 
-void sViewport::MakeRay(sF32 mx,sF32 my,sRay &ray) const
+void sViewport::MakeRay(float mx,float my,sRay &ray) const
 {
   ray.Dir = Camera.k + Camera.i*mx/ZoomX + Camera.j*my/ZoomY;    // this might be wrong!
   ray.Start = Camera.l + ray.Dir*ClipNear;
   ray.Dir.Unit();
 }
 
-int sViewport::Visible(const sAABBox &box, sF32 clipnear, sF32 clipfar) const
+int sViewport::Visible(const sAABBox &box, float clipnear, float clipfar) const
 {
   register const sMatrix34 &mv=ModelView;
-  register const sF32 zx=ZoomX;
-  register const sF32 zy=ZoomY;
+  register const float zx=ZoomX;
+  register const float zy=ZoomY;
   sVector30 r[2][3];
   r[0][0].x = (mv.i.x*box.Min.x+mv.l.x)*zx; r[0][0].y=(mv.i.y*box.Min.x)*zy; r[0][0].z=mv.i.z*box.Min.x;
   r[0][1].x = (mv.j.x*box.Min.y)*zx; r[0][1].y=(mv.j.y*box.Min.y+mv.l.y)*zy; r[0][1].z=mv.j.z*box.Min.y;
@@ -2647,13 +2647,13 @@ int sViewport::Visible(const sAABBox &box, sF32 clipnear, sF32 clipfar) const
   r[1][1].x = (mv.j.x*box.Max.y)*zx; r[1][1].y=(mv.j.y*box.Max.y+mv.l.y)*zy; r[1][1].z=mv.j.z*box.Max.y;
   r[1][2].x = (mv.k.x*box.Max.z)*zx; r[1][2].y=(mv.k.y*box.Max.z)*zy; r[1][2].z=mv.k.z*box.Max.z+mv.l.z;
 
-  register sU32 amask = ~0;
-  register sU32 omask = 0;
+  register uint32_t amask = ~0;
+  register uint32_t omask = 0;
 #if 0   // better for some consoles...
   for(int i=0;i<8;i++)
   {
     register const sVector30 t = r[(i&1)][0]+r[(i&2)>>1][1]+r[(i&4)>>2][2];
-    register sU32 clip=0;
+    register uint32_t clip=0;
     if(t.x> t.z) clip |= 0x01;
     else if(t.x<-t.z) clip |= 0x04;
     if(t.y> t.z) clip |= 0x02;
@@ -2672,7 +2672,7 @@ int sViewport::Visible(const sAABBox &box, sF32 clipnear, sF32 clipfar) const
   for(int i=0;i<8;i++)
   {
     register const sVector30 t = r[(i&1)][0]+r[(i&2)>>1][1]+r[(i&4)>>2][2];
-    register const sU32 clip = ((t.x> t.z)?0x01:((t.x<-t.z)?0x4:0))|
+    register const uint32_t clip = ((t.x> t.z)?0x01:((t.x<-t.z)?0x4:0))|
                          ((t.y> t.z)?0x02:((t.y<-t.z)?0x8:0))|
                          ((t.z<clipnear)?0x10:((t.z>clipfar)?0x20:0));
     amask &= clip;
@@ -2685,13 +2685,13 @@ int sViewport::Visible(const sAABBox &box, sF32 clipnear, sF32 clipfar) const
 }
 
 
-int sViewport::VisibleDist(const sAABBox &box,sF32 &dist) const
+int sViewport::VisibleDist(const sAABBox &box,float &dist) const
 {
   sMatrix34 r[2];
   sVector30 v[8];
   sVector30 t;
   int i;
-  sU32 clip,amask,omask;
+  uint32_t clip,amask,omask;
 
   r[0] = ModelView;
   r[1] = ModelView;
@@ -2754,13 +2754,13 @@ int sViewport::VisibleDist(const sAABBox &box,sF32 &dist) const
   return 1;                       // part in
 }
 
-int sViewport::VisibleDist2(const sAABBox &box,sF32 &near, sF32 &far) const
+int sViewport::VisibleDist2(const sAABBox &box,float &near, float &far) const
 {
   sMatrix34 r[2];
   sVector30 v[8];
   sVector30 t;
   int i;
-  sU32 clip,amask,omask;
+  uint32_t clip,amask,omask;
 
   r[0] = ModelView;
   r[1] = ModelView;
@@ -2837,11 +2837,11 @@ sBool sViewport::Get2DBounds(const sVector31 points[],int count,sFRect &bounds) 
 {
   // Based on "Calculating Screen Coverage", Chapter 6 from "Jim Blinn's Corner:
   // Notation, Notation, Notation", Morgan-Kaufman Publishers, 2003
-  sF32 xMin = 1.0f, xMax = -1.0f;
-  sF32 yMin = 1.0f, yMax = -1.0f;
+  float xMin = 1.0f, xMax = -1.0f;
+  float yMin = 1.0f, yMax = -1.0f;
   sVector4 *proj = sALLOCSTACK(sVector4,count);
-  sU32 *outcodes = sALLOCSTACK(sU32,count);
-  sU32 Ocumulate = 0, Acumulate = ~0u;
+  uint32_t *outcodes = sALLOCSTACK(uint32_t,count);
+  uint32_t Ocumulate = 0, Acumulate = ~0u;
   sBool anyVisible = sFALSE;
 
   // pass 1: project all points
@@ -2851,7 +2851,7 @@ sBool sViewport::Get2DBounds(const sVector31 points[],int count,sFRect &bounds) 
     proj[i] = p = points[i] * ModelScreen;
 
     // calculate outcodes for x and y
-    sU32 out = 0;
+    uint32_t out = 0;
     if(p.x < -p.w)  out |= 0x01;
     if(p.x >  p.w)  out |= 0x02;
     if(p.y < -p.w)  out |= 0x04;
@@ -2918,9 +2918,9 @@ void sGetRendertargetSize(int &dx,int &dy)
   dy = sGFXViewRect.SizeY();//DXRendertargetY;
 }
 
-sF32 sGetRendertargetAspect()
+float sGetRendertargetAspect()
 {
-  return sGFXRendertargetAspect*sGFXRendertargetY*sF32(sGFXViewRect.SizeX())/(sF32(sGFXViewRect.SizeY())*sGFXRendertargetX);
+  return sGFXRendertargetAspect*sGFXRendertargetY*float(sGFXViewRect.SizeX())/(float(sGFXViewRect.SizeY())*sGFXRendertargetX);
 }
 
 sBool sIsFormatDXT(int format)
@@ -3019,7 +3019,7 @@ void sSetCBuffers(sCBufferBase **cbuffers,int cbcount)
 #else
 
 
-//extern sU32 setcubfferscount;
+//extern uint32_t setcubfferscount;
 
 #if sRENDERER == sRENDER_DX11
 
@@ -3098,13 +3098,13 @@ void sCBufferBase::Modify()
 
 void sCBufferBase::SetCfg(int slot, int start, int count)
 {
-  sU64 msk = ((sU64(1)<<(sClamp((RegCount+3)/4-32,0,32)))-1)<<32;
-  msk |= (sU64(1)<<(sClamp((RegCount+3)/4,0,32)))-1;
+  uint64_t msk = ((uint64_t(1)<<(sClamp((RegCount+3)/4-32,0,32)))-1)<<32;
+  msk |= (uint64_t(1)<<(sClamp((RegCount+3)/4,0,32)))-1;
   msk = msk<<(RegStart/4);
   SetCfg(slot,start,count,msk);
 }
 
-void sCBufferBase::SetCfg(int slot, int start, int count, sU64 mask)
+void sCBufferBase::SetCfg(int slot, int start, int count, uint64_t mask)
 {
   Slot = slot;
   RegStart = start;
@@ -3138,12 +3138,12 @@ namespace rygdxt
   static int Inited=0;
 
   // Couple of tables...
-  static sU8 Expand5[32];
-  static sU8 Expand6[64];
-  static sU8 OMatch5[256][2];
-  static sU8 OMatch6[256][2];
-  static sU8 QuantRBTab[256+16];
-  static sU8 QuantGTab[256+16];
+  static uint8_t Expand5[32];
+  static uint8_t Expand6[64];
+  static uint8_t OMatch5[256][2];
+  static uint8_t OMatch6[256][2];
+  static uint8_t QuantRBTab[256+16];
+  static uint8_t QuantGTab[256+16];
 
   /**************************************************************************/
 
@@ -3153,7 +3153,7 @@ namespace rygdxt
     return (t + (t >> 8)) >> 8;
   }
 
-  static int SquaredDist(sU8 a,sU8 b)
+  static int SquaredDist(uint8_t a,uint8_t b)
   {
     return sSquare(a-b);
   }
@@ -3163,14 +3163,14 @@ namespace rygdxt
     struct
     {
 #if sCONFIG_LE
-      sU8 b,g,r,a;
+      uint8_t b,g,r,a;
 #else
-      sU8 a,r,g,b;
+      uint8_t a,r,g,b;
 #endif
     } p;
-    sU32 v;
+    uint32_t v;
 
-    void From16Bit(sU16 v)
+    void From16Bit(uint16_t v)
     {
       int rv = (v & 0xf800) >> 11;
       int gv = (v & 0x07e0) >>  5;
@@ -3182,7 +3182,7 @@ namespace rygdxt
       p.b = Expand5[bv];
     }
 
-    sU16 As16Bit() const
+    uint16_t As16Bit() const
     {
       return (Mul8Bit(p.r,31) << 11) + (Mul8Bit(p.g,63) << 5) + Mul8Bit(p.b,31);
     }
@@ -3197,7 +3197,7 @@ namespace rygdxt
 
   /****************************************************************************/
 
-  static void PrepareOptTable(sU8 *Table,const sU8 *expand,int size)
+  static void PrepareOptTable(uint8_t *Table,const uint8_t *expand,int size)
   {
     for(int i=0;i<256;i++)
     {
@@ -3226,7 +3226,7 @@ namespace rygdxt
     }
   }
 
-  static void EvalColors(Pixel *color,sU16 c0,sU16 c1)
+  static void EvalColors(Pixel *color,uint16_t c0,uint16_t c1)
   {
     color[0].From16Bit(c0);
     color[1].From16Bit(c1);
@@ -3243,9 +3243,9 @@ namespace rygdxt
     // process channels seperately
     for(int ch=0;ch<3;ch++)
     {
-      sU8 *bp = (sU8 *) block;
-      sU8 *dp = (sU8 *) dest;
-      sU8 *quant = (ch == 1) ? QuantGTab+8 : QuantRBTab+8;
+      uint8_t *bp = (uint8_t *) block;
+      uint8_t *dp = (uint8_t *) dest;
+      uint8_t *quant = (ch == 1) ? QuantGTab+8 : QuantRBTab+8;
 
 #if sCONFIG_BE
       bp += 3-ch;
@@ -3283,9 +3283,9 @@ namespace rygdxt
   }
 
   // The color matching function (returns error metric)
-  static int MatchColorsBlock(const Pixel *block,const Pixel *color,sU32 &outMask,sBool dither)
+  static int MatchColorsBlock(const Pixel *block,const Pixel *color,uint32_t &outMask,sBool dither)
   {
-    sU32 mask = 0;
+    uint32_t mask = 0;
     int dirr = color[0].p.r - color[1].p.r;
     int dirg = color[0].p.g - color[1].p.g;
     int dirb = color[0].p.b - color[1].p.b;
@@ -3396,7 +3396,7 @@ namespace rygdxt
   }
 
   // The color optimization function. (Clever code, part 1)
-  static void OptimizeColorsBlock(const Pixel *block,sU16 &max16,sU16 &min16)
+  static void OptimizeColorsBlock(const Pixel *block,uint16_t &max16,uint16_t &min16)
   {
     static const int nIterPower = 4;
 
@@ -3405,7 +3405,7 @@ namespace rygdxt
 
     for(int ch=0;ch<3;ch++)
     {
-      const sU8 *bp = ((const sU8 *) block) + ch;
+      const uint8_t *bp = ((const uint8_t *) block) + ch;
       int muv,minv,maxv;
 
       muv = minv = maxv = bp[0];
@@ -3441,7 +3441,7 @@ namespace rygdxt
     }
 
     // convert covariance matrix to float, find principal axis via power iter
-    sF32 covf[6],vfr,vfg,vfb;
+    float covf[6],vfr,vfg,vfb;
     for(int i=0;i<6;i++)
       covf[i] = cov[i] / 255.0f;
 
@@ -3451,16 +3451,16 @@ namespace rygdxt
 
     for(int iter=0;iter<nIterPower;iter++)
     {
-      sF32 r = vfr*covf[0] + vfg*covf[1] + vfb*covf[2];
-      sF32 g = vfr*covf[1] + vfg*covf[3] + vfb*covf[4];
-      sF32 b = vfr*covf[2] + vfg*covf[4] + vfb*covf[5];
+      float r = vfr*covf[0] + vfg*covf[1] + vfb*covf[2];
+      float g = vfr*covf[1] + vfg*covf[3] + vfb*covf[4];
+      float b = vfr*covf[2] + vfg*covf[4] + vfb*covf[5];
 
       vfr = r;
       vfg = g;
       vfb = b;
     }
 
-    sF32 magn = sMax(sMax(sFAbs(vfr),sFAbs(vfg)),sFAbs(vfb));
+    float magn = sMax(sMax(sFAbs(vfr),sFAbs(vfg)),sFAbs(vfb));
     int v_r,v_g,v_b;
 
     if(magn < 4.0f) // too small, default to luminance
@@ -3508,14 +3508,14 @@ namespace rygdxt
   // The refinement function. (Clever code, part 2)
   // Tries to optimize colors to suit block contents better.
   // (By solving a least squares system via normal equations+Cramer's rule)
-  static sBool RefineBlock(const Pixel *block,sU16 &max16,sU16 &min16,sU32 mask)
+  static sBool RefineBlock(const Pixel *block,uint16_t &max16,uint16_t &min16,uint32_t mask)
   {
     static const int w1Tab[4] = { 3,0,2,1 };
     static const int prods[4] = { 0x090000,0x000900,0x040102,0x010402 };
     // ^some magic to save a lot of multiplies in the accumulating loop...
 
-    sU16 oldMin = min16;
-    sU16 oldMax = max16;
+    uint16_t oldMin = min16;
+    uint16_t oldMax = max16;
 
     if((mask ^ (mask << 2)) < 4) // just one index => degenerate system
     {
@@ -3543,7 +3543,7 @@ namespace rygdxt
       int akku = 0;
       int At1_r,At1_g,At1_b;
       int At2_r,At2_g,At2_b;
-      sU32 cm = mask;
+      uint32_t cm = mask;
 
       At1_r = At1_g = At1_b = 0;
       At2_r = At2_g = At2_b = 0;
@@ -3573,8 +3573,8 @@ namespace rygdxt
       int yy = (akku >> 8) & 0xff;
       int xy = (akku >> 0) & 0xff;
 
-      sF32 frb = 3.0f * 31.0f / 255.0f / (xx*yy - xy*xy);
-      sF32 fg = frb * 63.0f / 31.0f;
+      float frb = 3.0f * 31.0f / 255.0f / (xx*yy - xy*xy);
+      float fg = frb * 63.0f / 31.0f;
 
       // solve.
       max16 =   sClamp<int>(int((At1_r*yy - At2_r*xy)*frb+0.5f),0,31) << 11;
@@ -3590,7 +3590,7 @@ namespace rygdxt
   }
 
   // Color block compression
-  static void CompressColorBlock(sU8 *dest,const sU32 *src,int qualityDither)
+  static void CompressColorBlock(uint8_t *dest,const uint32_t *src,int qualityDither)
   {
     int quality = qualityDither & 0x3f;
     sBool dither = (qualityDither & 0x80) != 0;
@@ -3604,8 +3604,8 @@ namespace rygdxt
       i++;
 
     // perform block compression
-    sU16 min16,max16;
-    sU32 mask;
+    uint16_t min16,max16;
+    uint32_t mask;
 
     if(i != 16) // no constant color
     {
@@ -3619,9 +3619,9 @@ namespace rygdxt
       int error = MatchColorsBlock(block,color,mask,dither);
 
       // second step: refine, take it if error improves
-      sU16 tryMax16 = max16;
-      sU16 tryMin16 = min16;
-      sU32 tryMask = mask;
+      uint16_t tryMax16 = max16;
+      uint16_t tryMin16 = min16;
+      uint32_t tryMask = mask;
       for(int j=0;j<(quality ? 3 : 1);j++)
       {
         if(RefineBlock(dither ? dblock : block,tryMax16,tryMin16,tryMask))
@@ -3659,13 +3659,13 @@ namespace rygdxt
       mask ^= 0x55555555;
     }
 
-    ((sU16 *) dest)[0] = sSwapIfBE(max16);
-    ((sU16 *) dest)[1] = sSwapIfBE(min16);
-    ((sU32 *) dest)[1] = sSwapIfBE(mask);
+    ((uint16_t *) dest)[0] = sSwapIfBE(max16);
+    ((uint16_t *) dest)[1] = sSwapIfBE(min16);
+    ((uint32_t *) dest)[1] = sSwapIfBE(mask);
   }
 
   // Alpha block compression (this is easy for a change)
-  static void CompressAlphaBlock(sU8 *dest,const sU32 *src,int quality)
+  static void CompressAlphaBlock(uint8_t *dest,const uint32_t *src,int quality)
   {
     const Pixel *block = (const Pixel *) src;
 
@@ -3719,7 +3719,7 @@ namespace rygdxt
 
 using namespace rygdxt;
 
-void sCompressDXTBlock(sU8 *dest,const sU32 *src,sBool alpha,int quality)
+void sCompressDXTBlock(uint8_t *dest,const uint32_t *src,sBool alpha,int quality)
 {
   // generate tables for the first time
   if(!Inited)
@@ -3754,11 +3754,11 @@ void sCompressDXTBlock(sU8 *dest,const sU32 *src,sBool alpha,int quality)
   CompressColorBlock(dest,src,quality);
 }
 
-void sFastPackDXT(sU8 *d,sU32 *bmp,int xs,int ys,int format,int quality)
+void sFastPackDXT(uint8_t *d,uint32_t *bmp,int xs,int ys,int format,int quality)
 {
   int xb=(xs+3)/4;
   int yb=(ys+3)/4;
-  sU32 block[16];
+  uint32_t block[16];
 
   for (int y=0; y<yb; y++)
   {
@@ -3847,7 +3847,7 @@ void sTargetSpec::Init(const sRect &r)
 {
   Init(0,0);
   Window = r;
-  Aspect = sF32(r.SizeX())/sF32(r.SizeY());
+  Aspect = float(r.SizeX())/float(r.SizeY());
 }
 
 void sTargetSpec::Init(sTexture2D *color,sTexture2D *depth)
@@ -3859,7 +3859,7 @@ void sTargetSpec::Init(sTexture2D *color,sTexture2D *depth)
     Depth = depth;
     int z;
     Color->GetSize(Window.x1,Window.y1,z);
-    Aspect = sF32(Window.x1)/sF32(Window.y1);
+    Aspect = float(Window.x1)/float(Window.y1);
   }
   else
   {
@@ -3886,24 +3886,24 @@ sTargetPara::sTargetPara()
   Init();
 }
 
-sTargetPara::sTargetPara(int flags,sU32 clearcol,const sRect *window)
+sTargetPara::sTargetPara(int flags,uint32_t clearcol,const sRect *window)
 {
   Init(flags,clearcol,window);
 }
 
-sTargetPara::sTargetPara(int flags,sU32 clearcol,const sRect *window,sTextureBase *colorbuffer,sTextureBase *depthbuffer)
+sTargetPara::sTargetPara(int flags,uint32_t clearcol,const sRect *window,sTextureBase *colorbuffer,sTextureBase *depthbuffer)
 {
   Init(flags,clearcol,window,colorbuffer,depthbuffer);
 }
 
 
-sTargetPara::sTargetPara(int flags,sU32 clearcol,const sTargetSpec &spec)
+sTargetPara::sTargetPara(int flags,uint32_t clearcol,const sTargetSpec &spec)
 {
   Init();
   Init(flags,clearcol,spec);
 }
 
-void sTargetPara::SetTarget(int i, sTextureBase *tex, sU32 clearcol)
+void sTargetPara::SetTarget(int i, sTextureBase *tex, uint32_t clearcol)
 {
   sVERIFY(i>=0&&i<sCOUNTOF(Target));
   Target[i] = tex;
@@ -3924,14 +3924,14 @@ void sTargetPara::Init()
   Window.Init(0,0,0,0);
 }
 
-void sTargetPara::Init(int flags,sU32 clearcol,const sRect *window)
+void sTargetPara::Init(int flags,uint32_t clearcol,const sRect *window)
 {
   Init(flags,clearcol,window,sGetScreenColorBuffer(),sGetScreenDepthBuffer());
   if(!window)
     Aspect = sGetScreenAspect();
 }
 
-void sTargetPara::Init(int flags,sU32 clearcol,const sRect *window,sTextureBase *colorbuffer,sTextureBase *depthbuffer)
+void sTargetPara::Init(int flags,uint32_t clearcol,const sRect *window,sTextureBase *colorbuffer,sTextureBase *depthbuffer)
 {
   Flags = flags;
   for(int i=0;i<sCOUNTOF(ClearColor);i++)
@@ -3957,12 +3957,12 @@ void sTargetPara::Init(int flags,sU32 clearcol,const sRect *window,sTextureBase 
     Window.Init(0,0,0,0);
   }
   if (Window.SizeY())
-    Aspect = sF32(Window.SizeX()) / Window.SizeY();
+    Aspect = float(Window.SizeX()) / Window.SizeY();
   else
     Aspect=1;
 }
 
-void sTargetPara::Init(int flags,sU32 clearcol,const sTargetSpec &spec)
+void sTargetPara::Init(int flags,uint32_t clearcol,const sTargetSpec &spec)
 {
   if(spec.Window.IsEmpty())
     Init(flags,clearcol,0,spec.Color,spec.Depth);
@@ -4034,7 +4034,7 @@ sCopyTexturePara::sCopyTexturePara(int flags,sTextureBase *d,sTextureBase *s)
 
 #if RENDERTARGET_OLD_TO_NEW
 
-void sSetRendertarget(const sRect *vrp,int flags,sU32 clearcolor)
+void sSetRendertarget(const sRect *vrp,int flags,uint32_t clearcolor)
 {
   int newflags = 0;
   if(flags & sCLEAR_COLOR) newflags |= sST_CLEARCOLOR;
@@ -4044,7 +4044,7 @@ void sSetRendertarget(const sRect *vrp,int flags,sU32 clearcolor)
   sSetTarget(para);
 }
 
-void sSetRendertarget(const sRect *vrp, sTexture2D *tex,int flags,sU32 clearcolor)
+void sSetRendertarget(const sRect *vrp, sTexture2D *tex,int flags,uint32_t clearcolor)
 {
   int newflags = 0;
   if(flags & sCLEAR_COLOR) newflags |= sST_CLEARCOLOR;
@@ -4073,7 +4073,7 @@ void sSetRendertarget(const sRect *vrp, sTexture2D *tex,int flags,sU32 clearcolo
   sSetTarget(para);
 }
 
-void sSetRendertarget(const sRect *vrp,int flags,sU32 clearcolor,sTexture2D **tex,int count)
+void sSetRendertarget(const sRect *vrp,int flags,uint32_t clearcolor,sTexture2D **tex,int count)
 {
   int newflags = 0;
   if(flags & sCLEAR_COLOR) newflags |= sST_CLEARCOLOR;
@@ -4115,7 +4115,7 @@ void sSetRendertarget(const sRect *vrp,int flags,sU32 clearcolor,sTexture2D **te
   sSetTarget(para);
 }
 
-void sSetRendertargetCube(sTextureCube* tex, sTexCubeFace cf, int flags,sU32 clearcolor)
+void sSetRendertargetCube(sTextureCube* tex, sTexCubeFace cf, int flags,uint32_t clearcolor)
 {
   int newflags = 0;
   if(flags & sCLEAR_COLOR) newflags |= sST_CLEARCOLOR;

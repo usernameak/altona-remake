@@ -20,7 +20,7 @@
 #define new sDEFINE_NEW
 
 
-sBool sShaderCompileDX(const sChar *source,const sChar *profile,const sChar *main,sU8 *&data,int &size,int flags,sTextBuffer *errors)
+sBool sShaderCompileDX(const sChar *source,const sChar *profile,const sChar *main,uint8_t *&data,int &size,int flags,sTextBuffer *errors)
 {
   ID3D10Blob *bytecode;
   ID3D10Blob *dxerrors;
@@ -71,7 +71,7 @@ sBool sShaderCompileDX(const sChar *source,const sChar *profile,const sChar *mai
   if(bytecode && !FAILED(hr))
   {
     size = bytecode->GetBufferSize();
-    data = new sU8[size];
+    data = new uint8_t[size];
     sCopyMem(data,bytecode->GetBufferPointer(),size);
     bytecode->Release();
 
@@ -86,7 +86,7 @@ sBool sShaderCompileDX(const sChar *source,const sChar *profile,const sChar *mai
 
 #else
 
-sBool sShaderCompileDX(const sChar *source,const sChar *profile,const sChar *main,sU8 *&data,int &size,int flags,sTextBuffer *errors)
+sBool sShaderCompileDX(const sChar *source,const sChar *profile,const sChar *main,uint8_t *&data,int &size,int flags,sTextBuffer *errors)
 {
   return 0;
 }

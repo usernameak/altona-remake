@@ -247,7 +247,7 @@ void sNeed(ArrayType<BaseType> &a)
 /***                                                                      ***/
 /***   - a target object                                                  ***/
 /***   - a target member function                                         ***/
-/***   - an sDInt code                                                    ***/
+/***   - an ptrdiff_t code                                                    ***/
 /***                                                                      ***/
 /***   message system features                                            ***/
 /***                                                                      ***/
@@ -261,26 +261,26 @@ void sNeed(ArrayType<BaseType> &a)
 struct sMessage
 {
   int Type;
-  sDInt Code;
+  ptrdiff_t Code;
   sObject *Target;
   union
   {
     void (sObject::*Func1)();
-    void (sObject::*Func2)(sDInt);
+    void (sObject::*Func2)(ptrdiff_t);
     void (         *Func3)(sObject *);
-    void (         *Func4)(sObject *,sDInt);
+    void (         *Func4)(sObject *,ptrdiff_t);
     void (sObject::*Func11)(const struct sWindowDrag &);
-    void (sObject::*Func12)(const struct sWindowDrag &,sDInt);
+    void (sObject::*Func12)(const struct sWindowDrag &,ptrdiff_t);
   };
 
   sMessage()                                                                                      { Type=0; Code=0; Target=0; Func1=0; }
 //  sMessage(const sMessage &m)                                                                     { Type=m.Type; Code=m.Code; Target=m.Target; Func1=m.Func1; }
-  template<class T, class TBase> sMessage(T *target,void (TBase::*func)()                                ,sDInt code=0) { Type=1;    Code=code; Target=static_cast<TBase*>(target); Func1 =(void (sObject::*)()                )func; }
-  template<class T, class TBase> sMessage(T *target,void (TBase::*func)(sDInt)                           ,sDInt code=0) { Type=2;    Code=code; Target=static_cast<TBase*>(target); Func2 =(void (sObject::*)(sDInt)           )func; }
-                           sMessage(sObject *target,void (*func)(sObject*)                               ,sDInt code=0) { Type=3;    Code=code; Target=(sObject *)         target ; Func3 =func; }
-                           sMessage(sObject *target,void (*func)(sObject*,sDInt)                         ,sDInt code=0) { Type=4;    Code=code; Target=(sObject *)         target ; Func4 =func; }
-  template<class T, class TBase> sMessage(T *target,void (TBase::*func)(const struct sWindowDrag &      ),sDInt code=0) { Type=0x11; Code=code; Target=static_cast<TBase*>(target); Func11=(void (sObject::*)(const struct sWindowDrag &      ))func; }
-  template<class T, class TBase> sMessage(T *target,void (TBase::*func)(const struct sWindowDrag &,sDInt),sDInt code=0) { Type=0x12; Code=code; Target=static_cast<TBase*>(target); Func12=(void (sObject::*)(const struct sWindowDrag &,sDInt))func; }
+  template<class T, class TBase> sMessage(T *target,void (TBase::*func)()                                ,ptrdiff_t code=0) { Type=1;    Code=code; Target=static_cast<TBase*>(target); Func1 =(void (sObject::*)()                )func; }
+  template<class T, class TBase> sMessage(T *target,void (TBase::*func)(ptrdiff_t)                           ,ptrdiff_t code=0) { Type=2;    Code=code; Target=static_cast<TBase*>(target); Func2 =(void (sObject::*)(ptrdiff_t)           )func; }
+                           sMessage(sObject *target,void (*func)(sObject*)                               ,ptrdiff_t code=0) { Type=3;    Code=code; Target=(sObject *)         target ; Func3 =func; }
+                           sMessage(sObject *target,void (*func)(sObject*,ptrdiff_t)                         ,ptrdiff_t code=0) { Type=4;    Code=code; Target=(sObject *)         target ; Func4 =func; }
+  template<class T, class TBase> sMessage(T *target,void (TBase::*func)(const struct sWindowDrag &      ),ptrdiff_t code=0) { Type=0x11; Code=code; Target=static_cast<TBase*>(target); Func11=(void (sObject::*)(const struct sWindowDrag &      ))func; }
+  template<class T, class TBase> sMessage(T *target,void (TBase::*func)(const struct sWindowDrag &,ptrdiff_t),ptrdiff_t code=0) { Type=0x12; Code=code; Target=static_cast<TBase*>(target); Func12=(void (sObject::*)(const struct sWindowDrag &,ptrdiff_t))func; }
 
   void Post() const;                      // enque message
   void PostASync() const;                 // thread save message posting
@@ -543,7 +543,7 @@ public:
     }
   }
 
-  sU32 BytesAllocated()
+  uint32_t BytesAllocated()
   {
     return InternalPool.BytesAllocated();
   }
@@ -562,7 +562,7 @@ public:
 template <typename T> class sSmallObjectPoolStatic
 {
   int TSize;
-  sU8* InternalPool;
+  uint8_t* InternalPool;
   T* FreeList;
 
 public:
@@ -570,7 +570,7 @@ public:
   {
     TSize=sAlign<int>(sizeof(T),alignment);
     sVERIFY(TSize >= sizeof(void*));
-    InternalPool=(sU8*)sAllocMem(count*TSize,alignment,allocflags);
+    InternalPool=(uint8_t*)sAllocMem(count*TSize,alignment,allocflags);
 
     for (int i=0; i<count-1; i++)
       *((T**)(InternalPool+i*TSize))=(T*)(InternalPool+(i+1)*TSize);
@@ -657,7 +657,7 @@ public:
   sChar operator[](int i) const              { return Buffer[i]; }
   int Count() const                          { return sGetStringLen(Buffer); }
   sBool IsEmpty() const                       { return Buffer[0]==0; }
-  sU32 GetHash() const                        { return sHashString(Buffer); }
+  uint32_t GetHash() const                        { return sHashString(Buffer); }
 
   void Add(const sChar *a,const sChar *b)     { Buffer = sAddToStringPool2(a,sGetStringLen(a),b,sGetStringLen(b)); }
 };
@@ -744,7 +744,7 @@ protected:
   void GetAll(sArray<void *> *a);
 
   virtual sBool CompareKey(const void *k0,const void *k1)=0;
-  virtual sU32 HashKey(const void *key)=0;
+  virtual uint32_t HashKey(const void *key)=0;
 };
 
 
@@ -755,7 +755,7 @@ class sHashTable : public sHashTableBase
 {
 protected:
   sBool CompareKey(const void *k0,const void *k1)    { return (*(const KeyType *)k0)==(*(const KeyType *)k1); }
-  sU32 HashKey(const void *key)                      { return ((const KeyType *)key)->Hash(); }
+  uint32_t HashKey(const void *key)                      { return ((const KeyType *)key)->Hash(); }
 public:
   sHashTable(int s=0x4000,int n=0x100) : sHashTableBase(s,n)  {}
   void Add(const KeyType *key,ValueType *value)         { sHashTableBase::Add(key,value); }
@@ -813,7 +813,7 @@ protected:
   typedef struct Slot_ {Slot_ * next; sChar * key; void * value;} Slot;
   Slot ** Slots;
 
-  sU32 Hash (const sChar * key) const;
+  uint32_t Hash (const sChar * key) const;
 
 public: 
 
@@ -855,14 +855,14 @@ public:
 /***   * defaults to clear                                                ***/
 /***   * Will automatically grow in chunks of 128 bits (16 bytes)         ***/
 /***   * Newly grown bits will be set to one if SetAll() was called       ***/
-/***   * word referes to sU32 unit                                        ***/
+/***   * word referes to uint32_t unit                                        ***/
 /***                                                                      ***/
 /****************************************************************************/
 
 class sBitVector
 {
-  sU32 *Data;                     // the data
-  sU32 NewVal;                    // value for new bits (0 or ~0)
+  uint32_t *Data;                     // the data
+  uint32_t NewVal;                    // value for new bits (0 or ~0)
   sPtr Words;                     // number of words allocated. grows in chunks of 16.
 public:
   sBitVector();
@@ -898,38 +898,38 @@ class sStreamMemory : public sStream
 {
 protected:
 
-  sU8 *Ptr;
-  sDInt BSize, Pos;
+  uint8_t *Ptr;
+  ptrdiff_t BSize, Pos;
   sBool Owner, Readonly;
 
 public:
 
-  sBool Open(sDInt size);   // creates new buffer
-  sBool Open(const void *buffer, sDInt size, sBool iamowner=sFALSE); // opens buffer readonly
-  sBool Open(void *buffer, sDInt size, sBool iamowner=sFALSE); // opens buffer read/write
+  sBool Open(ptrdiff_t size);   // creates new buffer
+  sBool Open(const void *buffer, ptrdiff_t size, sBool iamowner=sFALSE); // opens buffer readonly
+  sBool Open(void *buffer, ptrdiff_t size, sBool iamowner=sFALSE); // opens buffer read/write
   sBool Open(sStream &str); // loads other stream into memory
 
   sStreamMemory();
-  explicit sStreamMemory(sDInt size);
-  sStreamMemory(const void *buffer, sDInt size, sBool iamowner=sFALSE);
-  sStreamMemory(void *buffer,sDInt size, sBool iamowner=sFALSE);
+  explicit sStreamMemory(ptrdiff_t size);
+  sStreamMemory(const void *buffer, ptrdiff_t size, sBool iamowner=sFALSE);
+  sStreamMemory(void *buffer,ptrdiff_t size, sBool iamowner=sFALSE);
   explicit sStreamMemory(sStream &str);
 
-  void  *Detach(sDInt *size);
+  void  *Detach(ptrdiff_t *size);
 
   // sStream impl
   ~sStreamMemory();
   int  GetFlags();
   sBool  Close();
-  sDInt Read(void *ptr, sDInt count);
-  sDInt Write(const void *ptr, sDInt count);
+  ptrdiff_t Read(void *ptr, ptrdiff_t count);
+  ptrdiff_t Write(const void *ptr, ptrdiff_t count);
   sSize Seek(sSize pos);
   sSize SeekEnd(sSize offset);
   sSize SeekCur(sSize offset);
   sBool EOF_();
   sSize Tell();
   sSize Size();
-  const void *GetPtr(sDInt &count);
+  const void *GetPtr(ptrdiff_t &count);
   sStream *Clone();
 
   using sStream::Read;
@@ -956,8 +956,8 @@ public:
   ~sStreamPart();
   int  GetFlags();
   sBool Close();
-  sDInt Read(void *ptr, sDInt count);
-  sDInt Write(const void *ptr, sDInt count);
+  ptrdiff_t Read(void *ptr, ptrdiff_t count);
+  ptrdiff_t Write(const void *ptr, ptrdiff_t count);
   sSize Seek(sSize pos);
   sSize SeekEnd(sSize offset);
   sSize SeekCur(sSize offset);
@@ -976,27 +976,27 @@ class sStreamCache : public sStream
 protected:
 
   sStream *Str;
-  sDInt BufSize;
-  sU8  *WBuf, *RBuf;
-  sDInt RBufPos, RBufSize;
-  sDInt WBufSize;
+  ptrdiff_t BufSize;
+  uint8_t  *WBuf, *RBuf;
+  ptrdiff_t RBufPos, RBufSize;
+  ptrdiff_t WBufSize;
   int Flags;
 
   void Flush();
 
 public:
 
-  sBool Open(sStream &str, sDInt granule=65536);
+  sBool Open(sStream &str, ptrdiff_t granule=65536);
 
   sStreamCache();
-  sStreamCache(sStream &str, sDInt granule=65536);
+  sStreamCache(sStream &str, ptrdiff_t granule=65536);
 
   // sStream impl
   ~sStreamCache();
   int  GetFlags();
   sBool Close();
-  sDInt Read(void *ptr, sDInt count);
-  sDInt Write(const void *ptr, sDInt count);
+  ptrdiff_t Read(void *ptr, ptrdiff_t count);
+  ptrdiff_t Write(const void *ptr, ptrdiff_t count);
   sBool EOF_();
 
   using sStream::Read;
@@ -1012,15 +1012,15 @@ protected:
 
   struct Buffer
   {
-    sU8 Mem[BUFSIZE];
+    uint8_t Mem[BUFSIZE];
     sDNode DNode;
   };
 
   sDList<Buffer,&Buffer::DNode> Nodes;
   
-  sDInt FSize;
+  ptrdiff_t FSize;
   Buffer *CurB;
-  sDInt BPos,FPos;
+  ptrdiff_t BPos,FPos;
 
 public:
 
@@ -1031,8 +1031,8 @@ public:
   ~sStreamTemp();
   int  GetFlags();
   sBool Close();
-  sDInt Read(void *ptr, sDInt count);
-  sDInt Write(const void *ptr, sDInt count);
+  ptrdiff_t Read(void *ptr, ptrdiff_t count);
+  ptrdiff_t Write(const void *ptr, ptrdiff_t count);
   sSize Seek(sSize pos);
   sSize Tell();
   sSize Size();

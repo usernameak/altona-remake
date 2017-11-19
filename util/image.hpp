@@ -96,7 +96,7 @@ enum sTextureFlags
   sTEX_RAW = 41,        // compute shader: raw (byte addressed) buffer
   sTEX_UINT32 = 42,     // another format useful for compute shaders.
 
-  // don't use more than 64 texture formats, some tools use an sU64 bitmask to store sets of texture formats.
+  // don't use more than 64 texture formats, some tools use an uint64_t bitmask to store sets of texture formats.
 
   sTEX_FORMAT = 0x000000ff,       // mask for format field
   sTEX_DYNAMIC = 0x00000100,      // you want to update the texture regulary by BeginLoad() / EndLoad()
@@ -142,7 +142,7 @@ enum sTextureFlags
 class sImage;
 class sTextureBase;
 
-extern sU64 sTotalImageDataMem;  // total memory in sImageData bitmaps
+extern uint64_t sTotalImageDataMem;  // total memory in sImageData bitmaps
 
 /****************************************************************************/
 
@@ -168,9 +168,9 @@ public:
   int SizeZ;                     // for volumemaps. 0 otherwise
   int Mipmaps;                   // number of mipmaps
   int BitsPerPixel;              // for size calculation
-  sU8 *Data;                      // the Data itself
+  uint8_t *Data;                      // the Data itself
   int PaletteCount;              // in color entries (32 bit units)
-  sU32 *Palette;                  // if a palette is required, here it is!
+  uint32_t *Palette;                  // if a palette is required, here it is!
   int NameId;                    // Texture serialization nameid
   int Quality;                   // dither quality for DXT conversions
   int CodecType;                 // sICT_***
@@ -182,7 +182,7 @@ public:
 
 //  void Init(int format,int xs,int ys,int mipmaps=1);    // obsolete
   void Init2(int format,int mipmaps,int xs,int ys,int zs); // new version, with volume maps
-  void InitCoded(int codecType,int format,int mipmaps,int xs,int ys,int zs,const sU8 *data,int dataSize);
+  void InitCoded(int codecType,int format,int mipmaps,int xs,int ys,int zs,const uint8_t *data,int dataSize);
 
   void Copy(const sImageData *source);
   void Swap(sImageData *img);
@@ -219,8 +219,8 @@ void sSetDecompressHandler(int codecType,sDecompressImageDataHandler handler);
 struct sFontMapFontDesc
 {
   sString<256> Name;      // name of font to search by the fontsystem of the OS
-  sU32         Size;      // fontsize in pixel
-  sS32         YOffset;   // offset in y-direction (positive values shift the font upwards)
+  uint32_t         Size;      // fontsize in pixel
+  int32_t         YOffset;   // offset in y-direction (positive values shift the font upwards)
   sBool        Italic;    // font in italic mode
   sBool        Bold;      // font in bold mode
 };
@@ -229,12 +229,12 @@ class sFontMapInputParameter
 {
   public:
     sStaticArray<sFontMapFontDesc> FontsToSearchIn;
-    sU32         AntiAliasingFactor;
+    uint32_t         AntiAliasingFactor;
     sBool        Mipmaps;   // font has mitmaps
     sBool        Hinting;   // font has hinting enabled
     sBool        PMAlpha;   // font supports premultiplied alpha
-    sU32         Outline;   // size of outline in pixels
-    sU32         Blur;      // size of blur kernel in pixels
+    uint32_t         Outline;   // size of outline in pixels
+    uint32_t         Blur;      // size of blur kernel in pixels
     const sChar *Letters;   // the letters to be contained by the fontmap
 };
 
@@ -247,15 +247,15 @@ class sFontMapInputParameter
 
 struct sFontMap
 {
-  sU16 X,Y;                       ///< position in bitmap in bitmap-pixels
-  sS16 Pre;                       ///< kerning before character in multi-pixels
-  sS16 Cell;                      ///< size of bitmap-cell in bitmap-pixels
-  sS16 Post;                      ///< kerning after character in multi-pixels
-  sS16 Advance;                   ///< total advance in multi-pixels
-  sU16 Letter;                    ///< 16-bit unicode of character
-  sS16 OffsetY;                   // vertical distance between the top of the character cell and the glyph
-  sU16 Height;                    // height of the glyph
-  sU16 Pad;
+  uint16_t X,Y;                       ///< position in bitmap in bitmap-pixels
+  int16_t Pre;                       ///< kerning before character in multi-pixels
+  int16_t Cell;                      ///< size of bitmap-cell in bitmap-pixels
+  int16_t Post;                      ///< kerning after character in multi-pixels
+  int16_t Advance;                   ///< total advance in multi-pixels
+  uint16_t Letter;                    ///< 16-bit unicode of character
+  int16_t OffsetY;                   // vertical distance between the top of the character cell and the glyph
+  uint16_t Height;                    // height of the glyph
+  uint16_t Pad;
 };
 
 
@@ -263,18 +263,18 @@ struct sFontMap
 class sImage
 {
 public:
-  sBool LoadBMP(const sU8 *data,int size);
-  sBool LoadPIC(const sU8 *data,int size);
+  sBool LoadBMP(const uint8_t *data,int size);
+  sBool LoadPIC(const uint8_t *data,int size);
   sBool LoadTGA(const sChar *name);
-  sBool LoadJPG(const sU8 *data,int size);
-  sBool LoadPNG(const sU8 *data,int size);
+  sBool LoadJPG(const uint8_t *data,int size);
+  sBool LoadPNG(const uint8_t *data,int size);
 
   sBool SaveBMP(const sChar *name);
   sBool SavePIC(const sChar *name);
   sBool SaveTGA(const sChar *name);
   sBool SavePNG(const sChar *name);
 
-  int SaveBMP(sU8 *data, int size);
+  int SaveBMP(uint8_t *data, int size);
 
 public:
 /*
@@ -288,7 +288,7 @@ public:
 */
   int SizeX;
   int SizeY;
-  sU32 *Data;
+  uint32_t *Data;
 
   sImage();
   sImage(int xs,int ys);
@@ -301,8 +301,8 @@ public:
 
   sBool HasAlpha();                 // TRUE when at least one pixel is alpha!=255 -> use for DXT1/DXT5 check
   
-  void Fill(sU32 color);
-//  void Fill(sU32 srcBitmask,sU32 color);
+  void Fill(uint32_t color);
+//  void Fill(uint32_t srcBitmask,uint32_t color);
   void SwapRedBlue();
   void SwapEndian();
 #if sCONFIG_BE
@@ -313,19 +313,19 @@ public:
   void SwapIfBE()       { }
 #endif
 
-  void Checker(sU32 col0,sU32 col1,int maskx=8,int masky=8);
-  void Glow(sF32 cx,sF32 cy,sF32 rx,sF32 ry,sU32 color,sF32 alpha=1.0f,sF32 power=0.5f);
-  void Rect(sF32 x0,sF32 x1,sF32 y0,sF32 y1,sU32 color);
-  void Perlin(int start,int octaves,sF32 falloff,int mode,int seed,sF32 amount);
+  void Checker(uint32_t col0,uint32_t col1,int maskx=8,int masky=8);
+  void Glow(float cx,float cy,float rx,float ry,uint32_t color,float alpha=1.0f,float power=0.5f);
+  void Rect(float x0,float x1,float y0,float y1,uint32_t color);
+  void Perlin(int start,int octaves,float falloff,int mode,int seed,float amount);
 
   void MakeSigned();                    // convert from 0..255 unsigned to -128..127 signed
 //  void ExchangeChannels(IChannel channelX, IChannel channelY);
 //  void CopyChannelFrom(IChannel channelDst, IChannel channelSrc);
-//  void SetChannel(IChannel channelX,sU8 val);
+//  void SetChannel(IChannel channelX,uint8_t val);
   void Copy(sImage *);
   void Add(sImage *);
   void Mul(sImage *);
-  void Mul(sU32 color);
+  void Mul(uint32_t color);
   void Blend(sImage *, sBool premultiplied);
   void ContrastBrightness(int contrast,int brightness); // x = (x-0.5)*c+0.5+b;
   void BlitFrom(const sImage *src, int sx, int sy, int dx, int dy, int width, int height);
@@ -341,9 +341,9 @@ public:
   void PinkAlpha();
   void MonoToAll(); // min(alpha,luminance) -> all channels
 
-  void HalfTransparentRect(int x0,int y0,int x1,int y1,sU32 color);
-  void HalfTransparentRect(const sRect &r,sU32 color) { HalfTransparentRect(r.x0,r.y0,r.x1,r.y1,color); }
-  void HalfTransparentRectHole(const sRect &outer,const sRect &hole,sU32 color);
+  void HalfTransparentRect(int x0,int y0,int x1,int y1,uint32_t color);
+  void HalfTransparentRect(const sRect &r,uint32_t color) { HalfTransparentRect(r.x0,r.y0,r.x1,r.y1,color); }
+  void HalfTransparentRectHole(const sRect &outer,const sRect &hole,uint32_t color);
 
   sFontMap *CreateFontPage(sFontMapInputParameter &inParam, int &outLetterCount, int *outBaseLine=0);
   
@@ -353,7 +353,7 @@ public:
   sImage *Half(sBool gammacorrect=sFALSE) const;
   sImage *Copy() const;
 
-  sU32 Filter(int x,int y) const;     // 24:8 pixel, requires power 2 texture!
+  uint32_t Filter(int x,int y) const;     // 24:8 pixel, requires power 2 texture!
 
 //  sImageData *Convert(int tf,int mip=0) const;  // obsolete
 //  void Convert(sImageData *);                     // obsolete
@@ -377,7 +377,7 @@ class sImageI16
 public:
   int SizeX;
   int SizeY;
-  sU16 *Data;
+  uint16_t *Data;
 
   sImageI16();
   sImageI16(int xs,int ys);
@@ -391,7 +391,7 @@ public:
   void Serialize(sWriter &);
   void Serialize(sReader &);
 
-  void Fill(sU16 value);
+  void Fill(uint16_t value);
   void SwapEndian();
 #if sCONFIG_BE
   void SwapIfLE()       { }
@@ -403,7 +403,7 @@ public:
 
   void Add(sImageI16 *);
   void Mul(sImageI16 *);
-  void Mul(sU16 value);
+  void Mul(uint16_t value);
   void FlipXY(); 
   int Filter(int x,int y,sBool colwrap=0) const;     // 24:8 pixel, requires power 2 texture!
 };
@@ -421,7 +421,7 @@ public:
   int SizeX;
   int SizeY;
   int SizeZ;                     // for cube or volume map
-  sF32 *Data;
+  float *Data;
   sBool Cubemap;                  // Interpret SizeZ as cubemap, not volumemap
 
   sFloatImage();
@@ -432,20 +432,20 @@ public:
   void CopyFrom(const sImage *src);
   void CopyFrom(const sImageData *src);
   void CopyTo(sImage *dest) const;
-  void CopyTo(sImage *dest,sF32 power) const; // power optimized for 0.5f , 1.0f and 2.0f, only for RGB
-  void CopyTo(sU32 *dest,sF32 power) const;   // power optimized for 0.5f , 1.0f and 2.0f, only for RGB
+  void CopyTo(sImage *dest,float power) const; // power optimized for 0.5f , 1.0f and 2.0f, only for RGB
+  void CopyTo(uint32_t *dest,float power) const;   // power optimized for 0.5f , 1.0f and 2.0f, only for RGB
   
 
-  void Fill(sF32 r,sF32 g,sF32 b,sF32 a);
+  void Fill(float r,float g,float b,float a);
   void Scale(const sFloatImage *src,int xs,int ys); // no interpolation
-  void Power(sF32 p);             // power optimized for 0.5f and 2.0f, only for RGB
+  void Power(float p);             // power optimized for 0.5f and 2.0f, only for RGB
   void Half(sBool linear);
   void Downsample(int mip,const sFloatImage *src);
   void Normalize();
 
-  void ScaleAlpha(sF32 scale);
-  sF32 GetAlphaCoverage(sF32 tresh);
-  void AdjustAlphaCoverage(sF32 tresh,sF32 cov,sF32 error);
+  void ScaleAlpha(float scale);
+  float GetAlphaCoverage(float tresh);
+  void AdjustAlphaCoverage(float tresh,float cov,float error);
 };
 
 
@@ -460,20 +460,20 @@ class sTexture2D *sLoadTexture2D(const sImage *img,int formatandflags);
 class sTexture2D *sLoadTexture2D(const sImageData *img);
 class sTextureCube *sLoadTextureCube(const sChar *t0,const sChar *t1,const sChar *t2,const sChar *t3,const sChar *t4,const sChar *t5,int formatandflags);
 class sTextureCube *sLoadTextureCube(const sImageData *img);
-//sImage *sReadTexImage(sU32 *&data, sU32 &texflags);
-//void sReadTexImage(sU32 *&data, sU32 &texflags, sImage *img);
+//sImage *sReadTexImage(uint32_t *&data, uint32_t &texflags);
+//void sReadTexImage(uint32_t *&data, uint32_t &texflags, sImage *img);
 void sSaveRT(const sChar *filename,sTexture2D *rt=0);
 
-int sDiffImage(sImage *dest, const sImage *img0, const sImage *img1, sU32 mask=0xffffffff);
-void Heightmap2Normalmap(sImage *dest, const sImage *src, sF32 scale /*= 1.0f*/);
+int sDiffImage(sImage *dest, const sImage *img0, const sImage *img1, uint32_t mask=0xffffffff);
+void Heightmap2Normalmap(sImage *dest, const sImage *src, float scale /*= 1.0f*/);
 sImageData *sMergeNormalMaps(const sImageData *img0, const sImageData *img1);
 
 // HDR compression
 inline sBool sCheckMRGB(int format) { format &= sTEX_FORMAT; return format==sTEX_MRGB8 || format==sTEX_MRGB16; }
 void sCompressMRGB(sImageData *dst_img, int format, const sImageData *src_img);
-void sDecompressMRGB(sImageData *dst_img, const sImageData *src_img, sF32 alpha=1.0f);
+void sDecompressMRGB(sImageData *dst_img, const sImageData *src_img, float alpha=1.0f);
 void sCompressMRGB(sImageData *img, int format);
-void sDecompressMRGB(sImageData *img, sF32 alpha=1.0f);
+void sDecompressMRGB(sImageData *img, float alpha=1.0f);
 void sClampToARGB8(sImageData *img, int mm=0);
 sImageData *sConvertARGB8ToHDR(const sImageData *img, int format);
 

@@ -30,7 +30,7 @@ public:
   void FadeIn (int delta=0) {Time = sMin(Length, Time+delta); Dir=IN;}
   void FadeOut (int delta=0) {Time = sMax(0, Time-delta); Dir=OUT;}
   int GetDirection() { return (Dir==IN ? 1 : (Dir==OUT ? -1 : 0)); }
-  sF32 GetFactor(sU32 type=SMOOTH);
+  float GetFactor(uint32_t type=SMOOTH);
   int GetTime() { return Time; }
   int GetLength() { return Length; }
   

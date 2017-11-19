@@ -28,9 +28,9 @@ namespace sPerfMon
   static int MaxSwitches;
   static sBool Active;
   static sBool Show=sFALSE;
-  static sU64  StartTime;
-  static sU64  MaxTime=1000000/30;
-  static sU64  FrameTime=1000000/60;
+  static uint64_t  StartTime;
+  static uint64_t  MaxTime=1000000/30;
+  static uint64_t  FrameTime=1000000/60;
 
   static int NumThreads;
   static sThreadContext **ThreadList;
@@ -77,7 +77,7 @@ namespace sPerfMon
 
   struct ThreadEvent
   {
-    sU32  Color;
+    uint32_t  Color;
     const sChar *Name;
     const sChar8 *Name8;
 
@@ -86,7 +86,7 @@ namespace sPerfMon
 
   struct Event
   {
-    sU64  Time;
+    uint64_t  Time;
     int  Level;
     ThreadEvent Ev;
   };
@@ -103,20 +103,20 @@ namespace sPerfMon
     int MuteCount;
   };
 
-  sU8  *Memory;
+  uint8_t  *Memory;
  
   /****************************************************************************/
 
-  static sU8 *Alloc(int size)
+  static uint8_t *Alloc(int size)
   {
-    sU8 *ptr=0;
+    uint8_t *ptr=0;
 
     sPushMemLeakDesc(L"PerfMon");
 
     if (sIsMemTypeAvailable(sAMF_DEBUG))
-      ptr = (sU8*)sAllocMem(size,4,sAMF_DEBUG);
+      ptr = (uint8_t*)sAllocMem(size,4,sAMF_DEBUG);
 
-    if (!ptr) ptr=(sU8*)sAllocMem(size,4,0);
+    if (!ptr) ptr=(uint8_t*)sAllocMem(size,4,0);
 
     sPopMemLeakDesc();
 
@@ -144,7 +144,7 @@ namespace sPerfMon
     }
 
     sSetMem(Memory,0,memneeded);
-    sU8 *mem=Memory;
+    uint8_t *mem=Memory;
 
     NumThreads=0;
     ThreadList= (sThreadContext**)mem; mem+=tlmem;
@@ -244,7 +244,7 @@ namespace sPerfMon
     Lock->Lock();
 
     Active=sFALSE;
-    sU64 time = sGetTimeUS()-StartTime;
+    uint64_t time = sGetTimeUS()-StartTime;
 
     // add end to all threads
     for (int i=0; i<NumThreads; i++)
@@ -268,7 +268,7 @@ namespace sPerfMon
     sSetTarget(sTargetPara(sST_CLEARNONE,0,0));
 
     int sx, sy;
-    sF32 asp, sax, say;
+    float asp, sax, say;
 
     sGetScreenSize(sx,sy);
     sGetScreenSafeArea(sax,say);
@@ -277,21 +277,21 @@ namespace sPerfMon
     Painter->SetTarget(sRect(0,0,sx,sy));
     Painter->Begin();
 
-    sF32 height=20;
-    sF32 theight=Painter->GetHeight(0);
-    sF32 yto=(height-theight)/2;
+    float height=20;
+    float theight=Painter->GetHeight(0);
+    float yto=(height-theight)/2;
     
-    sF32 y=height*NumThreads+(height/2)*(NumThreads+1);
+    float y=height*NumThreads+(height/2)*(NumThreads+1);
     y=sy/2+(sy*say/2)-y;
-    sF32 barsy=y;
+    float barsy=y;
 
     Painter->Box(sFRect(0,y,sx,sy),0x40000000);
 
-    sF32 left=(sx-sx*sax)/2;
-    sF32 right=(sx+sx*sax)/2;
+    float left=(sx-sx*sax)/2;
+    float right=(sx+sx*sax)/2;
     y+=height/2;
 
-    sF32 tw=0;
+    float tw=0;
     for (int i=0; i<NumThreads; i++)
       tw=sMax(tw,Painter->GetWidth(0,ThreadList[i]->ThreadName));
     tw+=10;
@@ -307,17 +307,17 @@ namespace sPerfMon
       r.Extend(-1);
       Painter->Box(r,0xff000000);
 
-      sU64 ft=FrameTime;
+      uint64_t ft=FrameTime;
       while (ft<MaxTime)
       {
-        sF32 x=r.SizeX()*ft/MaxTime+left+tw;
+        float x=r.SizeX()*ft/MaxTime+left+tw;
         Painter->Box(x,r.y0,x+1,r.y1,0xffffffc0);
         ft+=FrameTime;
       }
 
       r.Extend(-1);
 
-      sU64 rxs=(sU64)r.SizeX();
+      uint64_t rxs=(uint64_t)r.SizeX();
       for (int i=0; i<t->NumEvents-1; i++)
       {
         Event &e1=t->Events[i];
@@ -339,11 +339,11 @@ namespace sPerfMon
 
       sString<256> name;
       ThreadEvent *LineEv[MAXLINES];
-      sU64 LineTime[MAXLINES];
-      sU32 LineCount[MAXLINES];
+      uint64_t LineTime[MAXLINES];
+      uint32_t LineCount[MAXLINES];
       int nLines=0;
       
-      sF32 basey=barsy-theight*1.5f;
+      float basey=barsy-theight*1.5f;
 
       tw=0;
       for (int i=0; i<t->NumEvents-1; i++)
@@ -362,9 +362,9 @@ namespace sPerfMon
       }
       tw+=10;
 
-//      sU64 rxs=r.SizeX();
-      sF32 r2=right-Painter->GetWidth(0,L" (1234) 12345");
-      sU64 rxs=(sU64)(r2-(left+tw));
+//      uint64_t rxs=r.SizeX();
+      float r2=right-Painter->GetWidth(0,L" (1234) 12345");
+      uint64_t rxs=(uint64_t)(r2-(left+tw));
       for (int i=0; i<t->NumEvents-1; i++)
       {
         Event &e1=t->Events[i];
@@ -387,7 +387,7 @@ namespace sPerfMon
             LineTime[nLines]=0;
             LineCount[nLines]=0;
 
-            sF32 y=basey-line*1.5f*theight;
+            float y=basey-line*1.5f*theight;
             Painter->Box(0,y,sx,y+theight*1.5f,0x40000000);
             Painter->Box(left+tw,y,r2,y+theight,0xff000000);
             if (e1.Ev.Name)
@@ -434,20 +434,20 @@ namespace sPerfMon
     else if (ShowDetails==SHOW_SWITCHES)
     {
       //static const int MAXLINES=20;
-      sF32 basey=barsy;
+      float basey=barsy;
 
-      sF32 tw=0;
+      float tw=0;
       for (int i=0; i<NumSwitches; i++)
         tw=sMax(tw,Painter->GetWidth(0,Switches[i].Name));
       tw+=30;
 
-      sF32 y=basey-1.5f*theight;
+      float y=basey-1.5f*theight;
       for (int i=0; i<NumSwitches; i++)
       {
         Switch &s=Switches[i];
 
-        sU32 c1=0x40000000;
-        sU32 c2=0xffc0c0c0;
+        uint32_t c1=0x40000000;
+        uint32_t c2=0xffc0c0c0;
         if (i==CurSwitch)
         {
           c1=0x40808080;
@@ -491,12 +491,12 @@ namespace sPerfMon
       ValuesSorted=sTRUE;
     }
 
-    sF32 maxy=(sy-sy*say)/2;
+    float maxy=(sy-sy*say)/2;
     int curgroup=0;
     height=18;
-    sF32 width=110;
-    sF32 x=sx;
-    sF32 groupy=0;
+    float width=110;
+    float x=sx;
+    float groupy=0;
     y=sy;
     for (int i=0; i<NumValues; i++)
     {
@@ -523,21 +523,21 @@ namespace sPerfMon
       int val=*v.Ptr;
       if (val<v.Min)
       {
-        sF32 w=sMin((v.Min-val)*(width-4)/sF32(range),width-4);
+        float w=sMin((v.Min-val)*(width-4)/float(range),width-4);
         Painter->Box(r.x1-w,r.y0,r.x1,r.y1,0xff802060);
       }
       else if (val<v.Max)
       {
-        sF32 w=(val-v.Min)*(width-4)/sF32(range);
+        float w=(val-v.Min)*(width-4)/float(range);
         Painter->Box(r.x0,r.y0,r.x0+w,r.y1,0xff408040);
       }
       else
       {
         Painter->Box(r,0xff408040);
-        sF32 w=sMin((val-v.Max)*(width-4)/sF32(range),width-4);
+        float w=sMin((val-v.Max)*(width-4)/float(range),width-4);
         Painter->Box(r.x0,r.y0,r.x0+w,r.y1,0xffa02020);
       }
-      sF32 ty=r.y0+((height-2)-theight)/2;
+      float ty=r.y0+((height-2)-theight)/2;
       Painter->Print(0,r.x0+1,ty,0xffffffff,v.Name);
       
       sString<256> vstr;
@@ -566,10 +566,10 @@ void sShowPerfMon(sBool show) { if (!show) CurSwitch=-1; sPerfMon::Show=show; }
 void sTogglePerfMon() { Show=!Show; CurSwitch=-1; }
 sBool sPerfMonInited() { return Inited; }
 
-static const sU32 PerfMonLeft = 0; 
-static const sU32 PerfMonRight = 0;
-static const sU32 PerfMonUp = 0;
-static const sU32 PerfMonDown = 0;
+static const uint32_t PerfMonLeft = 0; 
+static const uint32_t PerfMonRight = 0;
+static const uint32_t PerfMonUp = 0;
+static const uint32_t PerfMonDown = 0;
 
 sBool sSendPerfMonInput(const sInput2Event &ie)
 {
@@ -625,10 +625,10 @@ sBool sSendPerfMonInput(const sInput2Event &ie)
   return sFALSE;
 }
 
-void sSetPerfMonTimes(sF32 maxtime, sF32 frametime) 
+void sSetPerfMonTimes(float maxtime, float frametime) 
 { 
-  MaxTime=sU64(maxtime*1000000.0f); 
-  FrameTime=sU64(frametime*1000000.0f); 
+  MaxTime=uint64_t(maxtime*1000000.0f); 
+  FrameTime=uint64_t(frametime*1000000.0f); 
 }
 
 /****************************************************************************/
@@ -699,7 +699,7 @@ void sPerfRemThread(sThreadContext *ctx)
 /***                                                                      ***/
 /****************************************************************************/
 
-void sPerfEnter(const sChar *name, sU32 color, sThreadContext *tid)
+void sPerfEnter(const sChar *name, uint32_t color, sThreadContext *tid)
 {
   if (!sPerfMon::Inited) return;
 
@@ -710,7 +710,7 @@ void sPerfEnter(const sChar *name, sU32 color, sThreadContext *tid)
   if (t->Level==MAX_NESTING) return;
   if (t->MuteCount) return;
 
-  sU64 time = sGetTimeUS()-StartTime;
+  uint64_t time = sGetTimeUS()-StartTime;
   Event &e=t->Events[t->NumEvents++];
   e.Time=time;
   e.Level=t->Level;
@@ -723,7 +723,7 @@ void sPerfEnter(const sChar *name, sU32 color, sThreadContext *tid)
   if (t->NumEvents==MaxEvents) t->NumEvents--;
 }
 
-void sPerfEnter(const sChar8 *name, sU32 color, sThreadContext* tid)
+void sPerfEnter(const sChar8 *name, uint32_t color, sThreadContext* tid)
 {
   if (!sPerfMon::Inited) return;
 
@@ -733,7 +733,7 @@ void sPerfEnter(const sChar8 *name, sU32 color, sThreadContext* tid)
   if (t->Level==MAX_NESTING) return;
   if (t->MuteCount) return;
 
-  sU64 time = sGetTimeUS()-StartTime;
+  uint64_t time = sGetTimeUS()-StartTime;
 
   Event &e=t->Events[t->NumEvents++];
   e.Time=time;
@@ -747,10 +747,10 @@ void sPerfEnter(const sChar8 *name, sU32 color, sThreadContext* tid)
   if (t->NumEvents==MaxEvents) t->NumEvents--;
 }
 
-void sPerfSet(const sChar *name, sU32 color, sThreadContext *tid)
+void sPerfSet(const sChar *name, uint32_t color, sThreadContext *tid)
 {
   if (!sPerfMon::Inited) return;
-  sU64 time = sGetTimeUS()-StartTime;
+  uint64_t time = sGetTimeUS()-StartTime;
 
   if (!tid) tid=sGetThreadContext();
   Thread *t=(Thread*)tid->PerfData;
@@ -770,7 +770,7 @@ void sPerfSet(const sChar *name, sU32 color, sThreadContext *tid)
 void sPerfLeave(sThreadContext* tid)
 {
   if (!sPerfMon::Inited) return;
-  sU64 time = sGetTimeUS()-StartTime;
+  uint64_t time = sGetTimeUS()-StartTime;
 
   if (!tid) tid=sGetThreadContext();
   Thread *t=(Thread*)tid->PerfData;

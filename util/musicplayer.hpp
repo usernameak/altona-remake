@@ -25,11 +25,11 @@
 class sMusicPlayer
 {
 private:
-  sS16 *RewindBuffer;               // remember all rendered samples
+  int16_t *RewindBuffer;               // remember all rendered samples
   int RewindSize;                  // max size in samples
   int RewindPos;                   // up to this sample the buffer has been rendered
 protected:
-  sU8 *Stream;                      // the loaded data
+  uint8_t *Stream;                      // the loaded data
   int StreamSize;
   sBool StreamDelete;
 
@@ -40,19 +40,19 @@ public:
   sMusicPlayer();
   virtual ~sMusicPlayer();
   sBool Load(const sChar *name);    // load from file, memory is deleted automatically
-  sBool Load(sU8 *data,int size);  // load from buffer, memory is not deleted automatically
+  sBool Load(uint8_t *data,int size);  // load from buffer, memory is not deleted automatically
   sBool LoadAndCache(const sChar *name);
   int GetCacheSamples() { return RewindSize; }
-  sS16 *GetCacheData() { return RewindBuffer; }
+  int16_t *GetCacheData() { return RewindBuffer; }
   sBool IsPlaying() { return Status==3; }
   void InstallHandler();            // install a soundhandler.
   void AllocRewind(int bytes);     // allocate a rewindbuffer
   sBool Start(int songnr);         // initialize and start playing
   void Stop();                      // stop playing
-  sBool Handler(sS16 *buffer,int samples,int Volume=256); // return sFALSE if all following calls to handler will just return silence
+  sBool Handler(int16_t *buffer,int samples,int Volume=256); // return sFALSE if all following calls to handler will just return silence
 
   virtual sBool Init(int songnr)=0;
-  virtual int Render(sS16 *buffer,int samples)=0;   // return number of samples actually rendered, 0 for eof
+  virtual int Render(int16_t *buffer,int samples)=0;   // return number of samples actually rendered, 0 for eof
   virtual int GetTuneLength() = 0; // in samples
 };
 

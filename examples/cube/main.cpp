@@ -71,7 +71,7 @@ MyApp::MyApp()
   vp->Init(-1, 1, 1, -1, 0, 0, 0,0); vp++; // 7
   Geo->EndLoadVB();
 
-  sU16 *ip=0;
+  uint16_t *ip=0;
   Geo->BeginLoadIB(6*6,sGD_STATIC,&ip);
   for(int i=0;i<6;i++)
     sQuad(ip,i*4,0,1,2,3);
@@ -153,7 +153,7 @@ void MyApp::OnPaint3D()
 
   // debug output
 
-  sF32 avg = Timer.GetAverageDelta();
+  float avg = Timer.GetAverageDelta();
   Painter->SetTarget();
   Painter->Begin();
   Painter->SetPrint(0,0xff000000,2);

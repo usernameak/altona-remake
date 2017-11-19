@@ -97,13 +97,13 @@ void sExternMainExit();
 
 struct sDateAndTime
 {
-  sU16 Year;        // Woops! Y0x10000 problem!
-  sU8  Month;       // 1-12 (January=1)
-  sU8  Day;         // Day of month 1-31
-  sU8  DayOfWeek;   // 0-6 (0=Sunday)
-  sU8  Hour;        // 0-23
-  sU8  Minute;      // 0-59
-  sU8  Second;      // 0-60 (! - leap seconds!)
+  uint16_t Year;        // Woops! Y0x10000 problem!
+  uint8_t  Month;       // 1-12 (January=1)
+  uint8_t  Day;         // Day of month 1-31
+  uint8_t  DayOfWeek;   // 0-6 (0=Sunday)
+  uint8_t  Hour;        // 0-23
+  uint8_t  Minute;      // 0-59
+  uint8_t  Second;      // 0-60 (! - leap seconds!)
 
   sDateAndTime();
   int Compare(const sDateAndTime &x) const;
@@ -126,17 +126,17 @@ void sEnableGUI();
 
 void sConsoleWindowClear();
 int sGetTime();
-sU64 sGetTimeUS(); // microseconds, resolution as good as possible
+uint64_t sGetTimeUS(); // microseconds, resolution as good as possible
 
 sDateAndTime sGetDateAndTime(); // local time
 sDateAndTime sAddLocalTime(sDateAndTime origin,int seconds);
-sS64 sDiffLocalTime(sDateAndTime a,sDateAndTime b); // a-b (returns difference in seconds)
-sU8 sGetFirstDayOfWeek(); //! Gets first day of week, depending on users locale setting. (0=Sunday)
-sBool sIsLeapYear(sU16 year);
-sBool sIsDateValid(sU16 year, sU8 month, sU8 day);
+int64_t sDiffLocalTime(sDateAndTime a,sDateAndTime b); // a-b (returns difference in seconds)
+uint8_t sGetFirstDayOfWeek(); //! Gets first day of week, depending on users locale setting. (0=Sunday)
+sBool sIsLeapYear(uint16_t year);
+sBool sIsDateValid(uint16_t year, uint8_t month, uint8_t day);
 sBool sIsDateValid(const sDateAndTime &date);
-int sGetDaysInMonth(sU16 year, sU8 month);
-sU8 sGetDayOfWeek(const sDateAndTime &date);
+int sGetDaysInMonth(uint16_t year, uint8_t month);
+uint8_t sGetDayOfWeek(const sDateAndTime &date);
 
 void sCatchCtrlC(sBool enable=1);
 sBool sGotCtrlC();
@@ -178,9 +178,9 @@ struct sTimeHelper
 {
   int Start;
   const sChar *Msg;
-  sU32 *TotalTime;
+  uint32_t *TotalTime;
   sTimeHelper(const sChar *msg):Msg(msg) { TotalTime = 0; Start = sGetTime(); }
-  sTimeHelper(const sChar *msg, sU32 &totaltime):Msg(msg) { TotalTime = &totaltime; Start = sGetTime(); }
+  sTimeHelper(const sChar *msg, uint32_t &totaltime):Msg(msg) { TotalTime = &totaltime; Start = sGetTime(); }
   ~sTimeHelper()
   {
 #if !sSTRIPPED
@@ -239,13 +239,13 @@ sLanguage sGetLanguage();
 // This function is inlined, because the compiler is able to optimize/remove surrounding code,
 // so it is harder "patch" the demo to a full title.
 sINLINE sBool sIsTrialVersion() { return sTRUE; }
-sU32 sGetDemoTimeOut();   // 0 : never, otherwise timeout time in ms
+uint32_t sGetDemoTimeOut();   // 0 : never, otherwise timeout time in ms
 #else
 // A trial version is a full title, with limited functionality only.
 // It actually contains the whole content and logic of the full title.
 // To unlock all features, the user has to obtain a license.
 sBool sIsTrialVersion();
-sINLINE sU32 sGetDemoTimeOut() { return 0; }   // 0 : never, otherwise timeout time in ms
+sINLINE uint32_t sGetDemoTimeOut() { return 0; }   // 0 : never, otherwise timeout time in ms
 #endif
 
 /****************************************************************************/
@@ -269,7 +269,7 @@ struct sSysMemInfo
 // returns number of different memory types, fillst up to count info entries with mem infos
 int sGetSystemMemInfo(sSysMemInfo* info=0, int count=0);
 
-sS64 sGetUsedMainMemory();          // negative result: memory free
+int64_t sGetUsedMainMemory();          // negative result: memory free
 void sEnableMemoryAllocation(sBool enable);
 
 /****************************************************************************/
@@ -318,7 +318,7 @@ typedef void (sThreadFunc)(class sThread *, void *);
 struct sThreadContext
 {
   static sPtr TlsOffset;
-  sU32 Flags;                       // some flags for the thread
+  uint32_t Flags;                       // some flags for the thread
   sChar PrintBuffer[1024];        // the buffer for the threadsafe print-functions
   sString<64> ThreadName;           // a name for the thread
   //  void *UserData;                   // free for your own business
@@ -335,7 +335,7 @@ struct sThreadContext
   sChar MemLeakDescBuffer[sMemoryLeakDesc::STRINGLEN];
   sChar MemLeakDescBuffer2[sMemoryLeakDesc::STRINGLEN]; 
   int MLDBPos;
-  sU32 MLDBCRC;
+  uint32_t MLDBCRC;
 
 #endif
 
@@ -343,11 +343,11 @@ struct sThreadContext
   void *PerfData; // for PerfMon
 #endif
 
-  void *GetTls(sPtr offset) { if(offset<TlsOffset) return (void *)(((sU8 *)this)+offset); else return 0; }
+  void *GetTls(sPtr offset) { if(offset<TlsOffset) return (void *)(((uint8_t *)this)+offset); else return 0; }
 
   // used by sAllocFrame
 #if sCONFIG_FRAMEMEM_MT
-  sU64 FrameFrame;                // check if data needs to be reset
+  uint64_t FrameFrame;                // check if data needs to be reset
   sPtr FrameCurrent;              // primary buffer for allocation (borrowed from global frame mem)
   sPtr FrameEnd;
   sPtr FrameAltCurrent;           // alternate buffer for allocation (borrowed from global frame mem)
@@ -361,10 +361,10 @@ struct sThreadContext
   sPtr DmaAltCurrent;             // alternate buffer for allocation (borrowed from global frame mem)
   sPtr DmaAltEnd;
   sPtr DmaBorrow;                 // sAllovFrameBegin/sAllocFrameEnd to primary buffer
-  sU64 DmaFrame;                  // check if data needs to be reset
+  uint64_t DmaFrame;                  // check if data needs to be reset
 
   // sAllocTls memory
-  sU8 Mem[sMAX_APP_TLS];          // memory for application thread context allocation (sAllocTls)
+  uint8_t Mem[sMAX_APP_TLS];          // memory for application thread context allocation (sAllocTls)
 };
 
 /****************************************************************************/
@@ -376,15 +376,15 @@ class sThread
   friend void sThreadTrunk(sThread *);
   void *ThreadHandle;
 #if sPLATFORM==sPLAT_LINUX
-  sU64 ThreadId;
+  uint64_t ThreadId;
 #else
-  sU32 ThreadId;
+  uint32_t ThreadId;
 #endif
 
   volatile sBool TerminateFlag;
   sThreadFunc *Code;
   void *Userdata;
-  sU8 *Stack;
+  uint8_t *Stack;
   sThreadContext *Context;
 
 
@@ -428,7 +428,7 @@ public:
 class sThreadEvent
 {
 #if sPLATFORM==sPLAT_LINUX || sPLATFORM==sPLAT_IOS
-  volatile sU32 Signaled;
+  volatile uint32_t Signaled;
   sBool ManualReset;
 #else
   void *EventHandle;
@@ -502,13 +502,13 @@ inline void sReadBarrier() { _ReadBarrier(); }
 
 // these functions return the NEW value after the operation was done on the memory address
 
-inline sU32 sAtomicAdd(volatile sU32 *p,int i) { sU32 e = _InterlockedExchangeAdd((volatile long *)p,i); return e+i; }
-inline sU32 sAtomicInc(volatile sU32 *p) { return _InterlockedIncrement((long *)p); }
-inline sU32 sAtomicDec(volatile sU32 *p) { return _InterlockedDecrement((long *)p); }
-inline sU64 sAtomicAdd(volatile sU64 *p,int i) { sU64 e = _InterlockedExchangeAdd64((volatile __int64 *)p,i); return e+i; }
-inline sU64 sAtomicInc(volatile sU64 *p) { return _InterlockedIncrement64((__int64 *)p); }
-inline sU64 sAtomicDec(volatile sU64 *p) { return _InterlockedDecrement64((__int64 *)p); }
-inline sU32 sAtomicSwap(volatile sU32 *p, sU32 i) { return _InterlockedExchange((long*)p,i); }
+inline uint32_t sAtomicAdd(volatile uint32_t *p,int i) { uint32_t e = _InterlockedExchangeAdd((volatile long *)p,i); return e+i; }
+inline uint32_t sAtomicInc(volatile uint32_t *p) { return _InterlockedIncrement((long *)p); }
+inline uint32_t sAtomicDec(volatile uint32_t *p) { return _InterlockedDecrement((long *)p); }
+inline uint64_t sAtomicAdd(volatile uint64_t *p,int i) { uint64_t e = _InterlockedExchangeAdd64((volatile __int64 *)p,i); return e+i; }
+inline uint64_t sAtomicInc(volatile uint64_t *p) { return _InterlockedIncrement64((__int64 *)p); }
+inline uint64_t sAtomicDec(volatile uint64_t *p) { return _InterlockedDecrement64((__int64 *)p); }
+inline uint32_t sAtomicSwap(volatile uint32_t *p, uint32_t i) { return _InterlockedExchange((long*)p,i); }
 
 #endif
 
@@ -516,13 +516,13 @@ inline sU32 sAtomicSwap(volatile sU32 *p, sU32 i) { return _InterlockedExchange(
 
 inline void sWriteBarrier() { /*__sync_syncronize();*/ }
 inline void sReadBarrier() { /*__sync_syncronize();*/ }
-inline sU32 sAtomicAdd(volatile sU32 *p,sU32 i) { return __sync_add_and_fetch(p,i); }
-inline sU32 sAtomicInc(volatile sU32 *p) { return __sync_add_and_fetch(p,1); }
-inline sU32 sAtomicDec(volatile sU32 *p) { return __sync_add_and_fetch(p,-1); }
-inline sU64 sAtomicAdd(volatile sU64 *p,sU64 i) { return __sync_add_and_fetch(p,i); }
-inline sU64 sAtomicInc(volatile sU64 *p) { return __sync_add_and_fetch(p,1); }
-inline sU64 sAtomicDec(volatile sU64 *p) { return __sync_add_and_fetch(p,-1); }
-inline sU32 sAtomicSwap(volatile sU32 *p, sU32 val) { return __sync_lock_test_and_set(p,val); }   // full swap supported?
+inline uint32_t sAtomicAdd(volatile uint32_t *p,uint32_t i) { return __sync_add_and_fetch(p,i); }
+inline uint32_t sAtomicInc(volatile uint32_t *p) { return __sync_add_and_fetch(p,1); }
+inline uint32_t sAtomicDec(volatile uint32_t *p) { return __sync_add_and_fetch(p,-1); }
+inline uint64_t sAtomicAdd(volatile uint64_t *p,uint64_t i) { return __sync_add_and_fetch(p,i); }
+inline uint64_t sAtomicInc(volatile uint64_t *p) { return __sync_add_and_fetch(p,1); }
+inline uint64_t sAtomicDec(volatile uint64_t *p) { return __sync_add_and_fetch(p,-1); }
+inline uint32_t sAtomicSwap(volatile uint32_t *p, uint32_t val) { return __sync_lock_test_and_set(p,val); }   // full swap supported?
 
 #endif
 
@@ -533,13 +533,13 @@ inline sU32 sAtomicSwap(volatile sU32 *p, sU32 val) { return __sync_lock_test_an
 inline void sWriteBarrier() {}
 inline void sReadBarrier() {}
 
-sU32 sAtomicAdd(volatile sU32 *p,sU32 i);
-sU32 sAtomicInc(volatile sU32 *p);
-sU32 sAtomicDec(volatile sU32 *p);
-sU64 sAtomicAdd(volatile sU64 *p,sU64 i);
-sU64 sAtomicInc(volatile sU64 *p);
-sU64 sAtomicDec(volatile sU64 *p);
-sU32 sAtomicSwap(volatile sU32 *p,sU32 val);
+uint32_t sAtomicAdd(volatile uint32_t *p,uint32_t i);
+uint32_t sAtomicInc(volatile uint32_t *p);
+uint32_t sAtomicDec(volatile uint32_t *p);
+uint64_t sAtomicAdd(volatile uint64_t *p,uint64_t i);
+uint64_t sAtomicInc(volatile uint64_t *p);
+uint64_t sAtomicDec(volatile uint64_t *p);
+uint32_t sAtomicSwap(volatile uint32_t *p,uint32_t val);
 
 #endif
 
@@ -548,17 +548,17 @@ sU32 sAtomicSwap(volatile sU32 *p,sU32 val);
 
 inline void sWriteBarrier() { __builtin_fence(); }
 inline void sReadBarrier() { __builtin_fence(); }
-inline sU32 sAtomicAdd(volatile sU32 *p,sU32 i) { return __builtin_cellAtomicAdd32((sU32*)p,i) + i; }
-inline sU32 sAtomicInc(volatile sU32 *p) { return __builtin_cellAtomicAdd32((sU32*)p,1) + 1; }
-inline sU32 sAtomicDec(volatile sU32 *p) { return __builtin_cellAtomicAdd32((sU32*)p,~0u) - 1; }
-inline sU64 sAtomicAdd(volatile sU64 *p,sU64 i) { return __builtin_cellAtomicAdd64((sU64*)p,i) + i; }
-inline sU64 sAtomicInc(volatile sU64 *p) { return __builtin_cellAtomicAdd64((sU64*)p,1) + 1; }
-inline sU64 sAtomicDec(volatile sU64 *p) { return __builtin_cellAtomicAdd64((sU64*)p,~0u) - 1; }
+inline uint32_t sAtomicAdd(volatile uint32_t *p,uint32_t i) { return __builtin_cellAtomicAdd32((uint32_t*)p,i) + i; }
+inline uint32_t sAtomicInc(volatile uint32_t *p) { return __builtin_cellAtomicAdd32((uint32_t*)p,1) + 1; }
+inline uint32_t sAtomicDec(volatile uint32_t *p) { return __builtin_cellAtomicAdd32((uint32_t*)p,~0u) - 1; }
+inline uint64_t sAtomicAdd(volatile uint64_t *p,uint64_t i) { return __builtin_cellAtomicAdd64((uint64_t*)p,i) + i; }
+inline uint64_t sAtomicInc(volatile uint64_t *p) { return __builtin_cellAtomicAdd64((uint64_t*)p,1) + 1; }
+inline uint64_t sAtomicDec(volatile uint64_t *p) { return __builtin_cellAtomicAdd64((uint64_t*)p,~0u) - 1; }
 
-static inline sU32 sAtomicSwap(volatile sU32 *p, sU32 val)
+static inline uint32_t sAtomicSwap(volatile uint32_t *p, uint32_t val)
 {
-  sU32 prev;
-  do prev = __builtin_cellAtomicLockLine32((sU32*)p); while(!__builtin_cellAtomicStoreConditional32((sU32*)p,val));
+  uint32_t prev;
+  do prev = __builtin_cellAtomicLockLine32((uint32_t*)p); while(!__builtin_cellAtomicStoreConditional32((uint32_t*)p,val));
   return prev;
 }
 
@@ -570,13 +570,13 @@ static inline sU32 sAtomicSwap(volatile sU32 *p, sU32 val)
 
 inline void sWriteBarrier() { __force_stores(); }
 inline void sReadBarrier() { __memory_changed(); }
-inline sU32 sAtomicAdd(volatile sU32 *p,sU32 i) { return *p+i; }
-inline sU32 sAtomicInc(volatile sU32 *p) { return *p+1; }
-inline sU32 sAtomicDec(volatile sU32 *p) { return *p-1; }
-inline sU64 sAtomicAdd(volatile sU64 *p,sU64 i) { return *p+i; }
-inline sU64 sAtomicInc(volatile sU64 *p) { return *p+1; }
-inline sU64 sAtomicDec(volatile sU64 *p) { return *p-1; }
-inline sU32 sAtomicSwap(volatile sU32 *p, sU32 val) { sU32 i = *p; *p = val; return i; }   // full swap supported?
+inline uint32_t sAtomicAdd(volatile uint32_t *p,uint32_t i) { return *p+i; }
+inline uint32_t sAtomicInc(volatile uint32_t *p) { return *p+1; }
+inline uint32_t sAtomicDec(volatile uint32_t *p) { return *p-1; }
+inline uint64_t sAtomicAdd(volatile uint64_t *p,uint64_t i) { return *p+i; }
+inline uint64_t sAtomicInc(volatile uint64_t *p) { return *p+1; }
+inline uint64_t sAtomicDec(volatile uint64_t *p) { return *p-1; }
+inline uint32_t sAtomicSwap(volatile uint32_t *p, uint32_t val) { uint32_t i = *p; *p = val; return i; }   // full swap supported?
 
 #endif
 
@@ -776,7 +776,7 @@ enum
   sKEY_JOYPAD_SELECT = sKEY_JOYPADXBOX_BACK,
 };
 
-sU32 sGetKeyQualifier();                    // get shift-state sKEYQ
+uint32_t sGetKeyQualifier();                    // get shift-state sKEYQ
 void sInput2ClearQueue();
 void sInput2SendEvent(const sInput2Event& event);
 sBool sInput2PopEvent(sInput2Event& event, int time);
@@ -817,33 +817,33 @@ typedef int sFileReadHandle;
 class sFile
 {
 protected:
-  sU8 *MapFakeMem;                            // memory buffer for fake file mapping in MapAll()
+  uint8_t *MapFakeMem;                            // memory buffer for fake file mapping in MapAll()
 public:
   sFile();
   virtual ~sFile();
   virtual sBool Close();                      // only needed to get error code. the error code is accumulative!
-  virtual sBool Read(void *data,sDInt size);  // read bytes. may change mapping.
-  virtual sBool Write(const void *data,sDInt size); // write bytes, may change mapping.
-  virtual sU8 *Map(sS64 offset,sDInt size);  // map file (independent from SetOffset()) (may fail)  
-  virtual sBool SetOffset(sS64 offset);       // seek to offset
-  virtual sS64 GetOffset();                   // get offset
-  virtual sBool SetSize(sS64);                // change size of file on disk
-  virtual sS64 GetSize();                     // get size
+  virtual sBool Read(void *data,ptrdiff_t size);  // read bytes. may change mapping.
+  virtual sBool Write(const void *data,ptrdiff_t size); // write bytes, may change mapping.
+  virtual uint8_t *Map(int64_t offset,ptrdiff_t size);  // map file (independent from SetOffset()) (may fail)  
+  virtual sBool SetOffset(int64_t offset);       // seek to offset
+  virtual int64_t GetOffset();                   // get offset
+  virtual sBool SetSize(int64_t);                // change size of file on disk
+  virtual int64_t GetSize();                     // get size
 
   // asynchronous interface. expect this to be unimplemented for certain file handlers
   // normal on disk files and uncompressed files from a pack file should work tho.
-  virtual sFileReadHandle BeginRead(sS64 offset,sDInt size,void *destbuffer=0, sFilePriorityFlags prio=sFP_NORMAL);  // begin reading
+  virtual sFileReadHandle BeginRead(int64_t offset,ptrdiff_t size,void *destbuffer=0, sFilePriorityFlags prio=sFP_NORMAL);  // begin reading
   virtual sBool DataAvailable(sFileReadHandle handle);  // data valid?
   virtual void *GetData(sFileReadHandle handle);  // access data (only valid if you didn't specify the buffer yourself!)
   virtual void EndRead(sFileReadHandle handle);   // the data buffer may be reused now
 
   // PLATFORM DEPENDENT: get physical position of part of file.
-  virtual sU64 GetPhysicalPosition(sS64 offset);   
+  virtual uint64_t GetPhysicalPosition(int64_t offset);   
 
   // helper functions
-  sU8 *MapAll();                              // map whole file. if mapping is not supported, copy by hand.
+  uint8_t *MapAll();                              // map whole file. if mapping is not supported, copy by hand.
   int CopyFrom(sFile *f);                    // copies from f into itself
-  int CopyFrom(sFile *f, sS64 max);          // copies max bytes from f into itself
+  int CopyFrom(sFile *f, int64_t max);          // copies max bytes from f into itself
 };
 
 class sFailsafeFile : public sFile // file that stores to a different name and renames when finished. only for writing!
@@ -856,13 +856,13 @@ public:
   sFailsafeFile(sFile *host,const sChar *curName,const sChar *tgtName);
   virtual ~sFailsafeFile();
   virtual sBool Close();
-  virtual sBool Read(void *data,sDInt size)                 { sVERIFYFALSE; return 0; }
-  virtual sBool Write(const void *data,sDInt size)          { return Host->Write(data,size); }
-  virtual sU8 *Map(sS64 offset,sDInt size)                  { return Host->Map(offset,size); }
-  virtual sBool SetOffset(sS64 offset)                      { return Host->SetOffset(offset); }
-  virtual sS64 GetOffset()                                  { return Host->GetOffset(); }
-  virtual sBool SetSize(sS64 newSize)                       { return Host->SetSize(newSize); }
-  virtual sS64 GetSize()                                    { return Host->GetSize(); }
+  virtual sBool Read(void *data,ptrdiff_t size)                 { sVERIFYFALSE; return 0; }
+  virtual sBool Write(const void *data,ptrdiff_t size)          { return Host->Write(data,size); }
+  virtual uint8_t *Map(int64_t offset,ptrdiff_t size)                  { return Host->Map(offset,size); }
+  virtual sBool SetOffset(int64_t offset)                      { return Host->SetOffset(offset); }
+  virtual int64_t GetOffset()                                  { return Host->GetOffset(); }
+  virtual sBool SetSize(int64_t newSize)                       { return Host->SetSize(newSize); }
+  virtual int64_t GetSize()                                    { return Host->GetSize(); }
 };
 
 class sFileHandler
@@ -879,8 +879,8 @@ void sRemFileHandler(sFileHandler *);
 class sFile *sCreateFile(const sChar *name,sFileAccess access=sFA_READ);
 class sFile *sCreateFailsafeFile(const sChar *name,sFileAccess access=sFA_READ);
 
-class sFile *sCreateMemFile(const void *data,sDInt size,sBool owndata=1,int blocksize=1);  // readonly
-class sFile *sCreateMemFile(void *data,sDInt size,sBool owndata=1,int blocksize=1,sFileAccess access=sFA_READ);
+class sFile *sCreateMemFile(const void *data,ptrdiff_t size,sBool owndata=1,int blocksize=1);  // readonly
+class sFile *sCreateMemFile(void *data,ptrdiff_t size,sBool owndata=1,int blocksize=1,sFileAccess access=sFA_READ);
 class sFile *sCreateMemFile(const sChar *name);
 
 class sFile *sCreateGrowMemFile();
@@ -889,7 +889,7 @@ class sFile *sCreateGrowMemFile();
 // for calculating md5 of serialization without writing it to hardisk
 class sCalcMD5File : public sFile
 {
-  sU8 TempBuf[64];
+  uint8_t TempBuf[64];
   int TempCount;
   int TotalCount;
 public:
@@ -898,13 +898,13 @@ public:
   sCalcMD5File();
   ~sCalcMD5File();
   sBool Close();
-  sBool Read(void *data,sDInt size);
-  sBool Write(const void *data,sDInt size);
-  sU8 *Map(sS64 offset,sDInt size);
-  sBool SetOffset(sS64 offset);
-  sS64 GetOffset();
-  sBool SetSize(sS64);
-  sS64 GetSize();
+  sBool Read(void *data,ptrdiff_t size);
+  sBool Write(const void *data,ptrdiff_t size);
+  uint8_t *Map(int64_t offset,ptrdiff_t size);
+  sBool SetOffset(int64_t offset);
+  int64_t GetOffset();
+  sBool SetSize(int64_t);
+  int64_t GetSize();
 };
 
 /****************************************************************************/
@@ -914,10 +914,10 @@ public:
 /****************************************************************************/
 
 sBool sCheckFile(const sChar *name);
-sU8 *sLoadFile(const sChar *name);
-sU8 *sLoadFile(const sChar *name,sDInt &size);
-sBool sSaveFile(const sChar *name,const void *data,sDInt bytes);
-sBool sSaveFileFailsafe(const sChar *name,const void *data,sDInt bytes);
+uint8_t *sLoadFile(const sChar *name);
+uint8_t *sLoadFile(const sChar *name,ptrdiff_t &size);
+sBool sSaveFile(const sChar *name,const void *data,ptrdiff_t bytes);
+sBool sSaveFileFailsafe(const sChar *name,const void *data,ptrdiff_t bytes);
 sChar *sLoadText(const sChar *name);
 //sStream *sOpenText(const sChar *name);
 sBool sSaveTextAnsi(const sChar *name,const sChar *data);
@@ -948,7 +948,7 @@ struct sDirEntry
   sString<256> Name;
   int Size;
   int Flags;
-  sU64 LastWriteTime;
+  uint64_t LastWriteTime;
 };
 
 enum sDirEntryFlags
@@ -964,16 +964,16 @@ sBool sRenameFile(const sChar *source,const sChar *dest, sBool overwrite=sFALSE)
 sBool sFindFile(sChar *foundname, int foundnamesize, const sChar *path,const sChar *pattern = 0);
 #if sPLATFORM==sPLAT_WINDOWS || sPLATFORM==sPLAT_LINUX 
 sBool sLoadDir(sArray<sDirEntry> &list,const sChar *path,const sChar *pattern=0);
-sDateAndTime sFromFileTime(sU64 fileTime); // OS specific times, e.g. LastWriteTime
-sU64 sToFileTime(sDateAndTime time);
-sBool sSetFileTime(const sChar *name, sU64 lastwritetime);
+sDateAndTime sFromFileTime(uint64_t fileTime); // OS specific times, e.g. LastWriteTime
+uint64_t sToFileTime(sDateAndTime time);
+sBool sSetFileTime(const sChar *name, uint64_t lastwritetime);
 #endif
 sBool sChangeDir(const sChar *name);
 void  sGetCurrentDir(const sStringDesc &str);
 void  sGetTempDir(const sStringDesc &str);
 void  sGetAppDataDir(const sStringDesc &str);
 sBool sGetFileInfo(const sChar *name,sDirEntry *);
-sBool sGetDiskSizeInfo(const sChar *path, sS64 &availablesize, sS64 &totalsize);
+sBool sGetDiskSizeInfo(const sChar *path, int64_t &availablesize, int64_t &totalsize);
 sBool sMakeDir(const sChar *);          // make one directory
 sBool sMakeDirAll(const sChar *);       // make all directories. may fail with strage paths.
 sBool sCheckDir(const sChar *);
@@ -997,10 +997,10 @@ public:
   virtual ~sVideoWriter();
 
   // Writes a frame of video (ARGB8888)
-  virtual sBool WriteFrame(const sU32 *data) = 0;
+  virtual sBool WriteFrame(const uint32_t *data) = 0;
 };
 
-sVideoWriter *sCreateVideoWriter(const sChar *filename,const sChar *codec,sF32 fps,int xRes,int yRes);
+sVideoWriter *sCreateVideoWriter(const sChar *filename,const sChar *codec,float fps,int xRes,int yRes);
 
 /****************************************************************************/
 /***                                                                      ***/

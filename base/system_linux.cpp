@@ -64,7 +64,7 @@ extern int sSystemFlags;
 extern int sExitFlag;
 extern sApp *sAppPtr;
 
-sU32 sKeyQual;
+uint32_t sKeyQual;
 
 /****************************************************************************/
 /***                                                                      ***/
@@ -282,11 +282,11 @@ int sGetTime()
   return currentTime.tv_sec * 1000 + currentTime.tv_nsec / 1000000 - sStartTime;
 }
 
-sU64 sGetTimeUS()
+uint64_t sGetTimeUS()
 {
   timespec currentTime;
   clock_gettime(CLOCK_REALTIME, &currentTime);
-  return sU64(currentTime.tv_sec) * 1000000UL + currentTime.tv_nsec / 1000;
+  return uint64_t(currentTime.tv_sec) * 1000000UL + currentTime.tv_nsec / 1000;
 }
 
 static sDateAndTime TimeFromSystemTime(const struct tm *t)
@@ -331,22 +331,22 @@ sDateAndTime sAddLocalTime(sDateAndTime origin, int seconds)
   return TimeFromSystemTime(t2);
 }
 
-sS64 sDiffLocalTime(sDateAndTime a, sDateAndTime b)
+int64_t sDiffLocalTime(sDateAndTime a, sDateAndTime b)
 {
   struct tm ta, tb;
   TimeToSystemTime(&ta, a);
   TimeToSystemTime(&tb, b);
-  return (sS64)difftime(mktime(&ta), mktime(&tb));
+  return (int64_t)difftime(mktime(&ta), mktime(&tb));
 }
 
-sDateAndTime sFromFileTime(sU64 lastWriteTime)
+sDateAndTime sFromFileTime(uint64_t lastWriteTime)
 {
   time_t time = lastWriteTime;
   struct tm *t = localtime(&time);
   return TimeFromSystemTime(t);
 }
 
-sU64 sToFileTime(sDateAndTime time)
+uint64_t sToFileTime(sDateAndTime time)
 {
   struct tm t;
   TimeToSystemTime(&t, time);
@@ -399,7 +399,7 @@ int sGetRandomSeed()
   FILE *f = fopen("/dev/random", "r");
   if (f)
   {
-    sU8 buffer[4] = {0};
+    uint8_t buffer[4] = {0};
     if (fread(&buffer, 1, 4, f) == 4)
     {
       check.CalcAdd(buffer, 4);
@@ -409,7 +409,7 @@ int sGetRandomSeed()
     fclose(f);
   }
 
-  check.CalcEnd((const sU8 *)&tm, sizeof(tm), bytes);
+  check.CalcEnd((const uint8_t *)&tm, sizeof(tm), bytes);
   return check.Hash[0];
 }
 
@@ -510,13 +510,13 @@ class sRootFile : public sFile
 {
   int File;
   sFileAccess Access;
-  sS64 Size;
-  sS64 Offset;
+  int64_t Size;
+  int64_t Offset;
   sBool Ok;
 
-  sS64 MapOffset;
-  sDInt MapSize;
-  sU8 *MapPtr;     // 0 = mapping not active
+  int64_t MapOffset;
+  ptrdiff_t MapSize;
+  uint8_t *MapPtr;     // 0 = mapping not active
   sBool MapFailed; // 1 = we tryed once to map and it didn't work, do don't try again
   sRootFileHandler *Handler;
 
@@ -524,13 +524,13 @@ public:
   sRootFile(int file, sFileAccess access, sRootFileHandler *h);
   ~sRootFile();
   sBool Close();
-  sBool Read(void *data, sDInt size);
-  sBool Write(const void *data, sDInt size);
-  sU8 *Map(sS64 offset, sDInt size);
-  sBool SetOffset(sS64 offset);
-  sS64 GetOffset();
-  sBool SetSize(sS64);
-  sS64 GetSize();
+  sBool Read(void *data, ptrdiff_t size);
+  sBool Write(const void *data, ptrdiff_t size);
+  uint8_t *Map(int64_t offset, ptrdiff_t size);
+  sBool SetOffset(int64_t offset);
+  int64_t GetOffset();
+  sBool SetSize(int64_t);
+  int64_t GetSize();
 };
 
 static void sAddRootFilesystem()
@@ -626,7 +626,7 @@ sBool sRootFile::Close()
   return Ok;
 }
 
-sBool sRootFile::Read(void *data, sDInt size)
+sBool sRootFile::Read(void *data, ptrdiff_t size)
 {
   sVERIFY(File != -1)
       sVERIFY(size <= 0x7fffffff);
@@ -642,7 +642,7 @@ sBool sRootFile::Read(void *data, sDInt size)
   return result;
 }
 
-sBool sRootFile::Write(const void *data, sDInt size)
+sBool sRootFile::Write(const void *data, ptrdiff_t size)
 {
   sVERIFY(File != -1);
   sVERIFY(size <= 0x7fffffff);
@@ -658,7 +658,7 @@ sBool sRootFile::Write(const void *data, sDInt size)
   return result;
 }
 
-sU8 *sRootFile::Map(sS64 offset, sDInt size)
+uint8_t *sRootFile::Map(int64_t offset, ptrdiff_t size)
 {
   sVERIFY(File != -1);
 
@@ -681,8 +681,8 @@ sU8 *sRootFile::Map(sS64 offset, sDInt size)
   // map new view
   if (size >= 0x7fffffff)
     return 0;
-  MapPtr = (sU8 *)mmap64(0, size, PROT_READ, MAP_PRIVATE | MAP_FILE, File, offset);
-  if (MapPtr != (sU8 *)MAP_FAILED)
+  MapPtr = (uint8_t *)mmap64(0, size, PROT_READ, MAP_PRIVATE | MAP_FILE, File, offset);
+  if (MapPtr != (uint8_t *)MAP_FAILED)
   {
     MapOffset = offset;
     MapSize = size;
@@ -697,7 +697,7 @@ sU8 *sRootFile::Map(sS64 offset, sDInt size)
   return MapPtr;
 }
 
-sBool sRootFile::SetOffset(sS64 offset)
+sBool sRootFile::SetOffset(int64_t offset)
 {
   sVERIFY(File != -1)
 
@@ -708,12 +708,12 @@ sBool sRootFile::SetOffset(sS64 offset)
   return result;
 }
 
-sS64 sRootFile::GetOffset()
+int64_t sRootFile::GetOffset()
 {
   return Offset;
 }
 
-sBool sRootFile::SetSize(sS64 size)
+sBool sRootFile::SetSize(int64_t size)
 {
   sVERIFY(File != -1);
   if (Ok)
@@ -725,7 +725,7 @@ sBool sRootFile::SetSize(sS64 size)
   return Ok;
 }
 
-sS64 sRootFile::GetSize()
+int64_t sRootFile::GetSize()
 {
   return Size;
 }
@@ -834,7 +834,7 @@ sBool sCopyFile(const sChar *source, const sChar *dest, sBool failifexists)
   sLogF(L"file", L"copy to   <%s>\n", dest);
 
   static const int bufSize = 65536;
-  sU8 *buf = new sU8[bufSize];
+  uint8_t *buf = new uint8_t[bufSize];
   if (!buf)
   {
     sLogF(L"file", L"copy failed: couldn't allocate temp buffer!\n");
@@ -1031,7 +1031,7 @@ void *sSTDCALL sThreadTrunk_pthread(void *ptr)
   while (!th->ThreadId)
     sSleep(10);
 
-  sU64 self = pthread_self();
+  uint64_t self = pthread_self();
   sLogF(L"sys", L"New sThread started. 0x%x, id is 0x%x\n", self, th->ThreadId);
 
   sVERIFY(pthread_equal(self, th->ThreadId));
@@ -1203,15 +1203,15 @@ sBool sThreadEvent::Wait(int timeout)
     }
 
     int start = sGetTime();
-    sU32 tDiff;
+    uint32_t tDiff;
     sBool okay = sFALSE;
     do
     {
       okay = Signaled;
-      tDiff = sU32(sGetTime() - start);
-      if (!okay && sU32(timeout) > tDiff) // not signaled, not yet timed out
+      tDiff = uint32_t(sGetTime() - start);
+      if (!okay && uint32_t(timeout) > tDiff) // not signaled, not yet timed out
         pthread_yield();
-    } while (!okay && sU32(timeout) > tDiff);
+    } while (!okay && uint32_t(timeout) > tDiff);
 
     return okay;
   }
@@ -1219,7 +1219,7 @@ sBool sThreadEvent::Wait(int timeout)
   {
     if (timeout == -1) // okay, just wait forever
     {
-      sU32 gotit;
+      uint32_t gotit;
       while ((gotit = sAtomicSwap(&Signaled, 0)) == 0)
         pthread_yield();
 
@@ -1227,14 +1227,14 @@ sBool sThreadEvent::Wait(int timeout)
     }
 
     int start = sGetTime();
-    sU32 tDiff, gotit;
+    uint32_t tDiff, gotit;
     do
     {
       gotit = sAtomicSwap(&Signaled, 0);
-      tDiff = sU32(sGetTime() - start);
-      if (!gotit && sU32(timeout) > tDiff) // haven't got it, not timed out
+      tDiff = uint32_t(sGetTime() - start);
+      if (!gotit && uint32_t(timeout) > tDiff) // haven't got it, not timed out
         pthread_yield();
-    } while (!gotit && sU32(timeout) > tDiff);
+    } while (!gotit && uint32_t(timeout) > tDiff);
 
     return gotit == 1;
   }
@@ -1437,7 +1437,7 @@ void sSetMouseCenter()
 #endif
 }
 
-sU32 sGetKeyQualifier()
+uint32_t sGetKeyQualifier()
 {
   return sKeyQual;
 }
@@ -1509,9 +1509,9 @@ void sInit(int flags, int xs, int ys)
       sLogF(L"win", L"sXVisualInfo set, parameters:\n");
       sLogF(L"win", L"  depth=%d\n", depth);
       sLogF(L"win", L"  class=%d\n", sXVisualInfo->c_class);
-      sLogF(L"win", L"  r_mask=%06x\n", (sU32)sXVisualInfo->red_mask);
-      sLogF(L"win", L"  g_mask=%06x\n", (sU32)sXVisualInfo->green_mask);
-      sLogF(L"win", L"  b_mask=%06x\n", (sU32)sXVisualInfo->blue_mask);
+      sLogF(L"win", L"  r_mask=%06x\n", (uint32_t)sXVisualInfo->red_mask);
+      sLogF(L"win", L"  g_mask=%06x\n", (uint32_t)sXVisualInfo->green_mask);
+      sLogF(L"win", L"  b_mask=%06x\n", (uint32_t)sXVisualInfo->blue_mask);
       sLogF(L"win", L"  colormap_size=%d\n", sXVisualInfo->colormap_size);
       sLogF(L"win", L"  bits_per_rgb=%d\n", sXVisualInfo->bits_per_rgb);
     }
@@ -1797,12 +1797,12 @@ static void sXMessageLoop()
         case ButtonRelease:
         {
           int b = e.xbutton.button;
-          sU32 orm = (e.type == ButtonRelease) ? 0 : ~0u;
+          uint32_t orm = (e.type == ButtonRelease) ? 0 : ~0u;
 
           sendMouseMove(e.xbutton.x, e.xbutton.y);
           if (b < sCOUNTOF(buttonMask))
           {
-            sU32 mask = buttonMask[b];
+            uint32_t mask = buttonMask[b];
             Mouse[0].Buttons = (Mouse[0].Buttons & ~mask) | (mask & orm);
             sInput2SendEvent(sInput2Event(buttonKey[b] | (sKEYQ_BREAK & ~orm)));
           }
@@ -1814,7 +1814,7 @@ static void sXMessageLoop()
         {
           static XComposeStatus compose[2];
           int isRelease = (e.type == KeyRelease);
-          sU32 orm = isRelease ? 0 : ~0u;
+          uint32_t orm = isRelease ? 0 : ~0u;
           char str[8];
           sChar wch[8];
           KeySym sym;
@@ -1924,16 +1924,16 @@ static void sXMessageLoop()
 class sLinuxJoypad : public sJoypad
 {
   int TimestampOffset;
-  sU32 LastTimestamp;
+  uint32_t LastTimestamp;
   sString<256> Path;
   
   int fd;
-  sU8 AxisMapping[ABS_MAX+1];
+  uint8_t AxisMapping[ABS_MAX+1];
   sBool FirstEvent;
   
   sJoypadData State;
   
-  int TranslateTimestamp(sU32 inTimestamp);
+  int TranslateTimestamp(uint32_t inTimestamp);
   void Open(const sChar *filename);
   void Close();
   
@@ -1951,7 +1951,7 @@ public:
   void Poll();
 };
 
-int sLinuxJoypad::TranslateTimestamp(sU32 inTimestamp)
+int sLinuxJoypad::TranslateTimestamp(uint32_t inTimestamp)
 {
   if(FirstEvent)
   {
@@ -1971,7 +1971,7 @@ void sLinuxJoypad::Open(const sChar *filename)
     return;
   
   // get joypad interface version
-  sU32 version;
+  uint32_t version;
   if(ioctl(fd,JSIOCGVERSION,&version) < 0 || version < 0x010000) // only tested with ver >=2.0
   {
     sLogF(L"inp",L"joypad(%q): need a 1.0 or higher device interface\n",filename);
@@ -1993,7 +1993,7 @@ void sLinuxJoypad::Open(const sChar *filename)
   sCopyString(Name,devname);
   
   // get number of axes and buttons
-  sU8 nAxis,nButton;
+  uint8_t nAxis,nButton;
   if(ioctl(fd,JSIOCGAXES,&nAxis) < 0
     || ioctl(fd,JSIOCGBUTTONS,&nButton) < 0)
   {
@@ -2061,7 +2061,7 @@ void sLinuxJoypad::Event(const js_event &ev)
       int index = ev.number;
       if(index < sCOUNTOF(State.Pressure))
       {
-        sU32 mask = 1u << index;
+        uint32_t mask = 1u << index;
         
         if(ev.value) // pressed
         {
@@ -2230,8 +2230,8 @@ sADDSUBSYSTEM(LinuxJoypad,0xa1,sInitLinuxJoypad,sExitLinuxJoypad);
 /***                                                                      ***/
 /****************************************************************************/
 
-sU8 *sMainHeapBase;
-sU8 *sDebugHeapBase;
+uint8_t *sMainHeapBase;
+uint8_t *sDebugHeapBase;
 class sMemoryHeap sMainHeap;
 class sMemoryHeap sDebugHeap;
 
@@ -2240,7 +2240,7 @@ class sLibcHeap_ : public sMemoryHandler
 public:
   void *Alloc(sPtr size, int align, int flags)
   {
-    //    sAtomicAdd(&sMemoryUsed, (sDInt)size);
+    //    sAtomicAdd(&sMemoryUsed, (ptrdiff_t)size);
     void *ptr;
     align = sMax<int>(align, sizeof(void *));
     if (posix_memalign(&ptr, align, size))
@@ -2250,7 +2250,7 @@ public:
   }
   sBool Free(void *ptr)
   {
-    //    sAtomicAdd(&sMemoryUsed, -(sDInt)size);
+    //    sAtomicAdd(&sMemoryUsed, -(ptrdiff_t)size);
     free(ptr);
     return 1;
   }
@@ -2274,8 +2274,8 @@ void sInitMem1()
     if (flags & sIMF_NORTL)
     {
       int size = DebugHeapSize;
-      sDebugHeapBase = (sU8 *)mmap(0, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
-      sVERIFY(sDebugHeapBase != (sU8 *)MAP_FAILED);
+      sDebugHeapBase = (uint8_t *)mmap(0, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
+      sVERIFY(sDebugHeapBase != (uint8_t *)MAP_FAILED);
       sDebugHeap.Init(sDebugHeapBase, size);
       sRegisterMemHandler(sAMF_DEBUG, &sDebugHeap);
     }
@@ -2284,8 +2284,8 @@ void sInitMem1()
   }
   if ((flags & sIMF_NORTL) && sMemoryInitSize > 0)
   {
-    sMainHeapBase = (sU8 *)mmap(0, sMemoryInitSize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
-    sVERIFY(sMainHeapBase != (sU8 *)MAP_FAILED);
+    sMainHeapBase = (uint8_t *)mmap(0, sMemoryInitSize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
+    sVERIFY(sMainHeapBase != (uint8_t *)MAP_FAILED);
     if (flags & sIMF_CLEAR)
       sSetMem(sMainHeapBase, 0x77, sMemoryInitSize);
     sMainHeap.Init(sMainHeapBase, sMemoryInitSize);
@@ -2387,7 +2387,7 @@ int main(int argc, char **argv)
 
 /****************************************************************************/
 
-sVideoWriter *sCreateVideoWriter(const sChar *filename, const sChar *codec, sF32 fps, int xRes, int yRes)
+sVideoWriter *sCreateVideoWriter(const sChar *filename, const sChar *codec, float fps, int xRes, int yRes)
 {
   sDPrintF(L"sCreateVideoWriter not implemented on Linux!\n");
   return 0;

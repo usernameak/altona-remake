@@ -812,7 +812,7 @@ morespace:
       Token = sTOK_FLOAT;
       if(bi<MaxValLen-2) bp[bi++]=*s;
       s++;
-      sF64 dec=1.0f;
+      double dec=1.0f;
       if (*s == '#')
       {
         // catch float infinity 
@@ -825,7 +825,7 @@ morespace:
           if(bi<MaxValLen-2) bp[bi++]='F';
           s+=3;
           while(*s>='0' && *s<='9') s++;
-          ValF = sRawCast<sF32,sU32>(0x7f800000);
+          ValF = sRawCast<float,uint32_t>(0x7f800000);
         }
         else
           Token = sTOK_ERROR;     // invalid infinity float
@@ -835,7 +835,7 @@ morespace:
         while(*s>='0' && *s<='9')
         {
           dec = dec/10;
-          ValF += sF32(dec*(*s-'0'));
+          ValF += float(dec*(*s-'0'));
           if(bi<MaxValLen-2) bp[bi++]=*s;
           s++;
         }
@@ -951,10 +951,10 @@ int sScanner::ScanInt()
   return r*sign;
 }
 
-sF32 sScanner::ScanFloat()
+float sScanner::ScanFloat()
 {
-  sF32 r;
-  sF32 sign = 1;
+  float r;
+  float sign = 1;
   if(IfToken('-')) 
     sign = -1;
   if(Token==sTOK_INT)   
@@ -1358,7 +1358,7 @@ namespace sScannerUtil
     return sFALSE;
   }
 
-  sBool FloatProp(sScanner *scan,const sChar *name,sF32 &tgt)
+  sBool FloatProp(sScanner *scan,const sChar *name,float &tgt)
   {
     if(scan->IfName(name))
     {
@@ -1475,12 +1475,12 @@ struct sRegexTrans                // possible transition between states
   
   sRegexState *To;
   sRegexState *From;
-  sU32 BitGroup[8];               // 0x0001..0x00ff
+  uint32_t BitGroup[8];               // 0x0001..0x00ff
   const sChar *HighGroup;         // 0x0100..0xffff
   sBool Invert;                   // invert the groups
   sBool Empty;                    // transition taken without consuming
-  sU32 StartCaptureBits;          // start capturing for group
-  sU32 StopCaptureBits;            // end capturing for group
+  uint32_t StartCaptureBits;          // start capturing for group
+  uint32_t StopCaptureBits;            // end capturing for group
 
   void SetBit(sChar);
   void SetChar(sChar);            // 'a'

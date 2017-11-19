@@ -15,7 +15,7 @@
 
 struct sColorGradientKey
 {
-  sF32 Time;
+  float Time;
   sVector4 Color;
 };
 
@@ -23,14 +23,14 @@ class sColorGradient : public sObject
 {
 public:
   sArray<sColorGradientKey> Keys;
-  sF32 Gamma;
+  float Gamma;
   int Flags;
 
-  void AddKey(sF32 time,sU32 col);
-  void AddKey(sF32 time,const sVector4 &col);
+  void AddKey(float time,uint32_t col);
+  void AddKey(float time,const sVector4 &col);
   void Sort();
-  void CalcUnwarped(sF32 time,sVector4 &col);
-  void Calc(sF32 time,sVector4 &col);
+  void CalcUnwarped(float time,sVector4 &col);
+  void Calc(float time,sVector4 &col);
 
   sCLASSNAME(sColorGradient);
   sColorGradient();
@@ -62,17 +62,17 @@ class sColorPickerWindow : public sWindow
 {
   class sGridFrame *Grid;
 
-  sF32 *FPtr;
-  sU8 *UPtr;
+  float *FPtr;
+  uint8_t *UPtr;
 
-  sF32 Red;
-  sF32 Green;
-  sF32 Blue;
-  sF32 Alpha;
+  float Red;
+  float Green;
+  float Blue;
+  float Alpha;
 
-  sF32 Hue;
-  sF32 Sat;
-  sF32 Value;
+  float Hue;
+  float Sat;
+  float Value;
 
 
   sRect BarRect;
@@ -85,11 +85,11 @@ class sColorPickerWindow : public sWindow
   sBool AlphaEnable;
   sColorGradient *Gradient;
   int DragKey;
-  sF32 DragStart;
+  float DragStart;
 
   sImage *PickImage;
-  sF32 PickSat;
-  sF32 PickHue;
+  float PickSat;
+  float PickHue;
   sImage *GradientImage;
   sImage *WarpImage;
   sBool GradientChanged;
@@ -104,8 +104,8 @@ public:
   ~sColorPickerWindow();
   void Tag();
 
-  void Init(sF32 *,sObject *tagref,sBool alpha);
-  void Init(sU32 *,sObject *tagref,sBool alpha);
+  void Init(float *,sObject *tagref,sBool alpha);
+  void Init(uint32_t *,sObject *tagref,sBool alpha);
   void Init(sColorGradient *grad,sBool alpha);
   void ChangeGradient();
   void ChangeRGB();
@@ -116,13 +116,13 @@ public:
   void OnCalcSize();
   void OnLayout();
   void OnDrag(const sWindowDrag &dd);
-  sBool OnKey(sU32 key);
+  sBool OnKey(uint32_t key);
 
   void CmdDelete();
 
   sMessage ChangeMsg;
 
-  static sF32 PaletteColors[32][4];
+  static float PaletteColors[32][4];
 };
 
 /****************************************************************************/

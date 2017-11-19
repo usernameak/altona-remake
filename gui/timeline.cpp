@@ -170,7 +170,7 @@ void sTimerTimeline::SeekBeat(int beat)
 /****************************************************************************/
 
 static sMusicTimeline *sMusicTimelinePlayer;
-void sMusicTimelineSoundHandler(sS16 *samples,int count)
+void sMusicTimelineSoundHandler(int16_t *samples,int count)
 {
   if(sMusicTimelinePlayer)
     sMusicTimelinePlayer->SoundHandler(samples,count);
@@ -335,7 +335,7 @@ void sMusicTimeline::SeekBeat(int beat)
   OnFrame();
 }
 
-void sMusicTimeline::SoundHandler(sS16 *samples,int count)
+void sMusicTimeline::SoundHandler(int16_t *samples,int count)
 {
   if(Music)
   {
@@ -348,7 +348,7 @@ void sMusicTimeline::SoundHandler(sS16 *samples,int count)
     }
     else
     {
-      sSetMem(samples,0,count*sizeof(sS16)*2);
+      sSetMem(samples,0,count*sizeof(int16_t)*2);
     }
   }
   TotalSamples+=count;

@@ -100,7 +100,7 @@ void sInput2Scheme::Bind(int id, const sInput2Key& key)
 
 /****************************************************************************/
 
-void sInput2Scheme::Bind(int id, const sInput2Device* device, int keyId, sF32 thresholdAnalog, sF32 thresholdDigitalLo, sF32 thresholdDigitalHi)
+void sInput2Scheme::Bind(int id, const sInput2Device* device, int keyId, float thresholdAnalog, float thresholdDigitalLo, float thresholdDigitalHi)
 {
   Bind(id, sInput2Key(device, keyId, thresholdAnalog, thresholdDigitalLo, thresholdDigitalHi));
 }
@@ -192,7 +192,7 @@ sBool sInput2Scheme::Hold(int id) const
   if (!key)
     return value;
   do {
-    sF32 v = key->Device->GetAbs(key->KeyId);
+    float v = key->Device->GetAbs(key->KeyId);
     if (sFAbs(v) > key->ThresholdDigitalHi)
       value = sMax(value, v != 0.0f ? sTRUE : sFALSE);
     key = key->Next;
@@ -206,9 +206,9 @@ int sInput2Scheme::Pressed(int id) const
   sVERIFY2(id >= 0 && id < Bindings.GetSize(), L"sInput2Scheme::Pressed(): id out of range specified with sInput2Scheme::Init()");
 
   int value = 0;
-  sF32 valuePositive = 0;
-  sF32 valueNegative = 0;
-  sF32 analog;
+  float valuePositive = 0;
+  float valueNegative = 0;
+  float analog;
   sInput2Key* key = Bindings[id];
   if (!key)
     return value;
@@ -252,17 +252,17 @@ int sInput2Scheme::Released(int id) const
 
 /****************************************************************************/
 
-sF32 sInput2Scheme::Analog(int id) const
+float sInput2Scheme::Analog(int id) const
 {
   sVERIFY2(id >= 0 && id < Bindings.GetSize(), L"sInput2Scheme::Analog(): id out of range specified with sInput2Scheme::Init()");
 
-  sF32 valuePositive = 0.0f;
-  sF32 valueNegative = 0.0f;
+  float valuePositive = 0.0f;
+  float valueNegative = 0.0f;
   sInput2Key* key = Bindings[id];
   if (!key)
     return valuePositive + valueNegative;
   do {
-    sF32 v = key->Device->GetAbs(key->KeyId);
+    float v = key->Device->GetAbs(key->KeyId);
     v = sFAbs(v) > key->ThresholdAnalog ? v : 0.0f;
     if (v > 0.0f)
       valuePositive = sMax(valuePositive, v);
@@ -275,16 +275,16 @@ sF32 sInput2Scheme::Analog(int id) const
 
 /****************************************************************************/
 
-sF32 sInput2Scheme::Relative(int id) const
+float sInput2Scheme::Relative(int id) const
 {
   sVERIFY2(id >= 0 && id < Bindings.GetSize(), L"sInput2Scheme::Relative(): id out of range specified with sInput2Scheme::Init()");
 
-  sF32 value = 0;
+  float value = 0;
   sInput2Key* key = Bindings[id];
   if (!key)
     return value;
   do {
-    sF32 v = key->Device->GetAbs(key->KeyId);
+    float v = key->Device->GetAbs(key->KeyId);
     if (sFAbs(v) > key->ThresholdAnalog)
       value += key->Device->GetRel(key->KeyId);
     key = key->Next;
@@ -306,7 +306,7 @@ sVector2 sInput2Scheme::Coords(int id) const
   do {
     sVERIFY2(key->KeyId+1 < key->Device->KeyCount(), L"invalid access function was used with this keybinding");
     for (int j=0; j<2; j++) {
-      sF32 v = key->Device->GetAbs(key->KeyId+j);
+      float v = key->Device->GetAbs(key->KeyId+j);
       if (v > 0.0f)
         valuePositive[j] = sMax(valuePositive[j], v);
       else
@@ -331,7 +331,7 @@ sVector31 sInput2Scheme::Position(int id) const
   do {
     sVERIFY2(key->KeyId+2 < key->Device->KeyCount(), L"invalid access function was used with this keybinding");
     for (int j=0; j<3; j++) {
-      sF32 v = key->Device->GetAbs(key->KeyId+j);
+      float v = key->Device->GetAbs(key->KeyId+j);
       if (v > 0.0f)
         valuePositive[j] = sMax(valuePositive[j], v);
       else
@@ -356,7 +356,7 @@ sVector30 sInput2Scheme::Normal(int id) const
   do {
     sVERIFY2(key->KeyId+2 < key->Device->KeyCount(), L"invalid access function was used with this keybinding");
     for (int j=0; j<3; j++) {
-      sF32 v = key->Device->GetRel(key->KeyId+j);
+      float v = key->Device->GetRel(key->KeyId+j);
       if (v > 0.0f)
         valuePositive[j] = sMax(valuePositive[j], v);
       else
@@ -380,22 +380,22 @@ sQuaternion sInput2Scheme::Quaternion(int id) const
     return valuePositive + valueNegative;
   do {
     sVERIFY2(key->KeyId+3 < key->Device->KeyCount(), L"invalid access function was used with this keybinding");
-    sF32 qr = key->Device->GetAbs(key->KeyId+0);
+    float qr = key->Device->GetAbs(key->KeyId+0);
     if (qr > 0.0f)
       valuePositive.r = sMax(valuePositive.r, qr);
     else
       valueNegative.r = sMin(valueNegative.r, qr);
-    sF32 qi = key->Device->GetAbs(key->KeyId+1);
+    float qi = key->Device->GetAbs(key->KeyId+1);
     if (qi > 0.0f)
       valuePositive.i = sMax(valuePositive.i, qi);
     else
       valueNegative.i = sMin(valueNegative.i, qi);
-    sF32 qj = key->Device->GetAbs(key->KeyId+2);
+    float qj = key->Device->GetAbs(key->KeyId+2);
     if (qj > 0.0f)
       valuePositive.j = sMax(valuePositive.j, qj);
     else
       valueNegative.j = sMin(valueNegative.j, qj);
-    sF32 qk = key->Device->GetAbs(key->KeyId+3);
+    float qk = key->Device->GetAbs(key->KeyId+3);
     if (qk > 0.0f)
       valuePositive.k = sMax(valuePositive.k, qk);
     else
@@ -419,7 +419,7 @@ sVector4 sInput2Scheme::Vector4(int id) const
   do {
     sVERIFY2(key->KeyId+3 < key->Device->KeyCount(), L"invalid access function was used with this keybinding");
     for (int j=0; j<4; j++) {
-      sF32 v = key->Device->GetAbs(key->KeyId+j);
+      float v = key->Device->GetAbs(key->KeyId+j);
       if (v > 0.0f)
         valuePositive[j] = sMax(valuePositive[j], v);
       else
@@ -440,7 +440,7 @@ const sInput2Device* sInput2Scheme::GetDevice(int id) const
   if (!key)
     return device;
   do {
-    sF32 v = key->Device->GetAbs(key->KeyId);
+    float v = key->Device->GetAbs(key->KeyId);
     if (sFAbs(v) > key->ThresholdDigitalHi && v != 0.0f) {
       device = key->Device;
       break;
@@ -532,7 +532,7 @@ void sInput2Mapping::Add(int player, int logicalKey, sInput2Key key)
 
 /****************************************************************************/
 
-void sInput2Mapping::Add(int player, int logicalKey, const sInput2Device* device, int key, sF32 ThresholdAnalog, sF32 ThresholdDigital)
+void sInput2Mapping::Add(int player, int logicalKey, const sInput2Device* device, int key, float ThresholdAnalog, float ThresholdDigital)
 {
   Add(logicalKey, player, sInput2Key(device, key, ThresholdAnalog, ThresholdDigital));
 }

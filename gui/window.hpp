@@ -23,8 +23,8 @@
 class sWindow;
 struct sWindowDrag;
 
-typedef void(sWindow::*sCommandFunc)(sDInt);
-typedef void(sWindow::*sDragFunc)(const sWindowDrag &dd,sDInt);
+typedef void(sWindow::*sCommandFunc)(ptrdiff_t);
+typedef void(sWindow::*sDragFunc)(const sWindowDrag &dd,ptrdiff_t);
 
 /****************************************************************************/
 
@@ -61,12 +61,12 @@ struct sWindowNotify              // update when something in range changes
 struct sWindowMessage
 {
   sCommandFunc Func;              // if func is set, invoke it
-  sDInt Code;                     // otherwise send the command
+  ptrdiff_t Code;                     // otherwise send the command
 
   sWindowMessage() { Func = 0; Code = 0; }
-  sWindowMessage(sDInt c) { Func = 0; Code = c; }
-  template <class T> sWindowMessage(void(T::*f)(sDInt),sDInt c) { Func = (sCommandFunc) f; Code = c; }
-  template <class T> sWindowMessage(void(T::*f)(sDInt)) { Func = (sCommandFunc) f; Code = 0; }
+  sWindowMessage(ptrdiff_t c) { Func = 0; Code = c; }
+  template <class T> sWindowMessage(void(T::*f)(ptrdiff_t),ptrdiff_t c) { Func = (sCommandFunc) f; Code = c; }
+  template <class T> sWindowMessage(void(T::*f)(ptrdiff_t)) { Func = (sCommandFunc) f; Code = 0; }
 
   void Send(sWindow *);           // send message or invoke func immediatly
   void Post(sWindow *);           // post message or invoke func immediatly
@@ -175,8 +175,8 @@ public:
   virtual void OnLayout();
   virtual void OnCalcSize();
   virtual void OnNotify(const void *ptr, int size);
-  virtual sBool OnKey(sU32 key);
-  virtual sBool OnShortcut(sU32 key);
+  virtual sBool OnKey(uint32_t key);
+  virtual sBool OnShortcut(uint32_t key);
   virtual sBool OnCommand(int cmd);
   virtual void OnDrag(const sWindowDrag &dd);
 
@@ -187,7 +187,7 @@ public:
   class sButtonControl *AddButton(const sChar *label,const sMessage &cmd,int style=0);
   class sButtonControl *AddRadioButton(const sChar *label,int *ptr,int val,const sMessage &cmd,int style=0);
   class sButtonControl *AddToggleButton(const sChar *label,int *ptr,const sMessage &cmd,int style=0);
-  void AddNotify(const void *,sDInt);
+  void AddNotify(const void *,ptrdiff_t);
   template<typename Type> void AddNotify(const Type &Val) { AddNotify(&Val,sizeof(Val)); }
   void ClearNotify();
   void UpdateNotify();

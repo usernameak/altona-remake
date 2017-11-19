@@ -92,7 +92,7 @@ static const sChar *opcodes[0x100] =
 
 // opcode info table
 
-static const sU8 outin[0x100]=
+static const uint8_t outin[0x100]=
 {
   0x00,0x11,0x12,0x12  ,0x13,0x12,0x11,0x11,
   0x12,0x12,0x12,0x12  ,0x12,0x12,0x11,0x11,    // 0x80 = label
@@ -155,7 +155,7 @@ static const sChar *texkind[8] =
 
 // writemask letters
 
-static const sU8 swizzlebits[] = { 'x','y','z','w' };
+static const uint8_t swizzlebits[] = { 'x','y','z','w' };
 
 // source modifier (not standard conform, but who cares about PS1.3 ?
 
@@ -177,7 +177,7 @@ static const sChar *sourcepost[16] =
 
 /****************************************************************************/
 
-static void PrintReg(sU32 reg,sU32 version,sTextBuffer &tb)
+static void PrintReg(uint32_t reg,uint32_t version,sTextBuffer &tb)
 {
   int type,num;
   const sChar *name;
@@ -209,7 +209,7 @@ static void PrintReg(sU32 reg,sU32 version,sTextBuffer &tb)
     tb.PrintChar('?');
 }
 
-static void printswizzle(sU32 value,sTextBuffer &tb)
+static void printswizzle(uint32_t value,sTextBuffer &tb)
 {
   int j;
   int m[4];
@@ -233,23 +233,23 @@ static void printswizzle(sU32 value,sTextBuffer &tb)
 
 /****************************************************************************/
 
-void sPrintShader(const sU32 *data,int flags)
+void sPrintShader(const uint32_t *data,int flags)
 {
   sTextBuffer tb;
   sPrintShader(tb,data,flags);
   sDPrint(tb.Get());
 }
 
-void sPrintShader(sTextBuffer& tb, const sU32 *data,int flags)
+void sPrintShader(sTextBuffer& tb, const uint32_t *data,int flags)
 {
   int code,in,out,def,dcl,label;
   int i,len,j;
-  sU32 version=0;
-  sU32 val;
+  uint32_t version=0;
+  uint32_t val;
   int komma;
   int line;
   sBool end = sFALSE;
-  const sU32 *datastart;
+  const uint32_t *datastart;
 
   line = 1;
   while(!end)
@@ -478,7 +478,7 @@ void sPrintShader(sTextBuffer& tb, const sU32 *data,int flags)
     {
       if(komma) tb.PrintChar(','); komma=1;
       val = *data++;
-      sF32 valf = sRawCast<sF32,sU32>(val);//*((sF32 *) &val);
+      float valf = sRawCast<float,uint32_t>(val);//*((float *) &val);
       tb.PrintF(L"%7.3f",valf);
     }
     tb.PrintChar('\n');
@@ -498,7 +498,7 @@ void sPrintShader(class sTextBuffer& tb, sShaderBlob *blob, int flags)
     blob = blob->Next();
   if(blob)
   {
-    sPrintShader(tb,(const sU32*)blob->Data,flags);
+    sPrintShader(tb,(const uint32_t*)blob->Data,flags);
   }
 }
 

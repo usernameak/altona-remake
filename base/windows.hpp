@@ -81,22 +81,22 @@ void sUpdateWindow(const sRect &);
 void sSetClipboard(const sChar *,int len=-1);
 sChar *sGetClipboard();
 
-void sSetClipboard(const sU8 *data,sDInt size,sU32 serid,int sermode);
-sU8 *sGetClipboard(sDInt &size,sU32 serid,int sermode);
+void sSetClipboard(const uint8_t *data,ptrdiff_t size,uint32_t serid,int sermode);
+uint8_t *sGetClipboard(ptrdiff_t &size,uint32_t serid,int sermode);
 
 void sEnableFileDrop(sBool enable);
 const sChar *sGetDragDropFile();
 
 /****************************************************************************/
 
-template <class Type> sBool sSetClipboardObject(Type *obj,sU32 serid)
+template <class Type> sBool sSetClipboardObject(Type *obj,uint32_t serid)
 {
 #if sPLATFORM==sPLAT_WINDOWS || sPLATFORM==sPLAT_LINUX
   sFile *file = sCreateGrowMemFile();
   sWriter stream; stream.Begin(file); obj->Serialize(stream); stream.End();
   if(!stream.IsOk()) return 0;
-  sDInt size = file->GetSize();
-  sU8 *data = file->Map(0,size);
+  ptrdiff_t size = file->GetSize();
+  uint8_t *data = file->Map(0,size);
   sSetClipboard(data,size,serid,1);
   delete file;
   return 1;
@@ -105,11 +105,11 @@ template <class Type> sBool sSetClipboardObject(Type *obj,sU32 serid)
 #endif
 }
 
-template <class Type> sBool sGetClipboardObject(Type *&obj,sU32 serid)
+template <class Type> sBool sGetClipboardObject(Type *&obj,uint32_t serid)
 {
 #if sPLATFORM==sPLAT_WINDOWS || sPLATFORM==sPLAT_LINUX
-  sDInt size;
-  sU8 *data = sGetClipboard(size,serid,1);
+  ptrdiff_t size;
+  uint8_t *data = sGetClipboard(size,serid,1);
   if(!data) return 0;
   sFile *file = sCreateMemFile(data,size);
   obj = new Type;
@@ -123,7 +123,7 @@ template <class Type> sBool sGetClipboardObject(Type *&obj,sU32 serid)
   return 0;
 }
 
-template <class Type> sBool sSetClipboardArray(sStaticArray<Type *>&arr,sU32 serid)
+template <class Type> sBool sSetClipboardArray(sStaticArray<Type *>&arr,uint32_t serid)
 {
 #if sPLATFORM==sPLAT_WINDOWS || sPLATFORM==sPLAT_LINUX
   Type *e;
@@ -136,8 +136,8 @@ template <class Type> sBool sSetClipboardArray(sStaticArray<Type *>&arr,sU32 ser
   stream.Footer();
   stream.End();
   if(!stream.IsOk()) return 0;
-  sDInt size = file->GetSize();
-  sU8 *data = file->Map(0,size);
+  ptrdiff_t size = file->GetSize();
+  uint8_t *data = file->Map(0,size);
   sSetClipboard(data,size,serid,2);
   delete file;
   return 1;
@@ -147,12 +147,12 @@ template <class Type> sBool sSetClipboardArray(sStaticArray<Type *>&arr,sU32 ser
 }
 
 
-template <class Type> sBool sGetClipboardArray(sStaticArray<Type *>&arr,sU32 serid)
+template <class Type> sBool sGetClipboardArray(sStaticArray<Type *>&arr,uint32_t serid)
 {
 #if sPLATFORM==sPLAT_WINDOWS || sPLATFORM==sPLAT_LINUX
   Type *e;
-  sDInt size;
-  sU8 *data = sGetClipboard(size,serid,2);
+  ptrdiff_t size;
+  uint8_t *data = sGetClipboard(size,serid,2);
   if(!data) return 0;
   sFile *file = sCreateMemFile(data,size);
   sReader stream; stream.Begin(file); 
@@ -207,8 +207,8 @@ sBool sSystemMessageDialog(const sChar *label,int flags,const sChar *title);
 
 // drawing
 
-void sSetColor2D(int colid,sU32 color);
-sU32 sGetColor2D(int colid);
+void sSetColor2D(int colid,uint32_t color);
+uint32_t sGetColor2D(int colid);
 void sRect2D(int x0,int y0,int x1,int y1,int colid);
 void sRect2D(const sRect &,int colid);
 void sRectInvert2D(int x0,int y0,int x1,int y1);
@@ -219,8 +219,8 @@ void sRectHole2D(const sRect &out,const sRect &hole,int colid);
 void sLine2D(int x0,int y0,int x1,int y1,int colid);
 void sLine2D(int *list,int count,int colid);
 void sLineList2D(int *list,int count,int colid);
-void sBlit2D(const sU32 *data,int width,const sRect &dest);      // good for constantly changing data, for constant images use sImage2D!
-void sStretch2D(const sU32 *data,int width,const sRect &source,const sRect &dest);
+void sBlit2D(const uint32_t *data,int width,const sRect &dest);      // good for constantly changing data, for constant images use sImage2D!
+void sStretch2D(const uint32_t *data,int width,const sRect &source,const sRect &dest);
 
 // clipping
 
@@ -236,8 +236,8 @@ void sRender2DBegin();                // this renders on screen, outside message
 void sRender2DBegin(int xs,int ys); // render to throwaway-offscreen surface
 void sRender2DBegin(sImage2D *);      // render to preallocated offscreen surface
 void sRender2DEnd();                                  
-void sRender2DSet(sU32 *data);        // set pixels (data -> bitmap)
-void sRender2DGet(sU32 *data);        // get pixels (bitmap -> data)
+void sRender2DSet(uint32_t *data);        // set pixels (data -> bitmap)
+void sRender2DGet(uint32_t *data);        // get pixels (bitmap -> data)
 
 
 /****************************************************************************/
@@ -251,9 +251,9 @@ struct sPrintInfo
   int Overwrite;                 // print a fat overwrite cursor
   int SelectStart;               // start selection mark here, -1 to disable
   int SelectEnd;                 // end selection mark here, must be greater than start
-  sU32 SelectBackColor;           // second back color for selection. -1 to swap front and back instead
+  uint32_t SelectBackColor;           // second back color for selection. -1 to swap front and back instead
   int HintLine;                  // fine vertical line that hints the right border of the page
-  sU32 HintLineColor;             // sGC_???
+  uint32_t HintLineColor;             // sGC_???
 
   sRect CullRect;                 // multiline prints profit from culling
 
@@ -288,12 +288,12 @@ public:
 
   struct sLetterDimensions
   {
-    sS16 Pre;                       ///< kerning before character in bitmap-pixels
-    sS16 Cell;                      ///< size of bitmap-cell in bitmap-pixels
-    sS16 Post;                      ///< kerning after character in bitmap-pixels
-    sS16 Advance;                   ///< total advance in bitmap-pixels
-    sS16 OriginY;                   // glyph origin relative to baseline
-    sS16 Height;                    // height of the glyphs black box
+    int16_t Pre;                       ///< kerning before character in bitmap-pixels
+    int16_t Cell;                      ///< size of bitmap-cell in bitmap-pixels
+    int16_t Post;                      ///< kerning after character in bitmap-pixels
+    int16_t Advance;                   ///< total advance in bitmap-pixels
+    int16_t OriginY;                   // glyph origin relative to baseline
+    int16_t Height;                    // height of the glyphs black box
   };
   sLetterDimensions sGetLetterDimensions(const sChar letter);
   sBool LetterExists(sChar letter);
@@ -340,10 +340,10 @@ class sImage2D
   friend void sRender2DBegin(sImage2D *img);
   public: struct sImage2DPrivate *prv; // TODO: make non-public
 public:
-  sImage2D(int xs,int ys,sU32 *data);
+  sImage2D(int xs,int ys,uint32_t *data);
   ~sImage2D();
 
-  void Update(sU32 *data);
+  void Update(uint32_t *data);
   void Paint(int x,int y);
   void Paint(const sRect &source,int x,int y);
   void Stretch(const sRect &source,const sRect &dest);

@@ -90,12 +90,12 @@ void sWindow::OnLayout()
     c->Outer = Client;
 }
 
-sBool sWindow::OnKey(sU32 key)
+sBool sWindow::OnKey(uint32_t key)
 {
   return 0;
 }
 
-sBool sWindow::OnShortcut(sU32 key)
+sBool sWindow::OnShortcut(uint32_t key)
 {
   return 0;
 }
@@ -191,11 +191,11 @@ sButtonControl *sWindow::AddToggleButton(const sChar *label,int *ptr,const sMess
   return bc;
 }
 
-void sWindow::AddNotify(const void *p,sDInt n)
+void sWindow::AddNotify(const void *p,ptrdiff_t n)
 {
   sWindowNotify wn;
   wn.Start = p;
-  wn.End = (((sU8 *)p)+n);
+  wn.End = (((uint8_t *)p)+n);
   *NotifyList.AddMany(1) = wn;
   UpdateNotify();
 }

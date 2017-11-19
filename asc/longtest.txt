@@ -101,7 +101,7 @@ shader MaterialFlat
   parameter 
   {
     sTexture2D *BaseTex : s0;
-    sU32 Color;
+    uint32_t Color;
   }
 
   // the vertex sahder
@@ -198,8 +198,8 @@ shader MaterialZOffset
   parameter
   {
     sTexture2D *BaseTex : s0;
-    sF32 RZFar;
-    sF32 DepthScale;
+    float RZFar;
+    float DepthScale;
   }
   vs
   {
@@ -220,8 +220,8 @@ shader MaterialZOffset
   }
   ps
   {
-    sF32 RZFar_ : c0.x;
-    sF32 DepthScale_ : c1.x;
+    float RZFar_ : c0.x;
+    float DepthScale_ : c1.x;
    /*
     asc ps_2_0
     {
@@ -405,8 +405,8 @@ shader MaterialIppFilter
   parameter
   {
     sTexture2D *BaseTex : s0;
-    sF32 DistX;
-    sF32 DistY;
+    float DistX;
+    float DistY;
   }
   vs
   {
@@ -608,7 +608,7 @@ shader MaterialFlat
   parameter 
   {
     sTexture2D *BaseTex : s0;
-    sU32 Color;
+    uint32_t Color;
   }
 
   // the vertex sahder
@@ -685,8 +685,8 @@ shader DiffusionShader
     sTexture2D *Tex0 : s0;
     sTexture2D *Tex1 : s1;
     sTexture2D *Tex2 : s2;
-    sF32 TimeStep;
-    sF32 Lambda;
+    float TimeStep;
+    float Lambda;
   }
 
   vs
@@ -1151,8 +1151,8 @@ shader MaterialIppFilter
   parameter
   {
     sTexture2D *BaseTex : s0;
-    sF32 DistX;
-    sF32 DistY;
+    float DistX;
+    float DistY;
   }
   vs
   {
@@ -1218,7 +1218,7 @@ shader MaterialIppFilter
     
     for(int i=0;i<8;i++)
     {
-      sF32 f = (i*(2.0f/7.0f))-1.0f;
+      float f = (i*(2.0f/7.0f))-1.0f;
       shift[i].Init(DistX*f,DistY*f,0,0);
     }
   }
@@ -1251,7 +1251,7 @@ shader MaterialFlat
   parameter 
   {
     sTexture2D *BaseTex : s0;
-    sU32 Color;
+    uint32_t Color;
   }
 
   // the vertex sahder
@@ -1338,7 +1338,7 @@ shader MaterialCube
   parameter 
   {
     sTextureCube *CubeTex : s0;
-    sU32 Color = 0xffffffff;
+    uint32_t Color = 0xffffffff;
   }
 
   // the vertex sahder
@@ -1402,9 +1402,9 @@ shader MaterialCubeBlur
   parameter 
   {
     sTextureCube *CubeTex : s0;
-    sU32 MulColor = 0xffffffff;
-    sU32 SubColor = 0x00000000;
-    sU32 GrayColor = 0x00808080;
+    uint32_t MulColor = 0xffffffff;
+    uint32_t SubColor = 0x00000000;
+    uint32_t GrayColor = 0x00808080;
   }
   vs
   {
@@ -1461,9 +1461,9 @@ shader MaterialCubeBlurAlpha
   parameter 
   {
     sTextureCube *CubeTex : s0;
-    sU32 MulColor = 0xffffffff;
-    sU32 SubColor = 0x00000000;
-    sU32 GrayColor = 0x00808080;
+    uint32_t MulColor = 0xffffffff;
+    uint32_t SubColor = 0x00000000;
+    uint32_t GrayColor = 0x00808080;
   }
   vs
   {
@@ -1533,7 +1533,7 @@ shader MaterialBump2 // Object Space
     sTexture2D *BumpTex : s1;
     sTexture2D *SpecTex : s2;
     sTextureCube *EnvCube : s3;
-    sU32 Color;
+    uint32_t Color;
   }
 
   // the vertex sahder
@@ -1630,7 +1630,7 @@ shader MaterialBump  // Tangent Space
     sTexture2D *BumpTex : s1;
     sTexture2D *SpecTex : s2;
     sTextureCube *EnvCube : s3;
-    sU32 Color;
+    uint32_t Color;
   }
 
   // the vertex sahder
@@ -1753,7 +1753,7 @@ shader MaterialCube
   {
     sTexture2D *BaseTex : s0;
     sTextureCube *CubeTex : s1;
-    sU32 Color;
+    uint32_t Color;
   }
 
   // the vertex sahder
@@ -1977,7 +1977,7 @@ shader MaterialCube
   {
     sTexture2D *BaseTex : s0;
     sTextureCube *CubeTex : s1;
-    sU32 Color;
+    uint32_t Color;
   }
 
   // the vertex sahder
@@ -2054,7 +2054,7 @@ shader MaterialFlat
   parameter 
   {
     sTexture2D *BaseTex : s0;
-    sU32 Color;
+    uint32_t Color;
   }
 
   // the vertex sahder
@@ -2134,7 +2134,7 @@ shader MaterialFlat
   parameter 
   {
     sTexture2D *BaseTex : s0;
-    sU32 Color;
+    uint32_t Color;
   }
 
   // the vertex sahder
@@ -2222,7 +2222,7 @@ shader MaterialCube
   parameter 
   {
     sTextureCube *CubeTex : s0;
-    sU32 Color = 0xffffffff;
+    uint32_t Color = 0xffffffff;
   }
 
   // the vertex sahder
@@ -2287,9 +2287,9 @@ shader MaterialCubeBlur
   parameter 
   {
     sTextureCube *CubeTex : s0;
-    sU32 MulColor = 0xffffffff;
-    sU32 SubColor = 0x00000000;
-    sU32 GrayColor = 0x00808080;
+    uint32_t MulColor = 0xffffffff;
+    uint32_t SubColor = 0x00000000;
+    uint32_t GrayColor = 0x00808080;
   }
   vs
   {
@@ -2347,9 +2347,9 @@ shader MaterialCubeBlurAlpha
   parameter 
   {
     sTextureCube *CubeTex : s0;
-    sU32 MulColor = 0xffffffff;
-    sU32 SubColor = 0x00000000;
-    sU32 GrayColor = 0x00808080;
+    uint32_t MulColor = 0xffffffff;
+    uint32_t SubColor = 0x00000000;
+    uint32_t GrayColor = 0x00808080;
   }
   vs
   {
@@ -2420,7 +2420,7 @@ shader MaterialBump2 // Object Space
     sTexture2D *BumpTex : s1;
     sTexture2D *SpecTex : s2;
     sTextureCube *EnvCube : s3;
-    sU32 Color;
+    uint32_t Color;
   }
 
   // the vertex sahder
@@ -2517,7 +2517,7 @@ shader MaterialBump  // Tangent Space
     sTexture2D *BumpTex : s1;
     sTexture2D *SpecTex : s2;
     sTextureCube *EnvCube : s3;
-    sU32 Color;
+    uint32_t Color;
   }
 
   // the vertex sahder
@@ -2650,7 +2650,7 @@ shader MaterialBump  // Tangent Space
     sTexture2D *BumpTex : s1;
     sTexture2D *SpecTex : s2;
     sTextureCube *EnvCube : s3;
-    sU32 Color;
+    uint32_t Color;
   }
 
   // the vertex sahder
@@ -3230,7 +3230,7 @@ shader MaterialLandscape1
 
   parameter 
   {
-    sU32 Color;
+    uint32_t Color;
     sVector31 CamPos;
 	sTexture2D *LightMapTex : s0;
   }
@@ -3327,9 +3327,9 @@ shader MaterialLandscapeTex
 
   parameter 
   {
-    sU32 Color;
+    uint32_t Color;
     sVector31 CamPos;
-	sF32 BlendFactors[8];
+	float BlendFactors[8];
 	sTexture2D *BaseTex : s0;
 	sTexture2D *LightMapTex : s1;
   }
@@ -3343,7 +3343,7 @@ shader MaterialLandscapeTex
 	sMatrix44 vpm : c8;
 	sMatrix44 mv : c12;
 	sVector31 camPos : c16;
-	sF32 hack : c16;
+	float hack : c16;
 	sVector4  BlendFactors1 : c17;
 	sVector4  BlendFactors2 : c18;
 
@@ -3465,7 +3465,7 @@ shader MaterialParticle
   parameter 
   {
     sTexture2D *BaseTex : s0;
-    sU32 Color;
+    uint32_t Color;
   }
 
   // the vertex sahder
@@ -3590,10 +3590,10 @@ shader MaterialWater
 	sTexture2D *ReflTex : s3;
 	sTexture2D *EnvBumpTex : s2;
     sTextureCube *CubeTex : s1;
-    sU32 Color;
+    uint32_t Color;
 	sVector31 CamPos;
 	sVector31 GridOffsetW;
-	sF32 Phase;
+	float Phase;
   }
 
   // the vertex sahder
@@ -3749,10 +3749,10 @@ shader MaterialWaterShip
 	sTexture2D *EnvBumpTex : s2;
     sTextureCube *CubeTex : s1;
 	sTexture2D *WaveTex: s4;
-	sU32 Color;
+	uint32_t Color;
 	sVector31 CamPos;
 	sVector31 GridOffsetW;
-	sF32 Phase;
+	float Phase;
   }
 
   // the vertex sahder
@@ -3763,7 +3763,7 @@ shader MaterialWaterShip
 	sMatrix44 vm : c4;
 	sMatrix44 pm : c8;
 	sVector31 campos : c12;
-	sF32	  phase : c13;
+	float	  phase : c13;
 	sVector31 gridOffsetW : c14;
 
     asc vs_2_0                 // asc code
@@ -3922,7 +3922,7 @@ shader MaterialGround
   {
     sTexture2D *BaseTex : s0;
     sTexture2D *CausticsTex : s1;
-    sU32 Color;
+    uint32_t Color;
 	sVector31 CamPos;
 	sVector31 GridOffsetG;
   }
@@ -4040,7 +4040,7 @@ shader MaterialMountains
   {
     sTexture2D *BaseTex : s0;
     sTexture2D *CausticsTex : s1;
-    sU32 Color;
+    uint32_t Color;
 	sVector31 CamPos;
   }
 
@@ -4154,7 +4154,7 @@ shader MaterialReflections
   {
     sTexture2D *BaseTex : s0;
     sTexture2D *CausticsTex : s1;
-    sU32 Color;
+    uint32_t Color;
 	sVector31 CamPos;
   }
 
@@ -4252,7 +4252,7 @@ shader MaterialParticle : sEngBaseMtrl
   parameter 
   {
     sTexture2D *BaseTex : s0;
-    sU32 Color;
+    uint32_t Color;
   }
 
   // the vertex sahder
@@ -4351,9 +4351,9 @@ shader MaterialBillboards : sEngBaseMtrl
   parameter 
   {
     sTexture2D *BaseTex : s0;
-    sU32 Color;
-    sF32 SizeX = 1;
-    sF32 SizeY = 1;
+    uint32_t Color;
+    float SizeX = 1;
+    float SizeY = 1;
     int Mode = 0;
   }
 
@@ -5013,7 +5013,7 @@ shader sMtrlAdaptLum : sEngBaseMtrl
 {
   parameter
   {
-    sF32 AdaptParam = 0;
+    float AdaptParam = 0;
   }
 
   vs

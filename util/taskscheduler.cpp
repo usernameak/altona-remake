@@ -8,8 +8,8 @@
 #include "base/types.hpp"
 #include "util/taskscheduler.hpp"
 
-static sU32 StatSpin;
-static sU32 StatLock;
+static uint32_t StatSpin;
+static uint32_t StatLock;
 static int SpinDummy=1;
 
 /****************************************************************************/
@@ -330,7 +330,7 @@ sStsWorkload::sStsWorkload(sStsManager *mng)
   Manager = mng;
 
   const int memory = mng->ConfigPoolMem;
-  Mem = new sU8[memory];
+  Mem = new uint8_t[memory];
   MemUsed = sPtr(Mem);
   MemEnd = MemUsed+memory;
 
@@ -362,14 +362,14 @@ sStsWorkload::~sStsWorkload()
   delete[] Mem;
 }
 
-sU8 *sStsWorkload::AllocBytes(int bytes)
+uint8_t *sStsWorkload::AllocBytes(int bytes)
 {
   bytes = sAlign(bytes,4);
   sPtr r = sAtomicAdd(&MemUsed,bytes);
   if(r>MemEnd)
     sFatal(L"out of sts memory");
   sVERIFY(((r-bytes)&3)==0);
-  return (sU8 *)sPtr(r-bytes);
+  return (uint8_t *)sPtr(r-bytes);
 }
 
 /****************************************************************************/
@@ -423,7 +423,7 @@ sStsManager::sStsManager(int memory,int taskqueuelength,int maxcore)
   ConfigPoolMem = memory;
   ConfigMaxTasks = taskqueuelength;
 
-//  Mem = new sU8[memory];
+//  Mem = new uint8_t[memory];
 //  MemUsed = sPtr(Mem);
 //  MemEnd = MemUsed+memory;
 
@@ -693,14 +693,14 @@ void sStsManager::Sync(sStsSync *sync)
 
 /****************************************************************************/
 /*
-sU8 *sStsManager::AllocBytes(int bytes)
+uint8_t *sStsManager::AllocBytes(int bytes)
 {
   bytes = sAlign(bytes,4);
   sPtr r = sAtomicAdd(&MemUsed,bytes);
   if(r>MemEnd)
     sFatal(L"out of sts memory");
   sVERIFY(((r-bytes)&3)==0);
-  return (sU8 *)sPtr(r-bytes);
+  return (uint8_t *)sPtr(r-bytes);
 }
 */
 sBool sStsManager::StealTasks(int to)
@@ -985,7 +985,7 @@ void sStsPerfMon::FlipFrame()
 
 /****************************************************************************/
 
-/*void sStsPerfMon::Box(sF32 x0,sF32 y0,sF32 x1,sF32 y1,sU32 col)
+/*void sStsPerfMon::Box(float x0,float y0,float x1,float y1,uint32_t col)
 {
   if(GeoUsed+4>=GeoAlloc)
   {
@@ -1019,7 +1019,7 @@ void sStsPerfMon::Paint(const sTargetSpec &ts)
   int sx,sy;
   sx = ts.Window.SizeX();
   sy = ts.Window.SizeY();
-  sU32 colorstack[16];
+  uint32_t colorstack[16];
   int colorindex;
   sViewport View;
 
@@ -1058,13 +1058,13 @@ void sStsPerfMon::Paint(const sTargetSpec &ts)
       int pos0 = Rects[i].x0;
       int col0 = 0;
       colorstack[colorindex&15] = 0;
-      sF32 y0 = Rects[i].y0;
-      sF32 y1 = Rects[i].y1;
+      float y0 = Rects[i].y0;
+      float y1 = Rects[i].y1;
 
       for(int j=0;j<max;j++)
       {
         int pos1 = (d[j].Timestamp>>(Scale))+Rects[i].x0;
-        sU32 col1 = d[j].Color;
+        uint32_t col1 = d[j].Color;
         if(col1)
           colorstack[(++colorindex)&15] = col1;
         else

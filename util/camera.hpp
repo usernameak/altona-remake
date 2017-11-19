@@ -38,7 +38,7 @@ public:
   sCamera();
   virtual ~sCamera();
   virtual void OnFrame(int delta,sViewport &vp)=0;
-  virtual void OnKey(sU32 key);
+  virtual void OnKey(uint32_t key);
   virtual void SetMouseControl(sBool mouseControl) { MouseControl = mouseControl; }
   virtual void SetJoypadControl(sBool joypadControl) { JoypadControl = joypadControl; }
 
@@ -54,7 +54,7 @@ class sTumbleCamera : public sCamera
 public:
   sTumbleCamera();
 
-  sF32 Dist;
+  float Dist;
   sVector30 Speed;
   void OnFrame(int delta,sViewport &vp);
 };
@@ -64,7 +64,7 @@ public:
 class sOrbitCamera : public sCamera
 {
   sVector30 Angles;
-  sF32 Dist;
+  float Dist;
 public:
   sOrbitCamera();
   void OnFrame(int delta,sViewport &vp);
@@ -78,24 +78,24 @@ public:
 class sFreeCamera : public sCamera
 {
   int KeyMask;
-  sF32 Moving;
-  sF32 AnalogX;
-  sF32 AnalogY;
+  float Moving;
+  float AnalogX;
+  float AnalogY;
 
   void PrintPos();
 public:
   sFreeCamera();
   void OnFrame(int delta,sViewport &vp);
-  void OnKey(sU32 key);
+  void OnKey(uint32_t key);
 
   void Stop();
 
-  sF32 Speed;
-  sF32 LookSpeed;
-  sF32 Damping;
+  float Speed;
+  float LookSpeed;
+  float Damping;
 
   sVector31 Pos;
-  sF32 DirLook,DirPitch,DirRoll;
+  float DirLook,DirPitch,DirRoll;
   sVector30 SpeedV;
 };
 
@@ -116,14 +116,14 @@ class sCameraXSI : public sCamera
   int KeyMaskSticky;
   
 
-  sF32 DollyStep;
+  float DollyStep;
   sBool DollyActive;
 
 
   public:
     sCameraXSI();
     void OnFrame(int delta, sViewport &vp);
-    void OnKey(sU32 key);
+    void OnKey(uint32_t key);
     void OnDrag(const sMouseData &md);
     void Init();
 
@@ -131,7 +131,7 @@ class sCameraXSI : public sCamera
     sVector31 Target;
     sVector30 EulerRot;
     sVector30 Scale;
-    sF32      Distance;
+    float      Distance;
     sBool     StickyMode;
 };
 

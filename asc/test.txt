@@ -19,7 +19,7 @@ asc
     float4 SubColor;    // Color to substarct from src
     float4 MaxUV;       // Max texcoords to prevent leaking between splitscreens
 
-    extern void Set(sU32 subColor, sF32 pushFactor, sVector4 maxUV)
+    extern void Set(uint32_t subColor, float pushFactor, sVector4 maxUV)
     {
       SubColor.InitColor(subColor);
       SubColor.w = pushFactor;
@@ -92,17 +92,17 @@ asc
     float4 SbOffsets1;      // uv offset for small blur kernel -> 4, 8, 16 texel average
     float4 SbOffsets2;      // uv offset for small blur kernel -> 4, 8, 16 texel average
 
-    extern void Set(const sVector4 &cocFar, const sVector4 &sbOffsets1, const sVector4 &sbOffsets2, sU32 copyColor, sU32 addColor, const sVector4 &depthParams, sVector4 maxUV_F, sVector4 maxUV_H, sVector4 maxUV_Q, sBool skyBlur, sBool nearBlur, sBool showGlare)
+    extern void Set(const sVector4 &cocFar, const sVector4 &sbOffsets1, const sVector4 &sbOffsets2, uint32_t copyColor, uint32_t addColor, const sVector4 &depthParams, sVector4 maxUV_F, sVector4 maxUV_H, sVector4 maxUV_Q, sBool skyBlur, sBool nearBlur, sBool showGlare)
     {
       CoCFar = cocFar;
-      CoCFar.w = sF32(nearBlur);  // "dynamic" branch flag
+      CoCFar.w = float(nearBlur);  // "dynamic" branch flag
       SbOffsets1 = sbOffsets1;
       SbOffsets2 = sbOffsets2;
       CopyColor.InitColor(copyColor);
       AddColor.InitColor(addColor);
       DepthParams = depthParams;
-      DepthParams.z = sF32(skyBlur);    // branch flag
-      DepthParams.w = sF32(showGlare);  // branch flag (debug only)
+      DepthParams.z = float(skyBlur);    // branch flag
+      DepthParams.w = float(showGlare);  // branch flag (debug only)
       MaxUV_F = maxUV_F;
       MaxUV_H = maxUV_H;
       MaxUV_Q = maxUV_Q;

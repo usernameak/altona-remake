@@ -15,31 +15,31 @@
 /***                                                                      ***/
 /****************************************************************************/
 #if 1
-sF32 sFadeData::GetFactor(sU32 type)
+float sFadeData::GetFactor(uint32_t type)
 {
   switch (type)
   {
   default:
   case LINEAR:
-    return sF32(Time)/Length;
+    return float(Time)/Length;
   case SMOOTH:
     {
-    sF32 x = sF32(Time)/Length;
+    float x = float(Time)/Length;
     return -2*x*x*x+3*x*x;
     }
   case SMOOTH_IN:
     {
-    sF32 x = sF32(Time)/Length;
+    float x = float(Time)/Length;
     return -1*x*x*x+2*x*x;
     }
   case SMOOTH_OUT:
     {
-    sF32 x = 1-sF32(Time)/Length;
+    float x = 1-float(Time)/Length;
     return 1-(-1*x*x*x+2*x*x);
     }
   case SWITCH:
     {
-    return (sF32)((int)(sF32(Time)/Length));
+    return (float)((int)(float(Time)/Length));
     }
   }
 }

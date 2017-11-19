@@ -108,7 +108,7 @@ static int DXXSIMode=0;       // special flags for D3DCreate when used within XS
 static int DXStreamsUsed = 0;   // number of streams used by last sGeometry::Draw(). used for caching.
 static int DXInstanceSet = 0;    // number of streams for which instancing information was set
 static sBool Render3DInProgress=0;    // flagging started scene with d3d->BeginScene
-static sDInt DXTotalTextureMem = 0;
+static ptrdiff_t DXTotalTextureMem = 0;
 
 static sGeoBufferPart DXQuadIndex;
 static sVertexOffset NoVertexOffset;
@@ -130,7 +130,7 @@ static D3DCAPS9 DXCaps;
 static int DXShaderProfile;
 
 static int RenderClippingFlag;
-static sU32 RenderClippingData[4096];
+static uint32_t RenderClippingData[4096];
 
 static sBool ConvertsRGB = sTRUE;
 
@@ -147,9 +147,9 @@ static sArray<sOccQueryNode *> *AllOccQueryNodes;
 #define sMAXVB 1024
 #define sMAXIB 4096
 
-static sU32 sDXStates[sMS_MAX];
+static uint32_t sDXStates[sMS_MAX];
 
-void ConvertFlags(sU32 flags, D3DFORMAT& d3df, D3DPOOL& pool, int& usage, int& mm, int& lflags);
+void ConvertFlags(uint32_t flags, D3DFORMAT& d3df, D3DPOOL& pool, int& usage, int& mm, int& lflags);
 
 /****************************************************************************/
 
@@ -217,13 +217,13 @@ int sGeoPrimCount;
 /****************************************************************************/
 
 #if sSTRIPPED
-void DXError(sU32 err);
+void DXError(uint32_t err);
 
-#define DXErr(hr) { sU32 err=hr; if(FAILED(err)) DXError(err); }
+#define DXErr(hr) { uint32_t err=hr; if(FAILED(err)) DXError(err); }
 #else
-void DXError(sU32 err,const sChar *file,int line,const sChar *system);
+void DXError(uint32_t err,const sChar *file,int line,const sChar *system);
 
-#define DXErr(hr) { sU32 err=hr; if(FAILED(err)) DXError(err,sTXT(__FILE__),__LINE__,L"d3d"); }
+#define DXErr(hr) { uint32_t err=hr; if(FAILED(err)) DXError(err,sTXT(__FILE__),__LINE__,L"d3d"); }
 #endif
 
 /****************************************************************************/
@@ -247,14 +247,14 @@ void PreInitGFX(int &flags,int &xs,int &ys)
     if(flags & sISF_REFRAST)      DXScreenMode.Flags |= sSM_REFRAST;
     DXScreenMode.ScreenX = xs;
     DXScreenMode.ScreenY = ys;
-    DXScreenMode.Aspect = sF32(DXScreenMode.ScreenX) / sF32(DXScreenMode.ScreenY);
+    DXScreenMode.Aspect = float(DXScreenMode.ScreenX) / float(DXScreenMode.ScreenY);
   }
   else
   {
     xs = DXScreenMode.ScreenX;
     ys = DXScreenMode.ScreenY;
     if(DXScreenMode.Aspect==0)
-      DXScreenMode.Aspect = sF32(DXScreenMode.ScreenX) / sF32(DXScreenMode.ScreenY);
+      DXScreenMode.Aspect = float(DXScreenMode.ScreenX) / float(DXScreenMode.ScreenY);
     if(DXScreenMode.Flags & sSM_FULLSCREEN)
       flags |= sISF_FULLSCREEN;
   }
@@ -301,7 +301,7 @@ void InitGFX(int flags_,int xs_,int ys_)
       sFatal(L"DX error");
     DXScreenMode.ScreenX = dm.Width;
     DXScreenMode.ScreenY = dm.Height;
-    DXScreenMode.Aspect = sF32(DXScreenMode.ScreenX) / sF32(DXScreenMode.ScreenY);
+    DXScreenMode.Aspect = float(DXScreenMode.ScreenX) / float(DXScreenMode.ScreenY);
   }
 
   // ...
@@ -339,7 +339,7 @@ void InitGFX(int flags_,int xs_,int ys_)
   else
   {
     RECT r;
-    sU32 result = GetClientRect(sHWND,&r);
+    uint32_t result = GetClientRect(sHWND,&r);
     sVERIFY(result);
     DXScreenMode.ScreenX = r.right-r.left;
     DXScreenMode.ScreenY = r.bottom-r.top;
@@ -406,7 +406,7 @@ void InitGFX(int flags_,int xs_,int ys_)
     {
       DXScreenMode.ScreenX = d3dpp[0].BackBufferWidth = 800;
       DXScreenMode.ScreenY = d3dpp[0].BackBufferHeight = 600;
-      DXScreenMode.Aspect = sF32(DXScreenMode.ScreenX) / sF32(DXScreenMode.ScreenY);
+      DXScreenMode.Aspect = float(DXScreenMode.ScreenX) / float(DXScreenMode.ScreenY);
       sLogF(L"gfx",L"retry d3d %d x %d\n",DXScreenMode.ScreenX,DXScreenMode.ScreenY);
       hr = DX9->CreateDevice(adapter,DevType,sHWND,behaviorfFlags,d3dpp,&DXDev);
     }
@@ -559,9 +559,9 @@ void InitGFX(int flags_,int xs_,int ys_)
 
   if(!restart)
   {
-    sU16 *ip;
+    uint16_t *ip;
     sGeoBufferInit();
-    ip = (sU16 *)DXQuadIndex.Init(sMAX_QUADCOUNT*6,2,sGD_STATIC,1);
+    ip = (uint16_t *)DXQuadIndex.Init(sMAX_QUADCOUNT*6,2,sGD_STATIC,1);
     for(int i=0;i<sMAX_QUADCOUNT;i++)
       sQuad(ip,i*4,0,1,2,3);
     DXQuadIndex.Advance(-1,2);
@@ -636,7 +636,7 @@ void ResizeGFX(int x,int y)  // this is called when the windows size changes
     DXScreenMode.ScreenX = x;
     DXScreenMode.ScreenY = y;
     if (!(DXScreenMode.Flags & sSM_FULLSCREEN))
-      DXScreenMode.Aspect = sF32(x)/sF32(y);
+      DXScreenMode.Aspect = float(x)/float(y);
     DXRestore = 1;
   }
 }
@@ -697,7 +697,7 @@ sBool sSetOversizeScreen(int xs,int ys,int fsaa,sBool mayfail)
   return 1;
 }
 
-void sGetScreenSafeArea(sF32 &xs, sF32 &ys)
+void sGetScreenSafeArea(float &xs, float &ys)
 {
   xs=ys=1;
 }
@@ -903,7 +903,7 @@ found2:
   max = AspectRatios.GetCount();
   for(int i=0;i<max-1;i++)
     for(int j=i+1;j<max;j++)
-      if(sF32(AspectRatios[i].x)/AspectRatios[i].y > sF32(AspectRatios[j].x)/AspectRatios[j].y)
+      if(float(AspectRatios[i].x)/AspectRatios[i].y > float(AspectRatios[j].x)/AspectRatios[j].y)
         AspectRatios.Swap(i,j);
 
   // multisampling
@@ -917,7 +917,7 @@ found2:
   DXErr(DX9->GetAdapterDisplayMode(display,&mode));
   si.CurrentXSize = mode.Width;
   si.CurrentYSize = mode.Height;
-  si.CurrentAspect = sF32(si.CurrentXSize)/sF32(si.CurrentYSize); // this is wrong on some displays!
+  si.CurrentAspect = float(si.CurrentXSize)/float(si.CurrentYSize); // this is wrong on some displays!
 
   // copy result
 
@@ -999,7 +999,7 @@ sBool sConvertsRGBTex()
 
 #if 0
 
-void sClearRendertargetPrivate(int flags,sU32 color)
+void sClearRendertargetPrivate(int flags,uint32_t color)
 {
   // clear with scissor?
   sBool noscissor=(flags&sCLEAR_NOSCISSOR);
@@ -1220,7 +1220,7 @@ void sSetRendertargetPrivate(sTextureBase *tex,int xs,int ys,const sRect *vrp,in
   }
 
   if(tex!=DXBackBuffer)
-    sGFXRendertargetAspect = sF32(xs)/sF32(ys);
+    sGFXRendertargetAspect = float(xs)/float(ys);
   else
     sGFXRendertargetAspect = DXScreenMode.Aspect;
 
@@ -1246,14 +1246,14 @@ void sSetRendertargetPrivate(sTextureBase *tex,int xs,int ys,const sRect *vrp,in
   }
 }
 
-void sSetRendertarget(const sRect *vrp, int clearflags, sU32 clearcolor)
+void sSetRendertarget(const sRect *vrp, int clearflags, uint32_t clearcolor)
 {
   sSetRendertargetPrivate(DXBackBuffer,DXScreenMode.ScreenX,DXScreenMode.ScreenY,vrp,clearflags | sRTZBUF_FORCEMAIN);
 
   sClearRendertargetPrivate(clearflags,clearcolor);
 }
 
-void sSetRendertarget(const sRect *vrp,sTexture2D *tex,int flags, sU32 clearcolor)
+void sSetRendertarget(const sRect *vrp,sTexture2D *tex,int flags, uint32_t clearcolor)
 {
   if(tex)
   {
@@ -1268,7 +1268,7 @@ void sSetRendertarget(const sRect *vrp,sTexture2D *tex,int flags, sU32 clearcolo
   }
 }
 
-void sSetRendertarget(const sRect *vrp,int flags,sU32 clearcolor,sTexture2D **tex,int count)
+void sSetRendertarget(const sRect *vrp,int flags,uint32_t clearcolor,sTexture2D **tex,int count)
 {
   sVERIFY(count>=2);
   sVERIFY(tex);
@@ -1308,7 +1308,7 @@ void sSetRendertarget(const sRect *vrp,int flags,sU32 clearcolor,sTexture2D **te
 }
 
 
-void sSetRendertargetCube(sTextureCube* tex, sTexCubeFace cf, int flags, sU32 clearcolor)
+void sSetRendertargetCube(sTextureCube* tex, sTexCubeFace cf, int flags, uint32_t clearcolor)
 {
   IDirect3DSurface9 *dest;
 
@@ -1375,7 +1375,7 @@ void sSetScreen(class sTexture2D *tex, sGrabFilterFlags filter, const sRect *dst
   surface->Release();
 }
 
-void sSetScreen(const sRect &rect,sU32 *data)
+void sSetScreen(const sRect &rect,uint32_t *data)
 {
   IDirect3DSurface9* screen;
   D3DLOCKED_RECT lock;
@@ -1383,7 +1383,7 @@ void sSetScreen(const sRect &rect,sU32 *data)
   RECT sr;
   POINT dp;
   int xs,ys;
-  sU8 *s,*d;
+  uint8_t *s,*d;
 
   // check and prepare
 
@@ -1414,8 +1414,8 @@ void sSetScreen(const sRect &rect,sU32 *data)
   // copy to memory surface
 
   DXErr(DXSetScreenSurf->LockRect(&lock,&sr,0));
-  s = (sU8 *)data;
-  d = (sU8 *)lock.pBits;
+  s = (uint8_t *)data;
+  d = (uint8_t *)lock.pBits;
   for(int y=0;y<ys;y++)
   {
     sCopyMem(d,s,xs*4);
@@ -1674,7 +1674,7 @@ void sSetTarget(const sTargetPara &para)
   if(para.Target[0]==sGetScreenColorBuffer())
     sGFXRendertargetAspect = sGetScreenAspect();  
   else
-    sGFXRendertargetAspect = sF32(sGFXRendertargetX)/sGFXRendertargetY;
+    sGFXRendertargetAspect = float(sGFXRendertargetX)/sGFXRendertargetY;
 
   // window and scissor
 
@@ -1863,7 +1863,7 @@ void sGpuToCpu::CopyFrom(sTexture2D *tex,int miplevel)
   }
 }
 
-const void *sGpuToCpu::BeginRead(sDInt &pitch)
+const void *sGpuToCpu::BeginRead(ptrdiff_t &pitch)
 {
   sVERIFY(!Locked);
 
@@ -1952,9 +1952,9 @@ void sEnlargeRTDepthBuffer(int xs,int ys)
 /****************************************************************************/
 /****************************************************************************/
 
-void sBeginSaveRTPrivate(const sU8*& data, sS32& pitch, enum sTextureFlags& flags,IDirect3DSurface9* source);
+void sBeginSaveRTPrivate(const uint8_t*& data, int32_t& pitch, enum sTextureFlags& flags,IDirect3DSurface9* source);
 
-void sBeginSaveRT(const sU8*& data, sS32& pitch, enum sTextureFlags& flags)
+void sBeginSaveRT(const uint8_t*& data, int32_t& pitch, enum sTextureFlags& flags)
 {
   IDirect3DSurface9*  source;
   DXErr(DXDev->GetRenderTarget(0, &source));
@@ -1967,7 +1967,7 @@ void sEndSaveRT()
   DXRTSave->UnlockRect();
 }
 
-void sBeginReadTexture(const sU8*& data, sS32& pitch, enum sTextureFlags& flags,sTexture2D *tex)
+void sBeginReadTexture(const uint8_t*& data, int32_t& pitch, enum sTextureFlags& flags,sTexture2D *tex)
 {
   sResolveTargetPrivate(tex);
   IDirect3DSurface9 *source;
@@ -2012,7 +2012,7 @@ void sBeginReadTexture(const sU8*& data, sS32& pitch, enum sTextureFlags& flags,
   }
   DXRTSave->LockRect(&r, 0, D3DLOCK_READONLY);
 
-  data = (sU8*)r.pBits;
+  data = (uint8_t*)r.pBits;
   pitch = r.Pitch;
   flags = sTextureFlags(tex->Flags&sTEX_FORMAT);
 
@@ -2024,7 +2024,7 @@ void sEndReadTexture()
   DXRTSave->UnlockRect();
 }
 
-void sBeginSaveRTPrivate(const sU8*& data, sS32& pitch, enum sTextureFlags& flags,IDirect3DSurface9* source)
+void sBeginSaveRTPrivate(const uint8_t*& data, int32_t& pitch, enum sTextureFlags& flags,IDirect3DSurface9* source)
 {
   D3DLOCKED_RECT      r;
   int xs,ys;
@@ -2083,7 +2083,7 @@ void sBeginSaveRTPrivate(const sU8*& data, sS32& pitch, enum sTextureFlags& flag
   }
   DXRTSave->LockRect(&r, 0, D3DLOCK_READONLY);
 
-  data = (sU8*)r.pBits;
+  data = (uint8_t*)r.pBits;
   pitch = r.Pitch;
 
   sRelease(source);
@@ -2141,10 +2141,10 @@ void sDbgPaintWireFrame(sBool enable)
   DXErr(DXDev->SetRenderState(D3DRS_FILLMODE,enable?D3DFILL_WIREFRAME:D3DFILL_SOLID));
 }
 
-void sSetRenderStates(const sU32* data, int count)
+void sSetRenderStates(const uint32_t* data, int count)
 {
   int index;
-  sU32 value;
+  uint32_t value;
 
   for(int i=0;i<count;i++)
   {
@@ -2185,10 +2185,10 @@ void sSetRenderStates(const sU32* data, int count)
   }
 }
 
-int sRenderStateTexture(sU32* data, int texstage, sU32 tflags,sF32 lodbias)
+int sRenderStateTexture(uint32_t* data, int texstage, uint32_t tflags,float lodbias)
 {
   int tex = sMS_SAMPLERSTATE+(texstage<<sMS_SAMPLERSHIFT);
-  sU32* start = data;
+  uint32_t* start = data;
 
   if (tflags & sMTF_SRGB)
   {
@@ -2238,9 +2238,9 @@ int sRenderStateTexture(sU32* data, int texstage, sU32 tflags,sF32 lodbias)
     *data++ = tex+D3DSAMP_MIPFILTER;    *data++ = D3DTEXF_LINEAR;
     break;
   }
-  *data++ = tex+D3DSAMP_MIPMAPLODBIAS; *(sF32 *)data = lodbias; data++;
+  *data++ = tex+D3DSAMP_MIPMAPLODBIAS; *(float *)data = lodbias; data++;
 
-  sU32 bcolor = (tflags&sMTF_BCOLOR_WHITE) ? 0xffffffff : 0;
+  uint32_t bcolor = (tflags&sMTF_BCOLOR_WHITE) ? 0xffffffff : 0;
 
   *data++ = tex+D3DSAMP_ADDRESSU;
   switch(tflags&sMTF_ADDRMASK_U)
@@ -2412,8 +2412,8 @@ void sCreateShader2(sShader *shader, sShaderBlob *blob)
   }
 
   // can this be a directx shader?
-  const sU32 *start = (const sU32 *) (blob->Data);
-  const sU32 *end = (const sU32 *) (blob->Data+blob->Size-4);
+  const uint32_t *start = (const uint32_t *) (blob->Data);
+  const uint32_t *end = (const uint32_t *) (blob->Data+blob->Size-4);
   sVERIFY((blob->Size&3)==0);
   sVERIFY(*end==0x0000ffff);
 
@@ -2465,7 +2465,7 @@ void sSetPSParam(int o, int count, const sVector4* psf)
   sClearCurrentCBuffers();  // cbuffers are not valid anymore
 }
 
-void sSetVSBool(sU32 bits,sU32 mask)
+void sSetVSBool(uint32_t bits,uint32_t mask)
 {
   for(int i=0;i<sCOUNTOF(CurrentVSBools);i++)
   {
@@ -2478,7 +2478,7 @@ void sSetVSBool(sU32 bits,sU32 mask)
   sClearCurrentCBuffers();  // cbuffers are not valid anymore
 }
 
-void sSetPSBool(sU32 bits,sU32 mask)
+void sSetPSBool(uint32_t bits,uint32_t mask)
 {
   for(int i=0;i<sCOUNTOF(CurrentPSBools);i++)
   {
@@ -2527,10 +2527,10 @@ void sCBufferBase::SetRegs()
   switch(Slot & sCBUFFER_SHADERMASK)
   {
   case sCBUFFER_VS:
-    DXErr(DXDev->SetVertexShaderConstantF(RegStart,(sF32*)DataPersist,RegCount));
+    DXErr(DXDev->SetVertexShaderConstantF(RegStart,(float*)DataPersist,RegCount));
     break;
   case sCBUFFER_PS:
-    DXErr(DXDev->SetPixelShaderConstantF(RegStart,(sF32*)DataPersist,RegCount));
+    DXErr(DXDev->SetPixelShaderConstantF(RegStart,(float*)DataPersist,RegCount));
     break;
   }
   // should be valid for more than one frame
@@ -2932,7 +2932,7 @@ void *sGeoBufferPart::Init(int count,int size,sGeometryDuration duration,int buf
 
   if(Buffer->LockPtr==0)
     Buffer->Lock();
-  sU8 *data = (((sU8*)Buffer->LockPtr) + Buffer->Used);
+  uint8_t *data = (((uint8_t*)Buffer->LockPtr) + Buffer->Used);
 
   if(advance)
     Buffer->Used += Count*size;
@@ -3257,11 +3257,11 @@ void sGeometry::DrawPrim(sGeoPrim *start,sGeoPrim *end,int ic,int vc)
   sGeoBufferPart IB;  
   sGeoBuffer *verify;
   sGeoPrim *prim;
-  sU32 *ip;
+  uint32_t *ip;
   int vert,xs;
 
   IB.Clear();
-  ip = (sU32 *)IB.Init(ic,4,sGD_FRAME,2,1);
+  ip = (uint32_t *)IB.Init(ic,4,sGD_FRAME,2,1);
   verify = start->VB.Buffer;
   
   prim = start;
@@ -3423,7 +3423,7 @@ void sGeometry::Draw(const sGeometryDrawInfo &di)
 
   if(di.Flags & sGDI_BlendFactor)
   {
-    sU32 data[2] = { sMS_RENDERSTATE+int(D3DRS_BLENDFACTOR),di.BlendFactor };
+    uint32_t data[2] = { sMS_RENDERSTATE+int(D3DRS_BLENDFACTOR),di.BlendFactor };
     sSetRenderStates(data,1);       // this cares about caching!
   }
 
@@ -3671,7 +3671,7 @@ void sCopyCubeFace(sTexture2D *dest, sTextureCube *src, sTexCubeFace cf)
   {
     // copy rendertarget
     sSetRendertargetCube(src,cf,sCLEAR_NONE);
-    const sU8 *data;
+    const uint8_t *data;
     int pitch;
     sTextureFlags rtflags;
     sBeginSaveRT(data,pitch,rtflags);
@@ -3682,8 +3682,8 @@ void sCopyCubeFace(sTexture2D *dest, sTextureCube *src, sTexCubeFace cf)
 
     for (int y=0; y<dest->SizeY; y++)
     {
-      sU8 *src_ptr = (sU8*)data+y*pitch;
-      sU8 *dst_ptr = (sU8*)ldest.pBits+y*ldest.Pitch;
+      uint8_t *src_ptr = (uint8_t*)data+y*pitch;
+      uint8_t *dst_ptr = (uint8_t*)ldest.pBits+y*ldest.Pitch;
       for (int x=0; x<dest->SizeX*dest->BitsPerPixel/8; x++)
         *dst_ptr++ = *src_ptr++;
     }
@@ -3704,8 +3704,8 @@ void sCopyCubeFace(sTexture2D *dest, sTextureCube *src, sTexCubeFace cf)
 
     for (int y=0; y<dest->SizeY; y++)
     {
-      sU8 *src_ptr = (sU8*)lsrc.pBits+y*lsrc.Pitch;
-      sU8 *dst_ptr = (sU8*)ldest.pBits+y*ldest.Pitch;
+      uint8_t *src_ptr = (uint8_t*)lsrc.pBits+y*lsrc.Pitch;
+      uint8_t *dst_ptr = (uint8_t*)ldest.pBits+y*ldest.Pitch;
       for (int x=0; x<dest->SizeX*dest->BitsPerPixel/8; x++)
         *dst_ptr++ = *src_ptr++;
     }
@@ -3801,7 +3801,7 @@ void sOccQuery::Poll()
     sOccQueryNode *next = Queries.GetNext(qn);
     if(qn->Query->GetData(&pixels,sizeof(DWORD),0)==S_OK)
     {
-      Last = sF32(pixels)/qn->Pixels;
+      Last = float(pixels)/qn->Pixels;
       Average = (1-Filter)*Average + Filter*Last;
       Queries.Rem(qn);
       FreeOccQueryNodes->AddTail(qn);
@@ -3817,7 +3817,7 @@ void sOccQuery::Poll()
 /****************************************************************************/
 
 
-void ConvertFlags(sU32 flags, D3DFORMAT& d3df, D3DPOOL& pool, int& usage, int& mm, int& lflags)
+void ConvertFlags(uint32_t flags, D3DFORMAT& d3df, D3DPOOL& pool, int& usage, int& mm, int& lflags)
 {
   int rt = D3DUSAGE_RENDERTARGET;
 
@@ -3918,7 +3918,7 @@ void ConvertFlags(sU32 flags, D3DFORMAT& d3df, D3DPOOL& pool, int& usage, int& m
   }
 }
 
-sU64 sGetAvailTextureFormats()
+uint64_t sGetAvailTextureFormats()
 {
   return
     (1ULL<<sTEX_ARGB8888) |
@@ -3960,7 +3960,7 @@ void InitGraphicsCaps()
   if (SUCCEEDED(DX9->GetAdapterIdentifier(DX9Adapter,0,&aid)))
     sCopyString(caps.AdapterName,aid.Description);
     
-  sU64 avail = sGetAvailTextureFormats();
+  uint64_t avail = sGetAvailTextureFormats();
   for(int i=0;i<64;i++)
   {
     if((1ULL<<i)&avail)
@@ -4005,7 +4005,7 @@ void sGetGraphicsCaps(sGraphicsCaps &caps)
 /****************************************************************************/
 /****************************************************************************/
 
-void sPackDXT(sU8 *d,sU32 *bmp,int xs,int ys,int format,sBool dither)
+void sPackDXT(uint8_t *d,uint32_t *bmp,int xs,int ys,int format,sBool dither)
 {
   int formatflags = format;
   format &= sTEX_FORMAT;
@@ -4018,10 +4018,10 @@ void sPackDXT(sU8 *d,sU32 *bmp,int xs,int ys,int format,sBool dither)
 #if !sCONFIG_COMPILER_GCC
   IDirect3DSurface9 *surf;
   D3DFORMAT d3dformat,srcfmt;
-  sU32 *bmpdel=0;
+  uint32_t *bmpdel=0;
   D3DLOCKED_RECT lr;
   RECT wr;
-  sU8 *s;
+  uint8_t *s;
   int blocksize;
 
   switch(format&sTEX_FORMAT)
@@ -4035,7 +4035,7 @@ void sPackDXT(sU8 *d,sU32 *bmp,int xs,int ys,int format,sBool dither)
     d3dformat = D3DFMT_DXT1;
     srcfmt = D3DFMT_A8R8G8B8;
     blocksize = 8;
-    bmpdel = new sU32[xs*ys];
+    bmpdel = new uint32_t[xs*ys];
     sCopyMem(bmpdel,bmp,xs*ys*4);
     bmp = bmpdel;
     for(int i=0;i<xs*ys;i++)
@@ -4061,7 +4061,7 @@ void sPackDXT(sU8 *d,sU32 *bmp,int xs,int ys,int format,sBool dither)
     d3dformat = D3DFMT_DXT5;
     srcfmt = D3DFMT_A8R8G8B8;
     blocksize = 16;
-    bmpdel = new sU32[xs*ys];
+    bmpdel = new uint32_t[xs*ys];
     for(int i=0;i<xs*ys;i++)
       bmpdel[i] = (bmp[i]&0x0000ff00) | ((bmp[i]&0x00ff0000)<<8);
     bmp = bmpdel;
@@ -4071,7 +4071,7 @@ void sPackDXT(sU8 *d,sU32 *bmp,int xs,int ys,int format,sBool dither)
     d3dformat = D3DFMT_DXT5;
     srcfmt = D3DFMT_A8R8G8B8;
     blocksize = 16;
-    bmpdel = new sU32[xs*ys];
+    bmpdel = new uint32_t[xs*ys];
     for(int i=0;i<xs*ys;i++)
       bmpdel[i] = sARGBtoAYCoCg(bmp[i]);
     bmp = bmpdel;
@@ -4096,7 +4096,7 @@ void sPackDXT(sU8 *d,sU32 *bmp,int xs,int ys,int format,sBool dither)
 
   DXErr(surf->LockRect(&lr,0,D3DLOCK_READONLY));
 
-  s = (sU8 *)lr.pBits;
+  s = (uint8_t *)lr.pBits;
   for(int y=0;y<ys;y+=4)
   {
     sCopyMem(d,s,xs/4*blocksize);
@@ -4253,7 +4253,7 @@ void sTexture2D::OnLostDevice(sBool reinit/*=sFALSE*/)
   }
 }
 
-void sTexture2D::BeginLoad(sU8 *&data,int &pitch,int mipmap)
+void sTexture2D::BeginLoad(uint8_t *&data,int &pitch,int mipmap)
 {
   D3DLOCKED_RECT lr;
   sVERIFY(Loading==-1);
@@ -4262,18 +4262,18 @@ void sTexture2D::BeginLoad(sU8 *&data,int &pitch,int mipmap)
   if(mipmap)                      // D3DLOCK_DISCARD is allowed only on the top level
     lflags &= ~D3DLOCK_DISCARD;
   DXErr(Tex2D->LockRect(mipmap,&lr,0,LockFlags));
-  data = (sU8 *)lr.pBits;
+  data = (uint8_t *)lr.pBits;
   pitch = lr.Pitch;
   Loading = mipmap;
 }
 
-void sTexture2D::BeginLoadPartial(const sRect &rect,sU8 *&data,int &pitch,int mipmap)
+void sTexture2D::BeginLoadPartial(const sRect &rect,uint8_t *&data,int &pitch,int mipmap)
 {
   D3DLOCKED_RECT lr;
   sVERIFY(Loading==-1);
 
   DXErr(Tex2D->LockRect(mipmap,&lr,(const RECT *)&rect,LockFlags&~D3DLOCK_DISCARD));  // you probably don't want to discard the entire texture/mipmap chain with a partial update
-  data = (sU8 *)lr.pBits;
+  data = (uint8_t *)lr.pBits;
   pitch = lr.Pitch;
   Loading = mipmap;
 }
@@ -4375,7 +4375,7 @@ void sTextureCube::OnLostDevice(sBool reinit/*sFALSE*/)
   }
 }
 
-void sTextureCube::BeginLoad(sTexCubeFace cf, sU8*& data, int& pitch, int mipmap/*=0*/)
+void sTextureCube::BeginLoad(sTexCubeFace cf, uint8_t*& data, int& pitch, int mipmap/*=0*/)
 {
   sVERIFY(cf != sTCF_NONE);
 
@@ -4386,7 +4386,7 @@ void sTextureCube::BeginLoad(sTexCubeFace cf, sU8*& data, int& pitch, int mipmap
   if(cf!=sTCF_POSX||mipmap)               // D3DLOCK_DISCARD is allowed only on the top level
     lflags &= ~D3DLOCK_DISCARD;
   DXErr(TexCube->LockRect(static_cast<D3DCUBEMAP_FACES>(cf), mipmap, &lr, 0, lflags));
-  data = (sU8 *)lr.pBits;
+  data = (uint8_t *)lr.pBits;
   pitch = lr.Pitch;
   Loading = mipmap;
   LockedFace = cf;
@@ -4448,7 +4448,7 @@ void sTextureBasePrivate::OnLostDevice(sBool reinit)
 /***                                                                      ***/
 /****************************************************************************/
 
-sTexture3D::sTexture3D(int xs, int ys, int zs, sU32 flags)
+sTexture3D::sTexture3D(int xs, int ys, int zs, uint32_t flags)
 {
   D3DFORMAT format;
   D3DPOOL pool;
@@ -4489,7 +4489,7 @@ sTexture3D::~sTexture3D()
   sRelease(Tex3D);
 }
 
-void sTexture3D::BeginLoad(sU8*& data, int& rpitch, int& spitch, int mipmap/*=0*/)
+void sTexture3D::BeginLoad(uint8_t*& data, int& rpitch, int& spitch, int mipmap/*=0*/)
 {
   D3DLOCKED_BOX lr;
   sVERIFY(Loading==-1);
@@ -4498,7 +4498,7 @@ void sTexture3D::BeginLoad(sU8*& data, int& rpitch, int& spitch, int mipmap/*=0*
   if(mipmap)               // D3DLOCK_DISCARD is allowed only on the top level
     lflags &= ~D3DLOCK_DISCARD;
   DXErr(Tex3D->LockBox(mipmap, &lr, 0, lflags));
-  data = (sU8 *)lr.pBits;
+  data = (uint8_t *)lr.pBits;
   rpitch = lr.RowPitch;
   spitch = lr.SlicePitch;
   Loading = mipmap;
@@ -4511,7 +4511,7 @@ void sTexture3D::EndLoad()
   Loading = -1;
 }
 
-void sTexture3D::Load(sU8 *data)
+void sTexture3D::Load(uint8_t *data)
 {
   sVERIFYFALSE;
 }
@@ -4652,24 +4652,24 @@ void sMaterial::SetStates(int variant)
 #endif
 //  sGFXMtrlIsSet = 1;
 
-  sVERIFY(sizeof(sMaterial)-((sU8*)&Flags-(sU8*)this)>=sizeof(sMaterialRS));
+  sVERIFY(sizeof(sMaterial)-((uint8_t*)&Flags-(uint8_t*)this)>=sizeof(sMaterialRS));
   *(sMaterialRS*)&Flags = VariantFlags[variant];
 }
 /*
-void sMaterial::AllocStates(const sU32 *data,int count)
+void sMaterial::AllocStates(const uint32_t *data,int count)
 {
   sDeleteArray(States);
   StateCount = count;
   count += STATES_2PASS;
-  States = new sU32[count*2];
+  States = new uint32_t[count*2];
   sCopyMem(States,data,count*8);
 
 
   // this apppends additive blending states
   // material can be used with normal blending and additive blending skipping StateOffset states
   // and including last 5 states
-  sU32 blend =  BlendColor==sMB_ALPHA ? (sMBS_SA  |sMBO_ADD |sMBD_1  ) : sMB_ADD;
-  sU32 *ptr = &States[StateCount*2];
+  uint32_t blend =  BlendColor==sMB_ALPHA ? (sMBS_SA  |sMBO_ADD |sMBD_1  ) : sMB_ADD;
+  uint32_t *ptr = &States[StateCount*2];
 
   *ptr++ = D3DRS_ALPHABLENDENABLE;*ptr++ = 1;
   *ptr++ = D3DRS_SRCBLEND;        *ptr++ = (blend>> 0)&15;
@@ -4682,9 +4682,9 @@ void sMaterial::AllocStates(const sU32 *data,int count)
   *ptr++ = D3DRS_ZFUNC;           *ptr++ = (FuncFlags[0]==sMFF_ALWAYS || (Flags & sMTRL_ZMASK)==sMTRL_ZOFF ? sMFF_ALWAYS : sMFF_EQUAL)+D3DCMP_NEVER;
 }
 */
-void sMaterial::AddMtrlFlags(sU32 *&data)
+void sMaterial::AddMtrlFlags(uint32_t *&data)
 {
-  //sU32* start = data;
+  //uint32_t* start = data;
   if(BlendColor!=sMB_OFF)
   {
     *data++ = D3DRS_ALPHABLENDENABLE; *data++ = 1;
@@ -4753,7 +4753,7 @@ void sMaterial::AddMtrlFlags(sU32 *&data)
 
   // color write mask
   {
-    sU32 mask = D3DCOLORWRITEENABLE_ALPHA|D3DCOLORWRITEENABLE_RED|D3DCOLORWRITEENABLE_GREEN|D3DCOLORWRITEENABLE_BLUE;
+    uint32_t mask = D3DCOLORWRITEENABLE_ALPHA|D3DCOLORWRITEENABLE_RED|D3DCOLORWRITEENABLE_GREEN|D3DCOLORWRITEENABLE_BLUE;
     if (Flags&sMTRL_MSK_ALPHA)
       mask &= ~D3DCOLORWRITEENABLE_ALPHA;
     if (Flags&sMTRL_MSK_RED)
@@ -4837,7 +4837,7 @@ void sSetRenderClipping(sRect *r,int count)
   sVERIFY(count*sizeof(sRect)+sizeof(RGNDATAHEADER)<=sizeof(RenderClippingData));
 
   hdr = (RGNDATAHEADER *) RenderClippingData;
-  rd = (sRect *) (((sU8 *)RenderClippingData)+(sizeof(RGNDATAHEADER)));
+  rd = (sRect *) (((uint8_t *)RenderClippingData)+(sizeof(RGNDATAHEADER)));
 
   hdr->dwSize = sizeof(RGNDATAHEADER);
   hdr->iType = RDH_RECTANGLES;
@@ -5041,7 +5041,7 @@ void sRender3DEnd(sBool flip)
   BufferedStats = Stats;
   StatsEnable = 1;
   BufferedStats.StaticTextureMem = DXTotalTextureMem;
-  sDInt mem = 0;
+  ptrdiff_t mem = 0;
   for(int i=0;i<sGeoBufferCount;i++)
   {
     if(sGeoBuffers[i].Duration==sGD_STATIC)
@@ -5068,11 +5068,11 @@ void sRender3DFlush()
 {
 }
 
-void sSetDesiredFrameRate(sF32 rate)
+void sSetDesiredFrameRate(float rate)
 {
 }
 
-void sSetScreenGamma(sF32 gamma)
+void sSetScreenGamma(float gamma)
 {
   D3DGAMMARAMP ramp;
   for(int i=0;i<256;i++)

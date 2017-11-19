@@ -111,7 +111,7 @@ struct sStatusBorderItem
   sStringDesc Buffer;             // text mode
   int ProgressMax;               // progress bar mode
   int ProgressValue;
-  sU32 Color;                     // 0 for default
+  uint32_t Color;                     // 0 for default
 
   sRect Client;                   // calculated automatically
 };
@@ -121,7 +121,7 @@ class sStatusBorder : public sWindow
   sArray<sStatusBorderItem> Items;
   sString<1024> PrintBuffer;
   int Height;
-  sU32 Color;
+  uint32_t Color;
 public:
   sCLASSNAME(sStatusBorder);
   sStatusBorder();
@@ -132,8 +132,8 @@ public:
   void OnPaint2D();
 
   void AddTab(int width,int maxstring=256);
-  void Print(int tab,const sChar *string,int len=-1,sU32 color=0);
-  void SetColor(int tab,sU32 rgb);        // gets reset by Print/PrintF
+  void Print(int tab,const sChar *string,int len=-1,uint32_t color=0);
+  void SetColor(int tab,uint32_t rgb);        // gets reset by Print/PrintF
   void Progress(int tab,int value,int max);
 
   sPRINTING1(PrintF,sFormatStringBuffer buf=sFormatStringBase(PrintBuffer,format);buf,Print(arg1,PrintBuffer);,int);  

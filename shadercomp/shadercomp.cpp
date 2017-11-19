@@ -94,7 +94,7 @@ static CGcontext CGC=0;
 
 /****************************************************************************/
 
-void sPrintBlob(sTextBuffer &tb, sArray<sU8> &blob);
+void sPrintBlob(sTextBuffer &tb, sArray<uint8_t> &blob);
 
 /****************************************************************************/
 /***                                                                      ***/
@@ -233,7 +233,7 @@ static sBool sCompileDX9(sCompileResult &result, int stype, int dtype, int flags
   sRelease(result.D3D9.CTable);
   sRelease(result.D3D9.Errors);
 
-  sU32 d3dflags = 0;
+  uint32_t d3dflags = 0;
   if(flags&sSCF_DEBUG)
     d3dflags |= D3DXSHADER_DEBUG;
   //if (sGetShellSwitch(L"n"))
@@ -269,7 +269,7 @@ static sBool sCompileDX9(sCompileResult &result, int stype, int dtype, int flags
   }
 
   // get source code
-  sAddShaderBlob(result.ShaderBlobs,dtype,bytecode->GetBufferSize(),(const sU8*)bytecode->GetBufferPointer());
+  sAddShaderBlob(result.ShaderBlobs,dtype,bytecode->GetBufferSize(),(const uint8_t*)bytecode->GetBufferPointer());
   return result.Valid;
 #else
   return sFALSE;
@@ -327,7 +327,7 @@ static sBool sCompileCg(sCompileResult &result, int stype, int dtype, int flags,
   int size = 0;
   while(out8[size]) size++;
 
-  sAddShaderBlob(result.ShaderBlobs,dtype,size,(const sU8*)out8);
+  sAddShaderBlob(result.ShaderBlobs,dtype,size,(const uint8_t*)out8);
 
   result.Valid = sTRUE;
   sDeleteArray(src8);
@@ -347,7 +347,7 @@ error:
 
 static sBool sCompileDummy(sCompileResult &result, int stype, int dtype, int flags, const sChar8 *src, int len, const sChar8 *name)
 {
-  sAddShaderBlob(result.ShaderBlobs,dtype,4,(const sU8 *)"dumy");
+  sAddShaderBlob(result.ShaderBlobs,dtype,4,(const uint8_t *)"dumy");
   result.Valid = sTRUE;
   return sTRUE;
 }
@@ -384,7 +384,7 @@ void sShaderCompilerExit()
   CompilerCount = 0;
 }
 
-void sAddShaderBlob(sArray<sU8> &blob, int type, int bytes, const sU8 *data)
+void sAddShaderBlob(sArray<uint8_t> &blob, int type, int bytes, const uint8_t *data)
 {
   if(blob.IsEmpty())
   {
@@ -401,7 +401,7 @@ void sAddShaderBlob(sArray<sU8> &blob, int type, int bytes, const sU8 *data)
   b->SetNext(sSTF_NONE);  
 }
 
-void sPrintBlob(sTextBuffer &tb, sArray<sU8> &blob)
+void sPrintBlob(sTextBuffer &tb, sArray<uint8_t> &blob)
 {
   tb.Print(L"  ");
   for(int i=0;i<blob.GetCount();i++)
@@ -416,7 +416,7 @@ void sPrintBlob(sTextBuffer &tb, sArray<sU8> &blob)
 
 /****************************************************************************/
 
-sBool sShaderCompileDX(const sChar *source,const sChar *profile,const sChar *main,sU8 *&data,int &size,int flags,sTextBuffer *errors)
+sBool sShaderCompileDX(const sChar *source,const sChar *profile,const sChar *main,uint8_t *&data,int &size,int flags,sTextBuffer *errors)
 {
 #if sCOMP_DX9_ENABLE
   ID3D10Blob *bytecode;
@@ -468,7 +468,7 @@ sBool sShaderCompileDX(const sChar *source,const sChar *profile,const sChar *mai
   if(bytecode)
   {
     size = bytecode->GetBufferSize();
-    data = new sU8[size];
+    data = new uint8_t[size];
     sCopyMem(data,bytecode->GetBufferPointer(),size);
     bytecode->Release();
   }

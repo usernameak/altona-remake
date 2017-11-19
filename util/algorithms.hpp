@@ -172,10 +172,10 @@ class sDListRange
   typedef sArrayRange<T> ThisType;
 
   sINLINE const sDNode *GetNode(const T *e) const     { return &(e->*Offset); }
-  sINLINE const T *GetType(const sDNode *n) const     { return (const T*) (((sU8*)n)-sOFFSETOMP((T*)0,Offset)); }    
+  sINLINE const T *GetType(const sDNode *n) const     { return (const T*) (((uint8_t*)n)-sOFFSETOMP((T*)0,Offset)); }    
 
   sINLINE sDNode *GetNode(T *e)                       { return &(e->*Offset); }
-  sINLINE T *GetType(sDNode *n)                       { return (T*) (((sU8*)n)-sOFFSETOMP((T*)0,Offset)); }
+  sINLINE T *GetType(sDNode *n)                       { return (T*) (((uint8_t*)n)-sOFFSETOMP((T*)0,Offset)); }
 
 public:
   typedef T   ValueType;

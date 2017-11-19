@@ -33,7 +33,7 @@ class sStsManager;
 
 struct sStsLock
 {
-  sU32 Count;
+  uint32_t Count;
 
   sStsLock();
   void Lock();
@@ -67,7 +67,7 @@ struct sStsTask                   // an array of tasks to do
 
 struct sStsSync                   // syncro-point
 {
-  sU32 Count;                     // counter for sync
+  uint32_t Count;                     // counter for sync
   sStsTask *ContinueTask;         // task to start when sync is reached
 };
 
@@ -131,14 +131,14 @@ class sStsManager
   int ThreadCount;               // number of threads, including master thread
   int ThreadBits;                // 1<<ThreadBits >= ThreadCount
 
-//  sU8 *Mem;
+//  uint8_t *Mem;
 //  volatile sPtr MemUsed;
 //  sPtr MemEnd;
-//  sU8 *AllocBytes(int bytes);
+//  uint8_t *AllocBytes(int bytes);
 //  template <class T> T *Alloc(int count=1) { return (T *) AllocBytes(sizeof(T)*count); }
 
   volatile sBool Running;         // Indicate running state to threads
-  sU32 TotalTasksLeft;
+  uint32_t TotalTasksLeft;
 
 
   sBool StealTasks(int to);      // implementation of thread stealing
@@ -200,13 +200,13 @@ class sStsWorkload
   sStsManager *Manager;
   int ThreadCount;
 
-  sU8 *Mem;
+  uint8_t *Mem;
   volatile sPtr MemUsed;
   sPtr MemEnd;
 
   sStsQueue **Queues;
-  sU32 TasksLeft;
-  sU32 TasksRunning;
+  uint32_t TasksLeft;
+  uint32_t TasksRunning;
 
   sStaticArray<sStsTask *> Tasks;
   sString<128> StatBuffer;
@@ -220,7 +220,7 @@ public:
   void Start() { Manager->StartWorkload(this); }
   void Sync()  { Manager->SyncWorkload(this); }
   void End()   { Manager->EndWorkload(this); }
-  sU8 *AllocBytes(int bytes);
+  uint8_t *AllocBytes(int bytes);
   template <class T> T *Alloc(int count=1) { return (T *) AllocBytes(sizeof(T)*count); }
 
 
@@ -230,11 +230,11 @@ public:
 
   int Mode;
 
-  sU32 StealCount;
-  sU32 SpinCount;
-  sU32 ExeCount;
-  sU32 FailedLockCount;
-  sU32 FailedStealCount;
+  uint32_t StealCount;
+  uint32_t SpinCount;
+  uint32_t ExeCount;
+  uint32_t FailedLockCount;
+  uint32_t FailedStealCount;
 
   const sChar *PrintStat();
 };
@@ -248,17 +248,17 @@ public:
 #if sPLATFORM==sPLAT_WINDOWS
 extern "C" unsigned __int64 __rdtsc();
 #pragma intrinsic(__rdtsc)
-inline sU64 sGetTimeStamp() { return __rdtsc(); }
+inline uint64_t sGetTimeStamp() { return __rdtsc(); }
 #else
-inline sU64 sGetTimeStamp() { return sGetTimeUS(); }
+inline uint64_t sGetTimeStamp() { return sGetTimeUS(); }
 #endif
 
 class sStsPerfMon
 {
   struct Entry
   {
-    sU32 Timestamp;
-    sU32 Color;
+    uint32_t Timestamp;
+    uint32_t Color;
   };
   int ThreadCount;
   int DataCount;
@@ -269,9 +269,9 @@ class sStsPerfMon
   Entry **Datas;
   int **OldCounters;
   Entry **OldDatas;
-  sU64 OldStart;
-  sU64 OldEnd;
-  sU64 TimeStart;
+  uint64_t OldStart;
+  uint64_t OldEnd;
+  uint64_t TimeStart;
   int Enable;
 
   sRect *Rects;
@@ -280,15 +280,15 @@ class sStsPerfMon
   class sMaterial *Mtrl;
   int GeoAlloc,GeoUsed;
   struct sVertexBasic *GeoPtr;
-  void Box(sF32 x0,sF32 y0,sF32 x1,sF32 y1,sU32 col);
+  void Box(float x0,float y0,float x1,float y1,uint32_t col);
   void BoxEnd();
 public:
   sStsPerfMon();
   ~sStsPerfMon();
 
   void FlipFrame();
-  void Begin(int thread,sU32 color)  { if(!Enable) return; int cnt = *Counters[thread]; *Counters[thread]=cnt+1; Entry *e = &Datas[thread][cnt&CountMask]; e->Timestamp = sU32(sGetTimeStamp()-TimeStart); e->Color = color|0xff000000; }
-  void End(int thread)               { if(!Enable) return; int cnt = *Counters[thread]; *Counters[thread]=cnt+1; Entry *e = &Datas[thread][cnt&CountMask]; e->Timestamp = sU32(sGetTimeStamp()-TimeStart); e->Color = 0; }
+  void Begin(int thread,uint32_t color)  { if(!Enable) return; int cnt = *Counters[thread]; *Counters[thread]=cnt+1; Entry *e = &Datas[thread][cnt&CountMask]; e->Timestamp = uint32_t(sGetTimeStamp()-TimeStart); e->Color = color|0xff000000; }
+  void End(int thread)               { if(!Enable) return; int cnt = *Counters[thread]; *Counters[thread]=cnt+1; Entry *e = &Datas[thread][cnt&CountMask]; e->Timestamp = uint32_t(sGetTimeStamp()-TimeStart); e->Color = 0; }
 
   void Paint(const struct sTargetSpec &ts);
 

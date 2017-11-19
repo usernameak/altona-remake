@@ -222,7 +222,7 @@ struct ACLiteral
   ACLiteral *Child;
   ACExpression *Expr;             // sometimes, literals are expressions.. used in {}
   sPoolString Value;              // lexical value, for exact float reproduction
-  sF32 ValueF;
+  float ValueF;
   int ValueI;
   int Token;                     // sTOK_INT, sTOK_FLOAT
 };
